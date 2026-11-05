@@ -114,7 +114,7 @@ class AssignmentAndScheduleTest extends TestCase
             'title' => 'Rapat Evaluasi Mingguan Petugas',
             'start_time' => now()->addDays(2)->setTime(9, 0)->format('Y-m-d H:i:s'),
             'end_time' => now()->addDays(2)->setTime(11, 0)->format('Y-m-d H:i:s'),
-            'location' => 'Ruang Command Center SP4RT/SIMPLE',
+            'location' => 'Ruang Command Center SPKRT/SIMPLE',
             'status' => 'scheduled',
         ]);
 

@@ -29,7 +29,7 @@ Aplikasi terpadu berbasis web (Laravel) untuk pendataan sensus / survei lapangan
   - Monitoring pengumpulan laporan kegiatan perjalanan dinas.
 - **Verifikasi Laporan**: Fitur periksa, setujui, atau kembalikan dengan catatan evaluasi (*revision notes*).
 - **Manajemen Kegiatan & Penugasan**: Pembuatan kegiatan, penentuan target kuota, serta pembagian petugas lapangan.
-- **Pelatihan SP4RT**: Manajemen peserta, pencatatan presensi, dan cetak lembar daftar hadir resmi.
+- **Pelatihan SPKRT**: Manajemen peserta, pencatatan presensi, dan cetak lembar daftar hadir resmi.
 - **Rekapitulasi & Ekspor Dokumen**:
   - Ekspor Rekapitulasi format PDF Lanskap.
   - Ekspor Dataset ke Spreadsheet / Excel (CSV dengan UTF-8 BOM).

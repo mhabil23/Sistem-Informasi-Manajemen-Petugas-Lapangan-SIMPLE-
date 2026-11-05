@@ -252,7 +252,7 @@
         <tr>
             <td>
                 Mengetahui,<br>
-                Koordinator Wilayah Lapangan SP4RT<br>
+                Koordinator Wilayah Lapangan SPKRT<br>
                 <div class="signature-line">( .................................................... )</div>
                 <div style="font-size: 8pt;">NIP: ....................................................</div>
             </td>

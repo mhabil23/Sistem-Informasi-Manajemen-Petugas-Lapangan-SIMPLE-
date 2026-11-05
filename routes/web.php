@@ -91,7 +91,7 @@ Route::middleware(['auth', 'role:admin'])->prefix('admin')->as('admin.')->group(
     Route::put('/reports/{report}/review', [\App\Http\Controllers\Admin\ReportController::class, 'review'])->name('reports.review');
     Route::delete('/reports/{report}', [\App\Http\Controllers\Admin\ReportController::class, 'destroy'])->name('reports.destroy');
 
-    // Administrasi Pelatihan SP4RT (Admin)
+    // Administrasi Pelatihan SPKRT (Admin)
     Route::get('/trainings', [\App\Http\Controllers\Admin\TrainingController::class, 'index'])->name('trainings.index');
     Route::post('/trainings', [\App\Http\Controllers\Admin\TrainingController::class, 'store'])->name('trainings.store');
     Route::get('/trainings/{training}', [\App\Http\Controllers\Admin\TrainingController::class, 'show'])->name('trainings.show');

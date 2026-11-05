@@ -94,7 +94,7 @@ class FullModuleTestSuiteTest extends TestCase
     {
         // 1. Admin creates training event
         $createTrainingResponse = $this->actingAs($this->admin)->post(route('admin.trainings.store'), [
-            'title' => 'Bimbingan Teknis SP4RT Angkatan 1',
+            'title' => 'Bimbingan Teknis SPKRT Angkatan 1',
             'description' => 'Pelatihan enumerator',
             'start_date' => now()->toDateString(),
             'end_date' => now()->addDays(2)->toDateString(),
@@ -105,10 +105,10 @@ class FullModuleTestSuiteTest extends TestCase
 
         $createTrainingResponse->assertRedirect(route('admin.trainings.index'));
         $this->assertDatabaseHas('training_events', [
-            'title' => 'Bimbingan Teknis SP4RT Angkatan 1',
+            'title' => 'Bimbingan Teknis SPKRT Angkatan 1',
         ]);
 
-        $training = TrainingEvent::where('title', 'Bimbingan Teknis SP4RT Angkatan 1')->first();
+        $training = TrainingEvent::where('title', 'Bimbingan Teknis SPKRT Angkatan 1')->first();
 
         // 2. Admin adds participant
         $addParticipantResponse = $this->actingAs($this->admin)->post(route('admin.trainings.participants.store', $training), [

@@ -84,7 +84,7 @@ class AuthAndDashboardTest extends TestCase
 
         $response = $this->actingAs($user)->put(route('profile.update'), [
             'name' => 'Nama Baru Diperbarui',
-            'email' => 'emailbaru@sp4rt.go.id',
+            'email' => 'emailbaru@spkrt.go.id',
             'phone' => '089988776655',
         ]);
 
@@ -92,7 +92,7 @@ class AuthAndDashboardTest extends TestCase
         $this->assertDatabaseHas('users', [
             'id' => $user->id,
             'name' => 'Nama Baru Diperbarui',
-            'email' => 'emailbaru@sp4rt.go.id',
+            'email' => 'emailbaru@spkrt.go.id',
         ]);
     }
 

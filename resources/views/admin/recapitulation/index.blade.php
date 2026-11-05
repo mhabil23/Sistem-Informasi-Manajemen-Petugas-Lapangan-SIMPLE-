@@ -13,7 +13,7 @@
 <div class="row align-items-center mb-4">
     <div class="col-lg-6">
         <h3 class="fw-bold text-dark mb-1">Rekapitulasi & Export Data</h3>
-        <p class="text-muted small mb-0">Analisis komprehensif data responden, dokumen BAST, kinerja laporan kegiatan lapangan, dan peserta pelatihan SP4RT.</p>
+        <p class="text-muted small mb-0">Analisis komprehensif data responden, dokumen BAST, kinerja laporan kegiatan lapangan, dan peserta pelatihan SPKRT.</p>
     </div>
     <div class="col-lg-6 text-lg-end mt-3 mt-lg-0">
         <div class="dropdown d-inline-block me-2">
@@ -153,7 +153,7 @@
             </li>
             <li class="nav-item" role="presentation">
                 <button class="nav-link fw-semibold" id="train-tab" data-bs-toggle="tab" data-bs-target="#train-pane" type="button" role="tab">
-                    <i class="fa-solid fa-graduation-cap me-1 text-info"></i> Rekap Pelatihan SP4RT
+                    <i class="fa-solid fa-graduation-cap me-1 text-info"></i> Rekap Pelatihan SPKRT
                 </button>
             </li>
         </ul>

@@ -114,7 +114,7 @@
                             <tr><td>6</td><td><strong class="text-primary">officer_basts</strong></td><td>Berita Acara Serah Terima tugas Petugas</td></tr>
                             <tr><td>7</td><td><strong class="text-primary">officer_reports</strong></td><td>Laporan kerja harian, status revisi/approval</td></tr>
                             <tr><td>8</td><td><strong class="text-primary">report_attachments</strong></td><td>Foto bukti dokumentasi laporan kegiatan</td></tr>
-                            <tr><td>9</td><td><strong class="text-primary">training_events</strong></td><td>Kegiatan pelatihan bimtek SP4RT & kuota</td></tr>
+                            <tr><td>9</td><td><strong class="text-primary">training_events</strong></td><td>Kegiatan pelatihan bimtek SPKRT & kuota</td></tr>
                             <tr><td>10</td><td><strong class="text-primary">training_participants</strong></td><td>Peserta pelatihan (Pegawai, Magang, DPW)</td></tr>
                             <tr><td>11</td><td><strong class="text-primary">document_templates</strong></td><td>Template format kop & isi dokumen resmi</td></tr>
                             <tr><td>12</td><td><strong class="text-primary">generated_documents</strong></td><td>Arsip PDF dokumen yang telah dicetak</td></tr>

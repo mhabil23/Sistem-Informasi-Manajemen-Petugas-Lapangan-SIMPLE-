@@ -13,7 +13,7 @@
 <div class="row align-items-center mb-3">
     <div class="col-md-7">
         <h4 class="fw-bold text-dark mb-1">Manajemen Template Dokumen</h4>
-        <p class="text-muted small mb-0">Kelola format dokumen resmi administrasi SP4RT, teks standar kop, klausul BAST, serta tag variabel dinamis untuk generate otomatis.</p>
+        <p class="text-muted small mb-0">Kelola format dokumen resmi administrasi SPKRT, teks standar kop, klausul BAST, serta tag variabel dinamis untuk generate otomatis.</p>
     </div>
     <div class="col-md-5 text-md-end mt-2 mt-md-0">
         <button type="button" class="btn btn-sm btn-sp-primary" data-bs-toggle="modal" data-bs-target="#createTemplateModal">
@@ -267,7 +267,7 @@
 
                     <div class="mb-3">
                         <label class="form-label small fw-semibold text-secondary">TEKS FOOTER / CATATAN KAKI (OPSIONAL)</label>
-                        <input type="text" name="footer_text" class="form-control" placeholder="Dokumen ini diterbitkan sah melalui sistem SIMPLE SP4RT.">
+                        <input type="text" name="footer_text" class="form-control" placeholder="Dokumen ini diterbitkan sah melalui sistem SIMPLE SPKRT.">
                     </div>
                 </div>
                 <div class="modal-footer bg-light border-top">

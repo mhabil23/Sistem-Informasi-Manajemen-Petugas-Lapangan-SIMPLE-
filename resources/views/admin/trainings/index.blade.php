@@ -261,7 +261,7 @@
                 <div class="modal-body p-4">
                     <div class="mb-3">
                         <label class="form-label small fw-semibold text-secondary">NAMA / JUDUL PELATIHAN <span class="text-danger">*</span></label>
-                        <input type="text" name="title" class="form-control" placeholder="Contoh: Bimbingan Teknis Metodologi Survei & Pendataan Lapangan SP4RT" required>
+                        <input type="text" name="title" class="form-control" placeholder="Contoh: Bimbingan Teknis Metodologi Survei & Pendataan Lapangan SPKRT" required>
                     </div>
 
                     <div class="row g-3 mb-3">
