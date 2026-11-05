@@ -64,12 +64,13 @@
             <table class="table sp-table align-middle">
                 <thead>
                     <tr>
-                        <th style="width: 23%;">Nomor &amp; Tanggal BAST</th>
-                        <th style="width: 20%;">Pihak Responden</th>
-                        <th style="width: 18%;">Kegiatan Terkait</th>
-                        <th style="width: 14%;">Petugas Pelaksana</th>
-                        <th style="width: 15%;">Rincian Berkas</th>
-                        <th class="text-end" style="width: 10%;">Aksi</th>
+                        <th style="min-width: 180px;">Nomor &amp; Tanggal BAST</th>
+                        <th style="min-width: 170px;">Pihak KRT / Responden</th>
+                        <th style="min-width: 170px;">Penerima Dokumen</th>
+                        <th style="min-width: 160px;">Kegiatan Terkait</th>
+                        <th style="min-width: 150px;">Petugas Pelaksana</th>
+                        <th style="min-width: 100px;">Tanda Tangan</th>
+                        <th class="text-end" style="min-width: 120px;">Aksi</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -84,6 +85,19 @@
                                 <div class="small text-muted">{{ $item->respondent ? $item->respondent->agency : '-' }}</div>
                             </td>
                             <td>
+                                @if($item->recipient_type === 'representative')
+                                    <div class="fw-bold text-dark">{{ $item->recipient_name }}</div>
+                                    <span class="badge bg-warning-subtle text-warning border border-warning-subtle" style="font-size: 0.7rem;">
+                                        <i class="fa-solid fa-users me-1"></i> Wakil ({{ $item->recipient_relation ?? 'Keluarga' }})
+                                    </span>
+                                @else
+                                    <div class="fw-bold text-dark">{{ $item->respondent ? $item->respondent->name : '-' }}</div>
+                                    <span class="badge bg-success-subtle text-success border border-success-subtle" style="font-size: 0.7rem;">
+                                        <i class="fa-solid fa-user-check me-1"></i> KRT Langsung
+                                    </span>
+                                @endif
+                            </td>
+                            <td>
                                 <span class="small fw-semibold text-dark text-truncate d-block" style="max-width: 180px;">
                                     {{ $item->assignment ? $item->assignment->title : '-' }}
                                 </span>
@@ -93,9 +107,16 @@
                                 <div class="text-muted" style="font-size: 0.72rem;">Petugas Lapangan</div>
                             </td>
                             <td>
-                                <div class="small text-secondary text-truncate" style="max-width: 240px;" title="{{ $item->handover_items }}">
-                                    {{ Str::limit($item->handover_items, 40) }}
-                                </div>
+                                @if(!empty($item->signature_path))
+                                    <button type="button" 
+                                            class="btn btn-sm btn-light border text-success shadow-none py-1 px-2" 
+                                            style="font-size: 0.75rem;" 
+                                            onclick="previewSignatureModal('{{ asset('storage/' . $item->signature_path) }}', '{{ $item->bast_number }}', '{{ $item->recipient_display_name }}')">
+                                        <i class="fa-solid fa-signature me-1"></i> Lihat TTD
+                                    </button>
+                                @else
+                                    <span class="text-muted small">-</span>
+                                @endif
                             </td>
                             <td class="text-end text-nowrap">
                                 <div class="sp-action-btn-group">
@@ -223,5 +244,38 @@
         </div>
     </div>
 </div>
+
+<!-- Modal Pratinjau Tanda Tangan Digital -->
+<div class="modal fade" id="sigPreviewModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered modal-sm">
+        <div class="modal-content border-0 shadow">
+            <div class="modal-header bg-light border-bottom py-2">
+                <h6 class="modal-title fw-bold text-dark mb-0">
+                    <i class="fa-solid fa-signature text-success me-1"></i> Pratinjau Tanda Tangan
+                </h6>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body text-center p-3">
+                <div class="p-2 border rounded bg-light mb-2">
+                    <img id="sigModalImg" src="" alt="Tanda Tangan" style="max-height: 120px; max-width: 100%;">
+                </div>
+                <div class="fw-bold text-dark small" id="sigModalName">-</div>
+                <div class="text-muted font-monospace" style="font-size: 0.72rem;" id="sigModalBastNo">-</div>
+            </div>
+        </div>
+    </div>
+</div>
 @endsection
+
+@push('scripts')
+<script>
+    function previewSignatureModal(url, bastNo, name) {
+        document.getElementById('sigModalImg').src = url;
+        document.getElementById('sigModalBastNo').innerText = bastNo;
+        document.getElementById('sigModalName').innerText = name;
+        const modal = new bootstrap.Modal(document.getElementById('sigPreviewModal'));
+        modal.show();
+    }
+</script>
+@endpush
 

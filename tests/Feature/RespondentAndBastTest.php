@@ -167,4 +167,65 @@ class RespondentAndBastTest extends TestCase
         $response->assertSee('Responden Milik Budi');
         $response->assertDontSee('Responden Milik Orang Lain');
     }
+
+    public function test_petugas_can_create_bast_with_krt_recipient()
+    {
+        $respondent = Respondent::create([
+            'name' => 'Jamaluddin Ali',
+            'address' => 'Desa Makmur',
+            'phone' => '081234567899',
+            'agency' => 'Kelompok Tani Subur',
+            'purpose' => 'Pendataan',
+            'assignment_id' => $this->assignment->id,
+            'officer_id' => $this->petugas->id,
+            'input_date' => now()->toDateString(),
+        ]);
+
+        $response = $this->actingAs($this->petugas)->post(route('petugas.basts.respondents.store'), [
+            'respondent_id' => $respondent->id,
+            'bast_date' => now()->toDateString(),
+            'recipient_type' => 'krt',
+            'handover_items' => '1. Kuesioner Sensus Lapangan',
+            'notes' => 'Diserahkan langsung ke KRT',
+        ]);
+
+        $response->assertRedirect(route('petugas.basts.respondents.index'));
+        $this->assertDatabaseHas('respondent_basts', [
+            'respondent_id' => $respondent->id,
+            'recipient_type' => 'krt',
+            'recipient_name' => 'Jamaluddin Ali',
+        ]);
+    }
+
+    public function test_petugas_can_create_bast_with_representative_recipient()
+    {
+        $respondent = Respondent::create([
+            'name' => 'Jamaluddin Ali',
+            'address' => 'Desa Makmur',
+            'phone' => '081234567899',
+            'agency' => 'Kelompok Tani Subur',
+            'purpose' => 'Pendataan',
+            'assignment_id' => $this->assignment->id,
+            'officer_id' => $this->petugas->id,
+            'input_date' => now()->toDateString(),
+        ]);
+
+        $response = $this->actingAs($this->petugas)->post(route('petugas.basts.respondents.store'), [
+            'respondent_id' => $respondent->id,
+            'bast_date' => now()->toDateString(),
+            'recipient_type' => 'representative',
+            'recipient_name' => 'Siti Rogayah',
+            'recipient_relation' => 'Istri / Pasangan',
+            'handover_items' => '1. Kuesioner Sensus Lapangan',
+            'notes' => 'Diterima oleh istri karena KRT sedang di kebun',
+        ]);
+
+        $response->assertRedirect(route('petugas.basts.respondents.index'));
+        $this->assertDatabaseHas('respondent_basts', [
+            'respondent_id' => $respondent->id,
+            'recipient_type' => 'representative',
+            'recipient_name' => 'Siti Rogayah',
+            'recipient_relation' => 'Istri / Pasangan',
+        ]);
+    }
 }

@@ -37,10 +37,18 @@ class DashboardController extends Controller
             $respondentQuery->where('officer_id', $selectedOfficerId);
         }
 
-        $bastTargetCount = (clone $respondentQuery)->count();
+        // Hitung target kuota responden (jika kegiatan dipilih atau target global penugasan)
+        $selectedAssignment = $selectedAssignmentId ? Assignment::find($selectedAssignmentId) : null;
+        if ($selectedAssignment && $selectedAssignment->target_respondents > 0) {
+            $bastTargetCount = (int) $selectedAssignment->target_respondents;
+        } else {
+            $globalTargetSum = (int) Assignment::where('status', '!=', 'cancelled')->sum('target_respondents');
+            $bastTargetCount = $globalTargetSum > 0 ? $globalTargetSum : (clone $respondentQuery)->count();
+        }
+
         $bastCompletedCount = (clone $respondentQuery)->has('basts')->count();
         $bastPendingCount = max(0, $bastTargetCount - $bastCompletedCount);
-        $bastPercentage = $bastTargetCount > 0 ? round(($bastCompletedCount / $bastTargetCount) * 100, 1) : 0;
+        $bastPercentage = $bastTargetCount > 0 ? min(100, round(($bastCompletedCount / $bastTargetCount) * 100, 1)) : 0;
 
         // Global Statistics
         $totalOfficers = User::where('role', 'petugas')->count();
@@ -116,10 +124,17 @@ class DashboardController extends Controller
         $onTrackOfficersCount = 0;
 
         foreach ($allOfficersList as $off) {
-            $target = $off->respondents_count;
+            // Hitung kuota target penugasan yang diberikan kepada petugas ini
+            $assignedTargetSum = (int) \App\Models\AssignmentOfficer::where('assignment_officers.user_id', $off->id)
+                ->join('assignments', 'assignments.id', '=', 'assignment_officers.assignment_id')
+                ->when($selectedAssignmentId, fn($q) => $q->where('assignments.id', $selectedAssignmentId))
+                ->sum('assignments.target_respondents');
+
+            // Gunakan kuota target kegiatan jika ada, atau jumlah responden yang diinput petugas
+            $target = $assignedTargetSum > 0 ? $assignedTargetSum : max($off->respondents_count, 0);
             $completed = $off->completed_basts_count;
             $pending = max(0, $target - $completed);
-            $pct = $target > 0 ? round(($completed / $target) * 100, 1) : 0;
+            $pct = $target > 0 ? min(100, round(($completed / $target) * 100, 1)) : 0;
             $hasReport = $off->reports_count > 0;
 
             // Kategori status progres

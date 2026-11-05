@@ -79,7 +79,7 @@ class RecapitulationController extends Controller
                     break;
 
                 case 'basts':
-                    fputcsv($handle, ['No', 'Nomor BAST', 'Jenis BAST', 'Pihak Terkait', 'Tanggal BAST', 'Kegiatan', 'Status']);
+                    fputcsv($handle, ['No', 'Nomor BAST', 'Jenis BAST', 'Pihak Terkait / Penerima', 'Tanggal BAST', 'Kegiatan', 'Status']);
                     $bastsQuery = RespondentBast::with(['respondent', 'assignment']);
                     $this->applyFilters($bastsQuery, $filters, 'bast_date');
                     $counter = 1;
@@ -88,7 +88,7 @@ class RecapitulationController extends Controller
                             $counter++,
                             $b->bast_number,
                             'BAST Responden',
-                            $b->respondent ? $b->respondent->name : '-',
+                            $b->recipient_display_name,
                             $b->bast_date ? $b->bast_date->format('Y-m-d') : '-',
                             $b->assignment ? $b->assignment->title : '-',
                             $b->status,

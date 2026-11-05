@@ -13,6 +13,7 @@ use App\Services\GoogleSheetService;
 use Barryvdh\DomPDF\Facade\Pdf;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Storage;
 use Illuminate\Validation\Rule;
 
 class BastController extends Controller
@@ -36,9 +37,16 @@ class BastController extends Controller
             ->latest('bast_date')
             ->paginate(10);
 
-        $myRespondents = Respondent::where('officer_id', $userId)->orderBy('name')->get();
+        // Load all respondents allocated to this officer with their BASTs
+        $myRespondents = Respondent::with('basts')
+            ->where('officer_id', $userId)
+            ->orderBy('name')
+            ->get();
 
-        return view('petugas.basts.respondents', compact('basts', 'myRespondents'));
+        $completedCount = $myRespondents->filter(fn($r) => $r->basts->isNotEmpty())->count();
+        $pendingCount = $myRespondents->filter(fn($r) => $r->basts->isEmpty())->count();
+
+        return view('petugas.basts.respondents', compact('basts', 'myRespondents', 'completedCount', 'pendingCount'));
     }
 
     public function storeRespondent(Request $request)
@@ -46,15 +54,53 @@ class BastController extends Controller
         $validated = $request->validate([
             'respondent_id' => ['required', 'exists:respondents,id'],
             'bast_date' => ['required', 'date'],
+            'recipient_type' => ['required', Rule::in(['krt', 'representative'])],
+            'recipient_name' => ['nullable', 'string', 'max:255'],
+            'recipient_relation' => ['nullable', 'string', 'max:100'],
             'handover_items' => ['required', 'string'],
+            'signature_data' => ['nullable', 'string'],
+            'officer_signature_data' => ['nullable', 'string'],
             'notes' => ['nullable', 'string', 'max:500'],
         ], [
             'respondent_id.required' => 'Responden wajib dipilih.',
             'bast_date.required' => 'Tanggal BAST wajib diisi.',
+            'recipient_type.required' => 'Pihak penerima wajib dipilih (KRT atau Wakil).',
             'handover_items.required' => 'Rincian berkas wajib diisi.',
         ]);
 
         $respondent = Respondent::findOrFail($validated['respondent_id']);
+
+        // Jika penerima adalah selain KRT (wakil), pastikan nama dan hubungan terisi
+        if ($validated['recipient_type'] === 'representative') {
+            if (empty(trim($validated['recipient_name'] ?? ''))) {
+                return back()->withInput()->with('error', 'Nama penerima selain KRT (Wakil/Anggota Keluarga) wajib diisi.');
+            }
+            if (empty(trim($validated['recipient_relation'] ?? ''))) {
+                return back()->withInput()->with('error', 'Status hubungan penerima dengan Kepala Keluarga (misal: Pasangan/Anak) wajib diisi.');
+            }
+        }
+
+        // Simpan Tanda Tangan Digital Penerima / Responden jika ada
+        $signaturePath = null;
+        if (!empty($request->input('signature_data')) && str_starts_with($request->input('signature_data'), 'data:image')) {
+            $data = $request->input('signature_data');
+            $data = substr($data, strpos($data, ',') + 1);
+            $data = base64_decode($data);
+            $fileName = 'signatures/' . uniqid('sign_resp_') . '.png';
+            Storage::disk('public')->put($fileName, $data);
+            $signaturePath = $fileName;
+        }
+
+        // Simpan Tanda Tangan Petugas jika ada
+        $officerSignaturePath = null;
+        if (!empty($request->input('officer_signature_data')) && str_starts_with($request->input('officer_signature_data'), 'data:image')) {
+            $data = $request->input('officer_signature_data');
+            $data = substr($data, strpos($data, ',') + 1);
+            $data = base64_decode($data);
+            $fileName = 'signatures/' . uniqid('sign_off_') . '.png';
+            Storage::disk('public')->put($fileName, $data);
+            $officerSignaturePath = $fileName;
+        }
 
         $year = now()->format('Y');
         $romanMonths = ['I','II','III','IV','V','VI','VII','VIII','IX','X','XI','XII'];
@@ -69,6 +115,11 @@ class BastController extends Controller
             'assignment_id' => $respondent->assignment_id,
             'officer_id' => Auth::id(),
             'handover_items' => $validated['handover_items'],
+            'recipient_type' => $validated['recipient_type'],
+            'recipient_name' => $validated['recipient_type'] === 'representative' ? trim($validated['recipient_name']) : $respondent->name,
+            'recipient_relation' => $validated['recipient_type'] === 'representative' ? trim($validated['recipient_relation']) : 'Kepala Rumah Tangga (KRT)',
+            'signature_path' => $signaturePath,
+            'officer_signature_path' => $officerSignaturePath,
             'notes' => $validated['notes'] ?? null,
             'status' => 'finalized',
         ]);

@@ -181,11 +181,29 @@
 
     <!-- PIHAK KEDUA -->
     <table class="content-table">
-        <tr>
-            <td class="label-col"><strong>Nama Responden</strong></td>
-            <td class="sep-col">:</td>
-            <td class="val-col"><strong>{{ $bast->respondent->name }}</strong></td>
-        </tr>
+        @if($bast->recipient_type === 'representative' && !empty($bast->recipient_name))
+            <tr>
+                <td class="label-col"><strong>Nama Penerima</strong></td>
+                <td class="sep-col">:</td>
+                <td class="val-col"><strong>{{ $bast->recipient_name }}</strong></td>
+            </tr>
+            <tr>
+                <td class="label-col">Status / Hubungan</td>
+                <td class="sep-col">:</td>
+                <td class="val-col">{{ $bast->recipient_relation ?? 'Wakil / Anggota Keluarga' }} (Mewakili Kepala Rumah Tangga)</td>
+            </tr>
+            <tr>
+                <td class="label-col">Kepala Rumah Tangga</td>
+                <td class="sep-col">:</td>
+                <td class="val-col">{{ $bast->respondent->name }}</td>
+            </tr>
+        @else
+            <tr>
+                <td class="label-col"><strong>Nama Responden</strong></td>
+                <td class="sep-col">:</td>
+                <td class="val-col"><strong>{{ $bast->respondent->name }}</strong> (Kepala Rumah Tangga Langsung)</td>
+            </tr>
+        @endif
         <tr>
             <td class="label-col">Instansi / Lembaga</td>
             <td class="sep-col">:</td>
@@ -230,15 +248,35 @@
         <tr>
             <td class="signature-col">
                 <div>PIHAK KEDUA,</div>
-                <div style="font-size: 9.5pt;">Responden / Penanggung Jawab</div>
-                <div class="sign-space"></div>
-                <div class="signer-name">{{ $bast->respondent->name }}</div>
-                <div class="signer-title">{{ $bast->respondent->agency }}</div>
+                <div style="font-size: 9.5pt;">
+                    @if($bast->recipient_type === 'representative')
+                        Wakil Responden / Penerima
+                    @else
+                        Kepala Rumah Tangga / Responden
+                    @endif
+                </div>
+                <div class="sign-space" style="display: flex; align-items: center; justify-content: center;">
+                    @if(!empty($bast->signature_path) && file_exists(public_path('storage/' . $bast->signature_path)))
+                        <img src="{{ public_path('storage/' . $bast->signature_path) }}" style="max-height: 65px; max-width: 170px; display: block; margin: 0 auto;" alt="Tanda Tangan Penerima">
+                    @endif
+                </div>
+                <div class="signer-name">{{ $bast->recipient_type === 'representative' ? $bast->recipient_name : $bast->respondent->name }}</div>
+                <div class="signer-title">
+                    @if($bast->recipient_type === 'representative')
+                        Status: {{ $bast->recipient_relation ?? 'Wakil' }}
+                    @else
+                        {{ $bast->respondent->agency }}
+                    @endif
+                </div>
             </td>
             <td class="signature-col">
                 <div>PIHAK PERTAMA,</div>
                 <div style="font-size: 9.5pt;">Petugas Lapangan SIMPLE</div>
-                <div class="sign-space"></div>
+                <div class="sign-space" style="display: flex; align-items: center; justify-content: center;">
+                    @if(!empty($bast->officer_signature_path) && file_exists(public_path('storage/' . $bast->officer_signature_path)))
+                        <img src="{{ public_path('storage/' . $bast->officer_signature_path) }}" style="max-height: 65px; max-width: 170px; display: block; margin: 0 auto;" alt="Tanda Tangan Petugas">
+                    @endif
+                </div>
                 <div class="signer-name">{{ $bast->officer->name }}</div>
                 <div class="signer-title">NIP/ID: {{ $bast->officer->username }}</div>
             </td>

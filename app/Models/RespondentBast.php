@@ -19,10 +19,30 @@ class RespondentBast extends Model
         'assignment_id',
         'officer_id',
         'handover_items',
+        'recipient_type',
+        'recipient_name',
+        'recipient_relation',
+        'signature_path',
+        'officer_signature_path',
         'notes',
         'file_path',
         'status',
     ];
+
+    public function getRecipientDisplayNameAttribute(): string
+    {
+        if ($this->recipient_type === 'representative' && !empty($this->recipient_name)) {
+            $rel = !empty($this->recipient_relation) ? ' (' . $this->recipient_relation . ')' : ' (Wakil)';
+            return $this->recipient_name . $rel;
+        }
+
+        return $this->respondent ? $this->respondent->name . ' (KRT Langsung)' : '-';
+    }
+
+    public function getRecipientLabelAttribute(): string
+    {
+        return $this->recipient_type === 'representative' ? 'Wakil / Anggota Keluarga' : 'Kepala Rumah Tangga (KRT)';
+    }
 
     protected function casts(): array
     {

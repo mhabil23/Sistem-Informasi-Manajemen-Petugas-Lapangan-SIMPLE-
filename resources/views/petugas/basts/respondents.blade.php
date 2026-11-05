@@ -10,15 +10,57 @@
 
 @section('content')
 <!-- Header -->
-<div class="row align-items-center mb-4">
+<div class="row align-items-center mb-3">
     <div class="col-md-7">
         <h3 class="fw-bold text-dark mb-1">Berita Acara Serah Terima (BAST) Responden</h3>
-        <p class="text-muted small mb-0">Terbitkan dan unduh berkas PDF Berita Acara Serah Terima berkas dengan pihak responden yang Anda kunjungi.</p>
+        <p class="text-muted small mb-0">Terbitkan dokumen resmi BAST dengan responden atau wakil penerima yang Anda kunjungi, lengkap dengan tanda tangan digital.</p>
     </div>
     <div class="col-md-5 text-md-end mt-3 mt-md-0">
         <button type="button" class="btn btn-sp-primary" data-bs-toggle="modal" data-bs-target="#createMyBastModal">
             <i class="fa-solid fa-file-circle-plus me-1"></i> Buat BAST Responden
         </button>
+    </div>
+</div>
+
+<!-- Stat Cards (Status Penyelesaian Sampel Responden) -->
+<div class="row g-3 mb-4">
+    <div class="col-sm-4">
+        <div class="sp-stat-card">
+            <div class="sp-stat-icon-wrap" style="background: #e0f2fe; color: #0284c7;">
+                <i class="fa-solid fa-file-signature"></i>
+            </div>
+            <div class="sp-stat-info">
+                <div class="sp-stat-label">Total BAST Terbit</div>
+                <div class="sp-stat-value">{{ number_format($basts->total()) }}</div>
+                <div class="sp-stat-desc">Dokumen selesai</div>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-sm-4">
+        <div class="sp-stat-card">
+            <div class="sp-stat-icon-wrap" style="background: #dcfce7; color: #16a34a;">
+                <i class="fa-solid fa-circle-check"></i>
+            </div>
+            <div class="sp-stat-info">
+                <div class="sp-stat-label">Sampel Selesai BAST</div>
+                <div class="sp-stat-value text-success">{{ number_format($completedCount ?? 0) }}</div>
+                <div class="sp-stat-desc">Sudah ada berita acara</div>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-sm-4">
+        <div class="sp-stat-card">
+            <div class="sp-stat-icon-wrap" style="background: #fef3c7; color: #d97706;">
+                <i class="fa-solid fa-clock-rotate-left"></i>
+            </div>
+            <div class="sp-stat-info">
+                <div class="sp-stat-label">Sampel Belum BAST</div>
+                <div class="sp-stat-value text-warning">{{ number_format($pendingCount ?? 0) }}</div>
+                <div class="sp-stat-desc">Perlu dibuatkan BAST</div>
+            </div>
+        </div>
     </div>
 </div>
 
@@ -39,11 +81,12 @@
             <table class="table sp-table align-middle mb-0">
                 <thead>
                     <tr>
-                        <th style="min-width: 220px;">Nomor & Tanggal BAST</th>
-                        <th style="min-width: 200px;">Pihak Responden</th>
+                        <th style="min-width: 200px;">Nomor & Tanggal BAST</th>
+                        <th style="min-width: 200px;">Responden / KRT</th>
+                        <th style="min-width: 200px;">Penerima Dokumen</th>
                         <th>Kegiatan Terkait</th>
-                        <th style="min-width: 240px;">Rincian Berkas</th>
-                        <th class="text-end" style="min-width: 140px;">Aksi</th>
+                        <th>Tanda Tangan</th>
+                        <th class="text-end" style="min-width: 130px;">Aksi</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -58,14 +101,31 @@
                                 <div class="small text-muted">{{ $item->respondent ? $item->respondent->agency : '-' }}</div>
                             </td>
                             <td>
-                                <span class="small fw-semibold text-dark text-truncate d-block" style="max-width: 200px;">
+                                @if($item->recipient_type === 'representative')
+                                    <div class="fw-bold text-dark">{{ $item->recipient_name }}</div>
+                                    <span class="badge bg-warning-subtle text-warning border border-warning-subtle" style="font-size: 0.7rem;">
+                                        <i class="fa-solid fa-users me-1"></i> Wakil ({{ $item->recipient_relation ?? 'Keluarga' }})
+                                    </span>
+                                @else
+                                    <div class="fw-bold text-dark">{{ $item->respondent ? $item->respondent->name : '-' }}</div>
+                                    <span class="badge bg-success-subtle text-success border border-success-subtle" style="font-size: 0.7rem;">
+                                        <i class="fa-solid fa-user-check me-1"></i> KRT Langsung
+                                    </span>
+                                @endif
+                            </td>
+                            <td>
+                                <span class="small fw-semibold text-dark text-truncate d-block" style="max-width: 180px;">
                                     {{ $item->assignment ? $item->assignment->title : '-' }}
                                 </span>
                             </td>
                             <td>
-                                <div class="small text-secondary text-truncate" style="max-width: 260px;" title="{{ $item->handover_items }}">
-                                    {{ Str::limit($item->handover_items, 45) }}
-                                </div>
+                                @if(!empty($item->signature_path))
+                                    <span class="badge bg-light text-success border border-success-subtle">
+                                        <i class="fa-solid fa-signature me-1"></i> Ada TTD
+                                    </span>
+                                @else
+                                    <span class="text-muted small">-</span>
+                                @endif
                             </td>
                             <td class="text-end text-nowrap">
                                 <div class="sp-action-btn-group">
@@ -87,7 +147,7 @@
                         </tr>
                     @empty
                         <tr>
-                            <td colspan="5" class="text-center py-5 text-muted">
+                            <td colspan="6" class="text-center py-5 text-muted">
                                 <i class="fa-regular fa-folder-open fa-3x mb-3 text-secondary opacity-50"></i>
                                 <div class="fw-semibold">Anda belum menerbitkan BAST Responden.</div>
                                 <div class="small">Klik tombol "Buat BAST Responden" di atas untuk membuat dokumen.</div>
@@ -126,6 +186,22 @@
                             </div>
                         </div>
 
+                        <!-- Penerima Info -->
+                        <div class="p-2 mb-2 bg-light rounded-2 small">
+                            <span class="text-muted">Penerima:</span>
+                            @if($item->recipient_type === 'representative')
+                                <strong>{{ $item->recipient_name }}</strong>
+                                <span class="badge bg-warning-subtle text-warning border border-warning-subtle ms-1" style="font-size: 0.68rem;">
+                                    Wakil ({{ $item->recipient_relation ?? 'Keluarga' }})
+                                </span>
+                            @else
+                                <strong>{{ $item->respondent ? $item->respondent->name : '-' }}</strong>
+                                <span class="badge bg-success-subtle text-success border border-success-subtle ms-1" style="font-size: 0.68rem;">
+                                    KRT Langsung
+                                </span>
+                            @endif
+                        </div>
+
                         <div class="small text-secondary mb-2">
                             @if($item->assignment)
                                 <div class="mb-1 text-truncate">
@@ -143,9 +219,16 @@
                             <span class="text-muted small" style="font-size: 0.75rem;">
                                 <i class="fa-regular fa-calendar me-1"></i> {{ $item->bast_date->translatedFormat('d F Y') }}
                             </span>
-                            <span class="badge bg-success-subtle text-success border border-success-subtle px-2 py-1" style="font-size: 0.72rem;">
-                                <i class="fa-solid fa-circle-check me-1"></i> Sah / Terbit
-                            </span>
+                            <div>
+                                @if(!empty($item->signature_path))
+                                    <span class="badge bg-light text-success border border-success-subtle px-2 py-1" style="font-size: 0.72rem;">
+                                        <i class="fa-solid fa-signature me-1"></i> Ada TTD
+                                    </span>
+                                @endif
+                                <span class="badge bg-success-subtle text-success border border-success-subtle px-2 py-1" style="font-size: 0.72rem;">
+                                    <i class="fa-solid fa-circle-check me-1"></i> Terbit
+                                </span>
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -171,41 +254,150 @@
 </div>
 
 <!-- ==============================================================
-     MODAL BUAT BAST (PETUGAS)
+     MODAL BUAT BAST RESPONDEN (SESUAI ARAHAN CLIENT)
      ============================================================== -->
 <div class="modal fade" id="createMyBastModal" tabindex="-1" aria-labelledby="createMyBastModalLabel" aria-hidden="true">
     <div class="modal-dialog modal-dialog-centered modal-lg">
         <div class="modal-content border-0 shadow">
             <div class="modal-header bg-light border-bottom">
-                <h5 class="modal-title fw-bold" id="createMyBastModalLabel">
-                    <i class="fa-solid fa-file-circle-plus text-primary me-2"></i> Buat BAST Responden
-                </h5>
+                <div>
+                    <h5 class="modal-title fw-bold text-dark" id="createMyBastModalLabel">
+                        <i class="fa-solid fa-file-circle-plus text-primary me-2"></i> Buat BAST Responden Baru
+                    </h5>
+                    <div class="small text-muted">Pilih sampel responden, tentukan penerima (KRT vs Wakil), dan bubuhkan tanda tangan digital</div>
+                </div>
                 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
-            <form method="POST" action="{{ route('petugas.basts.respondents.store') }}">
+            <form method="POST" action="{{ route('petugas.basts.respondents.store') }}" id="bastCreateForm">
                 @csrf
                 <div class="modal-body p-4">
+                    <!-- 1. Pemilihan Sampel Responden -->
                     <div class="row g-3 mb-3">
                         <div class="col-md-7">
-                            <label class="form-label small fw-semibold text-secondary">PILIH RESPONDEN <span class="text-danger">*</span></label>
-                            <select name="respondent_id" class="form-select" required>
-                                <option value="">-- Pilih Responden yang Anda Input --</option>
-                                @foreach($myRespondents as $resp)
-                                    <option value="{{ $resp->id }}">{{ $resp->name }} — {{ $resp->agency }}</option>
-                                @endforeach
+                            <label class="form-label small fw-semibold text-secondary">
+                                PILIH SAMPEL RESPONDEN <span class="text-danger">*</span>
+                            </label>
+                            <select name="respondent_id" id="bastRespondentSelect" class="form-select" required onchange="handleRespondentSelect(this)">
+                                <option value="">-- Pilih Sampel Responden --</option>
+                                
+                                {{-- Prioritas 1: Responden yang BELUM dibuatkan BAST --}}
+                                @php
+                                    $uncompletedRespondents = $myRespondents->filter(fn($r) => $r->basts->isEmpty());
+                                    $completedRespondents = $myRespondents->filter(fn($r) => $r->basts->isNotEmpty());
+                                @endphp
+
+                                @if($uncompletedRespondents->isNotEmpty())
+                                    <optgroup label="📋 BELUM BAST (Silakan Pilih)">
+                                        @foreach($uncompletedRespondents as $resp)
+                                            <option value="{{ $resp->id }}" 
+                                                    data-name="{{ $resp->name }}" 
+                                                    data-agency="{{ $resp->agency }}"
+                                                    data-completed="0">
+                                                {{ $resp->name }} — {{ $resp->agency }}
+                                            </option>
+                                        @endforeach
+                                    </optgroup>
+                                @endif
+
+                                {{-- Prioritas 2: Responden yang SUDAH Selesai BAST (Warna Hijau) --}}
+                                @if($completedRespondents->isNotEmpty())
+                                    <optgroup label="✅ SUDAH SELESAI BAST (Warna Hijau)">
+                                        @foreach($completedRespondents as $resp)
+                                            <option value="{{ $resp->id }}" 
+                                                    data-name="{{ $resp->name }}" 
+                                                    data-agency="{{ $resp->agency }}"
+                                                    data-completed="1" 
+                                                    class="text-success fw-semibold">
+                                                {{ $resp->name }} — [Sudah BAST]
+                                            </option>
+                                        @endforeach
+                                    </optgroup>
+                                @endif
                             </select>
+                            <div class="form-text small mt-1" id="respCompletedHint" style="display: none;">
+                                <span class="badge bg-success-subtle text-success border border-success-subtle">
+                                    <i class="fa-solid fa-circle-check me-1"></i> Responden ini sudah pernah dibuatkan BAST sebelumnya.
+                                </span>
+                            </div>
                         </div>
+
                         <div class="col-md-5">
                             <label class="form-label small fw-semibold text-secondary">TANGGAL BAST <span class="text-danger">*</span></label>
                             <input type="date" name="bast_date" class="form-control" value="{{ now()->toDateString() }}" required>
                         </div>
                     </div>
 
+                    <!-- 2. Pihak yang Menerima (KRT vs Selain KRT) -->
                     <div class="mb-3">
-                        <label class="form-label small fw-semibold text-secondary">RINCIAN DOKUMEN / BARANG YANG DISERAHKAN <span class="text-danger">*</span></label>
-                        <textarea name="handover_items" class="form-control" rows="4" placeholder="Contoh:&#10;1. Kuesioner Formulir Pendataan Lapangan Terpadu (1 Rangkap)&#10;2. Salinan KTP & KK Penanggung Jawab Usaha&#10;3. Surat Keterangan Domisili Usaha" required></textarea>
+                        <label class="form-label small fw-semibold text-secondary d-block">
+                            PIHAK PENERIMA BERKAS / PENANDATANGAN <span class="text-danger">*</span>
+                        </label>
+                        <div class="row g-2">
+                            <div class="col-sm-6">
+                                <label class="border rounded-3 p-3 d-flex align-items-center w-100 cursor-pointer bg-light" id="krtRadioLabel" style="cursor: pointer;">
+                                    <input class="form-check-input me-2.5 mt-0" type="radio" name="recipient_type" id="recipientTypeKrt" value="krt" checked onchange="toggleRecipientType()">
+                                    <div>
+                                        <div class="fw-bold text-dark small"><i class="fa-solid fa-user me-1 text-primary"></i> Sesuai Kepala Keluarga (KRT)</div>
+                                        <div class="text-muted" style="font-size: 0.72rem;">Nama penerima otomatis sama dengan nama responden</div>
+                                    </div>
+                                </label>
+                            </div>
+                            <div class="col-sm-6">
+                                <label class="border rounded-3 p-3 d-flex align-items-center w-100 cursor-pointer bg-light" id="repRadioLabel" style="cursor: pointer;">
+                                    <input class="form-check-input me-2.5 mt-0" type="radio" name="recipient_type" id="recipientTypeRep" value="representative" onchange="toggleRecipientType()">
+                                    <div>
+                                        <div class="fw-bold text-dark small"><i class="fa-solid fa-users me-1 text-warning"></i> Selain Kepala Keluarga (Wakil)</div>
+                                        <div class="text-muted" style="font-size: 0.72rem;">Diterima oleh pasangan / anak / anggota keluarga lain</div>
+                                    </div>
+                                </label>
+                            </div>
+                        </div>
                     </div>
 
+                    <!-- Dynamic Input: Jika Penerima adalah Selain KRT (Wakil) -->
+                    <div id="representativeFields" class="p-3 mb-3 border rounded-3 bg-light border-warning" style="display: none;">
+                        <h6 class="fw-bold text-dark mb-2 small">
+                            <i class="fa-solid fa-address-card text-warning me-1"></i> Data Identitas Penerima (Wakil KRT)
+                        </h6>
+                        <div class="row g-3">
+                            <div class="col-md-6">
+                                <label class="form-label small fw-semibold text-secondary">NAMA PENERIMA YANG MENANDATANGANI <span class="text-danger">*</span></label>
+                                <input type="text" name="recipient_name" id="recipientNameInput" class="form-control" placeholder="Contoh: Siti Rogayah">
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label small fw-semibold text-secondary">STATUS / HUBUNGAN DENGAN KRT <span class="text-danger">*</span></label>
+                                <input type="text" name="recipient_relation" id="recipientRelationInput" class="form-control" placeholder="Contoh: Istri / Pasangan / Anak">
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- 3. Rincian Dokumen / Barang Serah Terima -->
+                    <div class="mb-3">
+                        <label class="form-label small fw-semibold text-secondary">RINCIAN DOKUMEN / BARANG YANG DISERAHKAN <span class="text-danger">*</span></label>
+                        <textarea name="handover_items" class="form-control" rows="3" placeholder="Contoh:&#10;1. Kuesioner Formulir Pendataan Lapangan Terpadu (1 Rangkap)&#10;2. Salinan KTP & KK Penanggung Jawab Usaha&#10;3. Surat Keterangan Domisili Usaha" required>1. Formulir Kuesioner Pendataan Lapangan (1 Berkas)
+2. Bukti Kelengkapan Berkas Administrasi Responden</textarea>
+                    </div>
+
+                    <!-- 4. Tanda Tangan Digital Touch Canvas -->
+                    <div class="mb-3">
+                        <div class="d-flex justify-content-between align-items-center mb-1">
+                            <label class="form-label small fw-semibold text-secondary mb-0">
+                                TANDA TANGAN DIGITAL PENERIMA / RESPONDEN
+                            </label>
+                            <button type="button" class="btn btn-sm btn-outline-secondary py-0 px-2" style="font-size: 0.75rem;" onclick="clearBastSignaturePad()">
+                                <i class="fa-solid fa-rotate-left me-1"></i> Hapus / Ulangi
+                            </button>
+                        </div>
+                        <div class="border rounded-3 p-1 bg-light text-center">
+                            <canvas id="bastSignatureCanvas" width="450" height="150" class="border bg-white rounded-2 w-100" style="touch-action: none; cursor: crosshair; max-height: 160px;"></canvas>
+                            <input type="hidden" name="signature_data" id="bastSignatureData">
+                            <div class="small text-muted py-1" style="font-size: 0.72rem;">
+                                <i class="fa-solid fa-fingerprint me-1 text-primary"></i> Bubuhkan tanda tangan langsung menggunakan jari di layar HP
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- 5. Catatan Tambahan (Opsional) -->
                     <div class="mb-0">
                         <label class="form-label small fw-semibold text-secondary">CATATAN TAMBAHAN (OPSIONAL)</label>
                         <input type="text" name="notes" class="form-control" placeholder="Catatan kondisi berkas serah terima...">
@@ -214,7 +406,7 @@
                 <div class="modal-footer bg-light border-top">
                     <button type="button" class="btn btn-light" data-bs-dismiss="modal">Batal</button>
                     <button type="submit" class="btn btn-sp-primary">
-                        <i class="fa-solid fa-file-pdf me-1"></i> Terbitkan & Download PDF
+                        <i class="fa-solid fa-paper-plane me-1"></i> Kirim & Terbitkan BAST
                     </button>
                 </div>
             </form>
@@ -223,3 +415,156 @@
 </div>
 @endsection
 
+@push('scripts')
+<script>
+    // Toggle Pihak Penerima (KRT vs Wakil)
+    function toggleRecipientType() {
+        const isRep = document.getElementById('recipientTypeRep').checked;
+        const repFields = document.getElementById('representativeFields');
+        const krtLabel = document.getElementById('krtRadioLabel');
+        const repLabel = document.getElementById('repRadioLabel');
+        const nameInput = document.getElementById('recipientNameInput');
+        const relationInput = document.getElementById('recipientRelationInput');
+
+        if (isRep) {
+            repFields.style.display = 'block';
+            krtLabel.classList.remove('border-primary', 'bg-white');
+            repLabel.classList.add('border-warning', 'bg-white');
+            nameInput.setAttribute('required', 'required');
+            relationInput.setAttribute('required', 'required');
+        } else {
+            repFields.style.display = 'none';
+            repLabel.classList.remove('border-warning', 'bg-white');
+            krtLabel.classList.add('border-primary', 'bg-white');
+            nameInput.removeAttribute('required');
+            relationInput.removeAttribute('required');
+        }
+    }
+
+    // Handle Respondent Select Change
+    function handleRespondentSelect(select) {
+        const selectedOpt = select.options[select.selectedIndex];
+        const isCompleted = selectedOpt.getAttribute('data-completed') === '1';
+        const hint = document.getElementById('respCompletedHint');
+
+        if (isCompleted) {
+            hint.style.display = 'block';
+        } else {
+            hint.style.display = 'none';
+        }
+    }
+
+    // Touch-Friendly HTML5 Canvas Signature Pad
+    let bastSigPad = null;
+    function setupBastSignaturePad(canvasId, inputId) {
+        const canvas = document.getElementById(canvasId);
+        if (!canvas) return null;
+        const ctx = canvas.getContext('2d');
+        let isDrawing = false;
+        let hasDrawn = false;
+
+        // Resize canvas to match display width
+        function resize() {
+            const rect = canvas.getBoundingClientRect();
+            if (rect.width > 0 && rect.width !== canvas.width) {
+                const temp = canvas.toDataURL();
+                canvas.width = rect.width;
+                canvas.height = 150;
+                ctx.lineWidth = 2.5;
+                ctx.lineCap = 'round';
+                ctx.strokeStyle = '#0d2142';
+                if (hasDrawn) {
+                    const img = new Image();
+                    img.onload = () => ctx.drawImage(img, 0, 0);
+                    img.src = temp;
+                }
+            } else {
+                ctx.lineWidth = 2.5;
+                ctx.lineCap = 'round';
+                ctx.strokeStyle = '#0d2142';
+            }
+        }
+
+        setTimeout(resize, 300);
+
+        function getCoords(e) {
+            const rect = canvas.getBoundingClientRect();
+            const clientX = e.touches ? e.touches[0].clientX : e.clientX;
+            const clientY = e.touches ? e.touches[0].clientY : e.clientY;
+            return {
+                x: clientX - rect.left,
+                y: clientY - rect.top
+            };
+        }
+
+        function startDraw(e) {
+            isDrawing = true;
+            hasDrawn = true;
+            const pos = getCoords(e);
+            ctx.beginPath();
+            ctx.moveTo(pos.x, pos.y);
+            if (e.cancelable && e.type.startsWith('touch')) e.preventDefault();
+        }
+
+        function draw(e) {
+            if (!isDrawing) return;
+            const pos = getCoords(e);
+            ctx.lineTo(pos.x, pos.y);
+            ctx.stroke();
+            if (e.cancelable && e.type.startsWith('touch')) e.preventDefault();
+        }
+
+        function stopDraw() {
+            if (!isDrawing) return;
+            isDrawing = false;
+            ctx.closePath();
+            const input = document.getElementById(inputId);
+            if (input && hasDrawn) {
+                input.value = canvas.toDataURL('image/png');
+            }
+        }
+
+        canvas.addEventListener('mousedown', startDraw);
+        canvas.addEventListener('mousemove', draw);
+        canvas.addEventListener('mouseup', stopDraw);
+        canvas.addEventListener('mouseleave', stopDraw);
+
+        canvas.addEventListener('touchstart', startDraw, { passive: false });
+        canvas.addEventListener('touchmove', draw, { passive: false });
+        canvas.addEventListener('touchend', stopDraw);
+
+        return {
+            clear: function() {
+                ctx.clearRect(0, 0, canvas.width, canvas.height);
+                hasDrawn = false;
+                const input = document.getElementById(inputId);
+                if (input) input.value = '';
+            },
+            hasDrawn: function() { return hasDrawn; },
+            toDataURL: function() { return canvas.toDataURL('image/png'); }
+        };
+    }
+
+    function clearBastSignaturePad() {
+        if (bastSigPad) bastSigPad.clear();
+    }
+
+    document.addEventListener('DOMContentLoaded', function() {
+        const modal = document.getElementById('createMyBastModal');
+        if (modal) {
+            modal.addEventListener('shown.bs.modal', function () {
+                bastSigPad = setupBastSignaturePad('bastSignatureCanvas', 'bastSignatureData');
+            });
+        }
+
+        const form = document.getElementById('bastCreateForm');
+        if (form) {
+            form.addEventListener('submit', function() {
+                if (bastSigPad && bastSigPad.hasDrawn()) {
+                    document.getElementById('bastSignatureData').value = bastSigPad.toDataURL();
+                }
+            });
+        }
+    });
+</script>
+@endpush
