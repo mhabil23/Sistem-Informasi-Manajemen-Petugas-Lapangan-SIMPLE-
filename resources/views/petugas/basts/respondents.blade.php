@@ -290,10 +290,12 @@
                                     <optgroup label="📋 BELUM BAST (Silakan Pilih)">
                                         @foreach($uncompletedRespondents as $resp)
                                             <option value="{{ $resp->id }}" 
-                                                    data-name="{{ $resp->name }}" 
+                                                    data-name="{{ $resp->family_head_name ?? $resp->name }}" 
+                                                    data-informant="{{ $resp->informant_name ?? $resp->name }}"
+                                                    data-status="{{ $resp->respondent_status ?? 'Kepala Keluarga (KRT)' }}"
                                                     data-agency="{{ $resp->agency }}"
                                                     data-completed="0">
-                                                {{ $resp->name }} — {{ $resp->agency }}
+                                                {{ $resp->family_head_name ?? $resp->name }} @if($resp->informant_name && $resp->informant_name !== ($resp->family_head_name ?? $resp->name)) (Pemberi Info: {{ $resp->informant_name }}) @endif — {{ $resp->agency }}
                                             </option>
                                         @endforeach
                                     </optgroup>
@@ -304,11 +306,13 @@
                                     <optgroup label="✅ SUDAH SELESAI BAST (Warna Hijau)">
                                         @foreach($completedRespondents as $resp)
                                             <option value="{{ $resp->id }}" 
-                                                    data-name="{{ $resp->name }}" 
+                                                    data-name="{{ $resp->family_head_name ?? $resp->name }}" 
+                                                    data-informant="{{ $resp->informant_name ?? $resp->name }}"
+                                                    data-status="{{ $resp->respondent_status ?? 'Kepala Keluarga (KRT)' }}"
                                                     data-agency="{{ $resp->agency }}"
                                                     data-completed="1" 
                                                     class="text-success fw-semibold">
-                                                {{ $resp->name }} — [Sudah BAST]
+                                                {{ $resp->family_head_name ?? $resp->name }} — [Sudah BAST]
                                             </option>
                                         @endforeach
                                     </optgroup>
@@ -444,13 +448,30 @@
     // Handle Respondent Select Change
     function handleRespondentSelect(select) {
         const selectedOpt = select.options[select.selectedIndex];
+        if (!selectedOpt || !selectedOpt.value) return;
+
         const isCompleted = selectedOpt.getAttribute('data-completed') === '1';
         const hint = document.getElementById('respCompletedHint');
+        if (hint) {
+            hint.style.display = isCompleted ? 'block' : 'none';
+        }
 
-        if (isCompleted) {
-            hint.style.display = 'block';
+        const informant = selectedOpt.getAttribute('data-informant');
+        const status = selectedOpt.getAttribute('data-status');
+        const headName = selectedOpt.getAttribute('data-name');
+
+        if (informant && headName && informant.trim().toLowerCase() !== headName.trim().toLowerCase()) {
+            const repRadio = document.getElementById('recipientTypeRep');
+            if (repRadio) repRadio.checked = true;
+            const nameInp = document.getElementById('recipientNameInput');
+            if (nameInp) nameInp.value = informant;
+            const relInp = document.getElementById('recipientRelationInput');
+            if (relInp) relInp.value = status || 'Wakil Keluarga';
+            toggleRecipientType();
         } else {
-            hint.style.display = 'none';
+            const krtRadio = document.getElementById('recipientTypeKrt');
+            if (krtRadio) krtRadio.checked = true;
+            toggleRecipientType();
         }
     }
 

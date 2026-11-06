@@ -139,10 +139,10 @@
             <table class="table sp-table align-middle">
                 <thead>
                     <tr>
-                        <th style="width: 22%;">Nama Responden</th>
-                        <th style="width: 16%;">Instansi / Lembaga</th>
+                        <th style="width: 24%;">Kepala Keluarga &amp; Responden</th>
+                        <th style="width: 15%;">Instansi / Lembaga</th>
                         <th style="width: 20%;">Alamat &amp; Wilayah</th>
-                        <th style="width: 16%;">Kegiatan Terkait</th>
+                        <th style="width: 15%;">Kegiatan Terkait</th>
                         <th style="width: 13%;">Petugas Penginput</th>
                         <th class="text-center" style="width: 7%;">Status BAST</th>
                         <th class="text-end" style="width: 6%;">Aksi</th>
@@ -152,7 +152,17 @@
                     @forelse($respondents as $resp)
                         <tr>
                             <td>
-                                <div class="fw-bold text-dark text-truncate" style="max-width: 180px;" title="{{ $resp->name }}">{{ $resp->name }}</div>
+                                <div class="fw-bold text-dark text-truncate" style="max-width: 210px;" title="{{ $resp->family_head_name ?? $resp->name }}">
+                                    {{ $resp->family_head_name ?? $resp->name }}
+                                </div>
+                                <div class="small my-1">
+                                    <span class="badge bg-light text-dark border me-1">
+                                        <i class="fa-solid fa-user me-1 text-primary"></i> {{ $resp->informant_name ?? $resp->name }}
+                                    </span>
+                                    <span class="badge bg-secondary-subtle text-secondary border">
+                                        {{ $resp->respondent_status ?? 'KRT' }}
+                                    </span>
+                                </div>
                                 <small class="text-muted"><i class="fa-solid fa-phone me-1"></i> {{ $resp->phone ?? '-' }}</small>
                             </td>
                             <td>
@@ -267,24 +277,64 @@
             <form method="POST" action="{{ route('admin.respondents.store') }}">
                 @csrf
                 <div class="modal-body p-4">
+                    <!-- Baris 1: Nama KRT & No HP -->
                     <div class="row g-3 mb-3">
                         <div class="col-md-7">
-                            <label class="form-label small fw-semibold text-secondary">NAMA LENGKAP RESPONDEN <span class="text-danger">*</span></label>
-                            <input type="text" name="name" class="form-control" placeholder="Contoh: Kelompok Tani Sejahtera (Bpk. Mulyadi)" required>
+                            <label class="form-label small fw-semibold text-secondary">
+                                <i class="fa-solid fa-house-user text-primary me-1"></i> NAMA KEPALA KELUARGA (KRT) <span class="text-danger">*</span>
+                            </label>
+                            <input type="text" id="admin_create_resp_name" name="name" class="form-control" placeholder="Contoh: Jamaluddin Ali" required>
+                            <div class="form-text small">Nama kepala keluarga sesuai daftar sampel sensus/survei.</div>
                         </div>
                         <div class="col-md-5">
-                            <label class="form-label small fw-semibold text-secondary">NOMOR HP / WHATSAPP</label>
+                            <label class="form-label small fw-semibold text-secondary">
+                                <i class="fa-solid fa-phone text-muted me-1"></i> NOMOR HP / WHATSAPP
+                            </label>
                             <input type="text" name="phone" class="form-control" placeholder="Contoh: 081234567890">
                         </div>
                     </div>
 
+                    <!-- Baris 2: Nama Pemberi Informasi & Status Hubungan -->
+                    <div class="row g-3 mb-3">
+                        <div class="col-md-7">
+                            <div class="d-flex justify-content-between align-items-center mb-1">
+                                <label class="form-label small fw-semibold text-secondary mb-0">
+                                    <i class="fa-solid fa-user-check text-success me-1"></i> NAMA PEMBERI INFORMASI <span class="text-danger">*</span>
+                                </label>
+                                <button type="button" class="btn btn-sm btn-outline-primary py-0 px-2" style="font-size: 0.72rem;" onclick="copyHeadNameToInformant('admin_create_resp_name', 'admin_create_informant_name', 'admin_create_status_select')">
+                                    <i class="fa-solid fa-copy me-1"></i> Sama dg KRT
+                                </button>
+                            </div>
+                            <input type="text" id="admin_create_informant_name" name="informant_name" class="form-control" placeholder="Contoh: Siti Rogayah (atau nama KRT jika ditemui langsung)" required>
+                            <div class="form-text small">Orang yang diwawancarai / memberikan data di lapangan.</div>
+                        </div>
+                        <div class="col-md-5">
+                            <label class="form-label small fw-semibold text-secondary">
+                                <i class="fa-solid fa-users text-primary me-1"></i> STATUS RESPONDEN / HUBUNGAN <span class="text-danger">*</span>
+                            </label>
+                            <select id="admin_create_status_select" name="respondent_status" class="form-select" required>
+                                <option value="Kepala Keluarga (KRT)">Kepala Keluarga (KRT)</option>
+                                <option value="Istri / Suami (Pasangan)">Istri / Suami (Pasangan)</option>
+                                <option value="Anak Kandung">Anak Kandung</option>
+                                <option value="Famili Lain / ART">Famili Lain / ART</option>
+                                <option value="Pengelola / Perwakilan Usaha">Pengelola / Perwakilan Usaha</option>
+                                <option value="Lainnya">Lainnya</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <!-- Baris 3: Instansi & Kegiatan Terkait -->
                     <div class="row g-3 mb-3">
                         <div class="col-md-6">
-                            <label class="form-label small fw-semibold text-secondary">INSTANSI / ASAL LEMBAGA <span class="text-danger">*</span></label>
-                            <input type="text" name="agency" class="form-control" placeholder="Contoh: Pelaku Usaha Agribisnis / Desa Sukamaju" required>
+                            <label class="form-label small fw-semibold text-secondary">
+                                <i class="fa-solid fa-building text-muted me-1"></i> INSTANSI / ASAL LEMBAGA <span class="text-danger">*</span>
+                            </label>
+                            <input type="text" name="agency" class="form-control" placeholder="Contoh: Rumah Tangga / Pelaku Usaha Agribisnis" required>
                         </div>
                         <div class="col-md-6">
-                            <label class="form-label small fw-semibold text-secondary">KEGIATAN TERKAIT</label>
+                            <label class="form-label small fw-semibold text-secondary">
+                                <i class="fa-solid fa-briefcase text-muted me-1"></i> KEGIATAN TERKAIT
+                            </label>
                             <select name="assignment_id" class="form-select">
                                 <option value="">-- Pilih Kegiatan --</option>
                                 @foreach($assignments as $assignment)
@@ -294,9 +344,12 @@
                         </div>
                     </div>
 
+                    <!-- Baris 4: Alamat & Wilayah -->
                     <div class="row g-3 mb-3">
                         <div class="col-md-7">
-                            <label class="form-label small fw-semibold text-secondary">ALAMAT LENGKAP <span class="text-danger">*</span></label>
+                            <label class="form-label small fw-semibold text-secondary">
+                                <i class="fa-solid fa-location-dot text-danger me-1"></i> ALAMAT LENGKAP <span class="text-danger">*</span>
+                            </label>
                             <textarea name="address" class="form-control" rows="2" placeholder="Nama jalan, RT/RW, Dusun/Desa..." required></textarea>
                         </div>
                         <div class="col-md-5">
@@ -353,24 +406,62 @@
                 @csrf
                 @method('PUT')
                 <div class="modal-body p-4">
+                    <!-- Baris 1: Nama KRT & No HP -->
                     <div class="row g-3 mb-3">
                         <div class="col-md-7">
-                            <label class="form-label small fw-semibold text-secondary">NAMA LENGKAP RESPONDEN <span class="text-danger">*</span></label>
+                            <label class="form-label small fw-semibold text-secondary">
+                                <i class="fa-solid fa-house-user text-primary me-1"></i> NAMA KEPALA KELUARGA (KRT) <span class="text-danger">*</span>
+                            </label>
                             <input type="text" id="edit_resp_name" name="name" class="form-control" required>
                         </div>
                         <div class="col-md-5">
-                            <label class="form-label small fw-semibold text-secondary">NOMOR HP / WHATSAPP</label>
+                            <label class="form-label small fw-semibold text-secondary">
+                                <i class="fa-solid fa-phone text-muted me-1"></i> NOMOR HP / WHATSAPP
+                            </label>
                             <input type="text" id="edit_resp_phone" name="phone" class="form-control">
                         </div>
                     </div>
 
+                    <!-- Baris 2: Nama Pemberi Informasi & Status Hubungan -->
+                    <div class="row g-3 mb-3">
+                        <div class="col-md-7">
+                            <div class="d-flex justify-content-between align-items-center mb-1">
+                                <label class="form-label small fw-semibold text-secondary mb-0">
+                                    <i class="fa-solid fa-user-check text-success me-1"></i> NAMA PEMBERI INFORMASI <span class="text-danger">*</span>
+                                </label>
+                                <button type="button" class="btn btn-sm btn-outline-primary py-0 px-2" style="font-size: 0.72rem;" onclick="copyHeadNameToInformant('edit_resp_name', 'edit_resp_informant_name', 'edit_resp_status')">
+                                    <i class="fa-solid fa-copy me-1"></i> Sama dg KRT
+                                </button>
+                            </div>
+                            <input type="text" id="edit_resp_informant_name" name="informant_name" class="form-control" required>
+                        </div>
+                        <div class="col-md-5">
+                            <label class="form-label small fw-semibold text-secondary">
+                                <i class="fa-solid fa-users text-primary me-1"></i> STATUS RESPONDEN / HUBUNGAN <span class="text-danger">*</span>
+                            </label>
+                            <select id="edit_resp_status" name="respondent_status" class="form-select" required>
+                                <option value="Kepala Keluarga (KRT)">Kepala Keluarga (KRT)</option>
+                                <option value="Istri / Suami (Pasangan)">Istri / Suami (Pasangan)</option>
+                                <option value="Anak Kandung">Anak Kandung</option>
+                                <option value="Famili Lain / ART">Famili Lain / ART</option>
+                                <option value="Pengelola / Perwakilan Usaha">Pengelola / Perwakilan Usaha</option>
+                                <option value="Lainnya">Lainnya</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <!-- Baris 3: Instansi & Kegiatan Terkait -->
                     <div class="row g-3 mb-3">
                         <div class="col-md-6">
-                            <label class="form-label small fw-semibold text-secondary">INSTANSI / ASAL LEMBAGA <span class="text-danger">*</span></label>
+                            <label class="form-label small fw-semibold text-secondary">
+                                <i class="fa-solid fa-building text-muted me-1"></i> INSTANSI / ASAL LEMBAGA <span class="text-danger">*</span>
+                            </label>
                             <input type="text" id="edit_resp_agency" name="agency" class="form-control" required>
                         </div>
                         <div class="col-md-6">
-                            <label class="form-label small fw-semibold text-secondary">KEGIATAN TERKAIT</label>
+                            <label class="form-label small fw-semibold text-secondary">
+                                <i class="fa-solid fa-briefcase text-muted me-1"></i> KEGIATAN TERKAIT
+                            </label>
                             <select id="edit_resp_assignment" name="assignment_id" class="form-select">
                                 <option value="">-- Tidak Terikat Kegiatan Tertentu --</option>
                                 @foreach($assignments as $assignment)
@@ -380,9 +471,12 @@
                         </div>
                     </div>
 
+                    <!-- Baris 4: Alamat Lengkap & Wilayah -->
                     <div class="row g-3 mb-3">
                         <div class="col-md-7">
-                            <label class="form-label small fw-semibold text-secondary">ALAMAT LENGKAP <span class="text-danger">*</span></label>
+                            <label class="form-label small fw-semibold text-secondary">
+                                <i class="fa-solid fa-location-dot text-danger me-1"></i> ALAMAT LENGKAP <span class="text-danger">*</span>
+                            </label>
                             <textarea id="edit_resp_address" name="address" class="form-control" rows="2" required></textarea>
                         </div>
                         <div class="col-md-5">
@@ -437,12 +531,19 @@
             <div class="modal-body p-4">
                 <div class="row g-3 mb-4">
                     <div class="col-sm-6">
-                        <div class="text-muted small">Nama Responden:</div>
+                        <div class="text-muted small">Nama Kepala Keluarga (KRT):</div>
                         <h5 class="fw-bold text-dark mb-0" id="det_name"></h5>
                     </div>
                     <div class="col-sm-6">
+                        <div class="text-muted small">Pemberi Informasi & Status:</div>
+                        <div class="fw-bold text-primary">
+                            <span id="det_informant_name">-</span>
+                            <span class="badge bg-secondary-subtle text-secondary border ms-1" id="det_status">-</span>
+                        </div>
+                    </div>
+                    <div class="col-sm-6">
                         <div class="text-muted small">Instansi / Lembaga:</div>
-                        <div class="fw-bold text-primary" id="det_agency"></div>
+                        <div class="fw-semibold text-dark" id="det_agency"></div>
                     </div>
                     <div class="col-sm-6">
                         <div class="text-muted small">Nomor HP / WhatsApp:</div>
@@ -451,6 +552,10 @@
                     <div class="col-sm-6">
                         <div class="text-muted small">Tanggal Input:</div>
                         <div class="fw-semibold text-dark" id="det_date"></div>
+                    </div>
+                    <div class="col-sm-6">
+                        <div class="text-muted small">Petugas Penginput:</div>
+                        <div class="fw-semibold text-dark" id="det_officer">-</div>
                     </div>
                     <div class="col-12">
                         <div class="text-muted small">Alamat Lengkap:</div>
@@ -485,9 +590,22 @@
 
 @push('scripts')
 <script>
+    function copyHeadNameToInformant(headInputId, informantInputId, statusSelectId) {
+        const headVal = document.getElementById(headInputId).value;
+        if (headVal) {
+            document.getElementById(informantInputId).value = headVal;
+            const statusSelect = document.getElementById(statusSelectId);
+            if (statusSelect) {
+                statusSelect.value = 'Kepala Keluarga (KRT)';
+            }
+        }
+    }
+
     function openEditRespondentModal(resp) {
         document.getElementById('editRespondentForm').action = '/admin/respondents/' + resp.id;
-        document.getElementById('edit_resp_name').value = resp.name;
+        document.getElementById('edit_resp_name').value = resp.family_head_name || resp.name || '';
+        document.getElementById('edit_resp_informant_name').value = resp.informant_name || resp.name || '';
+        document.getElementById('edit_resp_status').value = resp.respondent_status || 'Kepala Keluarga (KRT)';
         document.getElementById('edit_resp_phone').value = resp.phone || '';
         document.getElementById('edit_resp_agency').value = resp.agency;
         document.getElementById('edit_resp_assignment').value = resp.assignment_id || '';
@@ -502,10 +620,13 @@
     }
 
     function openDetailRespondentModal(resp) {
-        document.getElementById('det_name').innerText = resp.name;
-        document.getElementById('det_agency').innerText = resp.agency;
+        document.getElementById('det_name').innerText = resp.family_head_name || resp.name || '-';
+        document.getElementById('det_informant_name').innerText = resp.informant_name || resp.name || '-';
+        document.getElementById('det_status').innerText = resp.respondent_status || 'Kepala Keluarga (KRT)';
+        document.getElementById('det_agency').innerText = resp.agency || '-';
         document.getElementById('det_phone').innerText = resp.phone || '-';
         document.getElementById('det_date').innerText = resp.input_date ? resp.input_date.substring(0, 10) : '-';
+        document.getElementById('det_officer').innerText = resp.officer ? resp.officer.name : '-';
         document.getElementById('det_address').innerText = resp.address;
         const distBadge = document.getElementById('det_district_badge');
         if (resp.district) {

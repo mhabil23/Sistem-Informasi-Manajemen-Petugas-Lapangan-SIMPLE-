@@ -72,6 +72,7 @@ class ReportController extends Controller
         $validated = $request->validate([
             'activity_date' => ['required', 'date'],
             'activity_title' => ['required', 'string', 'max:255'],
+            'activity_location' => ['nullable', 'string', 'max:255'],
             'assignment_id' => ['nullable', 'exists:assignments,id'],
             'officer_name' => ['nullable', 'string', 'max:255'],
             'officer_nip' => ['nullable', 'string', 'max:100'],
@@ -128,6 +129,7 @@ class ReportController extends Controller
             'duration_text' => !empty($validated['duration_text']) ? $validated['duration_text'] : 'Selama 1 (satu) Hari',
             'activity_date' => $validated['activity_date'],
             'activity_title' => $validated['activity_title'],
+            'activity_location' => $validated['activity_location'] ?? null,
             'work_description' => $validated['work_description'],
             'recommendations' => $validated['recommendations'] ?? '-',
             'signing_city' => !empty($validated['signing_city']) ? $validated['signing_city'] : 'Lasusua',
@@ -224,6 +226,7 @@ class ReportController extends Controller
         $validated = $request->validate([
             'activity_date' => ['required', 'date'],
             'activity_title' => ['required', 'string', 'max:255'],
+            'activity_location' => ['nullable', 'string', 'max:255'],
             'assignment_id' => ['nullable', 'exists:assignments,id'],
             'officer_name' => ['nullable', 'string', 'max:255'],
             'officer_nip' => ['nullable', 'string', 'max:100'],
@@ -260,6 +263,7 @@ class ReportController extends Controller
         $report->update([
             'activity_date' => $validated['activity_date'],
             'activity_title' => $validated['activity_title'],
+            'activity_location' => $validated['activity_location'] ?? $report->activity_location,
             'assignment_id' => $validated['assignment_id'] ?? null,
             'officer_name' => !empty($validated['officer_name']) ? $validated['officer_name'] : $report->officer_name,
             'officer_nip' => !empty($validated['officer_nip']) ? $validated['officer_nip'] : $report->officer_nip,

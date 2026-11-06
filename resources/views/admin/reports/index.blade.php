@@ -319,6 +319,10 @@
                             <div class="text-muted small">Tanggal Pelaksanaan:</div>
                             <div class="fw-semibold text-dark" id="rev_date"></div>
                         </div>
+                        <div class="col-sm-6">
+                            <div class="text-muted small">Lokasi Pelaksanaan:</div>
+                            <div class="fw-semibold text-primary" id="rev_location"></div>
+                        </div>
                         <div class="col-12">
                             <div class="text-muted small mb-1">Uraian Pekerjaan / Hasil Lapangan:</div>
                             <div class="p-3 bg-white border rounded text-dark small" style="white-space: pre-wrap; max-height: 180px; overflow-y: auto;" id="rev_description"></div>
@@ -385,6 +389,7 @@
         document.getElementById('rev_officer').innerText = rep.user ? rep.user.name : '-';
         document.getElementById('rev_title').innerText = rep.activity_title;
         document.getElementById('rev_date').innerText = rep.activity_date ? rep.activity_date.substring(0, 10) : '-';
+        document.getElementById('rev_location').innerText = rep.activity_location || (rep.assignment ? rep.assignment.location : '-');
         document.getElementById('rev_description').innerText = rep.work_description;
         document.getElementById('rev_admin_notes').value = rep.admin_notes || '';
 

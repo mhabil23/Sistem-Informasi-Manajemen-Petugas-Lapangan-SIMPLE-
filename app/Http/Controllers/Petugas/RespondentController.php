@@ -30,6 +30,9 @@ class RespondentController extends Controller
         if ($search = $request->input('search')) {
             $query->where(function ($q) use ($search) {
                 $q->where('name', 'like', "%{$search}%")
+                  ->orWhere('family_head_name', 'like', "%{$search}%")
+                  ->orWhere('informant_name', 'like', "%{$search}%")
+                  ->orWhere('respondent_status', 'like', "%{$search}%")
                   ->orWhere('agency', 'like', "%{$search}%")
                   ->orWhere('phone', 'like', "%{$search}%")
                   ->orWhere('address', 'like', "%{$search}%");
@@ -72,7 +75,10 @@ class RespondentController extends Controller
     public function store(Request $request)
     {
         $validated = $request->validate([
-            'name' => ['required', 'string', 'max:255'],
+            'name' => ['nullable', 'string', 'max:255'],
+            'family_head_name' => ['nullable', 'string', 'max:255'],
+            'informant_name' => ['nullable', 'string', 'max:255'],
+            'respondent_status' => ['nullable', 'string', 'max:100'],
             'address' => ['required', 'string'],
             'district' => ['nullable', 'string', 'max:100'],
             'phone' => ['nullable', 'string', 'max:25'],
@@ -81,13 +87,21 @@ class RespondentController extends Controller
             'assignment_id' => ['nullable', 'exists:assignments,id'],
             'input_date' => ['required', 'date'],
         ], [
-            'name.required' => 'Nama responden wajib diisi.',
             'address.required' => 'Alamat responden wajib diisi.',
             'agency.required' => 'Instansi / lembaga wajib diisi.',
             'purpose.required' => 'Tujuan kegiatan wajib diisi.',
             'input_date.required' => 'Tanggal input data wajib diisi.',
         ]);
 
+        $headName = trim($request->input('family_head_name') ?: $request->input('name', ''));
+        if (empty($headName)) {
+            return back()->withErrors(['name' => 'Nama Kepala Keluarga (KRT) wajib diisi.'])->withInput();
+        }
+
+        $validated['name'] = $headName;
+        $validated['family_head_name'] = $headName;
+        $validated['informant_name'] = trim($request->input('informant_name') ?: $headName);
+        $validated['respondent_status'] = trim($request->input('respondent_status') ?: 'Kepala Keluarga (KRT)');
         $validated['officer_id'] = Auth::id();
 
         $respondent = Respondent::create($validated);
@@ -96,6 +110,9 @@ class RespondentController extends Controller
             $this->sheetService->insert('respondents', [
                 'id' => $respondent->id,
                 'name' => $respondent->name,
+                'family_head_name' => $respondent->family_head_name ?? $respondent->name,
+                'informant_name' => $respondent->informant_name ?? $respondent->name,
+                'respondent_status' => $respondent->respondent_status ?? '',
                 'address' => $respondent->address,
                 'phone' => $respondent->phone ?? '',
                 'agency' => $respondent->agency,
@@ -111,7 +128,7 @@ class RespondentController extends Controller
         ActivityLog::log(
             'create',
             'respondents',
-            "Petugas " . Auth::user()->name . " menginput data responden baru: {$respondent->name}."
+            "Petugas " . Auth::user()->name . " menginput data responden baru: {$respondent->name} (Pemberi Info: {$respondent->informant_name})."
         );
 
         return redirect()->route('petugas.respondents.index')->with('success', "Data responden '{$respondent->name}' berhasil disimpan!");
@@ -124,7 +141,10 @@ class RespondentController extends Controller
         }
 
         $validated = $request->validate([
-            'name' => ['required', 'string', 'max:255'],
+            'name' => ['nullable', 'string', 'max:255'],
+            'family_head_name' => ['nullable', 'string', 'max:255'],
+            'informant_name' => ['nullable', 'string', 'max:255'],
+            'respondent_status' => ['nullable', 'string', 'max:100'],
             'address' => ['required', 'string'],
             'district' => ['nullable', 'string', 'max:100'],
             'phone' => ['nullable', 'string', 'max:25'],
@@ -134,11 +154,24 @@ class RespondentController extends Controller
             'input_date' => ['required', 'date'],
         ]);
 
+        $headName = trim($request->input('family_head_name') ?: $request->input('name', ''));
+        if (empty($headName)) {
+            return back()->withErrors(['name' => 'Nama Kepala Keluarga (KRT) wajib diisi.'])->withInput();
+        }
+
+        $validated['name'] = $headName;
+        $validated['family_head_name'] = $headName;
+        $validated['informant_name'] = trim($request->input('informant_name') ?: $headName);
+        $validated['respondent_status'] = trim($request->input('respondent_status') ?: 'Kepala Keluarga (KRT)');
+
         $respondent->update($validated);
 
         if ($this->sheetService->isConfigured()) {
             $this->sheetService->update('respondents', $respondent->id, [
                 'name' => $respondent->name,
+                'family_head_name' => $respondent->family_head_name ?? $respondent->name,
+                'informant_name' => $respondent->informant_name ?? $respondent->name,
+                'respondent_status' => $respondent->respondent_status ?? '',
                 'address' => $respondent->address,
                 'phone' => $respondent->phone ?? '',
                 'agency' => $respondent->agency,

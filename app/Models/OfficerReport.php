@@ -31,6 +31,7 @@ class OfficerReport extends Model
         'assignment_id',
         'activity_date',
         'activity_title',
+        'activity_location',
         'work_description',
         'recommendations',
         'status',
@@ -91,6 +92,19 @@ class OfficerReport extends Model
             'approved' => 'Disetujui',
             default => ucfirst($this->status),
         };
+    }
+
+    public function getDisplayLocationAttribute(): string
+    {
+        if (!empty($this->activity_location)) {
+            return $this->activity_location;
+        }
+
+        if ($this->assignment && !empty($this->assignment->location)) {
+            return $this->assignment->location;
+        }
+
+        return 'Kabupaten Kolaka Utara';
     }
 }
 

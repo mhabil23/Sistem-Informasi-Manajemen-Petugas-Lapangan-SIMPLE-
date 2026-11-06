@@ -14,6 +14,9 @@ class Respondent extends Model
 
     protected $fillable = [
         'name',
+        'family_head_name',
+        'informant_name',
+        'respondent_status',
         'address',
         'district',
         'phone',
@@ -23,6 +26,16 @@ class Respondent extends Model
         'officer_id',
         'input_date',
     ];
+
+    public function getHeadOfFamilyAttribute(): string
+    {
+        return $this->family_head_name ?: $this->name;
+    }
+
+    public function getInformantDisplayNameAttribute(): string
+    {
+        return $this->informant_name ?: $this->name;
+    }
 
     protected function casts(): array
     {

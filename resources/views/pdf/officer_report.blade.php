@@ -254,7 +254,7 @@
     <!-- C. TUJUAN PERJALANAN DINAS -->
     <div class="section-title">C. Tujuan Perjalanan Dinas</div>
     <div class="section-desc">
-        {{ $report->destination_purpose ?: ('Perjalanan Dinas Biasa dalam kota lebih dari 8 jam dalam rangka pendataan ' . $report->activity_title . ' di ' . ($report->assignment->location ?? 'Kecamatan Wilayah Tugas') . '.') }}
+        {{ $report->destination_purpose ?: ('Perjalanan Dinas Biasa dalam kota lebih dari 8 jam dalam rangka pendataan ' . $report->activity_title . ' di ' . $report->display_location . '.') }}
     </div>
 
     <!-- D. WAKTU PERJALANAN DINAS -->
@@ -306,7 +306,7 @@
         <div class="attachment-page">
             <div class="attachment-title">DOKUMENTASI KEGIATAN PERJALANAN DINAS</div>
             <div style="text-align: center; font-size: 9.5pt; margin-top: -10px; margin-bottom: 15px; color: #333;">
-                Tanggal {{ $report->activity_date ? $report->activity_date->translatedFormat('d F Y') : '' }} di {{ $report->assignment->location ?? 'Kabupaten Kolaka Utara' }}
+                Tanggal {{ $report->activity_date ? $report->activity_date->translatedFormat('d F Y') : '' }} di {{ $report->display_location }}
             </div>
             <table class="photo-grid">
                 @foreach($report->attachments->chunk(2) as $row)
@@ -395,7 +395,7 @@
             </table>
 
             <p style="text-align: justify; line-height: 1.5; margin-bottom: 12px;">
-                Menerangkan bahwa dalam rangka {{ $report->activity_title }} di {{ $report->assignment->location ?? 'Kabupaten Kolaka Utara' }} sesuai Surat Perjalanan Dinas {{ $report->basis_st ?: ('Nomor: B-969/74080/VS.330/' . ($report->activity_date ? $report->activity_date->format('Y') : date('Y')) . ' Tanggal ' . ($report->activity_date ? $report->activity_date->translatedFormat('d F Y') : date('d F Y'))) }}. Saya benar-benar tidak menggunakan kendaraan dinas pada tanggal {{ $report->activity_date ? $report->activity_date->translatedFormat('d F Y') : date('d F Y') }}.
+                Menerangkan bahwa dalam rangka {{ $report->activity_title }} di {{ $report->display_location }} sesuai Surat Perjalanan Dinas {{ $report->basis_st ?: ('Nomor: B-969/74080/VS.330/' . ($report->activity_date ? $report->activity_date->format('Y') : date('Y')) . ' Tanggal ' . ($report->activity_date ? $report->activity_date->translatedFormat('d F Y') : date('d F Y'))) }}. Saya benar-benar tidak menggunakan kendaraan dinas pada tanggal {{ $report->activity_date ? $report->activity_date->translatedFormat('d F Y') : date('d F Y') }}.
             </p>
 
             <p style="text-align: justify; line-height: 1.5; margin-bottom: 25px;">

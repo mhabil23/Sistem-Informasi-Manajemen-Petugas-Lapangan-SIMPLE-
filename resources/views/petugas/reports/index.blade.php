@@ -473,12 +473,19 @@
                                 </div>
                                 <div class="col-md-5">
                                     <label class="form-label small fw-semibold text-secondary">Penugasan Terkait</label>
-                                    <select name="assignment_id" class="form-select">
-                                        <option value="">-- Kegiatan Mandiri / Umum --</option>
+                                    <select name="assignment_id" id="create_assignment_id" class="form-select" onchange="autoFillLocation(this, 'create_activity_location')">
+                                        <option value="" data-location="">-- Kegiatan Mandiri / Umum --</option>
                                         @foreach($myAssignments as $asgn)
-                                            <option value="{{ $asgn->id }}">{{ $asgn->title }}</option>
+                                            <option value="{{ $asgn->id }}" data-location="{{ $asgn->location }}">{{ $asgn->title }}</option>
                                         @endforeach
                                     </select>
+                                </div>
+                                <div class="col-12">
+                                    <label class="form-label small fw-semibold text-secondary">
+                                        <i class="fa-solid fa-location-dot text-primary me-1"></i> Lokasi / Tempat Pelaksanaan Kegiatan & Dokumentasi
+                                    </label>
+                                    <input type="text" name="activity_location" id="create_activity_location" class="form-control" placeholder="Contoh: Kecamatan Sukamaju / Desa Tambuha, Kec. Watunohu">
+                                    <div class="form-text small">Teks ini dicantumkan pada judul Dokumentasi ("di [Lokasi] dan Sekitarnya") dan Surat Pernyataan. Terisi otomatis jika memilih penugasan di atas.</div>
                                 </div>
                             </div>
                             <div class="mb-3">
@@ -731,12 +738,19 @@
                                 </div>
                                 <div class="col-md-5">
                                     <label class="form-label small fw-semibold text-secondary">Penugasan Terkait</label>
-                                    <select id="edit_assignment" name="assignment_id" class="form-select">
-                                        <option value="">-- Kegiatan Mandiri / Umum --</option>
+                                    <select id="edit_assignment" name="assignment_id" class="form-select" onchange="autoFillLocation(this, 'edit_activity_location')">
+                                        <option value="" data-location="">-- Kegiatan Mandiri / Umum --</option>
                                         @foreach($myAssignments as $asgn)
-                                            <option value="{{ $asgn->id }}">{{ $asgn->title }}</option>
+                                            <option value="{{ $asgn->id }}" data-location="{{ $asgn->location }}">{{ $asgn->title }}</option>
                                         @endforeach
                                     </select>
+                                </div>
+                                <div class="col-12">
+                                    <label class="form-label small fw-semibold text-secondary">
+                                        <i class="fa-solid fa-location-dot text-primary me-1"></i> Lokasi / Tempat Pelaksanaan Kegiatan & Dokumentasi
+                                    </label>
+                                    <input type="text" id="edit_activity_location" name="activity_location" class="form-control" placeholder="Contoh: Kecamatan Sukamaju / Desa Tambuha, Kec. Watunohu">
+                                    <div class="form-text small">Teks ini dicantumkan pada judul Dokumentasi ("di [Lokasi] dan Sekitarnya") dan Surat Pernyataan.</div>
                                 </div>
                             </div>
                             <div class="mb-3">
@@ -1212,6 +1226,17 @@
         }
     });
 
+    function autoFillLocation(selectElem, targetInputId) {
+        const selectedOpt = selectElem.options[selectElem.selectedIndex];
+        if (selectedOpt) {
+            const loc = selectedOpt.getAttribute('data-location');
+            const targetInput = document.getElementById(targetInputId);
+            if (targetInput && loc) {
+                targetInput.value = loc;
+            }
+        }
+    }
+
     function clearCreateCanvas() {
         if (createSigPad) createSigPad.clear();
     }
@@ -1237,6 +1262,7 @@
         // Tujuan & Waktu
         document.getElementById('edit_title').value = rep.activity_title || '';
         document.getElementById('edit_assignment').value = rep.assignment_id || '';
+        document.getElementById('edit_activity_location').value = rep.activity_location || (rep.assignment ? rep.assignment.location : '');
         document.getElementById('edit_destination_purpose').value = rep.destination_purpose || '';
         document.getElementById('edit_duration_text').value = rep.duration_text || 'Selama 1 (Satu) Hari';
         document.getElementById('edit_date').value = rep.activity_date ? rep.activity_date.substring(0, 10) : '';
@@ -1335,7 +1361,7 @@
             document.getElementById('stmt_officer_rank').innerText = rep.officer_rank || '-';
             document.getElementById('stmt_officer_position').innerText = rep.officer_position || 'Mitra BPS Kabupaten Kolaka Utara';
             
-            const loc = (rep.assignment && rep.assignment.location) ? rep.assignment.location : 'Kabupaten Kolaka Utara';
+            const loc = rep.activity_location || ((rep.assignment && rep.assignment.location) ? rep.assignment.location : 'Kabupaten Kolaka Utara');
             document.getElementById('stmt_body_text').innerText = `Menerangkan bahwa dalam rangka ${rep.activity_title} di ${loc} sesuai Surat Perjalanan Dinas ${rep.basis_st || 'Nomor Surat Tugas BPS Kolaka Utara'}. Saya benar-benar tidak menggunakan kendaraan dinas pada tanggal ${actDateStr}.`;
             
             document.getElementById('stmt_signing_place_date').innerText = signCity + ', ' + signDate;
