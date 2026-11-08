@@ -119,6 +119,9 @@ Route::middleware(['auth', 'role:admin'])->prefix('admin')->as('admin.')->group(
     Route::get('/logs', [\App\Http\Controllers\Admin\ActivityLogController::class, 'index'])->name('logs.index');
     Route::get('/logs/{log}', [\App\Http\Controllers\Admin\ActivityLogController::class, 'show'])->name('logs.show');
     Route::post('/logs/clear', [\App\Http\Controllers\Admin\ActivityLogController::class, 'clearOld'])->name('logs.clear');
+
+    // Notifikasi ke Papan Informasi Petugas (Admin)
+    Route::post('/notices/send', [\App\Http\Controllers\Admin\NoticeController::class, 'send'])->name('notices.send');
 });
 
 // Petugas Lapangan Area (Protected by role:petugas)
@@ -156,4 +159,8 @@ Route::middleware(['auth', 'role:petugas'])->prefix('petugas')->as('petugas.')->
     Route::get('/reports/{report}/preview', [\App\Http\Controllers\Petugas\ReportController::class, 'previewPdf'])->name('reports.preview');
     Route::put('/reports/{report}', [\App\Http\Controllers\Petugas\ReportController::class, 'update'])->name('reports.update');
     Route::delete('/reports/{report}', [\App\Http\Controllers\Petugas\ReportController::class, 'destroy'])->name('reports.destroy');
+
+    // Papan Informasi & Notifikasi Petugas
+    Route::patch('/notices/{notice}/read', [\App\Http\Controllers\Petugas\NoticeController::class, 'markAsRead'])->name('notices.read');
+    Route::delete('/notices/{notice}', [\App\Http\Controllers\Petugas\NoticeController::class, 'destroy'])->name('notices.destroy');
 });

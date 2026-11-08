@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Petugas;
 use App\Http\Controllers\Controller;
 use App\Models\AssignmentOfficer;
 use App\Models\OfficerBast;
+use App\Models\OfficerNotice;
 use App\Models\OfficerReport;
 use App\Models\Respondent;
 use App\Models\RespondentBast;
@@ -91,6 +92,13 @@ class DashboardController extends Controller
             ->take(5)
             ->get();
 
+        // 8. Pesan / Notifikasi dari Administrator ke Papan Informasi
+        $officerNotices = OfficerNotice::with('sender')
+            ->where('user_id', $user->id)
+            ->latest()
+            ->take(5)
+            ->get();
+
         return view('petugas.dashboard', compact(
             'user',
             'totalAssignedTasks',
@@ -113,7 +121,8 @@ class DashboardController extends Controller
             'reportsApproved',
             'upcomingSchedules',
             'activeTasks',
-            'recentReports'
+            'recentReports',
+            'officerNotices'
         ));
     }
 }

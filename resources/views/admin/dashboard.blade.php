@@ -265,9 +265,20 @@
                         <span class="fw-bold text-danger" style="font-size: 0.72rem;">
                             <i class="fa-solid fa-triangle-exclamation me-1"></i> Perlu Follow-Up Laporan ({{ $officersWithoutReports->count() }} Petugas):
                         </span>
-                        <a href="{{ route('admin.dashboard', array_merge(request()->query(), ['report_status' => 'not_submitted'])) }}" class="text-primary text-decoration-none" style="font-size: 0.7rem;">
-                            Lihat Semua
-                        </a>
+                        <div class="d-flex align-items-center gap-1.5">
+                            @if($officersWithoutReports->isNotEmpty())
+                                <button type="button" 
+                                        class="btn btn-xs btn-outline-danger py-0.5 px-1.5" 
+                                        style="font-size: 0.68rem;"
+                                        title="Kirim pesan serentak ke papan informasi seluruh petugas yang belum lapor"
+                                        onclick="openSendNoticeModal('all_without_reports', 'Semua Petugas Belum Lapor ({{ $officersWithoutReports->count() }} Orang)', 'report')">
+                                    <i class="fa-solid fa-paper-plane me-1"></i> Ingatkan Semua
+                                </button>
+                            @endif
+                            <a href="{{ route('admin.dashboard', array_merge(request()->query(), ['report_status' => 'not_submitted'])) }}" class="text-primary text-decoration-none" style="font-size: 0.7rem;">
+                                Lihat Semua
+                            </a>
+                        </div>
                     </div>
 
                     <div style="max-height: 140px; overflow-y: auto;">
@@ -280,11 +291,13 @@
                                     </small>
                                 </div>
                                 <div class="flex-shrink-0">
-                                    @if($offWithout->wa_url)
-                                        <a href="{{ $offWithout->wa_url }}" target="_blank" class="btn btn-xs btn-outline-success py-0.5 px-1.5" style="font-size: 0.68rem;" title="Kirim Pengingat WhatsApp">
-                                            <i class="fa-brands fa-whatsapp me-1"></i> Ingatkan
-                                        </a>
-                                    @endif
+                                    <button type="button" 
+                                            class="btn btn-xs btn-primary py-0.5 px-2" 
+                                            style="font-size: 0.68rem;" 
+                                            title="Kirim pesan ke papan informasi petugas" 
+                                            onclick="openSendNoticeModal({{ $offWithout->id }}, '{{ addslashes($offWithout->name) }}', 'report')">
+                                        <i class="fa-solid fa-bullhorn me-1"></i> Ingatkan
+                                    </button>
                                 </div>
                             </div>
                         @empty
@@ -458,25 +471,29 @@
                             <td class="text-end text-nowrap">
                                 <div class="d-inline-flex gap-1 align-items-center">
                                     <button type="button" 
+                                            class="btn btn-xs btn-primary py-1 px-2" 
+                                            style="font-size: 0.72rem;"
+                                            title="Kirim Pesan ke Papan Informasi Petugas"
+                                            onclick="openSendNoticeModal({{ $off->id }}, '{{ addslashes($off->name) }}', '{{ $off->has_report ? 'bast' : 'report' }}', '{{ $off->target }}', '{{ $off->completed }}', '{{ $off->pending }}', '{{ $off->percentage }}')">
+                                        <i class="fa-solid fa-bullhorn me-1"></i> Notif
+                                    </button>
+
+                                    <button type="button" 
                                             class="btn btn-xs btn-outline-secondary py-1 px-1.5" 
                                             style="font-size: 0.72rem;"
                                             title="Lihat Draf Pesan Notifikasi"
-                                            onclick="openReminderModal('{{ addslashes($off->name) }}', '{{ $off->phone ?? '-' }}', '{{ $off->target }}', '{{ $off->completed }}', '{{ $off->pending }}', '{{ $off->percentage }}', '{{ $off->has_report ? 'Sudah Diserahkan' : 'BELUM Diserahkan' }}', '{{ $off->wa_url ?? '' }}')">
+                                            onclick="openReminderModal('{{ $off->id }}', '{{ addslashes($off->name) }}', '{{ $off->phone ?? '-' }}', '{{ $off->target }}', '{{ $off->completed }}', '{{ $off->pending }}', '{{ $off->percentage }}', '{{ $off->has_report ? 'Sudah Diserahkan' : 'BELUM Diserahkan' }}', '{{ $off->wa_url ?? '' }}')">
                                         <i class="fa-regular fa-comment-dots"></i>
                                     </button>
 
                                     @if($off->wa_url)
                                         <a href="{{ $off->wa_url }}" 
                                            target="_blank" 
-                                           class="btn btn-xs btn-success py-1 px-2" 
+                                           class="btn btn-xs btn-outline-success py-1 px-1.5" 
                                            style="font-size: 0.72rem;"
-                                           title="Kirim follow-up WhatsApp">
-                                            <i class="fa-brands fa-whatsapp me-1"></i> WA
-                                        </a>
-                                    @else
-                                        <button class="btn btn-xs btn-light border py-1 px-2 text-muted" style="font-size: 0.72rem;" disabled>
+                                           title="Kirim WhatsApp (Opsional)">
                                             <i class="fa-brands fa-whatsapp"></i>
-                                        </button>
+                                        </a>
                                     @endif
                                 </div>
                             </td>
@@ -583,17 +600,83 @@
                     <div>Salin pesan atau langsung kirimkan via WhatsApp resmi.</div>
                 </div>
             </div>
-            <div class="modal-footer bg-light border-top py-2 px-3 d-flex justify-content-between">
+            <div class="modal-footer bg-light border-top py-2 px-3 d-flex justify-content-between flex-wrap gap-2">
                 <button type="button" class="btn btn-sm btn-outline-secondary" onclick="copyReminderText()">
                     <i class="fa-regular fa-copy me-1"></i> <span id="btnCopyText">Salin Teks</span>
                 </button>
                 <div class="d-flex gap-2">
-                    <button type="button" class="btn btn-sm btn-light" data-bs-dismiss="modal">Tutup</button>
-                    <a href="#" id="modal_wa_direct_link" target="_blank" class="btn btn-sm btn-success">
-                        <i class="fa-brands fa-whatsapp me-1"></i> Kirim WhatsApp
+                    <button type="button" class="btn btn-sm btn-light border" data-bs-dismiss="modal">Tutup</button>
+                    <button type="button" class="btn btn-sm btn-sp-primary" onclick="transferReminderToNoticeBoard()">
+                        <i class="fa-solid fa-bullhorn me-1"></i> Kirim ke Papan Informasi Petugas
+                    </button>
+                    <a href="#" id="modal_wa_direct_link" target="_blank" class="btn btn-sm btn-outline-success">
+                        <i class="fa-brands fa-whatsapp me-1"></i> WhatsApp
                     </a>
                 </div>
             </div>
+        </div>
+    </div>
+</div>
+
+<!-- ==============================================================
+     MODAL KIRIM PESAN KE PAPAN INFORMASI PETUGAS
+     ============================================================== -->
+<div class="modal fade" id="sendOfficerNoticeModal" tabindex="-1" aria-labelledby="sendOfficerNoticeModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content border-0 shadow">
+            <div class="modal-header bg-light border-bottom py-2.5 px-3">
+                <h6 class="modal-title fw-bold text-dark" id="sendOfficerNoticeModalLabel">
+                    <i class="fa-solid fa-bullhorn text-primary me-1.5"></i> Kirim Pesan ke Papan Informasi Petugas
+                </h6>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <form action="{{ route('admin.notices.send') }}" method="POST" id="formSendNotice">
+                @csrf
+                <input type="hidden" name="user_id" id="notice_user_id" value="">
+                <input type="hidden" name="type" id="notice_type" value="report_reminder">
+
+                <div class="modal-body p-3">
+                    <div class="mb-2.5 p-2 rounded bg-light border">
+                        <span class="text-muted small d-block" style="font-size: 0.7rem;">Target Penerima:</span>
+                        <div class="fw-bold text-dark d-flex align-items-center gap-1.5" id="notice_recipient_display">
+                            <!-- Populated by JS -->
+                        </div>
+                    </div>
+
+                    <div class="mb-2.5">
+                        <label class="form-label small fw-bold text-secondary mb-1">JUDUL PEMBERITAHUAN <span class="text-danger">*</span></label>
+                        <input type="text" name="title" id="notice_title" class="form-control form-control-sm" required value="Peringatan: Belum Menyerahkan Laporan Perjalanan Dinas">
+                    </div>
+
+                    <div class="mb-2.5">
+                        <label class="form-label small fw-bold text-secondary mb-1">ISI PESAN (TAMPIL DI TAMPILAN AWAL PETUGAS) <span class="text-danger">*</span></label>
+                        <textarea name="message" id="notice_message" class="form-control form-control-sm font-monospace" rows="4" required placeholder="Tuliskan pesan atau instruksi untuk petugas lapangan..." style="font-size: 0.8rem;"></textarea>
+                        <div class="form-text" style="font-size: 0.7rem;">
+                            <i class="fa-solid fa-circle-info text-primary me-1"></i> Pesan ini akan langsung tampil di kotak <strong>"Informasi Terbaru"</strong> pada beranda HP/layar awal petugas yang bersangkutan.
+                        </div>
+                    </div>
+
+                    <!-- Template Tombol Pilihan Cepat -->
+                    <div class="d-flex gap-1.5 align-items-center flex-wrap pt-1">
+                        <span class="text-muted" style="font-size: 0.68rem;">Pilihan Cepat:</span>
+                        <button type="button" class="btn btn-xs btn-outline-secondary py-0.5 px-1.5" style="font-size: 0.68rem;" onclick="setNoticePreset('report')">
+                            Laporan Perjalanan Dinas
+                        </button>
+                        <button type="button" class="btn btn-xs btn-outline-secondary py-0.5 px-1.5" style="font-size: 0.68rem;" onclick="setNoticePreset('bast')">
+                            BAST Responden
+                        </button>
+                        <button type="button" class="btn btn-xs btn-outline-secondary py-0.5 px-1.5" style="font-size: 0.68rem;" onclick="setNoticePreset('deadline')">
+                            Batas Waktu (Deadline)
+                        </button>
+                    </div>
+                </div>
+                <div class="modal-footer bg-light border-top py-2 px-3 d-flex justify-content-between">
+                    <button type="button" class="btn btn-sm btn-light border" data-bs-dismiss="modal">Batal</button>
+                    <button type="submit" class="btn btn-sm btn-sp-primary" id="btnSubmitNotice">
+                        <i class="fa-solid fa-paper-plane me-1"></i> Kirim ke Papan Informasi Petugas
+                    </button>
+                </div>
+            </form>
         </div>
     </div>
 </div>
@@ -603,11 +686,18 @@
 <!-- Chart.js CDN -->
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 <script>
-    function openReminderModal(name, phone, target, completed, pending, percentage, reportStatus, waUrl) {
+    let currentReminderUserId = null;
+    let currentReminderOfficerName = '';
+    let currentReminderMessage = '';
+
+    function openReminderModal(userId, name, phone, target, completed, pending, percentage, reportStatus, waUrl) {
+        currentReminderUserId = userId;
+        currentReminderOfficerName = name;
         document.getElementById('modal_officer_name').innerText = name;
         document.getElementById('modal_officer_phone').innerText = phone || 'Nomor HP tidak ada';
 
         const message = `Halo Rekan ${name},\n\nMengingatkan terkait progres penugasan SIMPLE Anda saat ini:\n• Target Responden: ${target}\n• BAST Selesai: ${completed} (${percentage}%)\n• Sisa Belum BAST: ${pending}\n• Status Laporan Kegiatan: ${reportStatus}\n\nMohon untuk segera menyelesaikan kunjungan responden & penginputan BAST serta melengkapi Laporan Perjalanan Dinas. Terima kasih.`;
+        currentReminderMessage = message;
 
         document.getElementById('modal_reminder_text').value = message;
 
@@ -622,6 +712,58 @@
 
         const modal = new bootstrap.Modal(document.getElementById('reminderFollowUpModal'));
         modal.show();
+    }
+
+    function transferReminderToNoticeBoard() {
+        const reminderModal = bootstrap.Modal.getInstance(document.getElementById('reminderFollowUpModal'));
+        if (reminderModal) {
+            reminderModal.hide();
+        }
+        openSendNoticeModal(currentReminderUserId, currentReminderOfficerName, 'report');
+        if (currentReminderMessage) {
+            document.getElementById('notice_message').value = currentReminderMessage;
+        }
+    }
+
+    let currentNoticeOfficerName = '';
+    function openSendNoticeModal(userId, officerName, presetType = 'report', target = null, completed = null, pending = null, percentage = null) {
+        currentNoticeOfficerName = officerName;
+        document.getElementById('notice_user_id').value = userId;
+        document.getElementById('notice_recipient_display').innerHTML = `
+            <i class="fa-solid fa-user-circle text-primary"></i>
+            <span>${officerName}</span>
+            ${userId === 'all_without_reports' ? '<span class="badge bg-danger ms-1">Broadcast Massal Seluruh Petugas Belum Lapor</span>' : '<span class="badge bg-light text-dark border ms-1">Papan Informasi Petugas</span>'}
+        `;
+
+        setNoticePreset(presetType, target, completed, pending, percentage);
+
+        const modal = new bootstrap.Modal(document.getElementById('sendOfficerNoticeModal'));
+        modal.show();
+    }
+
+    function setNoticePreset(presetType, target = null, completed = null, pending = null, percentage = null) {
+        const titleInput = document.getElementById('notice_title');
+        const messageInput = document.getElementById('notice_message');
+        const typeInput = document.getElementById('notice_type');
+        const name = currentNoticeOfficerName || 'Petugas Lapangan';
+
+        if (presetType === 'report') {
+            typeInput.value = 'report_reminder';
+            titleInput.value = 'Peringatan: Belum Menyerahkan Laporan Perjalanan Dinas';
+            messageInput.value = `Halo Rekan ${name},\n\nTercatat di sistem bahwa Anda belum menyerahkan Laporan Kegiatan / Perjalanan Dinas. Mohon untuk segera menyusun dan mengirimkan laporan kegiatan dinas lapangan Anda melalui menu Laporan agar dapat diverifikasi oleh admin. Terima kasih.`;
+        } else if (presetType === 'bast') {
+            typeInput.value = 'bast_reminder';
+            titleInput.value = 'Pengingat: Penyelesaian BAST Responden';
+            let detail = '';
+            if (target && completed !== null) {
+                detail = ` (Progres: ${completed}/${target} sampel, ${percentage}%)`;
+            }
+            messageInput.value = `Halo Rekan ${name},\n\nMohon dipercepat proses pendataan dan penerbitan Berita Acara Serah Terima (BAST) responden lapangan Anda${detail}. Pastikan sampel responden yang telah dikunjungi dilengkapi dengan tanda tangan digital resmi. Terima kasih.`;
+        } else if (presetType === 'deadline') {
+            typeInput.value = 'general';
+            titleInput.value = 'Pemberitahuan: Mendekati Batas Akhir (Deadline)';
+            messageInput.value = `Halo Rekan ${name},\n\nMengingatkan bahwa batas waktu kegiatan lapangan sudah semakin dekat. Mohon maksimalkan sisa waktu untuk menyelesaikan seluruh target responden, BAST, dan laporan perjalanan dinas sebelum batas akhir. Terima kasih atas dedikasi dan kerja samanya.`;
+        }
     }
 
     function copyReminderText() {

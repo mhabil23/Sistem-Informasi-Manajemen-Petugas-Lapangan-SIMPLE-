@@ -107,4 +107,9 @@ class User extends Authenticatable
     {
         return $this->hasMany(ActivityLog::class, 'user_id');
     }
+
+    public function officerNotices(): HasMany
+    {
+        return $this->hasMany(OfficerNotice::class, 'user_id');
+    }
 }

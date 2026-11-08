@@ -20,6 +20,66 @@
             </div>
         </div>
 
+        {{-- Pesan Khusus / Notifikasi dari Administrator ke Papan Informasi Petugas --}}
+        @if(isset($officerNotices) && $officerNotices->isNotEmpty())
+            <div class="mb-3">
+                @foreach($officerNotices as $notice)
+                    <div class="p-3 mb-2 rounded-3 border {{ !$notice->is_read ? 'bg-danger-subtle border-danger' : 'bg-light border-secondary-subtle' }} shadow-sm">
+                        <div class="d-flex justify-content-between align-items-start mb-1">
+                            <div class="d-flex align-items-center gap-1.5 flex-wrap">
+                                <span class="badge {{ !$notice->is_read ? 'bg-danger text-white' : 'bg-secondary text-white' }} px-2 py-1" style="font-size: 0.72rem;">
+                                    <i class="fa-solid fa-bullhorn me-1"></i> Pesan dari Administrator
+                                </span>
+                                @if(!$notice->is_read)
+                                    <span class="badge bg-warning text-dark px-1.5 py-0.5" style="font-size: 0.65rem;">
+                                        Baru
+                                    </span>
+                                @endif
+                                <span class="fw-bold text-dark small">{{ $notice->title }}</span>
+                            </div>
+                            <span class="text-muted" style="font-size: 0.68rem;">
+                                <i class="fa-regular fa-clock me-1"></i> {{ $notice->created_at->diffForHumans() }}
+                            </span>
+                        </div>
+                        <div class="text-dark small my-1.5" style="line-height: 1.5; white-space: pre-line;">
+                            {{ $notice->message }}
+                        </div>
+                        <div class="d-flex justify-content-between align-items-center pt-2 mt-2 border-top border-light-subtle">
+                            <div class="d-flex align-items-center gap-2">
+                                @if(str_contains($notice->type, 'report'))
+                                    <a href="{{ route('petugas.reports.index') }}" class="btn btn-xs btn-sp-primary py-1 px-2.5" style="font-size: 0.72rem;">
+                                        <i class="fa-solid fa-clipboard-user me-1"></i> Buka Menu Laporan
+                                    </a>
+                                @elseif(str_contains($notice->type, 'bast'))
+                                    <a href="{{ route('petugas.basts.respondents.index') }}" class="btn btn-xs btn-success py-1 px-2.5" style="font-size: 0.72rem;">
+                                        <i class="fa-solid fa-file-signature me-1"></i> Buka BAST Responden
+                                    </a>
+                                @endif
+                            </div>
+                            <div class="d-flex gap-2 align-items-center">
+                                @if(!$notice->is_read)
+                                    <form action="{{ route('petugas.notices.read', $notice) }}" method="POST" class="d-inline">
+                                        @csrf
+                                        @method('PATCH')
+                                        <button type="submit" class="btn btn-xs btn-outline-secondary py-1 px-2" style="font-size: 0.7rem;" title="Tandai Sudah Dibaca">
+                                            <i class="fa-solid fa-check me-1"></i> Tandai Dibaca
+                                        </button>
+                                    </form>
+                                @endif
+                                <form action="{{ route('petugas.notices.destroy', $notice) }}" method="POST" class="d-inline" onsubmit="return confirm('Hapus pesan ini dari papan informasi?');">
+                                    @csrf
+                                    @method('DELETE')
+                                    <button type="submit" class="btn btn-xs btn-link text-danger p-0" style="font-size: 0.7rem;" title="Hapus Pesan">
+                                        <i class="fa-regular fa-trash-can"></i>
+                                    </button>
+                                </form>
+                            </div>
+                        </div>
+                    </div>
+                @endforeach
+            </div>
+        @endif
+
         <ul class="petugas-notif-list">
             <!-- Bullet 1: Kunjungan / Penugasan & Deadline (Sketsa: Kunjungan 1 dead 15 Jan) -->
             @if($nearestTaskDeadline && $nearestTaskDeadline->assignment)
