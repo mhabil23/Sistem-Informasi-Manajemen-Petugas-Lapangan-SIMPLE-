@@ -294,31 +294,5 @@
             </div>
         </div>
     </div>
-
-                <div class="col-md-7">
-                    <div class="row g-2 text-center">
-                        <div class="col-4">
-                            <div class="p-2 rounded bg-light border">
-                                <div class="fs-6 fw-bold text-primary font-monospace">{{ number_format($totalRespondents) }}</div>
-                                <div class="text-muted" style="font-size: 0.7rem;">Sudah Didata</div>
-                            </div>
-                        </div>
-                        <div class="col-4">
-                            <div class="p-2 rounded bg-light border">
-                                <div class="fs-6 fw-bold text-warning font-monospace">{{ number_format($remainingRespondents) }}</div>
-                                <div class="text-muted" style="font-size: 0.7rem;">Sisa Target</div>
-                            </div>
-                        </div>
-                        <div class="col-4">
-                            <div class="p-2 rounded bg-light border">
-                                <div class="fs-6 fw-bold text-success font-monospace">{{ number_format($totalBasts) }}</div>
-                                <div class="text-muted" style="font-size: 0.7rem;">BAST Sah</div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
 </div>
 @endsection
