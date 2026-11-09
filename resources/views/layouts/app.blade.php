@@ -251,64 +251,12 @@
             <!-- Bottom Application Footer -->
             <footer class="sp-footer py-2.5 px-4 mt-auto border-top bg-white text-muted small d-flex flex-wrap justify-content-between align-items-center" style="font-size: 0.78rem;">
                 <div>
-                    <strong>SIMPLE</strong> &copy; {{ date('Y') }} &mdash; Sistem Informasi Manajemen Pelayanan &amp; Evaluasi Lapangan
+                    <strong>SIMPLE</strong> &copy; {{ date('Y') }} &mdash; Sistem Informasi Manajemen Pelayanan & Evaluasi Lapangan
                 </div>
                 <div class="d-none d-md-block text-secondary">
                     BPS Kabupaten &bull; Portal {{ auth()->user()->isAdmin() ? 'Administrator' : 'Petugas Lapangan' }}
                 </div>
             </footer>
-
-            @if(!auth()->user()->isAdmin())
-                <!-- ==============================================================
-                     MOBILE BOTTOM NAVIGATION BAR (KHUSUS PETUGAS LAPANGAN DI HP)
-                     ============================================================== -->
-                <nav class="sp-bottom-nav d-flex d-lg-none" aria-label="Navigasi Cepat Mobile Petugas">
-                    <!-- 1. Beranda -->
-                    <a href="{{ route('petugas.dashboard') }}" 
-                       class="sp-bottom-nav-item {{ request()->routeIs('petugas.dashboard') ? 'active' : '' }}">
-                        <div class="bottom-nav-icon">
-                            <i class="fa-solid fa-house"></i>
-                        </div>
-                        <span class="bottom-nav-label">Beranda</span>
-                    </a>
-
-                    <!-- 2. BAST Blanko (Kantor -> Petugas) -->
-                    <a href="{{ route('petugas.basts.officers.index', ['type' => 'kantor_ke_petugas']) }}" 
-                       class="sp-bottom-nav-item {{ request()->routeIs('petugas.basts.officers.*') && request('type') === 'kantor_ke_petugas' ? 'active' : '' }}">
-                        <div class="bottom-nav-icon">
-                            <i class="fa-solid fa-boxes-packing"></i>
-                        </div>
-                        <span class="bottom-nav-label">1. Blanko</span>
-                    </a>
-
-                    <!-- 3. BAST Responden (Petugas -> Responden + TTD Digital) -->
-                    <a href="{{ route('petugas.basts.respondents.index') }}" 
-                       class="sp-bottom-nav-item {{ request()->routeIs('petugas.basts.respondents.*') ? 'active' : '' }}">
-                        <div class="bottom-nav-icon">
-                            <i class="fa-solid fa-file-signature"></i>
-                        </div>
-                        <span class="bottom-nav-label">2. Responden</span>
-                    </a>
-
-                    <!-- 4. BAST Terisi (Petugas -> Kantor) -->
-                    <a href="{{ route('petugas.basts.officers.index', ['type' => 'petugas_ke_kantor']) }}" 
-                       class="sp-bottom-nav-item {{ request()->routeIs('petugas.basts.officers.*') && request('type') === 'petugas_ke_kantor' ? 'active' : '' }}">
-                        <div class="bottom-nav-icon">
-                            <i class="fa-solid fa-file-circle-check"></i>
-                        </div>
-                        <span class="bottom-nav-label">3. Terisi</span>
-                    </a>
-
-                    <!-- 5. Laporan Perjadin (SPD) -->
-                    <a href="{{ route('petugas.reports.index') }}" 
-                       class="sp-bottom-nav-item {{ request()->routeIs('petugas.reports.*') ? 'active' : '' }}">
-                        <div class="bottom-nav-icon">
-                            <i class="fa-solid fa-clipboard-user"></i>
-                        </div>
-                        <span class="bottom-nav-label">4. Perjadin</span>
-                    </a>
-                </nav>
-            @endif
         </div>
     </div>
 
