@@ -101,3 +101,4 @@ class NoticeController extends Controller
         return back()->with('success', "Pesan pengingat berhasil dikirim ke papan informasi {$officer->name}!");
     }
 }
+

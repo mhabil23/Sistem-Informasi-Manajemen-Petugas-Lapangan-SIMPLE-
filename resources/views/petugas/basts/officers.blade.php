@@ -1,24 +1,58 @@
 @extends('layouts.app')
 
-@section('title', 'BAST Petugas Lapangan')
-@section('page_title', 'BAST Petugas')
+@section('title', $currentType === 'kantor_ke_petugas' ? 'BAST Blanko & Perlengkapan' : ($currentType === 'petugas_ke_kantor' ? 'BAST Dokumen Terisi' : 'BAST Petugas Lapangan'))
+@section('page_title', $currentType === 'kantor_ke_petugas' ? 'BAST Blanko & Perlengkapan' : ($currentType === 'petugas_ke_kantor' ? 'BAST Dokumen Terisi' : 'BAST Petugas'))
 
 @section('breadcrumb')
     <li class="breadcrumb-item"><a href="{{ route('petugas.dashboard') }}">Petugas</a></li>
-    <li class="breadcrumb-item active" aria-current="page">BAST Petugas</li>
+    <li class="breadcrumb-item active" aria-current="page">
+        {{ $currentType === 'kantor_ke_petugas' ? 'BAST Blanko (Kantor ke Petugas)' : ($currentType === 'petugas_ke_kantor' ? 'BAST Dokumen Terisi (Petugas ke Kantor)' : 'BAST Petugas') }}
+    </li>
 @endsection
 
 @section('content')
 <!-- Header -->
 <div class="row align-items-center mb-4">
     <div class="col-md-7">
-        <h3 class="fw-bold text-dark mb-1">Berita Acara Serah Terima (BAST) Penugasan</h3>
-        <p class="text-muted small mb-0">Arsip dokumen serah terima penyelesaian tugas lapangan kepada koordinator/Administrator kegiatan.</p>
+        @if($currentType === 'kantor_ke_petugas')
+            <h3 class="fw-bold text-dark mb-1">
+                <i class="fa-solid fa-boxes-packing text-primary me-2"></i>BAST Blanko &amp; Perlengkapan
+            </h3>
+            <p class="text-muted small mb-0">Arsip serah terima penerimaan blanko kuesioner dan perlengkapan survei/sensus dari Kantor Satker BPS kepada Petugas Lapangan.</p>
+        @elseif($currentType === 'petugas_ke_kantor')
+            <h3 class="fw-bold text-dark mb-1">
+                <i class="fa-solid fa-file-circle-check text-warning me-2"></i>BAST Dokumen Terisi
+            </h3>
+            <p class="text-muted small mb-0">Arsip serah terima pengembalian berkas dokumen/kuesioner yang telah terisi lengkap hasil pencacahan lapangan kepada Kantor Satker BPS.</p>
+        @else
+            <h3 class="fw-bold text-dark mb-1">Berita Acara Serah Terima (BAST) Penugasan</h3>
+            <p class="text-muted small mb-0">Arsip dokumen serah terima blanko/perlengkapan maupun pengembalian dokumen terisi antara Petugas dan Kantor Satker BPS.</p>
+        @endif
     </div>
     <div class="col-md-5 text-md-end mt-3 mt-md-0">
         <button type="button" class="btn btn-sp-primary" data-bs-toggle="modal" data-bs-target="#createMyOfficerBastModal">
-            <i class="fa-solid fa-file-circle-plus me-1"></i> Buat BAST Penugasan
+            <i class="fa-solid fa-file-circle-plus me-1"></i> Buat BAST Baru
         </button>
+    </div>
+</div>
+
+<!-- Tab Filter BAST Petugas (Sesuai 4 Alur BPS) -->
+<div class="mb-4">
+    <div class="nav nav-pills gap-2 flex-wrap" role="tablist">
+        <a href="{{ route('petugas.basts.officers.index') }}" 
+           class="btn btn-sm {{ empty($currentType) ? 'btn-sp-primary' : 'btn-outline-secondary' }} rounded-pill px-3 py-1.5 fw-semibold">
+            <i class="fa-solid fa-list me-1"></i> Semua BAST ({{ $countBlanko + $countTerisi }})
+        </a>
+        <a href="{{ route('petugas.basts.officers.index', ['type' => 'kantor_ke_petugas']) }}" 
+           class="btn btn-sm {{ $currentType === 'kantor_ke_petugas' ? 'btn-sp-primary' : 'btn-outline-primary' }} rounded-pill px-3 py-1.5 fw-semibold">
+            <i class="fa-solid fa-boxes-packing me-1"></i> 1. Blanko &amp; Perlengkapan (Kantor &rarr; Petugas)
+            <span class="badge bg-primary-subtle text-primary border border-primary-subtle ms-1 font-monospace">{{ $countBlanko }}</span>
+        </a>
+        <a href="{{ route('petugas.basts.officers.index', ['type' => 'petugas_ke_kantor']) }}" 
+           class="btn btn-sm {{ $currentType === 'petugas_ke_kantor' ? 'btn-sp-primary' : 'btn-outline-warning' }} rounded-pill px-3 py-1.5 fw-semibold">
+            <i class="fa-solid fa-file-circle-check me-1"></i> 3. Dokumen Terisi (Petugas &rarr; Kantor)
+            <span class="badge bg-warning-subtle text-warning-emphasis border border-warning-subtle ms-1 font-monospace">{{ $countTerisi }}</span>
+        </a>
     </div>
 </div>
 
@@ -27,7 +61,7 @@
     <div class="sp-card-header d-flex justify-content-between align-items-center">
         <h5 class="sp-card-title mb-0">
             <i class="fa-solid fa-file-shield text-primary"></i>
-            Daftar BAST Penugasan Anda ({{ $basts->total() }})
+            Daftar Dokumen BAST ({{ $basts->total() }})
         </h5>
         <span class="badge bg-primary-subtle text-primary border border-primary-subtle d-md-none" style="font-size: 0.72rem;">
             {{ $basts->total() }} Dokumen
@@ -39,10 +73,11 @@
             <table class="table sp-table align-middle mb-0">
                 <thead>
                     <tr>
-                        <th style="min-width: 220px;">Nomor & Tanggal BAST</th>
-                        <th style="min-width: 220px;">Kegiatan Terkait</th>
-                        <th style="min-width: 250px;">Keterangan Serah Terima</th>
-                        <th class="text-end" style="min-width: 140px;">Aksi</th>
+                        <th style="min-width: 220px;">Nomor &amp; Tanggal BAST</th>
+                        <th style="min-width: 180px;">Jenis Alur BAST</th>
+                        <th style="min-width: 200px;">Kegiatan Terkait</th>
+                        <th style="min-width: 240px;">Keterangan Serah Terima</th>
+                        <th class="text-end" style="min-width: 130px;">Aksi</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -53,14 +88,25 @@
                                 <div class="small text-muted"><i class="fa-regular fa-calendar me-1"></i> {{ $item->bast_date->translatedFormat('d F Y') }}</div>
                             </td>
                             <td>
-                                <span class="small fw-semibold text-dark text-truncate d-block" style="max-width: 240px;">
+                                @if($item->bast_type === 'kantor_ke_petugas' || empty($item->bast_type))
+                                    <span class="badge bg-info-subtle text-info-emphasis border border-info-subtle py-1 px-2" style="font-size: 0.72rem;">
+                                        <i class="fa-solid fa-boxes-packing me-1 text-primary"></i> Kantor &rarr; Petugas (Blanko)
+                                    </span>
+                                @else
+                                    <span class="badge bg-warning-subtle text-warning-emphasis border border-warning-subtle py-1 px-2" style="font-size: 0.72rem;">
+                                        <i class="fa-solid fa-file-circle-check me-1 text-warning"></i> Petugas &rarr; Kantor (Terisi)
+                                    </span>
+                                @endif
+                            </td>
+                            <td>
+                                <span class="small fw-semibold text-dark text-truncate d-block" style="max-width: 200px;">
                                     {{ $item->assignment ? $item->assignment->title : '-' }}
                                 </span>
                                 <small class="text-muted"><i class="fa-solid fa-location-dot me-1 text-danger"></i> {{ $item->assignment ? $item->assignment->location : '-' }}</small>
                             </td>
                             <td>
-                                <div class="small text-secondary text-truncate" style="max-width: 280px;" title="{{ $item->description }}">
-                                    {{ Str::limit($item->description, 50) }}
+                                <div class="small text-secondary text-truncate" style="max-width: 260px;" title="{{ $item->description }}">
+                                    {{ Str::limit($item->description, 55) }}
                                 </div>
                             </td>
                             <td class="text-end text-nowrap">
@@ -83,10 +129,10 @@
                         </tr>
                     @empty
                         <tr>
-                            <td colspan="4" class="text-center py-5 text-muted">
+                            <td colspan="5" class="text-center py-5 text-muted">
                                 <i class="fa-regular fa-folder-open fa-3x mb-3 text-secondary opacity-50"></i>
-                                <div class="fw-semibold">Anda belum menerbitkan BAST Petugas.</div>
-                                <div class="small">Klik tombol "Buat BAST Penugasan" di atas untuk menyerahkan berkas resmi kegiatan.</div>
+                                <div class="fw-semibold">Belum ada dokumen BAST pada kategori ini.</div>
+                                <div class="small">Klik tombol "Buat BAST Baru" di atas untuk menerbitkan dokumen resmi kegiatan.</div>
                             </td>
                         </tr>
                     @endforelse
@@ -104,8 +150,21 @@
                                 <span class="badge bg-light text-dark font-monospace border mb-1" style="font-size: 0.75rem;">
                                     {{ $item->bast_number }}
                                 </span>
+                                @if($item->bast_type === 'kantor_ke_petugas' || empty($item->bast_type))
+                                    <div>
+                                        <span class="badge bg-info-subtle text-info-emphasis border border-info-subtle px-1.5 py-0.5" style="font-size: 0.65rem;">
+                                            <i class="fa-solid fa-boxes-packing me-1"></i> Kantor &rarr; Petugas (Blanko)
+                                        </span>
+                                    </div>
+                                @else
+                                    <div>
+                                        <span class="badge bg-warning-subtle text-warning-emphasis border border-warning-subtle px-1.5 py-0.5" style="font-size: 0.65rem;">
+                                            <i class="fa-solid fa-file-circle-check me-1"></i> Petugas &rarr; Kantor (Terisi)
+                                        </span>
+                                    </div>
+                                @endif
                                 @if($item->assignment)
-                                    <h6 class="fw-bold text-dark mb-0">{{ $item->assignment->title }}</h6>
+                                    <h6 class="fw-bold text-dark mt-1 mb-0">{{ $item->assignment->title }}</h6>
                                     <small class="text-muted"><i class="fa-solid fa-location-dot me-1 text-danger"></i> {{ $item->assignment->location }}</small>
                                 @endif
                             </div>
@@ -135,8 +194,8 @@
                             <span class="text-muted small" style="font-size: 0.75rem;">
                                 <i class="fa-regular fa-calendar me-1"></i> {{ $item->bast_date->translatedFormat('d F Y') }}
                             </span>
-                            <span class="badge bg-warning-subtle text-warning border border-warning-subtle px-2 py-1" style="font-size: 0.72rem;">
-                                <i class="fa-solid fa-file-shield me-1"></i> BAST Petugas
+                            <span class="text-muted small" style="font-size: 0.75rem;">
+                                Status: <strong class="text-success">Sah / Selesai</strong>
                             </span>
                         </div>
                     </div>
@@ -144,7 +203,7 @@
             @empty
                 <div class="text-center py-4 text-muted">
                     <i class="fa-regular fa-folder-open fa-2x mb-2 text-secondary opacity-50"></i>
-                    <div class="fw-semibold small">Anda belum menerbitkan BAST Petugas</div>
+                    <div class="fw-semibold small">Belum ada dokumen BAST pada kategori ini</div>
                 </div>
             @endforelse
         </div>
@@ -163,20 +222,36 @@
 </div>
 
 <!-- ==============================================================
-     MODAL BUAT BAST PETUGAS (PETUGAS)
+     MODAL BUAT BAST PETUGAS (SESUAI 4 ALUR BPS)
      ============================================================== -->
 <div class="modal fade" id="createMyOfficerBastModal" tabindex="-1" aria-labelledby="createMyOfficerBastModalLabel" aria-hidden="true">
     <div class="modal-dialog modal-dialog-centered modal-lg">
         <div class="modal-content border-0 shadow">
             <div class="modal-header bg-light border-bottom">
                 <h5 class="modal-title fw-bold" id="createMyOfficerBastModalLabel">
-                    <i class="fa-solid fa-file-circle-plus text-primary me-2"></i> Buat BAST Penyerahan Tugas
+                    <i class="fa-solid fa-file-circle-plus text-primary me-2"></i> Buat Dokumen BAST
                 </h5>
                 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
             <form method="POST" action="{{ route('petugas.basts.officers.store') }}">
                 @csrf
                 <div class="modal-body p-4">
+                    <!-- Pilihan Alur BAST Resmi BPS -->
+                    <div class="mb-3">
+                        <label class="form-label small fw-semibold text-secondary">JENIS ALUR SERAH TERIMA BAST <span class="text-danger">*</span></label>
+                        <select name="bast_type" id="bastTypeSelect" class="form-select fw-semibold" required onchange="updateBastDescriptionPlaceholder()">
+                            <option value="kantor_ke_petugas" {{ ($currentType === 'kantor_ke_petugas' || empty($currentType)) ? 'selected' : '' }}>
+                                1. BAST Blanko Dokumen dan Perlengkapan (Kantor &rarr; Petugas)
+                            </option>
+                            <option value="petugas_ke_kantor" {{ $currentType === 'petugas_ke_kantor' ? 'selected' : '' }}>
+                                3. BAST Dokumen Terisi &amp; Hasil Pendataan (Petugas &rarr; Kantor)
+                            </option>
+                        </select>
+                        <div class="form-text small" id="bastTypeHelp">
+                            Pilih tahap alur serah terima yang sedang dilaksanakan dengan kantor satker BPS.
+                        </div>
+                    </div>
+
                     <div class="row g-3 mb-3">
                         <div class="col-md-7">
                             <label class="form-label small fw-semibold text-secondary">PILIH KEGIATAN <span class="text-danger">*</span></label>
@@ -194,24 +269,38 @@
                     </div>
 
                     <div class="mb-3">
-                        <label class="form-label small fw-semibold text-secondary">KETERANGAN PENYERAHAN TUGAS & BERKAS <span class="text-danger">*</span></label>
-                        <textarea name="description" class="form-control" rows="3" placeholder="Contoh: Telah menyelesaikan seluruh kunjungan responden lapangan dan menyerahkan bundel formulir kuesioner fisik yang telah terisi lengkap kepada koordinator." required></textarea>
+                        <label class="form-label small fw-semibold text-secondary">RINCIAN DOKUMEN &amp; PERLENGKAPAN YANG DISERAHKAN <span class="text-danger">*</span></label>
+                        <textarea name="description" id="bastDescriptionInput" class="form-control" rows="4" required></textarea>
                     </div>
 
                     <div class="mb-0">
                         <label class="form-label small fw-semibold text-secondary">CATATAN TAMBAHAN (OPSIONAL)</label>
-                        <input type="text" name="notes" class="form-control" placeholder="Catatan kondisi penyerahan...">
+                        <input type="text" name="notes" class="form-control" placeholder="Catatan kondisi dokumen/perlengkapan...">
                     </div>
                 </div>
                 <div class="modal-footer bg-light border-top">
                     <button type="button" class="btn btn-light" data-bs-dismiss="modal">Batal</button>
                     <button type="submit" class="btn btn-sp-primary">
-                        <i class="fa-solid fa-file-pdf me-1"></i> Terbitkan & Download PDF
+                        <i class="fa-solid fa-file-pdf me-1"></i> Terbitkan &amp; Download PDF
                     </button>
                 </div>
             </form>
         </div>
     </div>
 </div>
+
+<script>
+function updateBastDescriptionPlaceholder() {
+    const type = document.getElementById('bastTypeSelect').value;
+    const desc = document.getElementById('bastDescriptionInput');
+    if (type === 'kantor_ke_petugas') {
+        desc.placeholder = "Contoh:\n- Formulir Kuesioner Sensus/Survei Blanko: 120 Eksemplar\n- Buku Pedoman Petugas Pencacah: 1 Buku\n- Tanda Pengenal / ID Card Petugas Lapangan: 1 Buah\n- Rompi / Tas Perlengkapan Dinas BPS: 1 Paket\n- Alat Tulis Kantor (ATK) & Papan Alas: 1 Set";
+    } else {
+        desc.placeholder = "Contoh:\n- Bundel Kuesioner Sensus/Survei yang Telah Terisi Lengkap: 120 Eksemplar\n- Berkas Berita Acara Serah Terima (BAST) Responden Bertanda Tangan: Lengkap\n- Pengembalian Perlengkapan Inventaris Satker (Rompi & Tas Dinas): Kondisi Baik";
+    }
+}
+document.addEventListener('DOMContentLoaded', updateBastDescriptionPlaceholder);
+</script>
+@endsection
 @endsection
 

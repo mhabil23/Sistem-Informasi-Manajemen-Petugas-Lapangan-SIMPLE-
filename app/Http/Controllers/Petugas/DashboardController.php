@@ -59,7 +59,15 @@ class DashboardController extends Controller
 
         // 3. BASTs Created by This Officer
         $totalRespondentBasts = RespondentBast::where('officer_id', $user->id)->count();
-        $totalOfficerBasts = OfficerBast::where('officer_id', $user->id)->count();
+        $totalBlankoBasts = OfficerBast::where('officer_id', $user->id)
+            ->where(function ($q) {
+                $q->where('bast_type', 'kantor_ke_petugas')
+                  ->orWhereNull('bast_type');
+            })->count();
+        $totalTerisiBasts = OfficerBast::where('officer_id', $user->id)
+            ->where('bast_type', 'petugas_ke_kantor')
+            ->count();
+        $totalOfficerBasts = $totalBlankoBasts + $totalTerisiBasts;
         $totalBasts = $totalRespondentBasts + $totalOfficerBasts;
 
         // 4. Report Stats
@@ -115,6 +123,8 @@ class DashboardController extends Controller
             'totalBasts',
             'totalRespondentBasts',
             'totalOfficerBasts',
+            'totalBlankoBasts',
+            'totalTerisiBasts',
             'reportsDraft',
             'reportsSubmitted',
             'reportsRevision',

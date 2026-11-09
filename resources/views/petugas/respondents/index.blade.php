@@ -12,13 +12,18 @@
 <!-- Header -->
 <div class="row align-items-center mb-4">
     <div class="col-md-7">
-        <h3 class="fw-bold text-dark mb-1">Data Responden Lapangan</h3>
-        <p class="text-muted small mb-0">Input dan kelola profil responden yang Anda temui dan verifikasi selama pelaksanaan kegiatan di lapangan.</p>
+        <h3 class="fw-bold text-dark mb-1">
+            <i class="fa-solid fa-house-chimney-user text-primary me-2"></i>Daftar Sampel Ruta (Responden)
+        </h3>
+        <p class="text-muted small mb-0">Daftar sampel rumah tangga (ruta) resmi yang dialokasikan oleh Administrator BPS. Lakukan verifikasi data lapangan dan terbitkan Berita Acara Serah Terima (BAST).</p>
     </div>
-    <div class="col-md-5 text-md-end mt-3 mt-md-0">
-        <button type="button" class="btn btn-sp-primary" data-bs-toggle="modal" data-bs-target="#createMyRespondentModal">
-            <i class="fa-solid fa-user-plus me-1"></i> Input Responden Baru
-        </button>
+    <div class="col-md-5 text-md-end mt-3 mt-md-0 d-flex justify-content-md-end gap-2 align-items-center">
+        <span class="badge bg-primary-subtle text-primary border border-primary-subtle py-2 px-3 fw-semibold d-none d-sm-inline-block">
+            <i class="fa-solid fa-database me-1"></i> Alokasi Sampel BPS
+        </span>
+        <a href="{{ route('petugas.basts.respondents.index') }}" class="btn btn-success shadow-sm">
+            <i class="fa-solid fa-file-signature me-1"></i> Menu BAST Responden
+        </a>
     </div>
 </div>
 
@@ -187,14 +192,21 @@
                             </td>
                             <td class="text-end text-nowrap">
                                 <div class="sp-action-btn-group">
-                                    <!-- Edit -->
+                                    <!-- Verifikasi / Edit Data Lapangan -->
                                     <button type="button" 
                                             class="btn btn-light border sp-action-btn text-warning" 
-                                            title="Edit Data Responden" 
+                                            title="Verifikasi / Update Lapangan" 
                                             data-bs-toggle="tooltip"
                                             onclick="openEditMyRespondentModal({{ json_encode($resp) }})">
                                         <i class="fa-regular fa-pen-to-square"></i>
                                     </button>
+                                    <!-- Shortcut BAST Responden -->
+                                    <a href="{{ route('petugas.basts.respondents.index') }}" 
+                                       class="btn btn-light border sp-action-btn text-success" 
+                                       title="Buka / Terbitkan BAST" 
+                                       data-bs-toggle="tooltip">
+                                        <i class="fa-solid fa-file-signature"></i>
+                                    </a>
                                 </div>
                             </td>
                         </tr>
@@ -204,15 +216,20 @@
                                 <i class="fa-solid fa-users-slash fa-3x mb-3 text-secondary opacity-50"></i>
                                 <div class="fw-semibold">
                                     @if(request('search') || request('assignment_id'))
-                                        Tidak ditemukan data responden yang sesuai dengan filter pencarian.
+                                        Tidak ditemukan data sampel responden yang sesuai dengan filter pencarian.
                                     @else
-                                        Anda belum menginput data responden lapangan.
+                                        Belum ada sampel rumah tangga (ruta) yang dialokasikan oleh Administrator untuk Anda.
                                     @endif
                                 </div>
                                 <div class="small mt-1">
                                     @if(request('search') || request('assignment_id'))
                                         Silakan reset filter atau cari dengan kata kunci lain.
                                     @else
+                                        Daftar sampel responden akan muncul otomatis setelah Administrator Satker BPS mengalokasikan sampel kegiatan kepada akun Anda.
+                                    @endif
+                                </div>
+                            </td>
+                        </tr>
                                         Klik tombol "Input Responden Baru" di atas untuk menambahkan data.
                                     @endif
                                 </div>
@@ -300,9 +317,9 @@
                     <i class="fa-solid fa-users-slash fa-2x mb-2 text-secondary opacity-50"></i>
                     <div class="fw-semibold small">
                         @if(request('search') || request('assignment_id'))
-                            Tidak ada responden sesuai filter pencarian.
+                            Tidak ada sampel responden sesuai filter pencarian.
                         @else
-                            Anda belum menginput data responden.
+                            Belum ada sampel rumah tangga (ruta) yang dialokasikan oleh Administrator untuk Anda.
                         @endif
                     </div>
                 </div>

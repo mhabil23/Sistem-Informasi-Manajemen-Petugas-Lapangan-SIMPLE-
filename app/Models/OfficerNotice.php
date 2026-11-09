@@ -51,3 +51,4 @@ class OfficerNotice extends Model
         return $query->where('is_read', false);
     }
 }
+

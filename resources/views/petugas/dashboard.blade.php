@@ -145,11 +145,37 @@
     </div>
 
     <!-- ==============================================================
-         2. EMPAT TOMBOL MENU UTAMA (SESUAI 4 KOTAK DI SKETSA KERTAS)
-         "Di sini ada empat menu tadi. Empat tombol empat menu ini."
+         2. EMPAT TOMBOL MENU UTAMA (SESUAI 4 ALUR RESMI IBU SITI ROGAYAH BPS)
+         1. BAST blanko dokumen dan perlengkapan dari kantor ke petugas
+         2. BAST blanko dokumen dan perlengkapan petugas ke responden
+         3. BAST dokumen terisi dari petugas ke kantor
+         4. Pengisian laporan perjadin
          ============================================================== -->
     <div class="row g-3 mb-4">
-        <!-- Tombol 1: BAST Responden (Sketsa: BAST respon) -->
+        <!-- Tombol 1: BAST Blanko Dokumen & Perlengkapan (Kantor ke Petugas) -->
+        <div class="col-xl-3 col-sm-6">
+            <a href="{{ route('petugas.basts.officers.index', ['type' => 'kantor_ke_petugas']) }}" class="petugas-sketch-btn btn-respondent">
+                <div class="sketch-btn-content">
+                    <div class="sketch-btn-icon" style="background: #e0f2fe; color: #0284c7;">
+                        <i class="fa-solid fa-boxes-packing"></i>
+                    </div>
+                    <div class="sketch-btn-text">
+                        <div class="d-flex align-items-center gap-1.5">
+                            <span class="sketch-btn-title">BAST Blanko &amp; Alat</span>
+                        </div>
+                        <div class="sketch-btn-sub">Kantor &rarr; Petugas (Logistik)</div>
+                        <span class="badge bg-primary-subtle text-primary border border-primary-subtle mt-1 font-monospace" style="font-size: 0.68rem;">
+                            {{ $totalBlankoBasts }} Dokumen Sah
+                        </span>
+                    </div>
+                </div>
+                <div class="sketch-btn-arrow">
+                    <i class="fa-solid fa-chevron-right"></i>
+                </div>
+            </a>
+        </div>
+
+        <!-- Tombol 2: BAST Responden (Petugas ke Responden + TTD Digital) -->
         <div class="col-xl-3 col-sm-6">
             <a href="{{ route('petugas.basts.respondents.index') }}" class="petugas-sketch-btn btn-bast-resp">
                 <div class="sketch-btn-content">
@@ -160,7 +186,7 @@
                         <div class="d-flex align-items-center gap-1.5">
                             <span class="sketch-btn-title">BAST Responden</span>
                         </div>
-                        <div class="sketch-btn-sub">Penerbitan BAST &amp; TTD Digital</div>
+                        <div class="sketch-btn-sub">Petugas &rarr; Responden (TTD Digital)</div>
                         <span class="badge bg-success-subtle text-success border border-success-subtle mt-1 font-monospace" style="font-size: 0.68rem;">
                             {{ $totalRespondentBasts }} Dokumen Terbit
                         </span>
@@ -172,43 +198,20 @@
             </a>
         </div>
 
-        <!-- Tombol 2: Data Responden -->
+        <!-- Tombol 3: BAST Dokumen Terisi (Petugas ke Kantor) -->
         <div class="col-xl-3 col-sm-6">
-            <a href="{{ route('petugas.respondents.index') }}" class="petugas-sketch-btn btn-respondent">
-                <div class="sketch-btn-content">
-                    <div class="sketch-btn-icon" style="background: #e0f2fe; color: #0284c7;">
-                        <i class="fa-solid fa-users"></i>
-                    </div>
-                    <div class="sketch-btn-text">
-                        <div class="d-flex align-items-center gap-1.5">
-                            <span class="sketch-btn-title">Data Responden</span>
-                        </div>
-                        <div class="sketch-btn-sub">Daftar sampel &amp; entri responden</div>
-                        <span class="badge bg-primary-subtle text-primary border border-primary-subtle mt-1 font-monospace" style="font-size: 0.68rem;">
-                            {{ $totalRespondents }} / {{ $targetRespondents }} Selesai
-                        </span>
-                    </div>
-                </div>
-                <div class="sketch-btn-arrow">
-                    <i class="fa-solid fa-chevron-right"></i>
-                </div>
-            </a>
-        </div>
-
-        <!-- Tombol 3: BAST Petugas -->
-        <div class="col-xl-3 col-sm-6">
-            <a href="{{ route('petugas.basts.officers.index') }}" class="petugas-sketch-btn btn-bast-off">
+            <a href="{{ route('petugas.basts.officers.index', ['type' => 'petugas_ke_kantor']) }}" class="petugas-sketch-btn btn-bast-off">
                 <div class="sketch-btn-content">
                     <div class="sketch-btn-icon" style="background: #fef3c7; color: #d97706;">
-                        <i class="fa-solid fa-file-shield"></i>
+                        <i class="fa-solid fa-file-circle-check"></i>
                     </div>
                     <div class="sketch-btn-text">
                         <div class="d-flex align-items-center gap-1.5">
-                            <span class="sketch-btn-title">BAST Petugas</span>
+                            <span class="sketch-btn-title">BAST Dokumen Terisi</span>
                         </div>
-                        <div class="sketch-btn-sub">Serah terima berkas lapangan</div>
+                        <div class="sketch-btn-sub">Petugas &rarr; Kantor (Hasil Sensus)</div>
                         <span class="badge bg-warning-subtle text-warning-emphasis border border-warning-subtle mt-1 font-monospace" style="font-size: 0.68rem;">
-                            {{ $totalOfficerBasts }} Dokumen Sah
+                            {{ $totalTerisiBasts }} Dokumen Sah
                         </span>
                     </div>
                 </div>
@@ -218,18 +221,18 @@
             </a>
         </div>
 
-        <!-- Tombol 4: Laporan Kegiatan / Perjalanan Dinas -->
+        <!-- Tombol 4: Pengisian Laporan Perjalanan Dinas (Perjadin) -->
         <div class="col-xl-3 col-sm-6">
             <a href="{{ route('petugas.reports.index') }}" class="petugas-sketch-btn btn-report">
                 <div class="sketch-btn-content">
                     <div class="sketch-btn-icon" style="background: #ede9fe; color: #7c3aed;">
-                        <i class="fa-solid fa-clipboard-check"></i>
+                        <i class="fa-solid fa-clipboard-user"></i>
                     </div>
                     <div class="sketch-btn-text">
                         <div class="d-flex align-items-center gap-1.5">
-                            <span class="sketch-btn-title">Laporan Kegiatan</span>
+                            <span class="sketch-btn-title">Laporan Perjadin</span>
                         </div>
-                        <div class="sketch-btn-sub">Laporan perjalanan &amp; auto PDF</div>
+                        <div class="sketch-btn-sub">SPD &amp; Dokumentasi Kegiatan</div>
                         <span class="badge {{ $reportsRevision > 0 ? 'bg-danger text-white' : ($reportsApproved > 0 ? 'bg-success-subtle text-success border border-success-subtle' : 'bg-secondary-subtle text-secondary border') }} mt-1" style="font-size: 0.68rem;">
                             {{ $reportsRevision > 0 ? $reportsRevision . ' Perlu Revisi' : ($reportsApproved > 0 ? $reportsApproved . ' Disetujui' : 'Draft / Buat') }}
                         </span>
@@ -259,7 +262,38 @@
                     <div class="progress" style="height: 8px; border-radius: 999px;">
                         <div class="progress-bar {{ $progressPercentage >= 100 ? 'bg-success' : 'bg-primary' }}" style="width: {{ max(4, $progressPercentage) }}%;"></div>
                     </div>
+                    <div class="mt-2">
+                        <a href="{{ route('petugas.respondents.index') }}" class="btn btn-xs btn-outline-primary py-1 px-2.5 rounded-pill" style="font-size: 0.75rem;">
+                            <i class="fa-solid fa-users-viewfinder me-1"></i> Buka Daftar Sampel Ruta Saya &rarr;
+                        </a>
+                    </div>
                 </div>
+
+                <div class="col-md-7">
+                    <div class="row g-2 text-center">
+                        <div class="col-4">
+                            <div class="p-2 rounded bg-light border">
+                                <div class="fs-6 fw-bold text-primary font-monospace">{{ number_format($totalRespondents) }}</div>
+                                <div class="text-muted" style="font-size: 0.7rem;">Sudah Didata</div>
+                            </div>
+                        </div>
+                        <div class="col-4">
+                            <div class="p-2 rounded bg-light border">
+                                <div class="fs-6 fw-bold text-warning font-monospace">{{ number_format($remainingRespondents) }}</div>
+                                <div class="text-muted" style="font-size: 0.7rem;">Sisa Target</div>
+                            </div>
+                        </div>
+                        <div class="col-4">
+                            <div class="p-2 rounded bg-light border">
+                                <div class="fs-6 fw-bold text-success font-monospace">{{ number_format($totalBasts) }}</div>
+                                <div class="text-muted" style="font-size: 0.7rem;">BAST Sah</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
 
                 <div class="col-md-7">
                     <div class="row g-2 text-center">

@@ -54,3 +54,4 @@ class NoticeController extends Controller
         return back()->with('success', 'Pesan telah dihapus dari papan informasi.');
     }
 }
+

@@ -64,10 +64,11 @@
             <table class="table sp-table align-middle">
                 <thead>
                     <tr>
-                        <th style="min-width: 220px;">Nomor & Tanggal BAST</th>
-                        <th style="min-width: 200px;">Petugas Lapangan</th>
-                        <th style="min-width: 220px;">Kegiatan Terkait</th>
-                        <th style="min-width: 250px;">Keterangan Serah Terima</th>
+                        <th style="min-width: 220px;">Nomor &amp; Tanggal BAST</th>
+                        <th style="min-width: 170px;">Alur BAST</th>
+                        <th style="min-width: 180px;">Petugas Lapangan</th>
+                        <th style="min-width: 200px;">Kegiatan Terkait</th>
+                        <th style="min-width: 240px;">Keterangan Serah Terima</th>
                         <th class="text-end" style="min-width: 140px;">Unduh / Cetak</th>
                     </tr>
                 </thead>
@@ -77,6 +78,17 @@
                             <td>
                                 <div class="fw-bold text-dark font-monospace">{{ $item->bast_number }}</div>
                                 <div class="small text-muted"><i class="fa-regular fa-calendar me-1"></i> {{ $item->bast_date->translatedFormat('d F Y') }}</div>
+                            </td>
+                            <td>
+                                @if($item->bast_type === 'kantor_ke_petugas' || empty($item->bast_type))
+                                    <span class="badge bg-info-subtle text-info-emphasis border border-info-subtle py-1 px-2" style="font-size: 0.72rem;">
+                                        <i class="fa-solid fa-boxes-packing me-1 text-primary"></i> Kantor &rarr; Petugas (Blanko)
+                                    </span>
+                                @else
+                                    <span class="badge bg-warning-subtle text-warning-emphasis border border-warning-subtle py-1 px-2" style="font-size: 0.72rem;">
+                                        <i class="fa-solid fa-file-circle-check me-1 text-warning"></i> Petugas &rarr; Kantor (Terisi)
+                                    </span>
+                                @endif
                             </td>
                             <td>
                                 <div class="fw-bold text-dark">{{ $item->officer ? $item->officer->name : '-' }}</div>
@@ -167,6 +179,14 @@
             <form method="POST" action="{{ route('admin.basts.officers.store') }}">
                 @csrf
                 <div class="modal-body p-4">
+                    <div class="mb-3">
+                        <label class="form-label small fw-semibold text-secondary">JENIS ALUR SERAH TERIMA BAST <span class="text-danger">*</span></label>
+                        <select name="bast_type" class="form-select fw-semibold" required>
+                            <option value="kantor_ke_petugas">1. BAST Blanko Dokumen dan Perlengkapan (Kantor &rarr; Petugas)</option>
+                            <option value="petugas_ke_kantor">3. BAST Dokumen Terisi &amp; Berkas Hasil Sensus (Petugas &rarr; Kantor)</option>
+                        </select>
+                    </div>
+
                     <div class="row g-3 mb-3">
                         <div class="col-md-6">
                             <label class="form-label small fw-semibold text-secondary">PILIH KEGIATAN PENUGASAN <span class="text-danger">*</span></label>

@@ -180,39 +180,64 @@ class BastController extends Controller
     public function officers(Request $request)
     {
         $userId = Auth::id();
+        $currentType = $request->query('type'); // 'kantor_ke_petugas', 'petugas_ke_kantor', or null
 
-        $basts = OfficerBast::with(['assignment'])
-            ->where('officer_id', $userId)
-            ->latest('bast_date')
-            ->paginate(10);
+        $query = OfficerBast::with(['assignment'])
+            ->where('officer_id', $userId);
+
+        if ($currentType === 'kantor_ke_petugas') {
+            $query->where(function ($q) {
+                $q->where('bast_type', 'kantor_ke_petugas')
+                  ->orWhereNull('bast_type');
+            });
+        } elseif ($currentType === 'petugas_ke_kantor') {
+            $query->where('bast_type', 'petugas_ke_kantor');
+        }
+
+        $basts = $query->latest('bast_date')->paginate(10)->withQueryString();
+
+        $countBlanko = OfficerBast::where('officer_id', $userId)
+            ->where(function ($q) {
+                $q->where('bast_type', 'kantor_ke_petugas')
+                  ->orWhereNull('bast_type');
+            })->count();
+
+        $countTerisi = OfficerBast::where('officer_id', $userId)
+            ->where('bast_type', 'petugas_ke_kantor')
+            ->count();
 
         $myAssignmentIds = AssignmentOfficer::where('user_id', $userId)->pluck('assignment_id');
         $myAssignments = Assignment::whereIn('id', $myAssignmentIds)->get();
 
-        return view('petugas.basts.officers', compact('basts', 'myAssignments'));
+        return view('petugas.basts.officers', compact('basts', 'myAssignments', 'currentType', 'countBlanko', 'countTerisi'));
     }
 
     public function storeOfficer(Request $request)
     {
         $validated = $request->validate([
             'assignment_id' => ['required', 'exists:assignments,id'],
+            'bast_type' => ['required', Rule::in(['kantor_ke_petugas', 'petugas_ke_kantor'])],
             'bast_date' => ['required', 'date'],
             'description' => ['required', 'string'],
             'notes' => ['nullable', 'string', 'max:500'],
         ], [
             'assignment_id.required' => 'Kegiatan wajib dipilih.',
+            'bast_type.required' => 'Jenis BAST wajib dipilih.',
             'bast_date.required' => 'Tanggal BAST wajib diisi.',
-            'description.required' => 'Keterangan penyerahan berkas tugas wajib diisi.',
+            'description.required' => 'Rincian serah terima dokumen/perlengkapan wajib diisi.',
         ]);
 
         $year = now()->format('Y');
         $romanMonths = ['I','II','III','IV','V','VI','VII','VIII','IX','X','XI','XII'];
         $month = $romanMonths[now()->month - 1];
         $count = OfficerBast::whereYear('created_at', now()->year)->count() + 1;
-        $bastNumber = sprintf('BAST-PETUGAS/%s/%s/%04d', $year, $month, $count);
+
+        $prefix = $validated['bast_type'] === 'kantor_ke_petugas' ? 'BAST-BLANKO' : 'BAST-TERISI';
+        $bastNumber = sprintf('%s/%s/%s/%04d', $prefix, $year, $month, $count);
 
         $bast = OfficerBast::create([
             'bast_number' => $bastNumber,
+            'bast_type' => $validated['bast_type'],
             'bast_date' => $validated['bast_date'],
             'assignment_id' => $validated['assignment_id'],
             'officer_id' => Auth::id(),
@@ -225,6 +250,7 @@ class BastController extends Controller
             $this->sheetService->insert('officer_basts', [
                 'id' => $bast->id,
                 'bast_number' => $bast->bast_number,
+                'bast_type' => $bast->bast_type,
                 'bast_date' => $bast->bast_date->toDateString(),
                 'assignment_id' => $bast->assignment_id,
                 'officer_id' => $bast->officer_id,
@@ -236,14 +262,16 @@ class BastController extends Controller
             ]);
         }
 
+        $typeText = $bast->bast_type === 'kantor_ke_petugas' ? 'BAST Blanko & Perlengkapan' : 'BAST Dokumen Terisi';
+
         ActivityLog::log(
             'create',
             'basts',
-            "Petugas " . Auth::user()->name . " menerbitkan BAST Petugas {$bast->bast_number}."
+            "Petugas " . Auth::user()->name . " menerbitkan {$typeText} {$bast->bast_number}."
         );
 
-        return redirect()->route('petugas.basts.officers.index')
-            ->with('success', "BAST Petugas '{$bast->bast_number}' berhasil dibuat!");
+        return redirect()->route('petugas.basts.officers.index', ['type' => $bast->bast_type])
+            ->with('success', "{$typeText} '{$bast->bast_number}' berhasil dibuat!");
     }
 
     public function downloadOfficerPdf(OfficerBast $bast)

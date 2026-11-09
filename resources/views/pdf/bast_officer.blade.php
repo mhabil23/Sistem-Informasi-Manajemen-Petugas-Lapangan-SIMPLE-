@@ -143,66 +143,134 @@
 
     <!-- JUDUL DOKUMEN -->
     <div class="doc-title">
-        <h3>BERITA ACARA SERAH TERIMA PENUGASAN PETUGAS</h3>
-        <p>Nomor: <strong>{{ $bast->bast_number }}</strong></p>
+        @if($bast->bast_type === 'kantor_ke_petugas')
+            <h3>BERITA ACARA SERAH TERIMA BLANKO DOKUMEN DAN PERLENGKAPAN</h3>
+            <p style="font-size: 9.5pt; font-weight: bold; color: #444; margin-top: 2px;">(DISTRIBUSI LOGISTIK SENSUS / SURVEI DARI KANTOR SATKER KE PETUGAS LAPANGAN)</p>
+        @else
+            <h3>BERITA ACARA SERAH TERIMA DOKUMEN TERISI DAN PENYELESAIAN TUGAS</h3>
+            <p style="font-size: 9.5pt; font-weight: bold; color: #444; margin-top: 2px;">(PENYERAHAN BERKAS HASIL PENCACAHAN DARI PETUGAS LAPANGAN KE KANTOR SATKER)</p>
+        @endif
+        <p style="margin-top: 4px;">Nomor: <strong>{{ $bast->bast_number }}</strong></p>
     </div>
 
     <p style="text-align: justify;">
-        Pada hari ini, <strong>{{ $bast->bast_date->translatedFormat('l') }}</strong> tanggal <strong>{{ $bast->bast_date->translatedFormat('d F Y') }}</strong>, bertempat di Kantor Wilayah SIMPLE, telah dilaksanakan serah terima hasil penugasan lapangan antara:
+        Pada hari ini, <strong>{{ $bast->bast_date->translatedFormat('l') }}</strong> tanggal <strong>{{ $bast->bast_date->translatedFormat('d F Y') }}</strong>, bertempat di Kantor Satuan Kerja SIMPLE / BPS, telah dilaksanakan serah terima {{ $bast->bast_type === 'kantor_ke_petugas' ? 'blanko dokumen dan perlengkapan lapangan' : 'dokumen kuesioner yang telah terisi lengkap hasil pendataan lapangan' }} antara pihak-pihak sebagai berikut:
     </p>
 
-    <!-- PIHAK PERTAMA -->
-    <table class="content-table">
-        <tr>
-            <td class="label-col"><strong>Nama Petugas</strong></td>
-            <td class="sep-col">:</td>
-            <td class="val-col"><strong>{{ $bast->officer->name }}</strong></td>
-        </tr>
-        <tr>
-            <td class="label-col">Username / NIP</td>
-            <td class="sep-col">:</td>
-            <td class="val-col">{{ $bast->officer->username }}</td>
-        </tr>
-        <tr>
-            <td class="label-col">Nomor Telepon</td>
-            <td class="sep-col">:</td>
-            <td class="val-col">{{ $bast->officer->phone ?? '-' }}</td>
-        </tr>
-        <tr>
-            <td class="label-col">Jabatan</td>
-            <td class="sep-col">:</td>
-            <td class="val-col">Petugas Lapangan Terpilih</td>
-        </tr>
-    </table>
-    <p style="margin: 0 0 10px 0; font-size: 10pt; font-style: italic;">
-        Selanjutnya disebut sebagai <strong>PIHAK PERTAMA (Petugas Lapangan)</strong>.
-    </p>
+    @if($bast->bast_type === 'kantor_ke_petugas')
+        <!-- KANTOR KE PETUGAS: Pihak Pertama adalah Kantor Satker, Pihak Kedua adalah Petugas Lapangan -->
+        <!-- PIHAK PERTAMA (KANTOR / SATKER BPS) -->
+        <table class="content-table">
+            <tr>
+                <td class="label-col"><strong>Nama Instansi / Satker</strong></td>
+                <td class="sep-col">:</td>
+                <td class="val-col"><strong>Badan Pusat Statistik (BPS) / Satker SIMPLE</strong></td>
+            </tr>
+            <tr>
+                <td class="label-col">Koordinator / Petugas Logistik</td>
+                <td class="sep-col">:</td>
+                <td class="val-col">Koordinator Administrasi Logistik Satker</td>
+            </tr>
+            <tr>
+                <td class="label-col">Kegiatan Penugasan</td>
+                <td class="sep-col">:</td>
+                <td class="val-col"><strong>{{ $bast->assignment->title ?? 'Kegiatan Lapangan Terkait' }}</strong></td>
+            </tr>
+            <tr>
+                <td class="label-col">Wilayah Tugas</td>
+                <td class="sep-col">:</td>
+                <td class="val-col">{{ $bast->assignment->location ?? '-' }}</td>
+            </tr>
+        </table>
+        <p style="margin: 0 0 10px 0; font-size: 10pt; font-style: italic;">
+            Selanjutnya disebut sebagai <strong>PIHAK PERTAMA (Yang Menyerahkan Blanko &amp; Perlengkapan)</strong>.
+        </p>
 
-    <!-- PIHAK KEDUA -->
-    <table class="content-table">
-        <tr>
-            <td class="label-col"><strong>Koordinator / Admin</strong></td>
-            <td class="sep-col">:</td>
-            <td class="val-col"><strong>Koordinator Administrasi SIMPLE</strong></td>
-        </tr>
-        <tr>
-            <td class="label-col">Kegiatan Terkait</td>
-            <td class="sep-col">:</td>
-            <td class="val-col"><strong>{{ $bast->assignment->title }}</strong></td>
-        </tr>
-        <tr>
-            <td class="label-col">Lokasi Pelaksanaan</td>
-            <td class="sep-col">:</td>
-            <td class="val-col">{{ $bast->assignment->location }}</td>
-        </tr>
-    </table>
-    <p style="margin: 0 0 10px 0; font-size: 10pt; font-style: italic;">
-        Selanjutnya disebut sebagai <strong>PIHAK KEDUA (Penerima Berkas / Koordinator)</strong>.
-    </p>
+        <!-- PIHAK KEDUA (PETUGAS LAPANGAN) -->
+        <table class="content-table">
+            <tr>
+                <td class="label-col"><strong>Nama Petugas Lapangan</strong></td>
+                <td class="sep-col">:</td>
+                <td class="val-col"><strong>{{ $bast->officer->name }}</strong></td>
+            </tr>
+            <tr>
+                <td class="label-col">Username / ID Petugas</td>
+                <td class="sep-col">:</td>
+                <td class="val-col">{{ $bast->officer->username }}</td>
+            </tr>
+            <tr>
+                <td class="label-col">Nomor HP / WhatsApp</td>
+                <td class="sep-col">:</td>
+                <td class="val-col">{{ $bast->officer->phone ?? '-' }}</td>
+            </tr>
+            <tr>
+                <td class="label-col">Peran / Jabatan</td>
+                <td class="sep-col">:</td>
+                <td class="val-col">Petugas Pencacah Lapangan (PCL / Mitra)</td>
+            </tr>
+        </table>
+        <p style="margin: 0 0 10px 0; font-size: 10pt; font-style: italic;">
+            Selanjutnya disebut sebagai <strong>PIHAK KEDUA (Yang Menerima Blanko &amp; Perlengkapan)</strong>.
+        </p>
 
-    <p style="text-align: justify; margin-top: 15px;">
-        Dengan ini menyatakan bahwa PIHAK PERTAMA telah menyelesaikan kewajiban tugas lapangan dan menyerahkan bundel berkas hasil pendataan kegiatan kepada PIHAK KEDUA dengan uraian keterangan sebagai berikut:
-    </p>
+        <p style="text-align: justify; margin-top: 15px;">
+            Dengan ini menyatakan bahwa PIHAK PERTAMA telah menyerahkan paket perlengkapan pendataan dan blanko dokumen survei/sensus kepada PIHAK KEDUA dalam kondisi baik dan lengkap, dengan rincian serah terima sebagai berikut:
+        </p>
+    @else
+        <!-- PETUGAS KE KANTOR: Pihak Pertama adalah Petugas Lapangan, Pihak Kedua adalah Kantor Satker -->
+        <!-- PIHAK PERTAMA (PETUGAS LAPANGAN) -->
+        <table class="content-table">
+            <tr>
+                <td class="label-col"><strong>Nama Petugas Lapangan</strong></td>
+                <td class="sep-col">:</td>
+                <td class="val-col"><strong>{{ $bast->officer->name }}</strong></td>
+            </tr>
+            <tr>
+                <td class="label-col">Username / ID Petugas</td>
+                <td class="sep-col">:</td>
+                <td class="val-col">{{ $bast->officer->username }}</td>
+            </tr>
+            <tr>
+                <td class="label-col">Nomor HP / WhatsApp</td>
+                <td class="sep-col">:</td>
+                <td class="val-col">{{ $bast->officer->phone ?? '-' }}</td>
+            </tr>
+            <tr>
+                <td class="label-col">Peran / Jabatan</td>
+                <td class="sep-col">:</td>
+                <td class="val-col">Petugas Pencacah Lapangan (PCL / Mitra)</td>
+            </tr>
+        </table>
+        <p style="margin: 0 0 10px 0; font-size: 10pt; font-style: italic;">
+            Selanjutnya disebut sebagai <strong>PIHAK PERTAMA (Yang Menyerahkan Dokumen Terisi)</strong>.
+        </p>
+
+        <!-- PIHAK KEDUA (KANTOR / SATKER BPS) -->
+        <table class="content-table">
+            <tr>
+                <td class="label-col"><strong>Penerima / Koordinator Satker</strong></td>
+                <td class="sep-col">:</td>
+                <td class="val-col"><strong>Koordinator Pengawas Administrasi Satker</strong></td>
+            </tr>
+            <tr>
+                <td class="label-col">Kegiatan Penugasan</td>
+                <td class="sep-col">:</td>
+                <td class="val-col"><strong>{{ $bast->assignment->title ?? 'Kegiatan Lapangan Terkait' }}</strong></td>
+            </tr>
+            <tr>
+                <td class="label-col">Wilayah Tugas</td>
+                <td class="sep-col">:</td>
+                <td class="val-col">{{ $bast->assignment->location ?? '-' }}</td>
+            </tr>
+        </table>
+        <p style="margin: 0 0 10px 0; font-size: 10pt; font-style: italic;">
+            Selanjutnya disebut sebagai <strong>PIHAK KEDUA (Yang Menerima Dokumen Terisi)</strong>.
+        </p>
+
+        <p style="text-align: justify; margin-top: 15px;">
+            Dengan ini menyatakan bahwa PIHAK PERTAMA telah menyelesaikan seluruh kewajiban pencacahan lapangan dan menyerahkan bundel kuesioner/dokumen yang telah terisi lengkap beserta perlengkapan tugas kepada PIHAK KEDUA dengan rincian serah terima sebagai berikut:
+        </p>
+    @endif
 
     <div class="items-box">
 {{ $bast->description }}
@@ -210,31 +278,48 @@
 
     @if($bast->notes)
         <p style="font-size: 10pt; margin: 8px 0;">
-            <strong>Catatan Pengawas:</strong> {{ $bast->notes }}
+            <strong>Catatan Pengawas / Administrasi:</strong> {{ $bast->notes }}
         </p>
     @endif
 
     <p style="text-align: justify;">
-        Demikian Berita Acara ini dibuat rangkap 2 (dua) yang masing-masing mempunyai kekuatan hukum yang sama untuk digunakan sebagai bukti penyelesaian kewajiban penugasan administrasi.
+        Demikian Berita Acara ini dibuat dan ditandatangani dengan sebenarnya untuk dipergunakan sebagaimana mestinya sebagai bukti sah serah terima administrasi kegiatan.
     </p>
 
     <!-- TANDA TANGAN -->
     <table class="signature-table">
         <tr>
-            <td class="signature-col">
-                <div>PIHAK PERTAMA,</div>
-                <div style="font-size: 9.5pt;">Petugas Lapangan</div>
-                <div class="sign-space"></div>
-                <div class="signer-name">{{ $bast->officer->name }}</div>
-                <div class="signer-title">ID: {{ $bast->officer->username }}</div>
-            </td>
-            <td class="signature-col">
-                <div>PIHAK KEDUA,</div>
-                <div style="font-size: 9.5pt;">Koordinator Pengawas Lapangan</div>
-                <div class="sign-space"></div>
-                <div class="signer-name">Koordinator Wilayah</div>
-                <div class="signer-title">Portal Administrasi SIMPLE</div>
-            </td>
+            @if($bast->bast_type === 'kantor_ke_petugas')
+                <td class="signature-col">
+                    <div>PIHAK PERTAMA,</div>
+                    <div style="font-size: 9.5pt;">Pengelola Logistik Satker BPS</div>
+                    <div class="sign-space"></div>
+                    <div class="signer-name">Koordinator Logistik BPS</div>
+                    <div class="signer-title">NIP. Satuan Kerja BPS</div>
+                </td>
+                <td class="signature-col">
+                    <div>PIHAK KEDUA,</div>
+                    <div style="font-size: 9.5pt;">Petugas Lapangan Penerima</div>
+                    <div class="sign-space"></div>
+                    <div class="signer-name">{{ $bast->officer->name }}</div>
+                    <div class="signer-title">ID Petugas: {{ $bast->officer->username }}</div>
+                </td>
+            @else
+                <td class="signature-col">
+                    <div>PIHAK PERTAMA,</div>
+                    <div style="font-size: 9.5pt;">Petugas Lapangan Yang Menyerahkan</div>
+                    <div class="sign-space"></div>
+                    <div class="signer-name">{{ $bast->officer->name }}</div>
+                    <div class="signer-title">ID Petugas: {{ $bast->officer->username }}</div>
+                </td>
+                <td class="signature-col">
+                    <div>PIHAK KEDUA,</div>
+                    <div style="font-size: 9.5pt;">Penerima Berkas Satker BPS</div>
+                    <div class="sign-space"></div>
+                    <div class="signer-name">Koordinator Wilayah</div>
+                    <div class="signer-title">Administrasi Satuan Kerja BPS</div>
+                </td>
+            @endif
         </tr>
     </table>
 

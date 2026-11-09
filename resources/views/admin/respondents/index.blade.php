@@ -12,8 +12,10 @@
 <!-- Header & Quick Actions -->
 <div class="row align-items-center mb-3">
     <div class="col-md-7">
-        <h4 class="fw-bold text-dark mb-1">Data Responden Lapangan</h4>
-        <p class="text-muted small mb-0">Kelola basis data responden, profil instansi/pelaku usaha, alamat wilayah, serta histori penerbitan Berita Acara Serah Terima (BAST).</p>
+        <h4 class="fw-bold text-dark mb-1">
+            <i class="fa-solid fa-house-chimney-user text-primary me-2"></i>Data Sampel Ruta (Responden)
+        </h4>
+        <p class="text-muted small mb-0">Kelola master sampel rumah tangga (ruta), nama Kepala Keluarga (KRT), alokasi penugasan ke petugas lapangan, serta histori penerbitan Berita Acara Serah Terima (BAST).</p>
     </div>
     <div class="col-md-5 text-md-end mt-2 mt-md-0">
         <button type="button" class="btn btn-sm btn-sp-primary" data-bs-toggle="modal" data-bs-target="#createRespondentModal">

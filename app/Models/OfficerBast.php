@@ -17,11 +17,29 @@ class OfficerBast extends Model
         'bast_date',
         'assignment_id',
         'officer_id',
+        'bast_type', // 'kantor_ke_petugas' (Blanko & Perlengkapan) atau 'petugas_ke_kantor' (Dokumen Terisi)
         'description',
         'notes',
         'file_path',
         'status',
     ];
+
+    public function getTypeLabelAttribute(): string
+    {
+        return $this->bast_type === 'petugas_ke_kantor'
+            ? 'Dokumen Terisi (Petugas ke Kantor)'
+            : 'Blanko & Perlengkapan (Kantor ke Petugas)';
+    }
+
+    public function isKantorKePetugas(): bool
+    {
+        return $this->bast_type !== 'petugas_ke_kantor';
+    }
+
+    public function isPetugasKeKantor(): bool
+    {
+        return $this->bast_type === 'petugas_ke_kantor';
+    }
 
     protected function casts(): array
     {

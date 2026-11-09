@@ -42,6 +42,17 @@ class OfficerBastController extends Controller
             $query->where('officer_id', $officerId);
         }
 
+        if ($bastType = $request->input('bast_type')) {
+            if ($bastType === 'kantor_ke_petugas') {
+                $query->where(function ($q) {
+                    $q->where('bast_type', 'kantor_ke_petugas')
+                      ->orWhereNull('bast_type');
+                });
+            } else {
+                $query->where('bast_type', $bastType);
+            }
+        }
+
         $totalBasts = OfficerBast::count();
         $thisMonthBasts = OfficerBast::whereMonth('bast_date', now()->month)
                                      ->whereYear('bast_date', now()->year)
@@ -66,6 +77,7 @@ class OfficerBastController extends Controller
         $validated = $request->validate([
             'assignment_id' => ['required', 'exists:assignments,id'],
             'officer_id' => ['required', 'exists:users,id'],
+            'bast_type' => ['nullable', Rule::in(['kantor_ke_petugas', 'petugas_ke_kantor'])],
             'bast_date' => ['required', 'date'],
             'bast_number' => ['nullable', 'string', 'max:100', 'unique:officer_basts,bast_number'],
             'description' => ['required', 'string'],
@@ -75,15 +87,18 @@ class OfficerBastController extends Controller
             'assignment_id.required' => 'Kegiatan wajib dipilih.',
             'officer_id.required' => 'Petugas wajib dipilih.',
             'bast_date.required' => 'Tanggal BAST wajib diisi.',
-            'description.required' => 'Keterangan penyerahan berkas tugas wajib diisi.',
+            'description.required' => 'Rincian serah terima dokumen/perlengkapan wajib diisi.',
         ]);
+
+        $validated['bast_type'] = $validated['bast_type'] ?? 'kantor_ke_petugas';
 
         if (empty($validated['bast_number'])) {
             $year = now()->format('Y');
             $romanMonths = ['I','II','III','IV','V','VI','VII','VIII','IX','X','XI','XII'];
             $month = $romanMonths[now()->month - 1];
             $count = OfficerBast::whereYear('created_at', now()->year)->count() + 1;
-            $validated['bast_number'] = sprintf('BAST-PETUGAS/%s/%s/%04d', $year, $month, $count);
+            $prefix = $validated['bast_type'] === 'kantor_ke_petugas' ? 'BAST-BLANKO' : 'BAST-TERISI';
+            $validated['bast_number'] = sprintf('%s/%s/%s/%04d', $prefix, $year, $month, $count);
         }
 
         $bast = OfficerBast::create($validated);
@@ -92,6 +107,7 @@ class OfficerBastController extends Controller
             $this->sheetService->insert('officer_basts', [
                 'id' => $bast->id,
                 'bast_number' => $bast->bast_number,
+                'bast_type' => $bast->bast_type,
                 'bast_date' => $bast->bast_date->toDateString(),
                 'assignment_id' => $bast->assignment_id,
                 'officer_id' => $bast->officer_id,
