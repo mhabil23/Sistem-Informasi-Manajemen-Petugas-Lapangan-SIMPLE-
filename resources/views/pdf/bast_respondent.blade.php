@@ -5,22 +5,22 @@
     <title>{{ $bast->bast_number }} - BAST Responden SIMPLE</title>
     <style>
         @page {
-            margin: 2cm 2cm 2cm 2cm;
+            margin: 1.2cm 1.5cm 1.2cm 1.5cm;
             size: A4 portrait;
         }
 
         body {
             font-family: 'Times New Roman', Times, serif;
-            font-size: 11pt;
-            line-height: 1.5;
+            font-size: 10pt;
+            line-height: 1.35;
             color: #000;
         }
 
         .header-table {
             width: 100%;
-            border-bottom: 3px double #000;
-            padding-bottom: 8px;
-            margin-bottom: 20px;
+            border-bottom: 2px double #000;
+            padding-bottom: 4px;
+            margin-bottom: 10px;
         }
 
         .header-title {
@@ -28,51 +28,51 @@
         }
 
         .instansi-utama {
-            font-size: 13pt;
+            font-size: 11.5pt;
             font-weight: bold;
             text-transform: uppercase;
             letter-spacing: 0.5px;
         }
 
         .instansi-sub {
-            font-size: 15pt;
+            font-size: 13.5pt;
             font-weight: bold;
             text-transform: uppercase;
             color: #0d2142;
         }
 
         .instansi-detail {
-            font-size: 9pt;
+            font-size: 8.5pt;
             font-style: italic;
             color: #333;
         }
 
         .doc-title {
             text-align: center;
-            margin-top: 15px;
-            margin-bottom: 20px;
+            margin-top: 8px;
+            margin-bottom: 10px;
         }
 
         .doc-title h3 {
-            font-size: 13pt;
+            font-size: 11.5pt;
             text-decoration: underline;
             margin: 0;
             text-transform: uppercase;
         }
 
         .doc-title p {
-            margin: 3px 0 0;
-            font-size: 10.5pt;
+            margin: 2px 0 0;
+            font-size: 9.5pt;
         }
 
         .content-table {
             width: 100%;
-            margin-bottom: 12px;
+            margin-bottom: 6px;
         }
 
         .content-table td {
             vertical-align: top;
-            padding: 3px 0;
+            padding: 1.5px 0;
         }
 
         .label-col {
@@ -90,15 +90,16 @@
         .items-box {
             background-color: #fdfdfd;
             border: 1px solid #777;
-            padding: 10px 14px;
-            margin: 12px 0;
-            font-size: 10.5pt;
+            padding: 6px 12px;
+            margin: 8px 0;
+            font-size: 9.5pt;
             white-space: pre-line;
         }
 
         .signature-table {
             width: 100%;
-            margin-top: 35px;
+            margin-top: 15px;
+            page-break-inside: avoid;
         }
 
         .signature-col {
@@ -109,6 +110,8 @@
 
         .sign-space {
             height: 70px;
+            text-align: center;
+            margin: 3px 0;
         }
 
         .signer-name {
@@ -117,16 +120,7 @@
         }
 
         .signer-title {
-            font-size: 9.5pt;
-        }
-
-        .doc-footer {
-            margin-top: 35px;
-            border-top: 1px dashed #aaa;
-            padding-top: 6px;
-            font-size: 8pt;
-            color: #666;
-            text-align: center;
+            font-size: 9pt;
         }
     </style>
 </head>
@@ -245,33 +239,70 @@
 
     <!-- TANDA TANGAN -->
     @php
-        $recipientSignData = '';
-        if (!empty($bast->signature_path)) {
-            $p = storage_path('app/public/' . $bast->signature_path);
-            if (!file_exists($p)) {
-                $p = storage_path('app/' . $bast->signature_path);
-            }
-            if (!file_exists($p)) {
-                $p = public_path('storage/' . $bast->signature_path);
-            }
-            if (file_exists($p)) {
-                $recipientSignData = base64_encode(file_get_contents($p));
-            }
-        }
+        $getTrimmedSignatureBase64 = function($path) {
+            if (empty($path)) return '';
+            
+            $p = storage_path('app/public/' . $path);
+            if (!file_exists($p)) $p = storage_path('app/' . $path);
+            if (!file_exists($p)) $p = public_path('storage/' . $path);
+            if (!file_exists($p)) return '';
 
-        $officerSignData = '';
-        if (!empty($bast->officer_signature_path)) {
-            $op = storage_path('app/public/' . $bast->officer_signature_path);
-            if (!file_exists($op)) {
-                $op = storage_path('app/' . $bast->officer_signature_path);
+            // Auto-crop area transparan canvas agar goresan tanda tangan tampak besar & proporsional
+            if (function_exists('imagecreatefrompng') && function_exists('imagecrop')) {
+                $im = @imagecreatefrompng($p);
+                if ($im) {
+                    $w = imagesx($im);
+                    $h = imagesy($im);
+                    $minX = $w; $minY = $h; $maxX = 0; $maxY = 0;
+                    $found = false;
+
+                    for ($x = 0; $x < $w; $x++) {
+                        for ($y = 0; $y < $h; $y++) {
+                            $rgba = imagecolorat($im, $x, $y);
+                            $alpha = ($rgba & 0x7F000000) >> 24;
+                            $r = ($rgba >> 16) & 0xFF;
+                            $g = ($rgba >> 8) & 0xFF;
+                            $b = $rgba & 0xFF;
+
+                            if ($alpha < 120 && ($r < 240 || $g < 240 || $b < 240)) {
+                                $found = true;
+                                if ($x < $minX) $minX = $x;
+                                if ($x > $maxX) $maxX = $x;
+                                if ($y < $minY) $minY = $y;
+                                if ($y > $maxY) $maxY = $y;
+                            }
+                        }
+                    }
+
+                    if ($found) {
+                        $pad = 10;
+                        $cropX = max(0, $minX - $pad);
+                        $cropY = max(0, $minY - $pad);
+                        $cropW = min($w - $cropX, ($maxX - $minX + 1) + ($pad * 2));
+                        $cropH = min($h - $cropY, ($maxY - $minY + 1) + ($pad * 2));
+
+                        $cropped = @imagecrop($im, ['x' => $cropX, 'y' => $cropY, 'width' => $cropW, 'height' => $cropH]);
+                        if ($cropped) {
+                            imagesavealpha($cropped, true);
+                            ob_start();
+                            imagepng($cropped);
+                            $data = ob_get_clean();
+                            imagedestroy($cropped);
+                            imagedestroy($im);
+                            if (!empty($data)) {
+                                return base64_encode($data);
+                            }
+                        }
+                    }
+                    imagedestroy($im);
+                }
             }
-            if (!file_exists($op)) {
-                $op = public_path('storage/' . $bast->officer_signature_path);
-            }
-            if (file_exists($op)) {
-                $officerSignData = base64_encode(file_get_contents($op));
-            }
-        }
+
+            return base64_encode(file_get_contents($p));
+        };
+
+        $recipientSignData = $getTrimmedSignatureBase64($bast->signature_path);
+        $officerSignData = $getTrimmedSignatureBase64($bast->officer_signature_path);
     @endphp
     <table class="signature-table">
         <tr>
@@ -286,7 +317,7 @@
                 </div>
                 <div class="sign-space">
                     @if($recipientSignData)
-                        <img src="data:image/png;base64,{{ $recipientSignData }}" style="max-height: 65px; max-width: 170px; display: inline-block;" alt="Tanda Tangan Penerima">
+                        <img src="data:image/png;base64,{{ $recipientSignData }}" style="height: 60px; max-height: 65px; max-width: 190px; width: auto; display: inline-block; vertical-align: middle;" alt="Tanda Tangan Penerima">
                     @endif
                 </div>
                 <div class="signer-name">{{ $bast->recipient_type === 'representative' ? $bast->recipient_name : $bast->respondent->name }}</div>
@@ -303,7 +334,7 @@
                 <div style="font-size: 9.5pt;">Petugas Lapangan SIMPLE</div>
                 <div class="sign-space">
                     @if($officerSignData)
-                        <img src="data:image/png;base64,{{ $officerSignData }}" style="max-height: 65px; max-width: 170px; display: inline-block;" alt="Tanda Tangan Petugas">
+                        <img src="data:image/png;base64,{{ $officerSignData }}" style="height: 60px; max-height: 65px; max-width: 190px; width: auto; display: inline-block; vertical-align: middle;" alt="Tanda Tangan Petugas">
                     @endif
                 </div>
                 <div class="signer-name">{{ $bast->officer->name }}</div>
