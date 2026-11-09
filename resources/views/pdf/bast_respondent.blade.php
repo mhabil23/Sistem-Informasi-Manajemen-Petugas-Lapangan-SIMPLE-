@@ -282,11 +282,6 @@
             </td>
         </tr>
     </table>
-
-    <div class="doc-footer">
-        Dokumen ini diterbitkan secara resmi melalui Sistem Informasi Manajemen SIMPLE pada {{ now()->translatedFormat('d F Y H:i') }} WIB.
-        <br>Nomor Arsip Digital: {{ $bast->bast_number }}
-    </div>
 </body>
 </html>
 
