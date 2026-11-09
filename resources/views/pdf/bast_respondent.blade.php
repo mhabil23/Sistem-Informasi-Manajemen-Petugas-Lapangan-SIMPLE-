@@ -244,6 +244,35 @@
     </p>
 
     <!-- TANDA TANGAN -->
+    @php
+        $recipientSignData = '';
+        if (!empty($bast->signature_path)) {
+            $p = storage_path('app/public/' . $bast->signature_path);
+            if (!file_exists($p)) {
+                $p = storage_path('app/' . $bast->signature_path);
+            }
+            if (!file_exists($p)) {
+                $p = public_path('storage/' . $bast->signature_path);
+            }
+            if (file_exists($p)) {
+                $recipientSignData = base64_encode(file_get_contents($p));
+            }
+        }
+
+        $officerSignData = '';
+        if (!empty($bast->officer_signature_path)) {
+            $op = storage_path('app/public/' . $bast->officer_signature_path);
+            if (!file_exists($op)) {
+                $op = storage_path('app/' . $bast->officer_signature_path);
+            }
+            if (!file_exists($op)) {
+                $op = public_path('storage/' . $bast->officer_signature_path);
+            }
+            if (file_exists($op)) {
+                $officerSignData = base64_encode(file_get_contents($op));
+            }
+        }
+    @endphp
     <table class="signature-table">
         <tr>
             <td class="signature-col">
@@ -255,9 +284,9 @@
                         Kepala Rumah Tangga / Responden
                     @endif
                 </div>
-                <div class="sign-space" style="display: flex; align-items: center; justify-content: center;">
-                    @if(!empty($bast->signature_path) && file_exists(public_path('storage/' . $bast->signature_path)))
-                        <img src="{{ public_path('storage/' . $bast->signature_path) }}" style="max-height: 65px; max-width: 170px; display: block; margin: 0 auto;" alt="Tanda Tangan Penerima">
+                <div class="sign-space">
+                    @if($recipientSignData)
+                        <img src="data:image/png;base64,{{ $recipientSignData }}" style="max-height: 65px; max-width: 170px; display: inline-block;" alt="Tanda Tangan Penerima">
                     @endif
                 </div>
                 <div class="signer-name">{{ $bast->recipient_type === 'representative' ? $bast->recipient_name : $bast->respondent->name }}</div>
@@ -272,9 +301,9 @@
             <td class="signature-col">
                 <div>PIHAK PERTAMA,</div>
                 <div style="font-size: 9.5pt;">Petugas Lapangan SIMPLE</div>
-                <div class="sign-space" style="display: flex; align-items: center; justify-content: center;">
-                    @if(!empty($bast->officer_signature_path) && file_exists(public_path('storage/' . $bast->officer_signature_path)))
-                        <img src="{{ public_path('storage/' . $bast->officer_signature_path) }}" style="max-height: 65px; max-width: 170px; display: block; margin: 0 auto;" alt="Tanda Tangan Petugas">
+                <div class="sign-space">
+                    @if($officerSignData)
+                        <img src="data:image/png;base64,{{ $officerSignData }}" style="max-height: 65px; max-width: 170px; display: inline-block;" alt="Tanda Tangan Petugas">
                     @endif
                 </div>
                 <div class="signer-name">{{ $bast->officer->name }}</div>
