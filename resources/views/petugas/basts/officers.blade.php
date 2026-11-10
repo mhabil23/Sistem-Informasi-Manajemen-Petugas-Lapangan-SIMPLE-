@@ -302,5 +302,5 @@ function updateBastDescriptionPlaceholder() {
 document.addEventListener('DOMContentLoaded', updateBastDescriptionPlaceholder);
 </script>
 @endsection
-@endsection
+
 
