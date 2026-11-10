@@ -281,7 +281,7 @@
                 <div class="modal-footer bg-light border-top">
                     <button type="button" class="btn btn-light" data-bs-dismiss="modal">Batal</button>
                     <button type="submit" class="btn btn-sp-primary">
-                        <i class="fa-solid fa-file-pdf me-1"></i> Terbitkan &amp; Download PDF
+                        <i class="fa-solid fa-file-circle-check me-1"></i> Terbitkan
                     </button>
                 </div>
             </form>
