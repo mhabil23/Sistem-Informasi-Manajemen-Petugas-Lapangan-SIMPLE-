@@ -230,11 +230,6 @@
                                 </div>
                             </td>
                         </tr>
-                                        Klik tombol "Input Responden Baru" di atas untuk menambahkan data.
-                                    @endif
-                                </div>
-                            </td>
-                        </tr>
                     @endforelse
                 </tbody>
             </table>
