@@ -682,19 +682,8 @@
                         </div>
                     </div>
 
-                    <!-- Lampiran Foto Dokumentasi -->
-                    <div class="card mb-3 border">
-                        <div class="card-header bg-light py-2 px-3 fw-bold text-dark small">
-                            <i class="fa-solid fa-camera text-primary me-1"></i> FOTO DOKUMENTASI KEGIATAN (HALAMAN DOKUMENTASI)
-                        </div>
-                        <div class="card-body p-3">
-                            <label class="form-label small fw-semibold text-secondary">
-                                Unggah Foto Bukti Lapangan / Kegiatan (Maks. 5MB per file)
-                            </label>
-                            <input type="file" name="photos[]" class="form-control" multiple accept="image/*,.pdf">
-                            <div class="form-text small">Foto akan ditampilkan pada halaman Dokumentasi berkop BPS Kabupaten Kolaka Utara.</div>
-                        </div>
-                    </div>
+                    <!-- Lampiran Foto Dokumentasi Langsung Kamera (Lokasi & Waktu Real-Time) -->
+                    @include('petugas.reports._camera_capture', ['prefix' => 'create', 'showExisting' => false])
 
                     <!-- Opsi Tambahan Surat Pernyataan Tidak Menggunakan Kendaraan Dinas -->
                     <div class="card mb-3 border">
@@ -1027,16 +1016,8 @@
                         </div>
                     </div>
 
-                    <!-- Lampiran Foto Dokumentasi -->
-                    <div class="card mb-3 border">
-                        <div class="card-header bg-light py-2 px-3 fw-bold text-dark small">
-                            <i class="fa-solid fa-camera text-primary me-1"></i> TAMBAH FOTO DOKUMENTASI BARU
-                        </div>
-                        <div class="card-body p-3">
-                            <input type="file" name="photos[]" class="form-control" multiple accept="image/*,.pdf">
-                            <div class="form-text small">Pilih berkas baru jika ingin menambahkan dokumentasi kegiatan.</div>
-                        </div>
-                    </div>
+                    <!-- Lampiran Foto Dokumentasi Langsung Kamera (Lokasi & Waktu Real-Time) -->
+                    @include('petugas.reports._camera_capture', ['prefix' => 'edit', 'showExisting' => true])
 
                     <!-- Tindakan Penyimpanan -->
                     <div class="p-3 bg-light rounded border">
@@ -1753,6 +1734,22 @@
             sigContainer.classList.add('d-none');
         }
 
+        // Reset kamera edit & tampilkan foto tersimpan sebelumnya
+        perjadinCamera.reset('edit');
+        const existBox = document.getElementById('edit_existing_photos_box');
+        const existList = document.getElementById('edit_existing_photos_list');
+        if (existBox && existList) {
+            existList.innerHTML = '';
+            if (Array.isArray(rep.attachments) && rep.attachments.length > 0) {
+                existBox.classList.remove('d-none');
+                rep.attachments.forEach(att => {
+                    existList.appendChild(buildExistingEditAttachmentCard(att));
+                });
+            } else {
+                existBox.classList.add('d-none');
+            }
+        }
+
         // Reset canvas gores
         if (editSigPad) editSigPad.clear();
 
@@ -1917,26 +1914,11 @@
 
         // Attachments
         const container = document.getElementById('det_attachments_container');
+        container.innerHTML = '';
         if (rep.attachments && rep.attachments.length > 0) {
-            let html = '';
             rep.attachments.forEach(att => {
-                const isImg = att.file_type && att.file_type.startsWith('image/');
-                html += `<div class="col-6 col-md-4">
-                            <div class="card h-100 border text-center p-2 shadow-sm">
-                                ${isImg 
-                                    ? `<a href="/storage/${att.file_path}" target="_blank">
-                                         <img src="/storage/${att.file_path}" class="img-fluid rounded mb-2" style="max-height: 110px; object-fit: cover;" alt="${att.file_name}">
-                                       </a>` 
-                                    : `<div class="py-3"><i class="fa-regular fa-file-pdf fa-3x text-danger"></i></div>`
-                                }
-                                <div class="small text-truncate" title="${att.file_name}">${att.file_name}</div>
-                                <a href="/storage/${att.file_path}" target="_blank" class="btn btn-sm btn-link text-decoration-none mt-1">
-                                    <i class="fa-solid fa-arrow-up-right-from-square"></i> Buka File
-                                </a>
-                            </div>
-                         </div>`;
+                container.appendChild(buildPreviewAttachmentCard(att));
             });
-            container.innerHTML = html;
         } else {
             container.innerHTML = '<div class="col-12 text-muted small fst-italic">Tidak ada lampiran foto dokumentasi.</div>';
         }
@@ -1948,6 +1930,662 @@
         const modal = new bootstrap.Modal(document.getElementById('detailReportModal'));
         modal.show();
     }
+
+    function formatCapturedTime(isoStr) {
+        if (!isoStr) return '';
+        const d = new Date(isoStr);
+        if (isNaN(d.getTime())) return isoStr;
+        return new Intl.DateTimeFormat('id-ID', {
+            day: '2-digit',
+            month: 'short',
+            year: 'numeric',
+            hour: '2-digit',
+            minute: '2-digit',
+            second: '2-digit',
+            timeZoneName: 'short'
+        }).format(d);
+    }
+
+    function buildAttachmentMetaBlock(att) {
+        const meta = document.createElement('div');
+        meta.className = 'text-start mt-1 pt-1 border-top';
+        meta.style.fontSize = '0.72rem';
+
+        const timeLabel = formatCapturedTime(att.captured_at);
+        if (timeLabel) {
+            const tDiv = document.createElement('div');
+            tDiv.className = 'text-dark fw-semibold';
+            tDiv.innerHTML = '<i class="fa-regular fa-clock text-primary me-1"></i>';
+            tDiv.appendChild(document.createTextNode(timeLabel));
+            meta.appendChild(tDiv);
+        }
+
+        if (att.location_address) {
+            const lDiv = document.createElement('div');
+            lDiv.className = 'text-secondary text-truncate';
+            lDiv.title = att.location_address;
+            lDiv.innerHTML = '<i class="fa-solid fa-location-dot text-danger me-1"></i>';
+            lDiv.appendChild(document.createTextNode(att.location_address));
+            meta.appendChild(lDiv);
+        }
+
+        if (att.latitude !== null && att.latitude !== undefined && att.longitude !== null && att.longitude !== undefined) {
+            const lat = Number(att.latitude).toFixed(6);
+            const lng = Number(att.longitude).toFixed(6);
+            const cDiv = document.createElement('div');
+            cDiv.className = 'font-monospace text-muted';
+            cDiv.textContent = `${lat}, ${lng}`;
+            meta.appendChild(cDiv);
+
+            const mapLink = document.createElement('a');
+            mapLink.href = `https://www.google.com/maps?q=${lat},${lng}`;
+            mapLink.target = '_blank';
+            mapLink.className = 'badge bg-info-subtle text-info-emphasis border border-info-subtle text-decoration-none mt-1';
+            mapLink.innerHTML = '<i class="fa-solid fa-map-location-dot me-1"></i> Lihat Peta GPS';
+            meta.appendChild(mapLink);
+        } else if (att.caption) {
+            const capDiv = document.createElement('div');
+            capDiv.className = 'text-muted';
+            capDiv.textContent = att.caption;
+            meta.appendChild(capDiv);
+        }
+
+        return meta;
+    }
+
+    function buildPreviewAttachmentCard(att) {
+        const col = document.createElement('div');
+        col.className = 'col-6 col-md-4';
+
+        const card = document.createElement('div');
+        card.className = 'card h-100 border p-2 shadow-sm text-center';
+
+        const isImg = att.file_type && att.file_type.startsWith('image/');
+        if (isImg) {
+            const a = document.createElement('a');
+            a.href = '/storage/' + att.file_path;
+            a.target = '_blank';
+            const img = document.createElement('img');
+            img.src = '/storage/' + att.file_path;
+            img.alt = att.file_name || 'Foto Dokumentasi';
+            img.className = 'img-fluid rounded mb-2';
+            img.style.maxHeight = '120px';
+            img.style.objectFit = 'cover';
+            a.appendChild(img);
+            card.appendChild(a);
+        } else {
+            const pdfBox = document.createElement('div');
+            pdfBox.className = 'py-3';
+            pdfBox.innerHTML = '<i class="fa-regular fa-file-pdf fa-3x text-danger"></i>';
+            card.appendChild(pdfBox);
+        }
+
+        const nameEl = document.createElement('div');
+        nameEl.className = 'small text-truncate fw-medium text-dark';
+        nameEl.title = att.file_name || '';
+        nameEl.textContent = att.file_name || '';
+        card.appendChild(nameEl);
+
+        card.appendChild(buildAttachmentMetaBlock(att));
+
+        const openBtn = document.createElement('a');
+        openBtn.href = '/storage/' + att.file_path;
+        openBtn.target = '_blank';
+        openBtn.className = 'btn btn-sm btn-link text-decoration-none mt-auto pt-1';
+        openBtn.innerHTML = '<i class="fa-solid fa-arrow-up-right-from-square me-1"></i> Buka Foto';
+        card.appendChild(openBtn);
+
+        col.appendChild(card);
+        return col;
+    }
+
+    function buildExistingEditAttachmentCard(att) {
+        const col = document.createElement('div');
+        col.className = 'col-6 col-md-4';
+
+        const card = document.createElement('div');
+        card.className = 'card h-100 border p-2 bg-light-subtle';
+
+        const isImg = att.file_type && att.file_type.startsWith('image/');
+        if (isImg) {
+            const img = document.createElement('img');
+            img.src = '/storage/' + att.file_path;
+            img.alt = att.file_name || 'Foto Tersimpan';
+            img.className = 'img-fluid rounded mb-2 w-100';
+            img.style.maxHeight = '105px';
+            img.style.objectFit = 'cover';
+            card.appendChild(img);
+        }
+
+        card.appendChild(buildAttachmentMetaBlock(att));
+
+        const chkWrap = document.createElement('div');
+        chkWrap.className = 'form-check mt-2 pt-1 border-top';
+        const chk = document.createElement('input');
+        chk.type = 'checkbox';
+        chk.className = 'form-check-input border-danger';
+        chk.name = 'delete_attachment_ids[]';
+        chk.value = att.id;
+        chk.id = 'del_att_' + att.id;
+
+        const lbl = document.createElement('label');
+        lbl.className = 'form-check-label small text-danger fw-semibold';
+        lbl.setAttribute('for', chk.id);
+        lbl.textContent = 'Hapus foto ini';
+
+        chkWrap.appendChild(chk);
+        chkWrap.appendChild(lbl);
+        card.appendChild(chkWrap);
+
+        col.appendChild(card);
+        return col;
+    }
+
+    const perjadinCamera = (function() {
+        const states = {};
+        const geocodeCache = {};
+
+        function getState(prefix) {
+            if (!states[prefix]) {
+                states[prefix] = {
+                    stream: null,
+                    watchId: null,
+                    clockTimer: null,
+                    facing: 'environment',
+                    coords: null,
+                    address: '',
+                    lastGeocodeKey: '',
+                    captured: []
+                };
+            }
+            return states[prefix];
+        }
+
+        function formatNowParts(dateObj) {
+            const fullClock = new Intl.DateTimeFormat('id-ID', {
+                weekday: 'long',
+                day: '2-digit',
+                month: 'short',
+                year: 'numeric',
+                hour: '2-digit',
+                minute: '2-digit',
+                second: '2-digit',
+                timeZoneName: 'short'
+            }).format(dateObj);
+
+            const stamp = new Intl.DateTimeFormat('id-ID', {
+                day: '2-digit',
+                month: 'short',
+                year: 'numeric',
+                hour: '2-digit',
+                minute: '2-digit',
+                second: '2-digit',
+                timeZoneName: 'short'
+            }).format(dateObj);
+
+            return { fullClock, stamp };
+        }
+
+        function getFieldActivityLocation(prefix) {
+            const locEl = document.getElementById(prefix + '_activity_location');
+            return locEl ? locEl.value.trim() : '';
+        }
+
+        function getFieldOfficerName(prefix) {
+            const modalEl = document.getElementById(prefix + 'ReportModal');
+            if (!modalEl) return '';
+            const inp = modalEl.querySelector('input[name="officer_name"]');
+            return inp ? inp.value.trim() : '';
+        }
+
+        function getEffectiveLocationLabel(prefix) {
+            const st = getState(prefix);
+            if (st.address) return st.address;
+            const formLoc = getFieldActivityLocation(prefix);
+            if (formLoc) return formLoc;
+            if (st.coords) {
+                return `Koordinat ${st.coords.latitude.toFixed(5)}, ${st.coords.longitude.toFixed(5)}`;
+            }
+            return 'Lokasi GPS belum terkunci';
+        }
+
+        function updateTelemetryUI(prefix) {
+            const st = getState(prefix);
+            const parts = formatNowParts(new Date());
+
+            const clockEl = document.getElementById(prefix + '_live_clock_text');
+            const hudTimeEl = document.getElementById(prefix + '_hud_time');
+            const hudLocEl = document.getElementById(prefix + '_hud_loc');
+            const hudCoordsEl = document.getElementById(prefix + '_hud_coords');
+            const gpsBadge = document.getElementById(prefix + '_gps_badge');
+            const addrEl = document.getElementById(prefix + '_gps_address_text');
+
+            if (clockEl) clockEl.textContent = parts.fullClock;
+            if (hudTimeEl) hudTimeEl.textContent = 'Waktu: ' + parts.stamp;
+
+            const locLabel = getEffectiveLocationLabel(prefix);
+            if (hudLocEl) hudLocEl.textContent = 'Lokasi: ' + locLabel;
+            if (addrEl) addrEl.textContent = st.address || getFieldActivityLocation(prefix) || '';
+
+            if (st.coords) {
+                const latStr = st.coords.latitude.toFixed(6);
+                const lngStr = st.coords.longitude.toFixed(6);
+                const accStr = st.coords.accuracy ? Math.round(st.coords.accuracy) : '?';
+                if (gpsBadge) {
+                    gpsBadge.className = 'badge bg-success-subtle text-success border border-success-subtle';
+                    gpsBadge.innerHTML = `<i class="fa-solid fa-satellite-dish me-1"></i> GPS Aktif: ${latStr}, ${lngStr} (±${accStr} m)`;
+                }
+                if (hudCoordsEl) {
+                    hudCoordsEl.textContent = `GPS: Lat ${latStr}, Lng ${lngStr} (±${accStr} m)`;
+                }
+            }
+        }
+
+        async function reverseGeocode(prefix, lat, lng) {
+            const st = getState(prefix);
+            const key = `${lat.toFixed(4)},${lng.toFixed(4)}`;
+            if (st.lastGeocodeKey === key && st.address) return;
+            st.lastGeocodeKey = key;
+
+            if (geocodeCache[key]) {
+                st.address = geocodeCache[key];
+                updateTelemetryUI(prefix);
+                return;
+            }
+
+            try {
+                const ctrl = new AbortController();
+                const timer = setTimeout(() => ctrl.abort(), 3500);
+                const resp = await fetch(
+                    `https://nominatim.openstreetmap.org/reverse?format=jsonv2&lat=${encodeURIComponent(lat)}&lon=${encodeURIComponent(lng)}&zoom=16&addressdetails=1`,
+                    { signal: ctrl.signal, headers: { 'Accept': 'application/json' } }
+                );
+                clearTimeout(timer);
+                if (!resp.ok) return;
+                const data = await resp.json();
+                const addr = data.address || {};
+                const parts = [
+                    addr.village || addr.suburb || addr.hamlet || addr.town || addr.road,
+                    addr.city_district || addr.municipality,
+                    addr.county || addr.city || addr.state_district
+                ].filter(Boolean);
+                const resolved = parts.length ? parts.join(', ') : (data.display_name ? data.display_name.split(',').slice(0, 3).join(',').trim() : '');
+                if (resolved) {
+                    geocodeCache[key] = resolved;
+                    st.address = resolved;
+                    updateTelemetryUI(prefix);
+                }
+            } catch (e) {
+                // Offline / timeout: tetap gunakan koordinat GPS + lokasi tugas
+            }
+        }
+
+        function handleGeoSuccess(prefix, pos) {
+            const st = getState(prefix);
+            st.coords = {
+                latitude: pos.coords.latitude,
+                longitude: pos.coords.longitude,
+                accuracy: pos.coords.accuracy
+            };
+            updateTelemetryUI(prefix);
+            reverseGeocode(prefix, pos.coords.latitude, pos.coords.longitude);
+        }
+
+        function handleGeoError(prefix, err) {
+            const gpsBadge = document.getElementById(prefix + '_gps_badge');
+            const hudCoords = document.getElementById(prefix + '_hud_coords');
+            let msg = 'GPS tidak aktif';
+            if (err && err.code === 1) msg = 'Izin lokasi GPS ditolak';
+            else if (err && err.code === 2) msg = 'Sinyal GPS tidak tersedia';
+            else if (err && err.code === 3) msg = 'Waktu pencarian GPS habis';
+
+            if (gpsBadge) {
+                gpsBadge.className = 'badge bg-danger-subtle text-danger border border-danger-subtle';
+                gpsBadge.innerHTML = `<i class="fa-solid fa-triangle-exclamation me-1"></i> ${msg}`;
+            }
+            if (hudCoords) {
+                hudCoords.textContent = `GPS: ${msg}`;
+            }
+        }
+
+        function startGps(prefix) {
+            const st = getState(prefix);
+            if (!('geolocation' in navigator)) {
+                handleGeoError(prefix, null);
+                return;
+            }
+            if (st.watchId !== null) {
+                navigator.geolocation.clearWatch(st.watchId);
+                st.watchId = null;
+            }
+            st.watchId = navigator.geolocation.watchPosition(
+                pos => handleGeoSuccess(prefix, pos),
+                err => handleGeoError(prefix, err),
+                { enableHighAccuracy: true, timeout: 15000, maximumAge: 0 }
+            );
+        }
+
+        function refreshGps(prefix) {
+            if (!('geolocation' in navigator)) {
+                handleGeoError(prefix, null);
+                return;
+            }
+            const gpsBadge = document.getElementById(prefix + '_gps_badge');
+            if (gpsBadge) {
+                gpsBadge.className = 'badge bg-warning text-dark';
+                gpsBadge.innerHTML = '<i class="fa-solid fa-spinner fa-spin me-1"></i> Memperbarui GPS...';
+            }
+            navigator.geolocation.getCurrentPosition(
+                pos => handleGeoSuccess(prefix, pos),
+                err => handleGeoError(prefix, err),
+                { enableHighAccuracy: true, timeout: 12000, maximumAge: 0 }
+            );
+        }
+
+        function startClock(prefix) {
+            const st = getState(prefix);
+            if (st.clockTimer) clearInterval(st.clockTimer);
+            updateTelemetryUI(prefix);
+            st.clockTimer = setInterval(() => updateTelemetryUI(prefix), 1000);
+        }
+
+        function stopStreamOnly(prefix) {
+            const st = getState(prefix);
+            if (st.stream) {
+                st.stream.getTracks().forEach(t => t.stop());
+                st.stream = null;
+            }
+            const video = document.getElementById(prefix + '_cam_video');
+            if (video) {
+                video.srcObject = null;
+                video.classList.add('d-none');
+            }
+            const hud = document.getElementById(prefix + '_cam_hud');
+            const snapWrap = document.getElementById(prefix + '_snap_wrapper');
+            const placeholder = document.getElementById(prefix + '_cam_placeholder');
+            if (hud) hud.classList.add('d-none');
+            if (snapWrap) snapWrap.classList.add('d-none');
+            if (placeholder) placeholder.classList.remove('d-none');
+        }
+
+        async function start(prefix) {
+            const st = getState(prefix);
+            startClock(prefix);
+            startGps(prefix);
+
+            const statusMsg = document.getElementById(prefix + '_cam_status_msg');
+            if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
+                if (statusMsg) {
+                    statusMsg.textContent = window.isSecureContext
+                        ? 'Browser tidak mendukung kamera langsung (WebRTC).'
+                        : 'Akses kamera memerlukan koneksi aman (HTTPS / localhost).';
+                }
+                return;
+            }
+
+            stopStreamOnly(prefix);
+            if (statusMsg) statusMsg.textContent = 'Mengakses kamera perangkat...';
+
+            try {
+                let stream;
+                try {
+                    stream = await navigator.mediaDevices.getUserMedia({
+                        video: { facingMode: { ideal: st.facing }, width: { ideal: 1280 }, height: { ideal: 720 } },
+                        audio: false
+                    });
+                } catch (constraintErr) {
+                    if (constraintErr && (constraintErr.name === 'OverconstrainedError' || constraintErr.name === 'NotFoundError')) {
+                        stream = await navigator.mediaDevices.getUserMedia({ video: true, audio: false });
+                    } else {
+                        throw constraintErr;
+                    }
+                }
+
+                st.stream = stream;
+                const video = document.getElementById(prefix + '_cam_video');
+                const placeholder = document.getElementById(prefix + '_cam_placeholder');
+                const hud = document.getElementById(prefix + '_cam_hud');
+                const snapWrap = document.getElementById(prefix + '_snap_wrapper');
+                const switchBtn = document.getElementById(prefix + '_btn_switch_cam');
+
+                if (video) {
+                    video.srcObject = stream;
+                    video.classList.remove('d-none');
+                    await video.play();
+                }
+                if (placeholder) placeholder.classList.add('d-none');
+                if (hud) hud.classList.remove('d-none');
+                if (snapWrap) snapWrap.classList.remove('d-none');
+                if (switchBtn) switchBtn.classList.remove('d-none');
+                updateTelemetryUI(prefix);
+            } catch (err) {
+                if (statusMsg) {
+                    const reason = err && err.name === 'NotAllowedError'
+                        ? 'Izin kamera ditolak oleh browser. Mohon izinkan akses kamera lalu klik coba lagi.'
+                        : (err && err.name === 'NotFoundError'
+                            ? 'Kamera tidak ditemukan pada perangkat ini.'
+                            : 'Gagal membuka kamera: ' + (err && err.message ? err.message : 'Periksa izin perangkat.'));
+                    statusMsg.textContent = reason;
+                }
+            }
+        }
+
+        function stop(prefix) {
+            const st = getState(prefix);
+            stopStreamOnly(prefix);
+            if (st.watchId !== null && 'geolocation' in navigator) {
+                navigator.geolocation.clearWatch(st.watchId);
+                st.watchId = null;
+            }
+            if (st.clockTimer) {
+                clearInterval(st.clockTimer);
+                st.clockTimer = null;
+            }
+        }
+
+        function switchFacing(prefix) {
+            const st = getState(prefix);
+            st.facing = (st.facing === 'environment') ? 'user' : 'environment';
+            start(prefix);
+        }
+
+        function drawWatermark(ctx, w, h, lines) {
+            const fontSize = Math.max(13, Math.round(w * 0.017));
+            const lineHeight = Math.round(fontSize * 1.42);
+            const padX = Math.round(w * 0.02);
+            const padY = Math.round(lineHeight * 0.55);
+            const boxHeight = (lines.length * lineHeight) + (padY * 2);
+            const startY = h - boxHeight;
+
+            ctx.fillStyle = 'rgba(8, 15, 28, 0.74)';
+            ctx.fillRect(0, startY, w, boxHeight);
+
+            ctx.textBaseline = 'top';
+            lines.forEach((line, i) => {
+                ctx.font = (i === 0 ? 'bold ' : '') + fontSize + 'px Arial, sans-serif';
+                ctx.fillStyle = i === 0 ? '#fbbf24' : '#ffffff';
+                ctx.fillText(line.text, padX, startY + padY + (i * lineHeight), w - (padX * 2));
+            });
+        }
+
+        function capture(prefix) {
+            const st = getState(prefix);
+            const video = document.getElementById(prefix + '_cam_video');
+            if (!video || !video.videoWidth || !video.videoHeight) {
+                return;
+            }
+
+            const maxW = 1280;
+            const scale = video.videoWidth > maxW ? (maxW / video.videoWidth) : 1;
+            const targetW = Math.round(video.videoWidth * scale);
+            const targetH = Math.round(video.videoHeight * scale);
+
+            const canvas = document.createElement('canvas');
+            canvas.width = targetW;
+            canvas.height = targetH;
+            const ctx = canvas.getContext('2d');
+            ctx.drawImage(video, 0, 0, targetW, targetH);
+
+            const now = new Date();
+            const parts = formatNowParts(now);
+            const locLabel = getEffectiveLocationLabel(prefix);
+            const officer = getFieldOfficerName(prefix) || 'Petugas Lapangan';
+            const lat = st.coords ? st.coords.latitude : null;
+            const lng = st.coords ? st.coords.longitude : null;
+            const acc = st.coords ? st.coords.accuracy : null;
+            const gpsLine = (lat !== null && lng !== null)
+                ? `GPS: Lat ${lat.toFixed(6)}, Lng ${lng.toFixed(6)} (Akurasi ±${acc ? Math.round(acc) : '?'} m)`
+                : 'GPS: Koordinat tidak terdeteksi (Pastikan izin lokasi aktif)';
+
+            drawWatermark(ctx, targetW, targetH, [
+                { text: 'Lokasi : ' + locLabel },
+                { text: gpsLine },
+                { text: `Waktu : ${parts.stamp}  |  Petugas: ${officer}` }
+            ]);
+
+            const dataUrl = canvas.toDataURL('image/jpeg', 0.85);
+            const timezone = (Intl.DateTimeFormat().resolvedOptions().timeZone) || 'Asia/Makassar';
+
+            st.captured.push({
+                id: 'cap_' + Date.now() + '_' + Math.floor(Math.random() * 1000),
+                dataUrl,
+                lat,
+                lng,
+                acc,
+                capturedAtIso: now.toISOString(),
+                capturedLabel: parts.stamp,
+                locationName: locLabel,
+                timezone
+            });
+
+            renderCaptured(prefix);
+        }
+
+        function removeCaptured(prefix, capId) {
+            const st = getState(prefix);
+            st.captured = st.captured.filter(item => item.id !== capId);
+            renderCaptured(prefix);
+        }
+
+        function createHiddenInput(name, value) {
+            const inp = document.createElement('input');
+            inp.type = 'hidden';
+            inp.name = name;
+            inp.value = (value === null || value === undefined) ? '' : String(value);
+            return inp;
+        }
+
+        function renderCaptured(prefix) {
+            const st = getState(prefix);
+            const grid = document.getElementById(prefix + '_captured_grid');
+            const empty = document.getElementById(prefix + '_captured_empty');
+            const inputs = document.getElementById(prefix + '_captured_inputs');
+            const countBadge = document.getElementById(prefix + '_captured_count');
+
+            if (!grid || !inputs) return;
+            grid.innerHTML = '';
+            inputs.innerHTML = '';
+
+            if (countBadge) {
+                countBadge.textContent = st.captured.length + ' Foto Baru';
+            }
+
+            if (st.captured.length === 0) {
+                if (empty) empty.classList.remove('d-none');
+                return;
+            }
+            if (empty) empty.classList.add('d-none');
+
+            st.captured.forEach((item, idx) => {
+                // Hidden inputs synchronized with PHP array fields
+                inputs.appendChild(createHiddenInput('camera_photos[]', item.dataUrl));
+                inputs.appendChild(createHiddenInput('camera_latitudes[]', item.lat !== null ? item.lat : ''));
+                inputs.appendChild(createHiddenInput('camera_longitudes[]', item.lng !== null ? item.lng : ''));
+                inputs.appendChild(createHiddenInput('camera_accuracies[]', item.acc !== null ? item.acc : ''));
+                inputs.appendChild(createHiddenInput('camera_captured_ats[]', item.capturedAtIso));
+                inputs.appendChild(createHiddenInput('camera_location_names[]', item.locationName));
+                inputs.appendChild(createHiddenInput('camera_timezones[]', item.timezone));
+
+                // Preview card
+                const col = document.createElement('div');
+                col.className = 'col-6 col-md-4';
+
+                const card = document.createElement('div');
+                card.className = 'card h-100 border border-success shadow-sm p-2';
+
+                const img = document.createElement('img');
+                img.src = item.dataUrl;
+                img.className = 'img-fluid rounded mb-2';
+                img.style.maxHeight = '140px';
+                img.style.objectFit = 'cover';
+                img.alt = 'Foto Kamera ' + (idx + 1);
+                card.appendChild(img);
+
+                const timeDiv = document.createElement('div');
+                timeDiv.className = 'small fw-semibold text-dark';
+                timeDiv.style.fontSize = '0.72rem';
+                timeDiv.textContent = item.capturedLabel;
+                card.appendChild(timeDiv);
+
+                const locDiv = document.createElement('div');
+                locDiv.className = 'small text-secondary text-truncate';
+                locDiv.style.fontSize = '0.7rem';
+                locDiv.title = item.locationName;
+                locDiv.textContent = item.locationName;
+                card.appendChild(locDiv);
+
+                if (item.lat !== null && item.lng !== null) {
+                    const coordDiv = document.createElement('div');
+                    coordDiv.className = 'font-monospace text-muted';
+                    coordDiv.style.fontSize = '0.68rem';
+                    coordDiv.textContent = `${item.lat.toFixed(6)}, ${item.lng.toFixed(6)}`;
+                    card.appendChild(coordDiv);
+                }
+
+                const rmBtn = document.createElement('button');
+                rmBtn.type = 'button';
+                rmBtn.className = 'btn btn-xs btn-outline-danger mt-2 py-0.5';
+                rmBtn.style.fontSize = '0.72rem';
+                rmBtn.innerHTML = '<i class="fa-solid fa-trash-can me-1"></i> Hapus Foto';
+                rmBtn.addEventListener('click', () => removeCaptured(prefix, item.id));
+                card.appendChild(rmBtn);
+
+                col.appendChild(card);
+                grid.appendChild(col);
+            });
+        }
+
+        function reset(prefix) {
+            const st = getState(prefix);
+            st.captured = [];
+            renderCaptured(prefix);
+        }
+
+        return { start, stop, switchFacing, refreshGps, capture, reset };
+    })();
+
+    document.addEventListener('DOMContentLoaded', function() {
+        const createModalEl = document.getElementById('createReportModal');
+        if (createModalEl) {
+            createModalEl.addEventListener('shown.bs.modal', function() {
+                perjadinCamera.reset('create');
+                perjadinCamera.start('create');
+            });
+            createModalEl.addEventListener('hidden.bs.modal', function() {
+                perjadinCamera.stop('create');
+            });
+        }
+
+        const editModalEl = document.getElementById('editReportModal');
+        if (editModalEl) {
+            editModalEl.addEventListener('shown.bs.modal', function() {
+                perjadinCamera.start('edit');
+            });
+            editModalEl.addEventListener('hidden.bs.modal', function() {
+                perjadinCamera.stop('edit');
+            });
+        }
+    });
 </script>
 @endpush
 

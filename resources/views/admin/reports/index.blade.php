@@ -401,28 +401,97 @@
             statusSelect.value = 'approved';
         }
 
-        // Attachments
+        // Attachments (termasuk koordinat GPS & waktu real-time kamera)
         const container = document.getElementById('rev_attachments_container');
+        container.innerHTML = '';
         if (rep.attachments && rep.attachments.length > 0) {
-            let html = '';
             rep.attachments.forEach(att => {
+                const col = document.createElement('div');
+                col.className = 'col-6 col-md-4';
+
+                const card = document.createElement('div');
+                card.className = 'card h-100 border text-center p-2';
+
                 const isImg = att.file_type && att.file_type.startsWith('image/');
-                html += `<div class="col-6 col-md-4">
-                            <div class="card h-100 border text-center p-2">
-                                ${isImg 
-                                    ? `<a href="/storage/${att.file_path}" target="_blank">
-                                         <img src="/storage/${att.file_path}" class="img-fluid rounded mb-2" style="max-height: 110px; object-fit: cover;" alt="${att.file_name}">
-                                       </a>` 
-                                    : `<div class="py-3"><i class="fa-regular fa-file-pdf fa-3x text-danger"></i></div>`
-                                }
-                                <div class="small text-truncate" title="${att.file_name}">${att.file_name}</div>
-                                <a href="/storage/${att.file_path}" target="_blank" class="btn btn-sm btn-link text-decoration-none mt-1">
-                                    <i class="fa-solid fa-arrow-up-right-from-square"></i> Buka File
-                                </a>
-                            </div>
-                         </div>`;
+                if (isImg) {
+                    const a = document.createElement('a');
+                    a.href = '/storage/' + att.file_path;
+                    a.target = '_blank';
+                    const img = document.createElement('img');
+                    img.src = '/storage/' + att.file_path;
+                    img.alt = att.file_name || 'Foto Dokumentasi';
+                    img.className = 'img-fluid rounded mb-2';
+                    img.style.maxHeight = '110px';
+                    img.style.objectFit = 'cover';
+                    a.appendChild(img);
+                    card.appendChild(a);
+                } else {
+                    const pdfIcon = document.createElement('div');
+                    pdfIcon.className = 'py-3';
+                    pdfIcon.innerHTML = '<i class="fa-regular fa-file-pdf fa-3x text-danger"></i>';
+                    card.appendChild(pdfIcon);
+                }
+
+                const nameEl = document.createElement('div');
+                nameEl.className = 'small text-truncate fw-medium';
+                nameEl.title = att.file_name || '';
+                nameEl.textContent = att.file_name || '';
+                card.appendChild(nameEl);
+
+                const meta = document.createElement('div');
+                meta.className = 'text-start mt-1 pt-1 border-top';
+                meta.style.fontSize = '0.72rem';
+
+                if (att.captured_at) {
+                    const d = new Date(att.captured_at);
+                    const timeTxt = isNaN(d.getTime())
+                        ? att.captured_at
+                        : new Intl.DateTimeFormat('id-ID', {
+                            day: '2-digit', month: 'short', year: 'numeric',
+                            hour: '2-digit', minute: '2-digit', second: '2-digit',
+                            timeZoneName: 'short'
+                        }).format(d);
+                    const tEl = document.createElement('div');
+                    tEl.className = 'fw-semibold text-dark';
+                    tEl.textContent = timeTxt;
+                    meta.appendChild(tEl);
+                }
+
+                if (att.location_address) {
+                    const addrEl = document.createElement('div');
+                    addrEl.className = 'text-secondary text-truncate';
+                    addrEl.title = att.location_address;
+                    addrEl.textContent = att.location_address;
+                    meta.appendChild(addrEl);
+                }
+
+                if (att.latitude !== null && att.latitude !== undefined && att.longitude !== null && att.longitude !== undefined) {
+                    const lat = Number(att.latitude).toFixed(6);
+                    const lng = Number(att.longitude).toFixed(6);
+                    const coordEl = document.createElement('div');
+                    coordEl.className = 'font-monospace text-muted';
+                    coordEl.textContent = `${lat}, ${lng}`;
+                    meta.appendChild(coordEl);
+
+                    const mapLink = document.createElement('a');
+                    mapLink.href = `https://www.google.com/maps?q=${lat},${lng}`;
+                    mapLink.target = '_blank';
+                    mapLink.className = 'badge bg-info-subtle text-info-emphasis border border-info-subtle text-decoration-none mt-1';
+                    mapLink.innerHTML = '<i class="fa-solid fa-map-location-dot me-1"></i> Lihat Peta';
+                    meta.appendChild(mapLink);
+                }
+                card.appendChild(meta);
+
+                const openBtn = document.createElement('a');
+                openBtn.href = '/storage/' + att.file_path;
+                openBtn.target = '_blank';
+                openBtn.className = 'btn btn-sm btn-link text-decoration-none mt-1';
+                openBtn.innerHTML = '<i class="fa-solid fa-arrow-up-right-from-square"></i> Buka File';
+                card.appendChild(openBtn);
+
+                col.appendChild(card);
+                container.appendChild(col);
             });
-            container.innerHTML = html;
         } else {
             container.innerHTML = '<div class="col-12 text-muted small fst-italic">Tidak ada berkas / foto dokumentasi yang dilampirkan.</div>';
         }

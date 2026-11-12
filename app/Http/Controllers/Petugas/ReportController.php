@@ -125,7 +125,7 @@ class ReportController extends Controller
             'status' => $validated['action_type'],
         ]);
 
-        // Handle File Attachments
+        // Handle Camera Attachments
         $this->savePhotoAttachments($request, $report);
 
         if ($this->sheetService->isConfigured()) {
@@ -242,6 +242,7 @@ class ReportController extends Controller
             'status' => $validated['action_type'],
         ]);
 
+        $this->deleteSelectedAttachments($request, $report);
         $this->savePhotoAttachments($request, $report);
 
         if ($this->sheetService->isConfigured()) {
@@ -320,11 +321,27 @@ class ReportController extends Controller
             'signature_file' => ['nullable', 'image', 'mimes:png,jpg,jpeg', 'max:3072'],
             'signature_data' => ['nullable', 'string'],
             'action_type' => ['required', Rule::in(['draft', 'submitted'])],
-            'photos.*' => ['nullable', 'file', 'mimes:jpg,jpeg,png,pdf', 'max:5120'],
+            'camera_photos' => ['nullable', 'array', 'max:10'],
+            'camera_photos.*' => ['required', 'string'],
+            'camera_latitudes' => ['nullable', 'array'],
+            'camera_latitudes.*' => ['nullable', 'numeric', 'between:-90,90'],
+            'camera_longitudes' => ['nullable', 'array'],
+            'camera_longitudes.*' => ['nullable', 'numeric', 'between:-180,180'],
+            'camera_accuracies' => ['nullable', 'array'],
+            'camera_accuracies.*' => ['nullable', 'numeric', 'min:0'],
+            'camera_captured_ats' => ['nullable', 'array'],
+            'camera_captured_ats.*' => ['nullable', 'string', 'max:100'],
+            'camera_location_names' => ['nullable', 'array'],
+            'camera_location_names.*' => ['nullable', 'string', 'max:255'],
+            'camera_timezones' => ['nullable', 'array'],
+            'camera_timezones.*' => ['nullable', 'string', 'max:64'],
+            'delete_attachment_ids' => ['nullable', 'array'],
+            'delete_attachment_ids.*' => ['integer'],
         ], [
             'activity_date.required' => 'Tanggal kegiatan wajib diisi.',
             'activity_title.required' => 'Judul kegiatan wajib diisi.',
             'work_description.required' => 'Uraian pekerjaan / laporan wajib diisi.',
+            'camera_photos.max' => 'Maksimal 10 foto kamera dalam satu kali penyimpanan.',
         ]);
     }
 
@@ -391,21 +408,98 @@ class ReportController extends Controller
         }
     }
 
-    private function savePhotoAttachments(Request $request, OfficerReport $report): void
+    private function deleteSelectedAttachments(Request $request, OfficerReport $report): void
     {
-        if (!$request->hasFile('photos')) {
+        $ids = array_filter((array) $request->input('delete_attachment_ids', []));
+        if (empty($ids)) {
             return;
         }
 
-        foreach ($request->file('photos') as $file) {
-            $path = $file->store('reports', 'public');
+        $attachments = ReportAttachment::where('report_id', $report->id)
+            ->whereIn('id', $ids)
+            ->get();
+
+        foreach ($attachments as $att) {
+            if ($att->file_path && Storage::disk('public')->exists($att->file_path)) {
+                Storage::disk('public')->delete($att->file_path);
+            }
+            $att->delete();
+        }
+    }
+
+    private function savePhotoAttachments(Request $request, OfficerReport $report): void
+    {
+        $cameraPhotos = $request->input('camera_photos', []);
+        if (empty($cameraPhotos) || !is_array($cameraPhotos)) {
+            return;
+        }
+
+        $latitudes = $request->input('camera_latitudes', []);
+        $longitudes = $request->input('camera_longitudes', []);
+        $accuracies = $request->input('camera_accuracies', []);
+        $capturedAts = $request->input('camera_captured_ats', []);
+        $locationNames = $request->input('camera_location_names', []);
+        $timezones = $request->input('camera_timezones', []);
+        $validTimezones = timezone_identifiers_list();
+
+        foreach ($cameraPhotos as $idx => $rawData) {
+            if (!is_string($rawData) || !preg_match('/^data:image\/(jpeg|jpg|png|webp);base64,(.+)$/i', $rawData, $matches)) {
+                continue;
+            }
+
+            $decoded = base64_decode($matches[2], true);
+            if ($decoded === false || strlen($decoded) > 6 * 1024 * 1024) {
+                continue;
+            }
+
+            $imgInfo = @getimagesizefromstring($decoded);
+            if ($imgInfo === false || empty($imgInfo['mime'])) {
+                continue;
+            }
+
+            $ext = match ($imgInfo['mime']) {
+                'image/png' => 'png',
+                'image/webp' => 'webp',
+                default => 'jpg',
+            };
+
+            $fileName = 'cam_' . $report->id . '_' . uniqid() . '.' . $ext;
+            $path = 'reports/' . $fileName;
+            Storage::disk('public')->put($path, $decoded);
+
+            $lat = isset($latitudes[$idx]) && is_numeric($latitudes[$idx]) ? (float) $latitudes[$idx] : null;
+            $lng = isset($longitudes[$idx]) && is_numeric($longitudes[$idx]) ? (float) $longitudes[$idx] : null;
+            $acc = isset($accuracies[$idx]) && is_numeric($accuracies[$idx]) ? (float) $accuracies[$idx] : null;
+            $locAddress = !empty($locationNames[$idx]) ? trim((string) $locationNames[$idx]) : ($report->activity_location ?: null);
+
+            $tz = (!empty($timezones[$idx]) && in_array($timezones[$idx], $validTimezones, true))
+                ? $timezones[$idx]
+                : 'Asia/Makassar';
+
+            try {
+                $capturedCarbon = !empty($capturedAts[$idx])
+                    ? \Carbon\Carbon::parse($capturedAts[$idx])
+                    : now();
+            } catch (\Throwable $e) {
+                $capturedCarbon = now();
+            }
+
+            $localTimeLabel = $capturedCarbon->copy()->timezone($tz)->translatedFormat('d M Y H:i:s');
+            $coordText = ($lat !== null && $lng !== null) ? number_format($lat, 6, '.', '') . ', ' . number_format($lng, 6, '.', '') : 'GPS tidak tersedia';
+            $caption = "Kamera Real-Time ({$localTimeLabel}) • " . ($locAddress ? "{$locAddress} ({$coordText})" : $coordText);
+
             ReportAttachment::create([
                 'report_id' => $report->id,
-                'file_name' => $file->getClientOriginalName(),
+                'file_name' => $fileName,
                 'file_path' => $path,
-                'file_type' => $file->getMimeType(),
-                'file_size' => $file->getSize(),
-                'caption' => 'Dokumentasi ' . $report->activity_title,
+                'file_type' => $imgInfo['mime'],
+                'file_size' => strlen($decoded),
+                'caption' => \Illuminate\Support\Str::limit($caption, 250),
+                'latitude' => $lat,
+                'longitude' => $lng,
+                'accuracy' => $acc,
+                'location_address' => $locAddress ? \Illuminate\Support\Str::limit($locAddress, 250) : null,
+                'captured_at' => $capturedCarbon->copy()->utc(),
             ]);
         }
     }

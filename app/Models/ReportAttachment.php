@@ -17,7 +17,22 @@ class ReportAttachment extends Model
         'file_type',
         'file_size',
         'caption',
+        'latitude',
+        'longitude',
+        'accuracy',
+        'location_address',
+        'captured_at',
     ];
+
+    protected function casts(): array
+    {
+        return [
+            'latitude' => 'float',
+            'longitude' => 'float',
+            'accuracy' => 'float',
+            'captured_at' => 'datetime',
+        ];
+    }
 
     public function report(): BelongsTo
     {
