@@ -136,10 +136,21 @@
         </tr>
     </table>
 
+    @php
+        $handoverCategory = strtoupper($bast->handover_category ?: 'KUES');
+        $handoverCategoryLabel = $handoverCategory === 'ATK'
+            ? 'ATK / Perlengkapan'
+            : 'KUES (Kuesioner / Dokumen)';
+    @endphp
     <!-- JUDUL DOKUMEN -->
     <div class="doc-title">
-        <h3>BERITA ACARA SERAH TERIMA DOKUMEN RESPONDEN</h3>
-        <p>Nomor: <strong>{{ $bast->bast_number }}</strong></p>
+        <h3>TANDA TERIMA &amp; BAST DOKUMEN RESPONDEN ({{ $handoverCategory }})</h3>
+        <p>
+            Nomor: <strong>{{ $bast->bast_number }}</strong>
+            @if(!empty($bast->respondent_number))
+                &nbsp;|&nbsp; No. Responden: <strong>{{ $bast->respondent_number }}</strong>
+            @endif
+        </p>
     </div>
 
     <p style="text-align: justify;">
@@ -220,7 +231,7 @@
 
     <!-- ISI SERAH TERIMA -->
     <p style="text-align: justify; margin-top: 15px;">
-        Bahwa PIHAK PERTAMA dan PIHAK KEDUA telah melaksanakan serah terima kelengkapan berkas administrasi dan dokumen kegiatan <strong>{{ $bast->assignment ? $bast->assignment->title : 'Pendataan Lapangan Terpadu' }}</strong> dengan rincian sebagai berikut:
+        Bahwa PIHAK PERTAMA dan PIHAK KEDUA telah melaksanakan serah terima <strong>{{ $handoverCategoryLabel }}</strong> untuk kegiatan <strong>{{ $bast->assignment ? $bast->assignment->title : 'Pendataan Lapangan Terpadu' }}</strong>@if(!empty($bast->respondent_number)) (Sampel No. Responden: <strong>{{ $bast->respondent_number }}</strong>)@endif dengan rincian sebagai berikut:
     </p>
 
     <div class="items-box">

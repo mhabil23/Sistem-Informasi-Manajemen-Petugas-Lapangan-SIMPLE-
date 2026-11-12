@@ -81,6 +81,17 @@
                             <td>
                                 <div class="fw-bold text-dark font-monospace">{{ $item->bast_number }}</div>
                                 <div class="small text-muted"><i class="fa-regular fa-calendar me-1"></i> {{ $item->bast_date->translatedFormat('d F Y') }}</div>
+                                @php $respCat = strtoupper($item->handover_category ?: 'KUES'); @endphp
+                                <div class="mt-1 d-flex flex-wrap gap-1">
+                                    @if(!empty($item->respondent_number))
+                                        <span class="badge bg-dark-subtle text-dark border border-dark-subtle" style="font-size: 0.68rem;">
+                                            No. Resp: {{ $item->respondent_number }}
+                                        </span>
+                                    @endif
+                                    <span class="badge {{ $respCat === 'ATK' ? 'bg-success-subtle text-success-emphasis border border-success-subtle' : 'bg-primary-subtle text-primary-emphasis border border-primary-subtle' }}" style="font-size: 0.68rem;">
+                                        {{ $respCat }}
+                                    </span>
+                                </div>
                             </td>
                             <td>
                                 <div class="fw-bold text-dark">{{ $item->respondent ? $item->respondent->name : '-' }}</div>
@@ -208,8 +219,35 @@
                             </select>
                         </div>
                         <div class="col-md-5">
-                            <label class="form-label small fw-semibold text-secondary">TANGGAL BAST <span class="text-danger">*</span></label>
+                            <label class="form-label small fw-semibold text-secondary d-flex justify-content-between align-items-center">
+                                <span>TANGGAL BAST <span class="text-danger">*</span></span>
+                                <span class="badge bg-info-subtle text-info-emphasis border border-info-subtle" style="font-size: 0.65rem;">Tgl Dibuka</span>
+                            </label>
                             <input type="date" name="bast_date" class="form-control" value="{{ now()->toDateString() }}" required>
+                        </div>
+                    </div>
+
+                    <div class="row g-3 mb-3">
+                        <div class="col-md-4">
+                            <label class="form-label small fw-semibold text-secondary">NO. URUT RESPONDEN</label>
+                            <input type="number" name="respondent_number" class="form-control" min="1" placeholder="Contoh: 1, 2, ... 10">
+                        </div>
+                        <div class="col-md-8">
+                            <label class="form-label small fw-semibold text-secondary">KATEGORI TANDA TERIMA <span class="text-danger">*</span></label>
+                            <div class="row g-2">
+                                <div class="col-6">
+                                    <label class="border rounded-3 p-2 d-flex align-items-center gap-2 cursor-pointer bg-light h-100">
+                                        <input type="radio" name="handover_category" value="ATK" class="form-check-input mt-0">
+                                        <span class="small fw-semibold">ATK <small class="text-muted fw-normal">(Perlengkapan)</small></span>
+                                    </label>
+                                </div>
+                                <div class="col-6">
+                                    <label class="border rounded-3 p-2 d-flex align-items-center gap-2 cursor-pointer bg-light h-100">
+                                        <input type="radio" name="handover_category" value="KUES" class="form-check-input mt-0" checked>
+                                        <span class="small fw-semibold">KUES <small class="text-muted fw-normal">(Kuesioner)</small></span>
+                                    </label>
+                                </div>
+                            </div>
                         </div>
                     </div>
 

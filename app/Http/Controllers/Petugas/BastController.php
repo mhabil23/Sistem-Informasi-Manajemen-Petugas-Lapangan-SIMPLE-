@@ -9,10 +9,12 @@ use App\Models\AssignmentOfficer;
 use App\Models\OfficerBast;
 use App\Models\Respondent;
 use App\Models\RespondentBast;
+use App\Models\User;
 use App\Services\GoogleSheetService;
 use Barryvdh\DomPDF\Facade\Pdf;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Validation\Rule;
 
@@ -37,10 +39,10 @@ class BastController extends Controller
             ->latest('bast_date')
             ->paginate(10);
 
-        // Load all respondents allocated to this officer with their BASTs
+        // Load all respondents allocated to this officer in stable sample order (No. Resp 1, 2, 3...)
         $myRespondents = Respondent::with('basts')
             ->where('officer_id', $userId)
-            ->orderBy('name')
+            ->orderBy('id')
             ->get();
 
         $completedCount = $myRespondents->filter(fn($r) => $r->basts->isNotEmpty())->count();
@@ -53,6 +55,8 @@ class BastController extends Controller
     {
         $validated = $request->validate([
             'respondent_id' => ['required', 'exists:respondents,id'],
+            'respondent_number' => ['nullable', 'integer', 'min:1'],
+            'handover_category' => ['required', Rule::in(['ATK', 'KUES'])],
             'bast_date' => ['required', 'date'],
             'recipient_type' => ['required', Rule::in(['krt', 'representative'])],
             'recipient_name' => ['nullable', 'string', 'max:255'],
@@ -63,6 +67,7 @@ class BastController extends Controller
             'notes' => ['nullable', 'string', 'max:500'],
         ], [
             'respondent_id.required' => 'Responden wajib dipilih.',
+            'handover_category.required' => 'Jenis tanda terima (ATK atau KUES) wajib dipilih.',
             'bast_date.required' => 'Tanggal BAST wajib diisi.',
             'recipient_type.required' => 'Pihak penerima wajib dipilih (KRT atau Wakil).',
             'handover_items.required' => 'Rincian berkas wajib diisi.',
@@ -108,10 +113,19 @@ class BastController extends Controller
         $count = RespondentBast::whereYear('created_at', now()->year)->count() + 1;
         $bastNumber = sprintf('BAST-RESP/%s/%s/%04d', $year, $month, $count);
 
+        $respNumber = $validated['respondent_number'] ?? null;
+        if (empty($respNumber)) {
+            $orderedIds = Respondent::where('officer_id', Auth::id())->orderBy('id')->pluck('id')->values();
+            $foundIdx = $orderedIds->search($respondent->id);
+            $respNumber = $foundIdx !== false ? ($foundIdx + 1) : 1;
+        }
+
         $bast = RespondentBast::create([
             'bast_number' => $bastNumber,
             'bast_date' => $validated['bast_date'],
             'respondent_id' => $respondent->id,
+            'respondent_number' => (int) $respNumber,
+            'handover_category' => strtoupper($validated['handover_category']),
             'assignment_id' => $respondent->assignment_id,
             'officer_id' => Auth::id(),
             'handover_items' => $validated['handover_items'],
@@ -206,61 +220,100 @@ class BastController extends Controller
             ->where('bast_type', 'petugas_ke_kantor')
             ->count();
 
+        $user = Auth::user();
         $myAssignmentIds = AssignmentOfficer::where('user_id', $userId)->pluck('assignment_id');
-        $myAssignments = Assignment::whereIn('id', $myAssignmentIds)->get();
+        $assignmentsQuery = Assignment::with(['officers' => fn ($q) => $q->orderBy('name')])
+            ->orderBy('title');
 
-        return view('petugas.basts.officers', compact('basts', 'myAssignments', 'currentType', 'countBlanko', 'countTerisi'));
+        if (!$user->isPegawai()) {
+            $assignmentsQuery->whereIn('id', $myAssignmentIds);
+        }
+        $myAssignments = $assignmentsQuery->get();
+
+        $officers = User::fieldStaff()->where('status', 'active')->orderBy('name')->get();
+
+        return view('petugas.basts.officers', compact(
+            'basts',
+            'myAssignments',
+            'officers',
+            'currentType',
+            'countBlanko',
+            'countTerisi'
+        ));
     }
 
     public function storeOfficer(Request $request)
     {
-        $validated = $request->validate([
+        $bastType = $request->input('bast_type', 'kantor_ke_petugas');
+
+        $rules = [
             'assignment_id' => ['required', 'exists:assignments,id'],
             'bast_type' => ['required', Rule::in(['kantor_ke_petugas', 'petugas_ke_kantor'])],
-            'bast_date' => ['required', 'date'],
-            'description' => ['required', 'string'],
             'notes' => ['nullable', 'string', 'max:500'],
-        ], [
+        ];
+
+        if ($bastType === 'petugas_ke_kantor') {
+            $rules['description'] = ['required', 'string'];
+        } else {
+            $rules['receipt_category'] = ['nullable', Rule::in(['ATK', 'KUES'])];
+            $rules['description'] = ['nullable', 'string'];
+            $rules['document_title'] = ['nullable', 'string', 'max:255'];
+            $rules['activity_subtitle'] = ['nullable', 'string', 'max:255'];
+            $rules['institution_name'] = ['nullable', 'string', 'max:255'];
+            $rules['document_place'] = ['nullable', 'string', 'max:255'];
+            $rules['maker_name'] = ['nullable', 'string', 'max:255'];
+            $rules['maker_nip'] = ['nullable', 'string', 'max:100'];
+            $rules['items'] = ['nullable', 'array'];
+            $rules['items.*'] = ['nullable', 'string', 'max:255'];
+            $rules['recipients'] = ['nullable', 'array'];
+            $rules['recipients.*.user_id'] = ['nullable', 'exists:users,id'];
+            $rules['recipients.*.recipient_name'] = ['nullable', 'string', 'max:255'];
+            $rules['recipients.*.position_unit'] = ['nullable', 'string', 'max:255'];
+            $rules['recipients.*.origin_role'] = ['nullable', 'string', 'max:255'];
+        }
+
+        $validated = $request->validate($rules, [
             'assignment_id.required' => 'Kegiatan wajib dipilih.',
             'bast_type.required' => 'Jenis BAST wajib dipilih.',
-            'bast_date.required' => 'Tanggal BAST wajib diisi.',
             'description.required' => 'Rincian serah terima dokumen/perlengkapan wajib diisi.',
         ]);
 
         $bastNumber = OfficerBast::generateBastNumber($validated['bast_type']);
         $assignment = Assignment::findOrFail($validated['assignment_id']);
         $user = Auth::user();
-        $year = date('Y', strtotime($validated['bast_date']));
+        $bastDate = now()->toDateString();
 
-        $payload = [
-            'bast_number' => $bastNumber,
-            'bast_type' => $validated['bast_type'],
-            'bast_date' => $validated['bast_date'],
-            'assignment_id' => $validated['assignment_id'],
-            'officer_id' => $user->id,
-            'description' => $validated['description'],
-            'notes' => $validated['notes'] ?? null,
-            'status' => 'finalized',
-        ];
-
-        if ($validated['bast_type'] === 'kantor_ke_petugas') {
-            $payload['document_title'] = 'Tanda Terima Blanko & Perlengkapan';
-            $payload['activity_subtitle'] = $assignment->title;
-            $payload['institution_name'] = "BPS Kabupaten Kolaka Utara Tahun {$year}";
-            $payload['document_place'] = $assignment->location ?: 'Lasusua';
-            $payload['maker_name'] = 'Koordinator Logistik BPS';
-        }
-
-        $bast = OfficerBast::create($payload);
-
-        if ($validated['bast_type'] === 'kantor_ke_petugas') {
-            $bast->recipients()->create([
-                'user_id' => $user->id,
-                'recipient_name' => $user->name,
-                'position_unit' => $user->position ?: ($user->isPegawai() ? 'Pegawai BPS' : 'Mitra'),
-                'origin_role' => $assignment->location ?: '-',
-                'sort_order' => 1,
+        if ($validated['bast_type'] === 'petugas_ke_kantor') {
+            $bast = OfficerBast::create([
+                'bast_number' => $bastNumber,
+                'bast_type' => 'petugas_ke_kantor',
+                'bast_date' => $bastDate,
+                'assignment_id' => $validated['assignment_id'],
+                'officer_id' => $user->id,
+                'description' => trim($validated['description']),
+                'notes' => $validated['notes'] ?? null,
+                'status' => 'finalized',
             ]);
+        } else {
+            [$bastAttributes, $recipients] = OfficerBast::prepareCollectivePayload(
+                $request,
+                $assignment,
+                $bastDate,
+                $user,
+                'Koordinator Logistik BPS',
+                ''
+            );
+
+            $bastAttributes['bast_number'] = $bastNumber;
+            $bastAttributes['notes'] = $validated['notes'] ?? null;
+            $bastAttributes['status'] = 'finalized';
+
+            $bast = DB::transaction(function () use ($bastAttributes, $recipients) {
+                $created = OfficerBast::create($bastAttributes);
+                $created->syncRecipients($recipients);
+
+                return $created;
+            });
         }
 
         if ($this->sheetService->isConfigured()) {

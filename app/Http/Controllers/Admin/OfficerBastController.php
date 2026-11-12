@@ -13,7 +13,6 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Validation\Rule;
-use Illuminate\Validation\ValidationException;
 
 class OfficerBastController extends Controller
 {
@@ -90,7 +89,7 @@ class OfficerBastController extends Controller
 
         $bast = DB::transaction(function () use ($bastData, $recipients) {
             $created = OfficerBast::create($bastData);
-            $this->syncRecipients($created, $recipients);
+            $created->syncRecipients($recipients);
 
             return $created;
         });
@@ -118,7 +117,7 @@ class OfficerBastController extends Controller
 
         DB::transaction(function () use ($bast, $bastData, $recipients) {
             $bast->update($bastData);
-            $this->syncRecipients($bast, $recipients);
+            $bast->syncRecipients($recipients);
         });
 
         $bast->load(['officer', 'recipients']);
@@ -175,7 +174,6 @@ class OfficerBastController extends Controller
         $rules = [
             'assignment_id' => ['required', 'exists:assignments,id'],
             'bast_type' => ['nullable', Rule::in(['kantor_ke_petugas', 'petugas_ke_kantor'])],
-            'bast_date' => ['required', 'date'],
             'bast_number' => ['nullable', 'string', 'max:100', $uniqueRule],
             'notes' => ['nullable', 'string', 'max:500'],
             'status' => ['required', Rule::in(['draft', 'finalized', 'archived'])],
@@ -186,6 +184,7 @@ class OfficerBastController extends Controller
             $rules['description'] = ['required', 'string'];
         } else {
             $rules['officer_id'] = ['nullable', 'exists:users,id'];
+            $rules['receipt_category'] = ['nullable', Rule::in(['ATK', 'KUES'])];
             $rules['description'] = ['nullable', 'string'];
             $rules['document_title'] = ['nullable', 'string', 'max:255'];
             $rules['activity_subtitle'] = ['nullable', 'string', 'max:255'];
@@ -205,20 +204,22 @@ class OfficerBastController extends Controller
         $validated = $request->validate($rules, [
             'assignment_id.required' => 'Kegiatan wajib dipilih.',
             'officer_id.required' => 'Petugas wajib dipilih.',
-            'bast_date.required' => 'Tanggal BAST wajib diisi.',
             'description.required' => 'Rincian serah terima dokumen/perlengkapan wajib diisi.',
             'bast_number.unique' => 'Nomor BAST tersebut sudah terdaftar.',
         ]);
 
         $assignment = Assignment::findOrFail($validated['assignment_id']);
-        $validated['bast_type'] = $bastType;
+        $bastDate = $existing && $existing->bast_date
+            ? $existing->bast_date->toDateString()
+            : now()->toDateString();
 
         if ($bastType === 'petugas_ke_kantor') {
             $bastData = [
                 'assignment_id' => $validated['assignment_id'],
                 'officer_id' => $validated['officer_id'],
                 'bast_type' => 'petugas_ke_kantor',
-                'bast_date' => $validated['bast_date'],
+                'receipt_category' => null,
+                'bast_date' => $bastDate,
                 'bast_number' => $validated['bast_number'] ?? null,
                 'description' => trim($validated['description']),
                 'notes' => $validated['notes'] ?? null,
@@ -234,99 +235,21 @@ class OfficerBastController extends Controller
             return [$bastData, []];
         }
 
-        // Kolektif Blanko & Perlengkapan (kantor_ke_petugas)
-        $cleanRecipients = [];
-        foreach ($request->input('recipients', []) as $row) {
-            $name = trim((string) ($row['recipient_name'] ?? ''));
-            $userId = !empty($row['user_id']) ? (int) $row['user_id'] : null;
-
-            if ($name === '' && $userId) {
-                $user = User::find($userId);
-                $name = $user?->name ?? '';
-            }
-            if ($name === '') {
-                continue;
-            }
-
-            $pos = trim((string) ($row['position_unit'] ?? ''));
-            $origin = trim((string) ($row['origin_role'] ?? ''));
-
-            $cleanRecipients[] = [
-                'user_id' => $userId,
-                'recipient_name' => $name,
-                'position_unit' => $pos !== '' ? $pos : 'Mitra',
-                'origin_role' => $origin !== '' ? $origin : ($assignment->location ?? '-'),
-                'sort_order' => count($cleanRecipients) + 1,
-            ];
-        }
-
-        if (empty($cleanRecipients) && !empty($validated['officer_id'])) {
-            $singleUser = User::find($validated['officer_id']);
-            if ($singleUser) {
-                $cleanRecipients[] = [
-                    'user_id' => $singleUser->id,
-                    'recipient_name' => $singleUser->name,
-                    'position_unit' => $singleUser->position ?: ($singleUser->isPegawai() ? 'Pegawai BPS' : 'Mitra'),
-                    'origin_role' => $assignment->location ?? '-',
-                    'sort_order' => 1,
-                ];
-            }
-        }
-
-        if (empty($cleanRecipients)) {
-            throw ValidationException::withMessages([
-                'recipients' => ['Minimal 1 petugas / peserta penerima blanko & perlengkapan wajib dipilih.'],
-            ]);
-        }
-
-        $cleanItems = [];
-        foreach ($request->input('items', []) as $itemText) {
-            $trimmed = trim((string) $itemText);
-            if ($trimmed !== '') {
-                $cleanItems[] = $trimmed;
-            }
-        }
-
-        $descriptionText = !empty($cleanItems)
-            ? implode("\n", $cleanItems)
-            : trim((string) ($validated['description'] ?? ''));
-
-        if ($descriptionText === '') {
-            throw ValidationException::withMessages([
-                'items' => ['Minimal 1 rincian barang / blanko perlengkapan wajib diisi.'],
-            ]);
-        }
-
-        $year = date('Y', strtotime($validated['bast_date']));
         $authUser = Auth::user();
+        [$bastData, $cleanRecipients] = OfficerBast::prepareCollectivePayload(
+            $request,
+            $assignment,
+            $bastDate,
+            null,
+            $authUser?->name ?? 'Koordinator Logistik BPS',
+            ''
+        );
 
-        $bastData = [
-            'assignment_id' => $validated['assignment_id'],
-            'officer_id' => $cleanRecipients[0]['user_id'] ?? null,
-            'bast_type' => 'kantor_ke_petugas',
-            'bast_date' => $validated['bast_date'],
-            'bast_number' => $validated['bast_number'] ?? null,
-            'description' => $descriptionText,
-            'document_title' => trim((string) ($validated['document_title'] ?? '')) ?: 'Tanda Terima Blanko & Perlengkapan',
-            'activity_subtitle' => trim((string) ($validated['activity_subtitle'] ?? '')) ?: $assignment->title,
-            'institution_name' => trim((string) ($validated['institution_name'] ?? '')) ?: "BPS Kabupaten Kolaka Utara Tahun {$year}",
-            'document_place' => trim((string) ($validated['document_place'] ?? '')) ?: ($assignment->location ?: 'Lasusua'),
-            'maker_name' => trim((string) ($validated['maker_name'] ?? '')) ?: ($authUser?->name ?? 'Koordinator Logistik BPS'),
-            'maker_nip' => trim((string) ($validated['maker_nip'] ?? '')),
-            'notes' => $validated['notes'] ?? null,
-            'status' => $validated['status'],
-        ];
+        $bastData['bast_number'] = $validated['bast_number'] ?? null;
+        $bastData['notes'] = $validated['notes'] ?? null;
+        $bastData['status'] = $validated['status'];
 
         return [$bastData, $cleanRecipients];
-    }
-
-    private function syncRecipients(OfficerBast $bast, array $recipients): void
-    {
-        $bast->recipients()->delete();
-
-        if (!empty($recipients)) {
-            $bast->recipients()->createMany($recipients);
-        }
     }
 
     private function renderPdf(OfficerBast $bast)

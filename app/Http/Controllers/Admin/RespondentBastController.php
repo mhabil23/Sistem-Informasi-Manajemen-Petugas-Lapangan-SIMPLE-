@@ -69,6 +69,8 @@ class RespondentBastController extends Controller
     {
         $validated = $request->validate([
             'respondent_id' => ['required', 'exists:respondents,id'],
+            'respondent_number' => ['nullable', 'integer', 'min:1'],
+            'handover_category' => ['nullable', Rule::in(['ATK', 'KUES'])],
             'bast_date' => ['required', 'date'],
             'bast_number' => ['nullable', 'string', 'max:100', 'unique:respondent_basts,bast_number'],
             'handover_items' => ['required', 'string'],
@@ -91,6 +93,7 @@ class RespondentBastController extends Controller
             $validated['bast_number'] = sprintf('BAST-RESP/%s/%s/%04d', $year, $month, $count);
         }
 
+        $validated['handover_category'] = strtoupper((string) ($validated['handover_category'] ?? 'KUES'));
         $validated['assignment_id'] = $respondent->assignment_id;
         $validated['officer_id'] = $respondent->officer_id ?? Auth::id();
 

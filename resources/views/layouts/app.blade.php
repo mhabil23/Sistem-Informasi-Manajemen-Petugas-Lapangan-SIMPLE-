@@ -139,15 +139,15 @@
                         </a>
                         <a href="{{ route('petugas.basts.respondents.index') }}" class="sp-nav-link {{ request()->routeIs('petugas.basts.respondents.*') ? 'active' : '' }}">
                             <i class="fa-solid fa-file-signature sp-nav-icon"></i>
-                            <span>BAST Responden Saya</span>
+                            <span>Tanda Terima Resp</span>
                         </a>
                         <a href="{{ route('petugas.basts.officers.index') }}" class="sp-nav-link {{ request()->routeIs('petugas.basts.officers.*') ? 'active' : '' }}">
                             <i class="fa-solid fa-file-shield sp-nav-icon"></i>
-                            <span>BAST Perlengkapan</span>
+                            <span>Tanda Terima Petugas &amp; BAST</span>
                         </a>
                         <a href="{{ route('petugas.reports.index') }}" class="sp-nav-link {{ request()->routeIs('petugas.reports.*') ? 'active' : '' }}">
                             <i class="fa-solid fa-route sp-nav-icon"></i>
-                            <span>Laporan Perjadin Saya</span>
+                            <span>LPerjadin Saya</span>
                         </a>
 
                         <div class="sp-nav-heading">Monitoring Lapangan</div>

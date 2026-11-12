@@ -16,41 +16,52 @@
     <div class="col-md-7">
         @if($currentType === 'kantor_ke_petugas')
             <h3 class="fw-bold text-dark mb-1">
-                <i class="fa-solid fa-boxes-packing text-primary me-2"></i>BAST Blanko &amp; Perlengkapan
+                <i class="fa-solid fa-boxes-packing text-primary me-2"></i>Tanda Terima Petugas (ATK / KUES)
             </h3>
-            <p class="text-muted small mb-0">Arsip serah terima penerimaan blanko kuesioner dan perlengkapan survei/sensus dari Kantor Satker BPS kepada Petugas Lapangan.</p>
+            <p class="text-muted small mb-0">Arsip tanda terima penerimaan ATK maupun Kuesioner/Blanko dari Kantor Satker BPS kepada Petugas Lapangan (tanggal pembuatan dikunci otomatis).</p>
         @elseif($currentType === 'petugas_ke_kantor')
             <h3 class="fw-bold text-dark mb-1">
                 <i class="fa-solid fa-file-circle-check text-warning me-2"></i>BAST Dokumen Terisi
             </h3>
-            <p class="text-muted small mb-0">Arsip serah terima pengembalian berkas dokumen/kuesioner yang telah terisi lengkap hasil pencacahan lapangan kepada Kantor Satker BPS.</p>
+            <p class="text-muted small mb-0">Arsip BAST pengembalian berkas dokumen/kuesioner yang telah terisi lengkap hasil pencacahan lapangan kepada Kantor Satker BPS.</p>
         @else
-            <h3 class="fw-bold text-dark mb-1">Berita Acara Serah Terima (BAST) Penugasan</h3>
-            <p class="text-muted small mb-0">Arsip dokumen serah terima blanko/perlengkapan maupun pengembalian dokumen terisi antara Petugas dan Kantor Satker BPS.</p>
+            <h3 class="fw-bold text-dark mb-1">Tanda Terima Petugas &amp; BAST</h3>
+            <p class="text-muted small mb-0">Arsip Tanda Terima Petugas (ATK / KUES) serta BAST pengembalian dokumen terisi antara Petugas dan Kantor Satker BPS.</p>
         @endif
     </div>
     <div class="col-md-5 text-md-end mt-3 mt-md-0">
-        <button type="button" class="btn btn-sp-primary" data-bs-toggle="modal" data-bs-target="#createMyOfficerBastModal">
+        <button type="button" class="btn btn-sp-primary" onclick="openCreateMyOfficerBastModal()">
             <i class="fa-solid fa-file-circle-plus me-1"></i> Buat BAST Baru
         </button>
     </div>
 </div>
 
-<!-- Tab Filter BAST Petugas (Sesuai 4 Alur BPS) -->
+@if(isset($errors) && $errors->any())
+    <div class="alert alert-danger border-0 shadow-sm mb-4">
+        <div class="fw-bold mb-1"><i class="fa-solid fa-triangle-exclamation me-1"></i> Gagal menyimpan dokumen BAST:</div>
+        <ul class="mb-0 small">
+            @foreach($errors->all() as $error)
+                <li>{{ $error }}</li>
+            @endforeach
+        </ul>
+    </div>
+@endif
+
+<!-- Tab Filter Tanda Terima & BAST Petugas -->
 <div class="mb-4">
     <div class="nav nav-pills gap-2 flex-wrap" role="tablist">
         <a href="{{ route('petugas.basts.officers.index') }}" 
            class="btn btn-sm {{ empty($currentType) ? 'btn-sp-primary' : 'btn-outline-secondary' }} rounded-pill px-3 py-1.5 fw-semibold">
-            <i class="fa-solid fa-list me-1"></i> Semua BAST ({{ $countBlanko + $countTerisi }})
+            <i class="fa-solid fa-list me-1"></i> Semua ({{ $countBlanko + $countTerisi }})
         </a>
         <a href="{{ route('petugas.basts.officers.index', ['type' => 'kantor_ke_petugas']) }}" 
            class="btn btn-sm {{ $currentType === 'kantor_ke_petugas' ? 'btn-sp-primary' : 'btn-outline-primary' }} rounded-pill px-3 py-1.5 fw-semibold">
-            <i class="fa-solid fa-boxes-packing me-1"></i> 1. Blanko &amp; Perlengkapan (Kantor &rarr; Petugas)
+            <i class="fa-solid fa-boxes-packing me-1"></i> Tanda Terima Petugas (ATK / KUES)
             <span class="badge bg-primary-subtle text-primary border border-primary-subtle ms-1 font-monospace">{{ $countBlanko }}</span>
         </a>
         <a href="{{ route('petugas.basts.officers.index', ['type' => 'petugas_ke_kantor']) }}" 
            class="btn btn-sm {{ $currentType === 'petugas_ke_kantor' ? 'btn-sp-primary' : 'btn-outline-warning' }} rounded-pill px-3 py-1.5 fw-semibold">
-            <i class="fa-solid fa-file-circle-check me-1"></i> 3. Dokumen Terisi (Petugas &rarr; Kantor)
+            <i class="fa-solid fa-file-circle-check me-1"></i> BAST Dokumen Terisi
             <span class="badge bg-warning-subtle text-warning-emphasis border border-warning-subtle ms-1 font-monospace">{{ $countTerisi }}</span>
         </a>
     </div>
@@ -89,12 +100,18 @@
                             </td>
                             <td>
                                 @if($item->bast_type === 'kantor_ke_petugas' || empty($item->bast_type))
+                                    @php $cat = strtoupper($item->receipt_category ?: 'ATK'); @endphp
                                     <span class="badge bg-info-subtle text-info-emphasis border border-info-subtle py-1 px-2" style="font-size: 0.72rem;">
-                                        <i class="fa-solid fa-boxes-packing me-1 text-primary"></i> Kantor &rarr; Petugas (Blanko)
+                                        <i class="fa-solid fa-boxes-packing me-1 text-primary"></i> Tanda Terima Petugas
                                     </span>
+                                    <div class="mt-1">
+                                        <span class="badge {{ $cat === 'KUES' ? 'bg-primary-subtle text-primary-emphasis border border-primary-subtle' : 'bg-success-subtle text-success-emphasis border border-success-subtle' }}" style="font-size: 0.68rem;">
+                                            {{ $cat }}
+                                        </span>
+                                    </div>
                                 @else
                                     <span class="badge bg-warning-subtle text-warning-emphasis border border-warning-subtle py-1 px-2" style="font-size: 0.72rem;">
-                                        <i class="fa-solid fa-file-circle-check me-1 text-warning"></i> Petugas &rarr; Kantor (Terisi)
+                                        <i class="fa-solid fa-file-circle-check me-1 text-warning"></i> BAST (Petugas &rarr; Kantor)
                                     </span>
                                 @endif
                             </td>
@@ -161,15 +178,19 @@
                                     {{ $item->bast_number }}
                                 </span>
                                 @if($item->bast_type === 'kantor_ke_petugas' || empty($item->bast_type))
-                                    <div>
+                                    @php $cat = strtoupper($item->receipt_category ?: 'ATK'); @endphp
+                                    <div class="d-flex flex-wrap gap-1">
                                         <span class="badge bg-info-subtle text-info-emphasis border border-info-subtle px-1.5 py-0.5" style="font-size: 0.65rem;">
-                                            <i class="fa-solid fa-boxes-packing me-1"></i> Kantor &rarr; Petugas (Blanko)
+                                            <i class="fa-solid fa-boxes-packing me-1"></i> Tanda Terima Petugas
+                                        </span>
+                                        <span class="badge {{ $cat === 'KUES' ? 'bg-primary-subtle text-primary-emphasis border border-primary-subtle' : 'bg-success-subtle text-success-emphasis border border-success-subtle' }} px-1.5 py-0.5" style="font-size: 0.65rem;">
+                                            {{ $cat }}
                                         </span>
                                     </div>
                                 @else
                                     <div>
                                         <span class="badge bg-warning-subtle text-warning-emphasis border border-warning-subtle px-1.5 py-0.5" style="font-size: 0.65rem;">
-                                            <i class="fa-solid fa-file-circle-check me-1"></i> Petugas &rarr; Kantor (Terisi)
+                                            <i class="fa-solid fa-file-circle-check me-1"></i> BAST (Petugas &rarr; Kantor)
                                         </span>
                                     </div>
                                 @endif
@@ -244,64 +265,66 @@
 <!-- ==============================================================
      MODAL BUAT BAST PETUGAS (SESUAI 4 ALUR BPS)
      ============================================================== -->
-<div class="modal fade" id="createMyOfficerBastModal" tabindex="-1" aria-labelledby="createMyOfficerBastModalLabel" aria-hidden="true">
-    <div class="modal-dialog modal-dialog-centered modal-lg">
+<div class="modal fade" id="officerBastFormModal" tabindex="-1" aria-labelledby="officerBastFormModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered modal-xl modal-dialog-scrollable">
         <div class="modal-content border-0 shadow">
             <div class="modal-header bg-light border-bottom">
-                <h5 class="modal-title fw-bold" id="createMyOfficerBastModalLabel">
+                <h5 class="modal-title fw-bold" id="officerBastFormModalLabel">
                     <i class="fa-solid fa-file-circle-plus text-primary me-2"></i> Buat Dokumen BAST
                 </h5>
                 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
-            <form method="POST" action="{{ route('petugas.basts.officers.store') }}">
+            <form id="officerBastForm" method="POST" action="{{ route('petugas.basts.officers.store') }}">
                 @csrf
                 <div class="modal-body p-4">
-                    <!-- Pilihan Alur BAST Resmi BPS -->
-                    <div class="mb-3">
-                        <label class="form-label small fw-semibold text-secondary">JENIS ALUR SERAH TERIMA BAST <span class="text-danger">*</span></label>
-                        <select name="bast_type" id="bastTypeSelect" class="form-select fw-semibold" required onchange="updateBastDescriptionPlaceholder()">
-                            <option value="kantor_ke_petugas" {{ ($currentType === 'kantor_ke_petugas' || empty($currentType)) ? 'selected' : '' }}>
-                                1. BAST Blanko Dokumen dan Perlengkapan (Kantor &rarr; Petugas)
-                            </option>
-                            <option value="petugas_ke_kantor" {{ $currentType === 'petugas_ke_kantor' ? 'selected' : '' }}>
-                                3. BAST Dokumen Terisi &amp; Hasil Pendataan (Petugas &rarr; Kantor)
-                            </option>
-                        </select>
-                        <div class="form-text small" id="bastTypeHelp">
-                            Pilih tahap alur serah terima yang sedang dilaksanakan dengan kantor satker BPS.
-                        </div>
-                    </div>
-
                     <div class="row g-3 mb-3">
-                        <div class="col-md-7">
+                        <div class="col-md-5">
+                            <label class="form-label small fw-semibold text-secondary">JENIS ALUR SERAH TERIMA BAST <span class="text-danger">*</span></label>
+                            <select name="bast_type" id="bastTypeInput" class="form-select fw-semibold" required onchange="toggleBastTypeSections()">
+                                <option value="kantor_ke_petugas" {{ ($currentType === 'kantor_ke_petugas' || empty($currentType)) ? 'selected' : '' }}>
+                                    Tanda Terima Petugas (ATK / KUES - Tgl Dikunci)
+                                </option>
+                                <option value="petugas_ke_kantor" {{ $currentType === 'petugas_ke_kantor' ? 'selected' : '' }}>
+                                    BAST Dokumen Terisi (Petugas &rarr; Kantor)
+                                </option>
+                            </select>
+                        </div>
+                        <div class="col-md-4">
                             <label class="form-label small fw-semibold text-secondary">PILIH KEGIATAN <span class="text-danger">*</span></label>
-                            <select name="assignment_id" class="form-select" required>
+                            <select name="assignment_id" id="bastAssignmentInput" class="form-select" required onchange="onAssignmentSelected()">
                                 <option value="">-- Pilih Kegiatan Anda --</option>
                                 @foreach($myAssignments as $item)
                                     <option value="{{ $item->id }}">{{ $item->title }}</option>
                                 @endforeach
                             </select>
                         </div>
-                        <div class="col-md-5">
-                            <label class="form-label small fw-semibold text-secondary">TANGGAL BAST <span class="text-danger">*</span></label>
-                            <input type="date" name="bast_date" class="form-control" value="{{ now()->toDateString() }}" required>
+                        <div class="col-md-3">
+                            <label class="form-label small fw-semibold text-secondary">TANGGAL PEMBUATAN BAST</label>
+                            <div class="form-control bg-light text-dark small d-flex align-items-center justify-content-between">
+                                <span class="fw-semibold">{{ now()->translatedFormat('j F Y') }}</span>
+                                <span class="badge bg-warning-subtle text-warning-emphasis border border-warning-subtle"><i class="fa-solid fa-lock me-1"></i>Tgl Dikunci</span>
+                            </div>
                         </div>
                     </div>
 
                     <div class="mb-3">
-                        <label class="form-label small fw-semibold text-secondary">RINCIAN DOKUMEN &amp; PERLENGKAPAN YANG DISERAHKAN <span class="text-danger">*</span></label>
-                        <textarea name="description" id="bastDescriptionInput" class="form-control" rows="4" required></textarea>
+                        <label class="form-label small fw-semibold text-secondary">CATATAN TAMBAHAN (OPSIONAL)</label>
+                        <input type="text" name="notes" id="bastNotesInput" class="form-control" placeholder="Catatan kondisi dokumen/perlengkapan...">
                     </div>
 
-                    <div class="mb-0">
-                        <label class="form-label small fw-semibold text-secondary">CATATAN TAMBAHAN (OPSIONAL)</label>
-                        <input type="text" name="notes" class="form-control" placeholder="Catatan kondisi dokumen/perlengkapan...">
+                    @include('basts.partials._blanko_fields', ['officers' => $officers])
+
+                    <div id="terisiSingleSection" class="d-none">
+                        <div class="mb-0">
+                            <label class="form-label small fw-semibold text-secondary">RINCIAN DOKUMEN &amp; PERLENGKAPAN YANG DISERAHKAN <span class="text-danger">*</span></label>
+                            <textarea name="description" id="bastSingleDescriptionInput" class="form-control" rows="4" placeholder="Contoh:&#10;- Bundel Kuesioner Sensus/Survei yang Telah Terisi Lengkap: 120 Eksemplar&#10;- Berkas BAST Responden Bertanda Tangan: Lengkap&#10;- Pengembalian Perlengkapan Inventaris Satker: Kondisi Baik"></textarea>
+                        </div>
                     </div>
                 </div>
                 <div class="modal-footer bg-light border-top">
                     <button type="button" class="btn btn-light" data-bs-dismiss="modal">Batal</button>
                     <button type="submit" class="btn btn-sp-primary">
-                        <i class="fa-solid fa-file-circle-check me-1"></i> Terbitkan
+                        <i class="fa-solid fa-file-circle-check me-1"></i> Terbitkan &amp; Buat PDF
                     </button>
                 </div>
             </form>
@@ -309,17 +332,33 @@
     </div>
 </div>
 
+@php
+    $currentUser = auth()->user();
+    $defaultRecipient = $currentUser ? [
+        'user_id' => $currentUser->id,
+        'recipient_name' => $currentUser->name,
+        'position_unit' => $currentUser->position ?: ($currentUser->isPegawai() ? 'Pegawai BPS' : 'Mitra'),
+        'origin_role' => '',
+    ] : null;
+@endphp
+
+@include('basts.partials._blanko_scripts', [
+    'assignments' => $myAssignments,
+    'officers' => $officers,
+    'defaultMakerName' => 'Koordinator Logistik BPS',
+    'defaultMakerNip' => '',
+    'defaultRecipient' => $defaultRecipient,
+])
+
 <script>
-function updateBastDescriptionPlaceholder() {
-    const type = document.getElementById('bastTypeSelect').value;
-    const desc = document.getElementById('bastDescriptionInput');
-    if (type === 'kantor_ke_petugas') {
-        desc.placeholder = "Contoh:\n- Formulir Kuesioner Sensus/Survei Blanko: 120 Eksemplar\n- Buku Pedoman Petugas Pencacah: 1 Buku\n- Tanda Pengenal / ID Card Petugas Lapangan: 1 Buah\n- Rompi / Tas Perlengkapan Dinas BPS: 1 Paket\n- Alat Tulis Kantor (ATK) & Papan Alas: 1 Set";
-    } else {
-        desc.placeholder = "Contoh:\n- Bundel Kuesioner Sensus/Survei yang Telah Terisi Lengkap: 120 Eksemplar\n- Berkas Berita Acara Serah Terima (BAST) Responden Bertanda Tangan: Lengkap\n- Pengembalian Perlengkapan Inventaris Satker (Rompi & Tas Dinas): Kondisi Baik";
-    }
+const PETUGAS_DEFAULT_BAST_TYPE = @json($currentType === 'petugas_ke_kantor' ? 'petugas_ke_kantor' : 'kantor_ke_petugas');
+
+function openCreateMyOfficerBastModal() {
+    isEditModalMode = false;
+    resetBastModalCommon();
+    initBlankoDefaultFields(PETUGAS_DEFAULT_BAST_TYPE);
+    bootstrap.Modal.getOrCreateInstance(document.getElementById('officerBastFormModal')).show();
 }
-document.addEventListener('DOMContentLoaded', updateBastDescriptionPlaceholder);
 </script>
 @endsection
 

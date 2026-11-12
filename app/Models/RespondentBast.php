@@ -16,6 +16,8 @@ class RespondentBast extends Model
         'bast_number',
         'bast_date',
         'respondent_id',
+        'respondent_number',
+        'handover_category',
         'assignment_id',
         'officer_id',
         'handover_items',
@@ -44,10 +46,18 @@ class RespondentBast extends Model
         return $this->recipient_type === 'representative' ? 'Wakil / Anggota Keluarga' : 'Kepala Rumah Tangga (KRT)';
     }
 
+    public function getCategoryLabelAttribute(): string
+    {
+        return ($this->handover_category ?? 'KUES') === 'ATK'
+            ? 'ATK (Alat Tulis Kantor & Perlengkapan)'
+            : 'KUES (Kuesioner & Dokumen Lapangan)';
+    }
+
     protected function casts(): array
     {
         return [
             'bast_date' => 'date',
+            'respondent_number' => 'integer',
         ];
     }
 

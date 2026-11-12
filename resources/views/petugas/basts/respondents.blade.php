@@ -95,6 +95,17 @@
                             <td>
                                 <div class="fw-bold text-dark font-monospace">{{ $item->bast_number }}</div>
                                 <div class="small text-muted"><i class="fa-regular fa-calendar me-1"></i> {{ $item->bast_date->translatedFormat('d F Y') }}</div>
+                                @php $respCat = strtoupper($item->handover_category ?: 'KUES'); @endphp
+                                <div class="mt-1 d-flex flex-wrap gap-1">
+                                    @if(!empty($item->respondent_number))
+                                        <span class="badge bg-dark-subtle text-dark border border-dark-subtle" style="font-size: 0.68rem;">
+                                            No. Resp: {{ $item->respondent_number }}
+                                        </span>
+                                    @endif
+                                    <span class="badge {{ $respCat === 'ATK' ? 'bg-success-subtle text-success-emphasis border border-success-subtle' : 'bg-primary-subtle text-primary-emphasis border border-primary-subtle' }}" style="font-size: 0.68rem;">
+                                        {{ $respCat }}
+                                    </span>
+                                </div>
                             </td>
                             <td>
                                 <div class="fw-bold text-dark">{{ $item->respondent ? $item->respondent->name : '-' }}</div>
@@ -165,9 +176,20 @@
                     <div class="card-body p-3">
                         <div class="d-flex justify-content-between align-items-start mb-2">
                             <div>
-                                <span class="badge bg-light text-dark font-monospace border mb-1" style="font-size: 0.75rem;">
-                                    {{ $item->bast_number }}
-                                </span>
+                                @php $respCat = strtoupper($item->handover_category ?: 'KUES'); @endphp
+                                <div class="d-flex flex-wrap align-items-center gap-1 mb-1">
+                                    <span class="badge bg-light text-dark font-monospace border" style="font-size: 0.75rem;">
+                                        {{ $item->bast_number }}
+                                    </span>
+                                    @if(!empty($item->respondent_number))
+                                        <span class="badge bg-dark-subtle text-dark border border-dark-subtle" style="font-size: 0.68rem;">
+                                            No. {{ $item->respondent_number }}
+                                        </span>
+                                    @endif
+                                    <span class="badge {{ $respCat === 'ATK' ? 'bg-success-subtle text-success-emphasis border border-success-subtle' : 'bg-primary-subtle text-primary-emphasis border border-primary-subtle' }}" style="font-size: 0.68rem;">
+                                        {{ $respCat }}
+                                    </span>
+                                </div>
                                 <h6 class="fw-bold text-dark mb-0">{{ $item->respondent ? $item->respondent->name : '-' }}</h6>
                                 <small class="text-primary fw-medium">{{ $item->respondent ? $item->respondent->agency : '-' }}</small>
                             </div>
@@ -271,7 +293,40 @@
             <form method="POST" action="{{ route('petugas.basts.respondents.store') }}" id="bastCreateForm">
                 @csrf
                 <div class="modal-body p-4">
-                    <!-- 1. Pemilihan Sampel Responden -->
+                    @php
+                        $orderedRespondents = $myRespondents->values();
+                        $sampleNumberById = $orderedRespondents->mapWithKeys(fn($r, $idx) => [$r->id => $idx + 1]);
+                        $uncompletedRespondents = $orderedRespondents->filter(fn($r) => $r->basts->isEmpty());
+                        $completedRespondents = $orderedRespondents->filter(fn($r) => $r->basts->isNotEmpty());
+                    @endphp
+
+                    <!-- 0. Pilih Cepat Nomor Urut Responden (1, 2, 3 ... 10+) -->
+                    @if($orderedRespondents->isNotEmpty())
+                        <div class="mb-3 p-3 rounded-3 border bg-light-subtle">
+                            <div class="d-flex justify-content-between align-items-center mb-2">
+                                <span class="small fw-semibold text-secondary">PILIH NOMOR SAMPEL RESPONDEN</span>
+                                <span class="small text-muted">Hijau = sudah TTD/BAST</span>
+                            </div>
+                            <div class="d-flex flex-wrap gap-1.5" id="respondentNumberPills">
+                                @foreach($orderedRespondents as $idx => $resp)
+                                    @php
+                                        $sampleNo = $idx + 1;
+                                        $isDone = $resp->basts->isNotEmpty();
+                                    @endphp
+                                    <button type="button"
+                                            class="btn btn-sm {{ $isDone ? 'btn-success text-white' : 'btn-outline-primary' }} fw-semibold rounded-pill px-2.5 py-1"
+                                            data-sample-pill="{{ $resp->id }}"
+                                            data-sample-number="{{ $sampleNo }}"
+                                            title="No. {{ $sampleNo }}: {{ $resp->family_head_name ?? $resp->name }}"
+                                            onclick="selectSamplePill({{ $resp->id }}, {{ $sampleNo }})">
+                                        No. {{ $sampleNo }}
+                                    </button>
+                                @endforeach
+                            </div>
+                        </div>
+                    @endif
+
+                    <!-- 1. Pemilihan Sampel Responden & Tanggal Dibuka -->
                     <div class="row g-3 mb-3">
                         <div class="col-md-7">
                             <label class="form-label small fw-semibold text-secondary">
@@ -279,23 +334,19 @@
                             </label>
                             <select name="respondent_id" id="bastRespondentSelect" class="form-select" required onchange="handleRespondentSelect(this)">
                                 <option value="">-- Pilih Sampel Responden --</option>
-                                
-                                {{-- Prioritas 1: Responden yang BELUM dibuatkan BAST --}}
-                                @php
-                                    $uncompletedRespondents = $myRespondents->filter(fn($r) => $r->basts->isEmpty());
-                                    $completedRespondents = $myRespondents->filter(fn($r) => $r->basts->isNotEmpty());
-                                @endphp
 
                                 @if($uncompletedRespondents->isNotEmpty())
                                     <optgroup label="📋 BELUM BAST (Silakan Pilih)">
                                         @foreach($uncompletedRespondents as $resp)
+                                            @php $sampleNo = $sampleNumberById[$resp->id] ?? null; @endphp
                                             <option value="{{ $resp->id }}" 
+                                                    data-number="{{ $sampleNo }}"
                                                     data-name="{{ $resp->family_head_name ?? $resp->name }}" 
                                                     data-informant="{{ $resp->informant_name ?? $resp->name }}"
                                                     data-status="{{ $resp->respondent_status ?? 'Kepala Keluarga (KRT)' }}"
                                                     data-agency="{{ $resp->agency }}"
                                                     data-completed="0">
-                                                {{ $resp->family_head_name ?? $resp->name }} @if($resp->informant_name && $resp->informant_name !== ($resp->family_head_name ?? $resp->name)) (Pemberi Info: {{ $resp->informant_name }}) @endif — {{ $resp->agency }}
+                                                No. {{ $sampleNo }} — {{ $resp->family_head_name ?? $resp->name }} @if($resp->informant_name && $resp->informant_name !== ($resp->family_head_name ?? $resp->name)) (Pemberi Info: {{ $resp->informant_name }}) @endif — {{ $resp->agency }}
                                             </option>
                                         @endforeach
                                     </optgroup>
@@ -305,14 +356,16 @@
                                 @if($completedRespondents->isNotEmpty())
                                     <optgroup label="✅ SUDAH SELESAI BAST (Warna Hijau)">
                                         @foreach($completedRespondents as $resp)
+                                            @php $sampleNo = $sampleNumberById[$resp->id] ?? null; @endphp
                                             <option value="{{ $resp->id }}" 
+                                                    data-number="{{ $sampleNo }}"
                                                     data-name="{{ $resp->family_head_name ?? $resp->name }}" 
                                                     data-informant="{{ $resp->informant_name ?? $resp->name }}"
                                                     data-status="{{ $resp->respondent_status ?? 'Kepala Keluarga (KRT)' }}"
                                                     data-agency="{{ $resp->agency }}"
                                                     data-completed="1" 
                                                     class="text-success fw-semibold">
-                                                {{ $resp->family_head_name ?? $resp->name }} — [Sudah BAST]
+                                                No. {{ $sampleNo }} — {{ $resp->family_head_name ?? $resp->name }} — [Sudah BAST]
                                             </option>
                                         @endforeach
                                     </optgroup>
@@ -326,8 +379,44 @@
                         </div>
 
                         <div class="col-md-5">
-                            <label class="form-label small fw-semibold text-secondary">TANGGAL BAST <span class="text-danger">*</span></label>
+                            <label class="form-label small fw-semibold text-secondary d-flex justify-content-between align-items-center">
+                                <span>TANGGAL TANDA TERIMA <span class="text-danger">*</span></span>
+                                <span class="badge bg-info-subtle text-info-emphasis border border-info-subtle" style="font-size: 0.65rem;">
+                                    <i class="fa-solid fa-lock-open me-1"></i>Tgl Dibuka
+                                </span>
+                            </label>
                             <input type="date" name="bast_date" class="form-control" value="{{ now()->toDateString() }}" required>
+                        </div>
+                    </div>
+
+                    <!-- 1b. Nomor Responden & Kategori ATK / KUES -->
+                    <div class="row g-3 mb-3">
+                        <div class="col-md-4">
+                            <label class="form-label small fw-semibold text-secondary">NO. RESP (1, 2, ... 10)</label>
+                            <input type="number" name="respondent_number" id="respondentNumberInput" class="form-control fw-semibold" min="1" placeholder="Otomatis / isi manual">
+                        </div>
+                        <div class="col-md-8">
+                            <label class="form-label small fw-semibold text-secondary">KATEGORI TANDA TERIMA <span class="text-danger">*</span></label>
+                            <div class="row g-2">
+                                <div class="col-6">
+                                    <label class="border rounded-3 p-2.5 d-flex align-items-start gap-2 cursor-pointer bg-light h-100" id="respCatAtkLabel">
+                                        <input type="radio" name="handover_category" id="respCatAtk" value="ATK" class="form-check-input mt-1" onchange="onRespCategoryChanged('ATK')">
+                                        <div>
+                                            <div class="fw-bold text-dark small"><i class="fa-solid fa-pen-ruler text-success me-1"></i> ATK</div>
+                                            <small class="text-muted d-block" style="font-size: 0.72rem;">Alat tulis &amp; perlengkapan responden.</small>
+                                        </div>
+                                    </label>
+                                </div>
+                                <div class="col-6">
+                                    <label class="border rounded-3 p-2.5 d-flex align-items-start gap-2 cursor-pointer bg-white border-primary h-100" id="respCatKuesLabel">
+                                        <input type="radio" name="handover_category" id="respCatKues" value="KUES" class="form-check-input mt-1" checked onchange="onRespCategoryChanged('KUES')">
+                                        <div>
+                                            <div class="fw-bold text-dark small"><i class="fa-solid fa-file-lines text-primary me-1"></i> KUES</div>
+                                            <small class="text-muted d-block" style="font-size: 0.72rem;">Kuesioner / formulir pendataan.</small>
+                                        </div>
+                                    </label>
+                                </div>
+                            </div>
                         </div>
                     </div>
 
@@ -378,7 +467,7 @@
                     <!-- 3. Rincian Dokumen / Barang Serah Terima -->
                     <div class="mb-3">
                         <label class="form-label small fw-semibold text-secondary">RINCIAN DOKUMEN / BARANG YANG DISERAHKAN <span class="text-danger">*</span></label>
-                        <textarea name="handover_items" class="form-control" rows="3" placeholder="Contoh:&#10;1. Kuesioner Formulir Pendataan Lapangan Terpadu (1 Rangkap)&#10;2. Salinan KTP & KK Penanggung Jawab Usaha&#10;3. Surat Keterangan Domisili Usaha" required>1. Formulir Kuesioner Pendataan Lapangan (1 Berkas)
+                        <textarea name="handover_items" id="respHandoverItemsInput" class="form-control" rows="3" placeholder="Contoh:&#10;1. Kuesioner Formulir Pendataan Lapangan Terpadu (1 Rangkap)&#10;2. Salinan KTP & KK Penanggung Jawab Usaha&#10;3. Surat Keterangan Domisili Usaha" required oninput="handoverItemsDirty = true">1. Formulir Kuesioner Pendataan Lapangan (1 Berkas)
 2. Bukti Kelengkapan Berkas Administrasi Responden</textarea>
                     </div>
 
@@ -445,10 +534,66 @@
         }
     }
 
+    let handoverItemsDirty = false;
+
+    const RESP_CATEGORY_TEMPLATES = {
+        ATK: "1. Map / Perlengkapan Pencacahan Responden (1 Set)\n2. Bolpoin / Alat Tulis Lapangan (1 Buah)\n3. Bukti Tanda Terima Perlengkapan Responden",
+        KUES: "1. Formulir Kuesioner Pendataan Lapangan (1 Berkas)\n2. Bukti Kelengkapan Berkas Administrasi Responden"
+    };
+
+    function selectSamplePill(respondentId, sampleNumber) {
+        const select = document.getElementById('bastRespondentSelect');
+        if (select) {
+            select.value = String(respondentId);
+            handleRespondentSelect(select);
+        }
+        const numInput = document.getElementById('respondentNumberInput');
+        if (numInput && sampleNumber) {
+            numInput.value = sampleNumber;
+        }
+    }
+
+    function highlightSamplePill(respondentId) {
+        document.querySelectorAll('#respondentNumberPills [data-sample-pill]').forEach((btn) => {
+            const isSelected = String(btn.getAttribute('data-sample-pill')) === String(respondentId);
+            btn.classList.toggle('shadow', isSelected);
+            btn.classList.toggle('border-2', isSelected);
+            btn.classList.toggle('border-dark', isSelected);
+        });
+    }
+
+    function onRespCategoryChanged(cat) {
+        const normalized = (cat || 'KUES').toUpperCase();
+        const atkLabel = document.getElementById('respCatAtkLabel');
+        const kuesLabel = document.getElementById('respCatKuesLabel');
+        if (atkLabel && kuesLabel) {
+            atkLabel.classList.toggle('bg-white', normalized === 'ATK');
+            atkLabel.classList.toggle('border-success', normalized === 'ATK');
+            atkLabel.classList.toggle('bg-light', normalized !== 'ATK');
+            kuesLabel.classList.toggle('bg-white', normalized === 'KUES');
+            kuesLabel.classList.toggle('border-primary', normalized === 'KUES');
+            kuesLabel.classList.toggle('bg-light', normalized !== 'KUES');
+        }
+        const textarea = document.getElementById('respHandoverItemsInput');
+        if (textarea && !handoverItemsDirty) {
+            textarea.value = RESP_CATEGORY_TEMPLATES[normalized] || RESP_CATEGORY_TEMPLATES.KUES;
+        }
+    }
+
     // Handle Respondent Select Change
     function handleRespondentSelect(select) {
         const selectedOpt = select.options[select.selectedIndex];
-        if (!selectedOpt || !selectedOpt.value) return;
+        if (!selectedOpt || !selectedOpt.value) {
+            highlightSamplePill('');
+            return;
+        }
+
+        highlightSamplePill(selectedOpt.value);
+        const sampleNum = selectedOpt.getAttribute('data-number');
+        const numInput = document.getElementById('respondentNumberInput');
+        if (numInput && sampleNum) {
+            numInput.value = sampleNum;
+        }
 
         const isCompleted = selectedOpt.getAttribute('data-completed') === '1';
         const hint = document.getElementById('respCompletedHint');

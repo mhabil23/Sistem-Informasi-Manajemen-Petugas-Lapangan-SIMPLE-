@@ -8,7 +8,9 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\MorphMany;
 use Illuminate\Database\Eloquent\SoftDeletes;
+use Illuminate\Http\Request;
 use Illuminate\Support\Collection;
+use Illuminate\Validation\ValidationException;
 
 class OfficerBast extends Model
 {
@@ -19,7 +21,8 @@ class OfficerBast extends Model
         'bast_date',
         'assignment_id',
         'officer_id',
-        'bast_type', // 'kantor_ke_petugas' (Blanko & Perlengkapan) atau 'petugas_ke_kantor' (Dokumen Terisi)
+        'bast_type', // 'kantor_ke_petugas' (Tanda Terima Petugas) atau 'petugas_ke_kantor' (BAST Dokumen Terisi)
+        'receipt_category', // 'ATK' | 'KUES'
         'description',
         'document_title',
         'activity_subtitle',
@@ -195,6 +198,119 @@ class OfficerBast extends Model
         $prefix = $this->isKantorKePetugas() ? 'BAST-Blanko-' : 'BAST-Petugas-';
 
         return $prefix . str_replace(['/', '\\'], '-', $this->bast_number) . '.pdf';
+    }
+
+    /**
+     * Validasi dan normalisasi atribut BAST Blanko & Perlengkapan beserta daftar penerimanya.
+     * Digunakan bersama oleh portal Admin dan Petugas/Pegawai.
+     */
+    public static function prepareCollectivePayload(
+        Request $request,
+        Assignment $assignment,
+        string $bastDate,
+        ?User $fallbackOfficer = null,
+        string $defaultMakerName = 'Koordinator Logistik BPS',
+        string $defaultMakerNip = ''
+    ): array {
+        $cleanRecipients = [];
+        foreach ($request->input('recipients', []) as $row) {
+            $name = trim((string) ($row['recipient_name'] ?? ''));
+            $userId = !empty($row['user_id']) ? (int) $row['user_id'] : null;
+
+            if ($name === '' && $userId) {
+                $user = User::find($userId);
+                $name = $user?->name ?? '';
+            }
+            if ($name === '') {
+                continue;
+            }
+
+            $pos = trim((string) ($row['position_unit'] ?? ''));
+            $origin = trim((string) ($row['origin_role'] ?? ''));
+
+            $cleanRecipients[] = [
+                'user_id' => $userId,
+                'recipient_name' => $name,
+                'position_unit' => $pos !== '' ? $pos : 'Mitra',
+                'origin_role' => $origin !== '' ? $origin : ($assignment->location ?? '-'),
+                'sort_order' => count($cleanRecipients) + 1,
+            ];
+        }
+
+        $singleOfficerId = $request->input('officer_id');
+        if (empty($cleanRecipients) && $singleOfficerId) {
+            $fallbackOfficer = User::find($singleOfficerId);
+        }
+
+        if (empty($cleanRecipients) && $fallbackOfficer) {
+            $cleanRecipients[] = [
+                'user_id' => $fallbackOfficer->id,
+                'recipient_name' => $fallbackOfficer->name,
+                'position_unit' => $fallbackOfficer->position ?: ($fallbackOfficer->isPegawai() ? 'Pegawai BPS' : 'Mitra'),
+                'origin_role' => $assignment->location ?? '-',
+                'sort_order' => 1,
+            ];
+        }
+
+        if (empty($cleanRecipients)) {
+            throw ValidationException::withMessages([
+                'recipients' => ['Minimal 1 petugas / peserta penerima blanko & perlengkapan wajib ditambahkan.'],
+            ]);
+        }
+
+        $cleanItems = [];
+        foreach ($request->input('items', []) as $itemText) {
+            $trimmed = trim((string) $itemText);
+            if ($trimmed !== '') {
+                $cleanItems[] = $trimmed;
+            }
+        }
+
+        $descriptionText = !empty($cleanItems)
+            ? implode("\n", $cleanItems)
+            : trim((string) $request->input('description', ''));
+
+        if ($descriptionText === '') {
+            throw ValidationException::withMessages([
+                'items' => ['Minimal 1 rincian barang / blanko perlengkapan wajib diisi.'],
+            ]);
+        }
+
+        $year = date('Y', strtotime($bastDate));
+        $category = strtoupper(trim((string) $request->input('receipt_category', 'ATK')));
+        if (!in_array($category, ['ATK', 'KUES'], true)) {
+            $category = 'ATK';
+        }
+
+        $defaultTitle = $category === 'KUES'
+            ? 'Tanda Terima Kuesioner & Dokumen'
+            : 'Tanda Terima ATK Peserta';
+
+        $bastAttributes = [
+            'assignment_id' => $assignment->id,
+            'officer_id' => $cleanRecipients[0]['user_id'] ?? null,
+            'bast_type' => 'kantor_ke_petugas',
+            'receipt_category' => $category,
+            'bast_date' => $bastDate,
+            'description' => $descriptionText,
+            'document_title' => trim((string) $request->input('document_title', '')) ?: $defaultTitle,
+            'activity_subtitle' => trim((string) $request->input('activity_subtitle', '')) ?: $assignment->title,
+            'institution_name' => trim((string) $request->input('institution_name', '')) ?: "BPS Kabupaten Kolaka Utara Tahun {$year}",
+            'document_place' => trim((string) $request->input('document_place', '')) ?: ($assignment->location ?: 'Lasusua'),
+            'maker_name' => trim((string) $request->input('maker_name', '')) ?: $defaultMakerName,
+            'maker_nip' => trim((string) $request->input('maker_nip', '')) ?: $defaultMakerNip,
+        ];
+
+        return [$bastAttributes, $cleanRecipients];
+    }
+
+    public function syncRecipients(array $recipients): void
+    {
+        $this->recipients()->delete();
+
+        if (!empty($recipients)) {
+            $this->recipients()->createMany($recipients);
+        }
     }
 }
 
