@@ -216,7 +216,7 @@
                         <div class="d-flex align-items-center gap-1.5">
                             <span class="sketch-btn-title">Pengisian Laporan Perjadin</span>
                         </div>
-                        <div class="sketch-btn-sub">SPD &amp; Dokumentasi Kegiatan</div>
+                        <div class="sketch-btn-sub">Laporan Perjadin &amp; Pengeluaran Riil</div>
                         <span class="badge {{ $reportsRevision > 0 ? 'bg-danger text-white' : ($reportsApproved > 0 ? 'bg-success-subtle text-success border border-success-subtle' : 'bg-secondary-subtle text-secondary border') }} mt-1" style="font-size: 0.68rem;">
                             {{ $reportsRevision > 0 ? $reportsRevision . ' Perlu Revisi' : ($reportsApproved > 0 ? $reportsApproved . ' Disetujui' : 'Draft / Buat') }}
                         </span>

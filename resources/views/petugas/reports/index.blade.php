@@ -1,26 +1,47 @@
 @extends('layouts.app')
 
-@section('title', 'Laporan Kegiatan Lapangan')
-@section('page_title', 'Laporan Kegiatan Lapangan Saya')
+@section('title', 'Pengisian Laporan Perjadin')
+@section('page_title', 'Pengisian Laporan Perjadin')
 
 @section('breadcrumb')
     <li class="breadcrumb-item"><a href="{{ route('petugas.dashboard') }}">Petugas</a></li>
-    <li class="breadcrumb-item active" aria-current="page">Laporan Kegiatan</li>
+    <li class="breadcrumb-item active" aria-current="page">Pengisian Laporan Perjadin</li>
 @endsection
 
 @section('content')
 <!-- Header & Action -->
 <div class="row align-items-center mb-4">
     <div class="col-md-7">
-        <h3 class="fw-bold text-dark mb-1">Laporan Kegiatan Lapangan</h3>
-        <p class="text-muted small mb-0">Dokumentasikan seluruh aktivitas, unggah foto bukti lapangan, serta pantau status verifikasi dan catatan revisi dari Administrator.</p>
+        <h3 class="fw-bold text-dark mb-1">Pengisian Laporan Perjadin &amp; Pengeluaran Riil</h3>
+        <p class="text-muted small mb-0">Satu kali pengisian &amp; satu kali tanda tangan digital menghasilkan <strong>1 File PDF Resmi</strong> berisi <em>Laporan Perjalanan Dinas (+ Dokumentasi)</em> dan <em>Daftar Pengeluaran Riil</em>.</p>
     </div>
     <div class="col-md-5 text-md-end mt-3 mt-md-0">
         <button type="button" class="btn btn-sp-primary" data-bs-toggle="modal" data-bs-target="#createReportModal">
-            <i class="fa-solid fa-plus me-1"></i> Buat Laporan Baru
+            <i class="fa-solid fa-plus me-1"></i> Isi Laporan Perjadin Baru
         </button>
     </div>
 </div>
+
+<!-- Banner Cepat Cetak PDF Gabungan setelah Berhasil Simpan -->
+@if(session('created_report_id'))
+    <div class="alert alert-success border-success d-flex flex-wrap align-items-center justify-content-between gap-3 mb-4 shadow-sm" role="alert">
+        <div class="d-flex align-items-center">
+            <i class="fa-solid fa-file-circle-check fa-2x me-3 text-success"></i>
+            <div>
+                <h6 class="alert-heading fw-bold mb-1">Dokumen Gabungan (1 PDF) Siap Dicetak!</h6>
+                <div class="small">Laporan Perjalanan Dinas dan Daftar Pengeluaran Riil beserta tanda tangan digital Anda telah digabung dalam 1 file PDF.</div>
+            </div>
+        </div>
+        <div class="d-flex gap-2">
+            <a href="{{ route('petugas.reports.preview', session('created_report_id')) }}" target="_blank" class="btn btn-sm btn-primary fw-semibold">
+                <i class="fa-solid fa-print me-1"></i> Preview / Cetak 1 File PDF
+            </a>
+            <a href="{{ route('petugas.reports.download', session('created_report_id')) }}" class="btn btn-sm btn-success fw-semibold">
+                <i class="fa-solid fa-file-pdf me-1"></i> Unduh PDF
+            </a>
+        </div>
+    </div>
+@endif
 
 <!-- Alert Perlu Revisi (Jika ada) -->
 @if($revisionCount > 0)
@@ -270,7 +291,7 @@
                             <td colspan="7" class="text-center py-5 text-muted">
                                 <i class="fa-solid fa-clipboard-user fa-3x mb-3 text-secondary opacity-50"></i>
                                 <div class="fw-semibold">Belum ada laporan kegiatan.</div>
-                                <div class="small">Klik tombol "Buat Laporan Baru" di kanan atas untuk mendokumentasikan kegiatan Anda.</div>
+                                <div class="small">Klik tombol "Pengisian Laporan Perjadin" di kanan atas untuk membuat dokumen gabungan (Laporan Perjadin &amp; Daftar Pengeluaran Riil).</div>
                             </td>
                         </tr>
                     @endforelse
@@ -366,7 +387,7 @@
                 <div class="text-center py-4 text-muted">
                     <i class="fa-solid fa-clipboard-user fa-3x mb-2 text-secondary opacity-50"></i>
                     <div class="fw-semibold">Belum ada laporan kegiatan.</div>
-                    <div class="small">Klik tombol "Buat Laporan Baru" di atas.</div>
+                    <div class="small">Klik tombol "Pengisian Laporan Perjadin" di atas.</div>
                 </div>
             @endforelse
         </div>
@@ -393,9 +414,9 @@
             <div class="modal-header bg-light border-bottom">
                 <div>
                     <h5 class="modal-title fw-bold text-dark" id="createReportModalLabel">
-                        <i class="fa-solid fa-file-signature text-primary me-2"></i> Buat Laporan Perjalanan Dinas Baru
+                        <i class="fa-solid fa-file-signature text-primary me-2"></i> Pengisian Laporan Perjadin &amp; Pengeluaran Riil
                     </h5>
-                    <div class="small text-muted">Format resmi Surat Perjalanan Dinas (SPD) & Pernyataan Bebas Kendaraan Dinas BPS Kab. Kolaka Utara</div>
+                    <div class="small text-muted">Menghasilkan 1 File PDF Gabungan: Laporan Perjalanan Dinas (+ Dokumentasi) &amp; Daftar Pengeluaran Riil</div>
                 </div>
                 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
@@ -405,20 +426,21 @@
                     <div class="alert alert-primary bg-primary bg-opacity-10 border-primary border-opacity-25 py-2 px-3 mb-3 d-flex align-items-center">
                         <i class="fa-solid fa-circle-info text-primary me-2 fa-lg"></i>
                         <div class="small text-dark">
-                            <strong>Standar BPS Kabupaten Kolaka Utara:</strong> Formulir laporan telah dilengkapi isian baku resmi, tanda tangan digital (dapat digores langsung pada layar atau diunggah), serta opsi Surat Pernyataan Tidak Menggunakan Kendaraan Dinas.
+                            <strong>Terintegrasi 1 File PDF:</strong> Nama &amp; NIK terisi otomatis dari akun Anda, dan cukup <strong>1 kali tanda tangan digital</strong> untuk muncul otomatis di <em>Laporan Perjalanan Dinas</em> maupun <em>Daftar Pengeluaran Riil</em>.
                         </div>
                     </div>
 
                     <!-- Bagian A: Yang Melakukan Perjalanan Dinas -->
                     <div class="card mb-3 border">
-                        <div class="card-header bg-light py-2 px-3 fw-bold text-dark small">
-                            <i class="fa-solid fa-user-tie text-primary me-1"></i> A. YANG MELAKUKAN PERJALANAN DINAS
+                        <div class="card-header bg-light py-2 px-3 fw-bold text-dark small d-flex justify-content-between align-items-center">
+                            <span><i class="fa-solid fa-user-tie text-primary me-1"></i> A. IDENTITAS PETUGAS (TERISI OTOMATIS)</span>
+                            <span class="badge bg-success-subtle text-success border border-success-subtle">Otomatis dari Profil Akun</span>
                         </div>
                         <div class="card-body p-3">
                             <div class="row g-3">
                                 <div class="col-md-5">
                                     <label class="form-label small fw-semibold text-secondary">Nama Lengkap <span class="text-danger">*</span></label>
-                                    <input type="text" name="officer_name" class="form-control" value="{{ auth()->user()->name }}" required>
+                                    <input type="text" name="officer_name" class="form-control bg-light fw-semibold" value="{{ auth()->user()->name }}" required>
                                 </div>
                                 <div class="col-md-3">
                                     <label class="form-label small fw-semibold text-secondary">Jenis Identitas</label>
@@ -428,16 +450,16 @@
                                     </select>
                                 </div>
                                 <div class="col-md-4">
-                                    <label class="form-label small fw-semibold text-secondary">Nomor NIK / NIP</label>
-                                    <input type="text" name="officer_nip" class="form-control" value="{{ auth()->user()->nip ?? '' }}" placeholder="Contoh: 7408022511030001">
+                                    <label class="form-label small fw-semibold text-secondary">Nomor NIK / NIP <span class="text-danger">*</span></label>
+                                    <input type="text" name="officer_nip" class="form-control bg-light fw-semibold font-monospace" value="{{ auth()->user()->nik ?? '' }}" placeholder="Masukkan NIK / NIP Anda" required>
                                 </div>
                                 <div class="col-md-6">
                                     <label class="form-label small fw-semibold text-secondary">Pangkat / Golongan</label>
-                                    <input type="text" name="officer_rank" class="form-control" value="-" placeholder="Contoh: - atau Penata Muda / III a">
+                                    <input type="text" name="officer_rank" class="form-control" value="{{ auth()->user()->rank ?? '-' }}" placeholder="Contoh: - atau Pengatur, II/d">
                                 </div>
                                 <div class="col-md-6">
                                     <label class="form-label small fw-semibold text-secondary">Jabatan</label>
-                                    <input type="text" name="officer_position" class="form-control" value="Mitra BPS Kabupaten Kolaka Utara">
+                                    <input type="text" name="officer_position" class="form-control" value="{{ auth()->user()->position ?? 'Mitra BPS Kabupaten Kolaka Utara' }}">
                                 </div>
                             </div>
                         </div>
@@ -446,16 +468,26 @@
                     <!-- Bagian B: Dasar Pelaksanaan -->
                     <div class="card mb-3 border">
                         <div class="card-header bg-light py-2 px-3 fw-bold text-dark small">
-                            <i class="fa-solid fa-scale-balanced text-primary me-1"></i> B. DASAR PELAKSANAAN
+                            <i class="fa-solid fa-scale-balanced text-primary me-1"></i> B. DASAR PELAKSANAAN (LAPORAN &amp; PENGELUARAN RIIL)
                         </div>
                         <div class="card-body p-3">
                             <div class="mb-3">
                                 <label class="form-label small fw-semibold text-secondary">1. DIPA Satuan Kerja</label>
                                 <textarea name="basis_dipa" class="form-control" rows="2">{{ 'DIPA Satuan Kerja Badan Pusat Statistik Kabupaten Kolaka Utara Tahun Anggaran ' . date('Y') . ' Nomor SP DIPA-054.01.2.667477/' . date('Y') . ' tanggal 1 Desember ' . (date('Y') - 1) . '.' }}</textarea>
                             </div>
+                            <div class="row g-3 mb-2">
+                                <div class="col-md-7">
+                                    <label class="form-label small fw-semibold text-secondary">2a. Nomor Surat Tugas <span class="text-danger">*</span></label>
+                                    <input type="text" name="st_number" id="create_st_number" class="form-control" value="B-1812/74080/HM.300/{{ date('Y') }}" oninput="syncCreateBasisSt()" required>
+                                </div>
+                                <div class="col-md-5">
+                                    <label class="form-label small fw-semibold text-secondary">2b. Tanggal Surat Tugas <span class="text-danger">*</span></label>
+                                    <input type="date" name="st_date" id="create_st_date" class="form-control" value="{{ date('Y-m-d') }}" oninput="syncCreateBasisSt()" required>
+                                </div>
+                            </div>
                             <div>
-                                <label class="form-label small fw-semibold text-secondary">2. Surat Tugas Kepala BPS</label>
-                                <textarea name="basis_st" class="form-control" rows="2">{{ 'Surat Tugas Kepala Badan Pusat Statistik Kabupaten Kolaka Utara Nomor: B-969/74080/VS.330/' . date('Y') . ' Tanggal ' . \Carbon\Carbon::now()->translatedFormat('d F Y') . '.' }}</textarea>
+                                <label class="form-label small fw-semibold text-secondary">Teks Lengkap Dasar Surat Tugas (Otomatis Terbentuk)</label>
+                                <textarea name="basis_st" id="create_basis_st" class="form-control" rows="2">{{ 'Surat Tugas Kepala Badan Pusat Statistik Kabupaten Kolaka Utara Nomor B-1812/74080/HM.300/' . date('Y') . ' Tanggal ' . \Carbon\Carbon::now()->translatedFormat('d F Y') . '.' }}</textarea>
                             </div>
                         </div>
                     </div>
@@ -463,17 +495,17 @@
                     <!-- Bagian C & D: Tujuan & Waktu Perjalanan Dinas -->
                     <div class="card mb-3 border">
                         <div class="card-header bg-light py-2 px-3 fw-bold text-dark small">
-                            <i class="fa-solid fa-map-location-dot text-primary me-1"></i> C & D. TUJUAN & WAKTU PERJALANAN DINAS
+                            <i class="fa-solid fa-map-location-dot text-primary me-1"></i> C &amp; D. TUJUAN &amp; WAKTU PERJALANAN DINAS
                         </div>
                         <div class="card-body p-3">
                             <div class="row g-3 mb-3">
                                 <div class="col-md-7">
                                     <label class="form-label small fw-semibold text-secondary">Judul Kegiatan / Agenda <span class="text-danger">*</span></label>
-                                    <input type="text" name="activity_title" class="form-control" placeholder="Contoh: Pemutakhiran SLS Sakernas Agustus {{ date('Y') }}" required>
+                                    <input type="text" name="activity_title" class="form-control" placeholder="Contoh: Pertemuan Tim Sensus Ekonomi {{ date('Y') }}" required>
                                 </div>
                                 <div class="col-md-5">
                                     <label class="form-label small fw-semibold text-secondary">Penugasan Terkait</label>
-                                    <select name="assignment_id" id="create_assignment_id" class="form-select" onchange="autoFillLocation(this, 'create_activity_location')">
+                                    <select name="assignment_id" id="create_assignment_id" class="form-select" onchange="autoFillLocationAndExpense(this, 'create_activity_location', 'create_expense_list')">
                                         <option value="" data-location="">-- Kegiatan Mandiri / Umum --</option>
                                         @foreach($myAssignments as $asgn)
                                             <option value="{{ $asgn->id }}" data-location="{{ $asgn->location }}">{{ $asgn->title }}</option>
@@ -482,21 +514,20 @@
                                 </div>
                                 <div class="col-12">
                                     <label class="form-label small fw-semibold text-secondary">
-                                        <i class="fa-solid fa-location-dot text-primary me-1"></i> Lokasi / Tempat Pelaksanaan Kegiatan & Dokumentasi
+                                        <i class="fa-solid fa-location-dot text-primary me-1"></i> Lokasi / Wilayah Tugas / Asal Keberangkatan
                                     </label>
-                                    <input type="text" name="activity_location" id="create_activity_location" class="form-control" placeholder="Contoh: Kecamatan Sukamaju / Desa Tambuha, Kec. Watunohu">
-                                    <div class="form-text small">Teks ini dicantumkan pada judul Dokumentasi ("di [Lokasi] dan Sekitarnya") dan Surat Pernyataan. Terisi otomatis jika memilih penugasan di atas.</div>
+                                    <input type="text" name="activity_location" id="create_activity_location" class="form-control" placeholder="Contoh: Kecamatan Batu Putih" oninput="syncDefaultExpenseDesc('create_activity_location', 'create_expense_list')">
+                                    <div class="form-text small">Digunakan pada tujuan perjalanan dinas dan rincian asal biaya transport Daftar Pengeluaran Riil.</div>
                                 </div>
                             </div>
                             <div class="mb-3">
-                                <label class="form-label small fw-semibold text-secondary">C. Tujuan Perjalanan Dinas (Teks Lengkap SPD)</label>
-                                <textarea name="destination_purpose" class="form-control" rows="2" placeholder="Contoh: Perjalanan Dinas Biasa dalam kota sampai dengan 8 jam dalam rangka pemutakhiran SLS Sakernas Agustus {{ date('Y') }} di Kecamatan Watunohu."></textarea>
-                                <div class="form-text small">Jika dikosongkan, kalimat baku otomatis disesuaikan dengan judul kegiatan dan wilayah tugas.</div>
+                                <label class="form-label small fw-semibold text-secondary">C. Tujuan Perjalanan Dinas (Teks Lengkap)</label>
+                                <textarea name="destination_purpose" class="form-control" rows="2" placeholder="Contoh: Perjalanan Dinas Biasa dalam kota sampai dengan 8 jam dalam rangka melaksanakan pendataan di Kecamatan Batu Putih."></textarea>
                             </div>
                             <div class="row g-3">
                                 <div class="col-md-6">
                                     <label class="form-label small fw-semibold text-secondary">D. Durasi / Lama Waktu Perjalanan</label>
-                                    <input type="text" name="duration_text" class="form-control" value="Selama 1 (Satu) Hari">
+                                    <input type="text" name="duration_text" class="form-control" value="Selama 1 (satu) Hari">
                                 </div>
                                 <div class="col-md-6">
                                     <label class="form-label small fw-semibold text-secondary">Tanggal Pelaksanaan Kegiatan <span class="text-danger">*</span></label>
@@ -506,32 +537,95 @@
                         </div>
                     </div>
 
-                    <!-- Bagian E: Hasil Perjalanan Dinas -->
+                    <!-- Bagian E & F: Hasil Perjalanan Dinas, Kendala, Solusi & Saran -->
                     <div class="card mb-3 border">
                         <div class="card-header bg-light py-2 px-3 fw-bold text-dark small">
-                            <i class="fa-solid fa-list-check text-primary me-1"></i> E. HASIL PERJALANAN DINAS
+                            <i class="fa-solid fa-list-check text-primary me-1"></i> E &amp; F. HASIL PERJALANAN DINAS, KENDALA, SOLUSI &amp; SARAN
                         </div>
                         <div class="card-body p-3">
-                            <label class="form-label small fw-semibold text-secondary">Uraian Rangkaian Kegiatan & Hasil Lapangan <span class="text-danger">*</span></label>
-                            <textarea name="work_description" class="form-control" rows="5" placeholder="Contoh: Menuju lokasi pemutakhiran SLS di Desa Tambuha, melakukan koordinasi dengan Kepala Desa, melakukan pemutakhiran SLS sesuai SOP..." required></textarea>
+                            <div class="mb-3">
+                                <label class="form-label small fw-semibold text-secondary">E. Uraian Hasil Perjalanan Dinas <span class="text-danger">*</span></label>
+                                <textarea name="work_description" class="form-control" rows="4" placeholder="Menuju lokasi kegiatan..., melakukan koordinasi..., melaksanakan pendataan..., submit data..." required></textarea>
+                            </div>
+                            <div class="row g-3 mb-3">
+                                <div class="col-md-6">
+                                    <label class="form-label small fw-semibold text-secondary">Kendala (Opsional)</label>
+                                    <textarea name="obstacles" class="form-control" rows="3" placeholder="- Masih ada petugas yang belum...&#10;- Beberapa desa belum memiliki jaringan yang baik."></textarea>
+                                </div>
+                                <div class="col-md-6">
+                                    <label class="form-label small fw-semibold text-secondary">Solusi (Opsional)</label>
+                                    <textarea name="solutions" class="form-control" rows="3" placeholder="- Menyarankan petugas melakukan submit data...&#10;- Melakukan log in terlebih dahulu di daerah dengan jaringan bagus."></textarea>
+                                </div>
+                            </div>
+                            <div>
+                                <label class="form-label small fw-semibold text-secondary">F. Saran dan Rekomendasi / Tindak Lanjut</label>
+                                <textarea name="recommendations" class="form-control" rows="2" placeholder="Ketik '-' jika tidak ada">-</textarea>
+                            </div>
                         </div>
                     </div>
 
-                    <!-- Bagian F: Saran dan Rekomendasi / Tindak Lanjut -->
-                    <div class="card mb-3 border">
-                        <div class="card-header bg-light py-2 px-3 fw-bold text-dark small">
-                            <i class="fa-solid fa-comment-dots text-primary me-1"></i> F. SARAN DAN REKOMENDASI / TINDAK LANJUT
+                    <!-- DOKUMEN 2: DAFTAR PENGELUARAN RIIL -->
+                    <div class="card mb-3 border border-success">
+                        <div class="card-header bg-success-subtle text-success-emphasis py-2 px-3 fw-bold small d-flex justify-content-between align-items-center">
+                            <span><i class="fa-solid fa-receipt me-1"></i> DAFTAR PENGELUARAN RIIL (DIGABUNG OTOMATIS KE 1 PDF)</span>
+                            <button type="button" class="btn btn-xs btn-success py-0.5 px-2" style="font-size: 0.72rem;" onclick="addExpenseRow('create_expense_list', 'create_expense_total', 'create_expense_terbilang')">
+                                <i class="fa-solid fa-plus me-1"></i> Tambah Baris Biaya
+                            </button>
                         </div>
                         <div class="card-body p-3">
-                            <textarea name="recommendations" class="form-control" rows="2" placeholder="Tuliskan saran atau rekomendasi tindak lanjut (Ketik '-' jika tidak ada)">-</textarea>
+                            <div class="table-responsive mb-2">
+                                <table class="table table-bordered table-sm align-middle mb-0">
+                                    <thead class="table-light text-center small">
+                                        <tr>
+                                            <th style="width: 50px;">No</th>
+                                            <th>Perincian Biaya</th>
+                                            <th style="width: 180px;">Jumlah (Rp)</th>
+                                            <th style="width: 45px;"></th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="create_expense_list">
+                                        <tr>
+                                            <td class="text-center small fw-bold">1</td>
+                                            <td>
+                                                <input type="text" name="expense_descriptions[]" class="form-control form-control-sm expense-desc-input" value="Biaya transport dari Wilayah Tugas ke Kantor BPS Kabupaten Kolaka Utara (P.P.) selama 1 hari" required>
+                                            </td>
+                                            <td>
+                                                <input type="number" name="expense_amounts[]" class="form-control form-control-sm text-end fw-semibold expense-amt-input" value="50000" min="0" oninput="recalcExpenses('create_expense_list', 'create_expense_total', 'create_expense_terbilang')" required>
+                                            </td>
+                                            <td class="text-center">
+                                                <button type="button" class="btn btn-sm btn-outline-danger py-0 px-1.5" onclick="removeExpenseRow(this, 'create_expense_list', 'create_expense_total', 'create_expense_terbilang')" title="Hapus baris"><i class="fa-solid fa-xmark"></i></button>
+                                            </td>
+                                        </tr>
+                                    </tbody>
+                                    <tfoot>
+                                        <tr class="table-light">
+                                            <th colspan="2" class="text-center small">
+                                                JUMLAH (<span id="create_expense_terbilang" class="fst-italic fw-semibold text-success">Lima Puluh Ribu Rupiah</span>)
+                                            </th>
+                                            <th class="text-end font-monospace text-dark" id="create_expense_total">Rp. 50.000,-</th>
+                                            <th></th>
+                                        </tr>
+                                    </tfoot>
+                                </table>
+                            </div>
+                            <div class="row g-2 mt-2">
+                                <div class="col-md-6">
+                                    <label class="form-label small fw-semibold text-secondary mb-1">Pejabat Pembuat Komitmen (Menyetujui)</label>
+                                    <input type="text" name="ppk_name" class="form-control form-control-sm" value="Hidayatullah, SE">
+                                </div>
+                                <div class="col-md-6">
+                                    <label class="form-label small fw-semibold text-secondary mb-1">NIP Pejabat Pembuat Komitmen</label>
+                                    <input type="text" name="ppk_nip" class="form-control form-control-sm font-monospace" value="198510292011011009">
+                                </div>
+                            </div>
                         </div>
                     </div>
 
                     <!-- Tanda Tangan & Penandatanganan -->
                     <div class="card mb-3 border border-primary">
                         <div class="card-header bg-primary text-white py-2 px-3 fw-bold small d-flex justify-content-between align-items-center">
-                            <span><i class="fa-solid fa-signature me-1"></i> PENANDATANGANAN & TANDA TANGAN DIGITAL</span>
-                            <span class="badge bg-light text-primary">Wajib untuk Dokumen Resmi</span>
+                            <span><i class="fa-solid fa-signature me-1"></i> TANDA TANGAN DIGITAL (1x INPUT UNTUK KEDUA DOKUMEN)</span>
+                            <span class="badge bg-light text-primary">Muncul di Perjadin &amp; Pengeluaran Riil</span>
                         </div>
                         <div class="card-body p-3">
                             <div class="row g-3 mb-3">
@@ -546,7 +640,7 @@
                             </div>
 
                             <label class="form-label small fw-semibold text-dark mb-1">
-                                <i class="fa-solid fa-pen-nib text-primary me-1"></i> Input Tanda Tangan Pelaksana:
+                                <i class="fa-solid fa-pen-nib text-primary me-1"></i> Input Tanda Tangan Pelaksana (1 Kali Saja):
                             </label>
                             
                             <!-- Tab Pilihan Tanda Tangan -->
@@ -569,7 +663,7 @@
                                     <div class="p-2 bg-light border rounded text-center">
                                         <canvas id="create_sig_canvas" class="border bg-white rounded shadow-sm" width="500" height="160" style="touch-action: none; cursor: crosshair; max-width: 100%; display: inline-block;"></canvas>
                                         <div class="d-flex justify-content-between align-items-center mt-2 px-1">
-                                            <small class="text-muted"><i class="fa-solid fa-hand-pointer me-1"></i> Goreskan tanda tangan pada bidang kotak di atas</small>
+                                            <small class="text-muted"><i class="fa-solid fa-hand-pointer me-1"></i> Goreskan tanda tangan di kotak atas — otomatis tampil di 2 dokumen sekaligus</small>
                                             <button type="button" class="btn btn-sm btn-outline-danger" onclick="clearCreateCanvas()">
                                                 <i class="fa-solid fa-rotate-left me-1"></i> Hapus / Ulangi
                                             </button>
@@ -588,32 +682,29 @@
                         </div>
                     </div>
 
-                    <!-- Opsi Surat Pernyataan Tidak Menggunakan Kendaraan Dinas -->
-                    <div class="card mb-3 border border-info bg-info bg-opacity-10">
-                        <div class="card-body p-3">
-                            <div class="form-check form-switch mb-1">
-                                <input class="form-check-input" type="checkbox" name="include_vehicle_statement" value="1" id="create_vehicle_stmt" checked>
-                                <label class="form-check-label fw-bold text-dark" for="create_vehicle_stmt">
-                                    <i class="fa-solid fa-file-contract text-primary me-1"></i> Sertakan Surat Pernyataan Tidak Menggunakan Kendaraan Dinas
-                                </label>
-                            </div>
-                            <div class="small text-muted ms-4">
-                                Otomatis menghasilkan lampiran resmi Surat Pernyataan Tidak Menggunakan Kendaraan Dinas bertanda tangan pelaksana untuk klaim biaya transpor BPS Kolaka Utara.
-                            </div>
-                        </div>
-                    </div>
-
                     <!-- Lampiran Foto Dokumentasi -->
                     <div class="card mb-3 border">
                         <div class="card-header bg-light py-2 px-3 fw-bold text-dark small">
-                            <i class="fa-solid fa-camera text-primary me-1"></i> FOTO DOKUMENTASI KEGIATAN
+                            <i class="fa-solid fa-camera text-primary me-1"></i> FOTO DOKUMENTASI KEGIATAN (HALAMAN DOKUMENTASI)
                         </div>
                         <div class="card-body p-3">
                             <label class="form-label small fw-semibold text-secondary">
-                                Unggah Foto Bukti Lapangan / Responden (Maks. 5MB per file)
+                                Unggah Foto Bukti Lapangan / Kegiatan (Maks. 5MB per file)
                             </label>
                             <input type="file" name="photos[]" class="form-control" multiple accept="image/*,.pdf">
-                            <div class="form-text small">Dapat memilih lebih dari satu foto sekaligus (format: JPG, PNG, PDF).</div>
+                            <div class="form-text small">Foto akan ditampilkan pada halaman Dokumentasi berkop BPS Kabupaten Kolaka Utara.</div>
+                        </div>
+                    </div>
+
+                    <!-- Opsi Tambahan Surat Pernyataan Tidak Menggunakan Kendaraan Dinas -->
+                    <div class="card mb-3 border">
+                        <div class="card-body p-3">
+                            <div class="form-check form-switch mb-0">
+                                <input class="form-check-input" type="checkbox" name="include_vehicle_statement" value="1" id="create_vehicle_stmt">
+                                <label class="form-check-label fw-semibold text-dark small" for="create_vehicle_stmt">
+                                    <i class="fa-solid fa-file-contract text-secondary me-1"></i> Lampirkan juga Surat Pernyataan Tidak Menggunakan Kendaraan Dinas (Opsional)
+                                </label>
+                            </div>
                         </div>
                     </div>
 
@@ -624,7 +715,7 @@
                             <div class="form-check">
                                 <input class="form-check-input" type="radio" name="action_type" id="actionSubmit" value="submitted" checked>
                                 <label class="form-check-label fw-bold text-primary" for="actionSubmit">
-                                    <i class="fa-solid fa-paper-plane me-1"></i> Langsung Ajukan ke Admin untuk Diverifikasi
+                                    <i class="fa-solid fa-paper-plane me-1"></i> Ajukan &amp; Buat 1 PDF Gabungan
                                 </label>
                             </div>
                             <div class="form-check">
@@ -639,7 +730,7 @@
                 <div class="modal-footer bg-light border-top">
                     <button type="button" class="btn btn-light" data-bs-dismiss="modal">Batal</button>
                     <button type="submit" class="btn btn-sp-primary">
-                        <i class="fa-solid fa-floppy-disk me-1"></i> Simpan & Buat Laporan
+                        <i class="fa-solid fa-file-pdf me-1"></i> Simpan &amp; Gabung Jadi 1 PDF
                     </button>
                 </div>
             </form>
@@ -711,15 +802,25 @@
                     <!-- Bagian B: Dasar Pelaksanaan -->
                     <div class="card mb-3 border">
                         <div class="card-header bg-light py-2 px-3 fw-bold text-dark small">
-                            <i class="fa-solid fa-scale-balanced text-primary me-1"></i> B. DASAR PELAKSANAAN
+                            <i class="fa-solid fa-scale-balanced text-primary me-1"></i> B. DASAR PELAKSANAAN (LAPORAN &amp; PENGELUARAN RIIL)
                         </div>
                         <div class="card-body p-3">
                             <div class="mb-3">
                                 <label class="form-label small fw-semibold text-secondary">1. DIPA Satuan Kerja</label>
                                 <textarea id="edit_basis_dipa" name="basis_dipa" class="form-control" rows="2"></textarea>
                             </div>
+                            <div class="row g-3 mb-2">
+                                <div class="col-md-7">
+                                    <label class="form-label small fw-semibold text-secondary">2a. Nomor Surat Tugas</label>
+                                    <input type="text" id="edit_st_number" name="st_number" class="form-control" oninput="syncEditBasisSt()">
+                                </div>
+                                <div class="col-md-5">
+                                    <label class="form-label small fw-semibold text-secondary">2b. Tanggal Surat Tugas</label>
+                                    <input type="date" id="edit_st_date" name="st_date" class="form-control" oninput="syncEditBasisSt()">
+                                </div>
+                            </div>
                             <div>
-                                <label class="form-label small fw-semibold text-secondary">2. Surat Tugas Kepala BPS</label>
+                                <label class="form-label small fw-semibold text-secondary">2. Teks Lengkap Surat Tugas Kepala BPS</label>
                                 <textarea id="edit_basis_st" name="basis_st" class="form-control" rows="2"></textarea>
                             </div>
                         </div>
@@ -728,7 +829,7 @@
                     <!-- Bagian C & D: Tujuan & Waktu Perjalanan Dinas -->
                     <div class="card mb-3 border">
                         <div class="card-header bg-light py-2 px-3 fw-bold text-dark small">
-                            <i class="fa-solid fa-map-location-dot text-primary me-1"></i> C & D. TUJUAN & WAKTU PERJALANAN DINAS
+                            <i class="fa-solid fa-map-location-dot text-primary me-1"></i> C &amp; D. TUJUAN &amp; WAKTU PERJALANAN DINAS
                         </div>
                         <div class="card-body p-3">
                             <div class="row g-3 mb-3">
@@ -738,7 +839,7 @@
                                 </div>
                                 <div class="col-md-5">
                                     <label class="form-label small fw-semibold text-secondary">Penugasan Terkait</label>
-                                    <select id="edit_assignment" name="assignment_id" class="form-select" onchange="autoFillLocation(this, 'edit_activity_location')">
+                                    <select id="edit_assignment" name="assignment_id" class="form-select" onchange="autoFillLocationAndExpense(this, 'edit_activity_location', 'edit_expense_list')">
                                         <option value="" data-location="">-- Kegiatan Mandiri / Umum --</option>
                                         @foreach($myAssignments as $asgn)
                                             <option value="{{ $asgn->id }}" data-location="{{ $asgn->location }}">{{ $asgn->title }}</option>
@@ -747,10 +848,10 @@
                                 </div>
                                 <div class="col-12">
                                     <label class="form-label small fw-semibold text-secondary">
-                                        <i class="fa-solid fa-location-dot text-primary me-1"></i> Lokasi / Tempat Pelaksanaan Kegiatan & Dokumentasi
+                                        <i class="fa-solid fa-location-dot text-primary me-1"></i> Lokasi / Tempat Pelaksanaan &amp; Asal Keberangkatan
                                     </label>
-                                    <input type="text" id="edit_activity_location" name="activity_location" class="form-control" placeholder="Contoh: Kecamatan Sukamaju / Desa Tambuha, Kec. Watunohu">
-                                    <div class="form-text small">Teks ini dicantumkan pada judul Dokumentasi ("di [Lokasi] dan Sekitarnya") dan Surat Pernyataan.</div>
+                                    <input type="text" id="edit_activity_location" name="activity_location" class="form-control" placeholder="Contoh: Kecamatan Batu Putih" oninput="syncDefaultExpenseDesc('edit_activity_location', 'edit_expense_list')">
+                                    <div class="form-text small">Digunakan pada tujuan perjalanan dinas, halaman Dokumentasi, dan rincian asal biaya Daftar Pengeluaran Riil.</div>
                                 </div>
                             </div>
                             <div class="mb-3">
@@ -770,32 +871,82 @@
                         </div>
                     </div>
 
-                    <!-- Bagian E: Hasil Perjalanan Dinas -->
+                    <!-- Bagian E & F: Hasil Perjalanan Dinas, Kendala, Solusi & Saran -->
                     <div class="card mb-3 border">
                         <div class="card-header bg-light py-2 px-3 fw-bold text-dark small">
-                            <i class="fa-solid fa-list-check text-primary me-1"></i> E. HASIL PERJALANAN DINAS
+                            <i class="fa-solid fa-list-check text-primary me-1"></i> E &amp; F. HASIL PERJALANAN DINAS, KENDALA, SOLUSI &amp; SARAN
                         </div>
                         <div class="card-body p-3">
-                            <label class="form-label small fw-semibold text-secondary">Uraian Rangkaian Kegiatan & Hasil Lapangan <span class="text-danger">*</span></label>
-                            <textarea id="edit_description" name="work_description" class="form-control" rows="5" required></textarea>
+                            <div class="mb-3">
+                                <label class="form-label small fw-semibold text-secondary">E. Uraian Hasil Perjalanan Dinas <span class="text-danger">*</span></label>
+                                <textarea id="edit_description" name="work_description" class="form-control" rows="4" required></textarea>
+                            </div>
+                            <div class="row g-3 mb-3">
+                                <div class="col-md-6">
+                                    <label class="form-label small fw-semibold text-secondary">Kendala (Opsional)</label>
+                                    <textarea id="edit_obstacles" name="obstacles" class="form-control" rows="3"></textarea>
+                                </div>
+                                <div class="col-md-6">
+                                    <label class="form-label small fw-semibold text-secondary">Solusi (Opsional)</label>
+                                    <textarea id="edit_solutions" name="solutions" class="form-control" rows="3"></textarea>
+                                </div>
+                            </div>
+                            <div>
+                                <label class="form-label small fw-semibold text-secondary">F. Saran dan Rekomendasi / Tindak Lanjut</label>
+                                <textarea id="edit_recommendations" name="recommendations" class="form-control" rows="2">-</textarea>
+                            </div>
                         </div>
                     </div>
 
-                    <!-- Bagian F: Saran dan Rekomendasi / Tindak Lanjut -->
-                    <div class="card mb-3 border">
-                        <div class="card-header bg-light py-2 px-3 fw-bold text-dark small">
-                            <i class="fa-solid fa-comment-dots text-primary me-1"></i> F. SARAN DAN REKOMENDASI / TINDAK LANJUT
+                    <!-- DOKUMEN 2: DAFTAR PENGELUARAN RIIL -->
+                    <div class="card mb-3 border border-success">
+                        <div class="card-header bg-success-subtle text-success-emphasis py-2 px-3 fw-bold small d-flex justify-content-between align-items-center">
+                            <span><i class="fa-solid fa-receipt me-1"></i> DAFTAR PENGELUARAN RIIL (DIGABUNG OTOMATIS KE 1 PDF)</span>
+                            <button type="button" class="btn btn-xs btn-success py-0.5 px-2" style="font-size: 0.72rem;" onclick="addExpenseRow('edit_expense_list', 'edit_expense_total', 'edit_expense_terbilang')">
+                                <i class="fa-solid fa-plus me-1"></i> Tambah Baris Biaya
+                            </button>
                         </div>
                         <div class="card-body p-3">
-                            <textarea id="edit_recommendations" name="recommendations" class="form-control" rows="2">-</textarea>
+                            <div class="table-responsive mb-2">
+                                <table class="table table-bordered table-sm align-middle mb-0">
+                                    <thead class="table-light text-center small">
+                                        <tr>
+                                            <th style="width: 50px;">No</th>
+                                            <th>Perincian Biaya</th>
+                                            <th style="width: 180px;">Jumlah (Rp)</th>
+                                            <th style="width: 45px;"></th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="edit_expense_list"></tbody>
+                                    <tfoot>
+                                        <tr class="table-light">
+                                            <th colspan="2" class="text-center small">
+                                                JUMLAH (<span id="edit_expense_terbilang" class="fst-italic fw-semibold text-success">Nol Rupiah</span>)
+                                            </th>
+                                            <th class="text-end font-monospace text-dark" id="edit_expense_total">Rp. 0,-</th>
+                                            <th></th>
+                                        </tr>
+                                    </tfoot>
+                                </table>
+                            </div>
+                            <div class="row g-2 mt-2">
+                                <div class="col-md-6">
+                                    <label class="form-label small fw-semibold text-secondary mb-1">Pejabat Pembuat Komitmen (Menyetujui)</label>
+                                    <input type="text" id="edit_ppk_name" name="ppk_name" class="form-control form-control-sm" value="Hidayatullah, SE">
+                                </div>
+                                <div class="col-md-6">
+                                    <label class="form-label small fw-semibold text-secondary mb-1">NIP Pejabat Pembuat Komitmen</label>
+                                    <input type="text" id="edit_ppk_nip" name="ppk_nip" class="form-control form-control-sm font-monospace" value="198510292011011009">
+                                </div>
+                            </div>
                         </div>
                     </div>
 
                     <!-- Tanda Tangan & Penandatanganan -->
                     <div class="card mb-3 border border-warning">
                         <div class="card-header bg-warning text-dark py-2 px-3 fw-bold small d-flex justify-content-between align-items-center">
-                            <span><i class="fa-solid fa-signature me-1"></i> PENANDATANGANAN & TANDA TANGAN DIGITAL</span>
-                            <span class="badge bg-dark text-white">Digital Signature</span>
+                            <span><i class="fa-solid fa-signature me-1"></i> TANDA TANGAN DIGITAL (1x INPUT UNTUK KEDUA DOKUMEN)</span>
+                            <span class="badge bg-dark text-white">Muncul di Perjadin &amp; Pengeluaran Riil</span>
                         </div>
                         <div class="card-body p-3">
                             <div class="row g-3 mb-3">
@@ -1005,7 +1156,15 @@
 
                     <!-- E. HASIL PERJALANAN DINAS -->
                     <div class="fw-bold mb-1 mt-2" style="font-size: 10.5pt;">E. Hasil Perjalanan Dinas</div>
-                    <div id="det_work_description" class="ms-3 mb-3 text-justify p-2 bg-light rounded" style="font-size: 10.5pt; white-space: pre-line;">-</div>
+                    <div id="det_work_description" class="ms-3 mb-2 text-justify p-2 bg-light rounded" style="font-size: 10.5pt; white-space: pre-line;">-</div>
+                    <div id="det_obstacles_box" class="ms-3 mb-2 d-none" style="font-size: 10.5pt;">
+                        <div class="fw-bold">Kendala :</div>
+                        <div id="det_obstacles" class="ms-2" style="white-space: pre-line;"></div>
+                    </div>
+                    <div id="det_solutions_box" class="ms-3 mb-3 d-none" style="font-size: 10.5pt;">
+                        <div class="fw-bold">Solusi :</div>
+                        <div id="det_solutions" class="ms-2" style="white-space: pre-line;"></div>
+                    </div>
 
                     <!-- F. SARAN DAN REKOMENDASI / TINDAK LANJUT -->
                     <div class="fw-bold mb-1 mt-2" style="font-size: 10.5pt;">F. Saran dan Rekomendasi / Tindak Lanjut</div>
@@ -1031,6 +1190,103 @@
                             <i class="fa-solid fa-camera text-primary me-1"></i> DOKUMENTASI KEGIATAN:
                         </div>
                         <div id="det_attachments_container" class="row g-2"></div>
+                    </div>
+                </div>
+
+                <!-- Simulation of Document 2: Daftar Pengeluaran Riil (Tanpa Kop Surat) -->
+                <div id="det_dpr_paper" class="bg-white p-4 p-md-5 rounded shadow-sm border mx-auto mb-4" style="max-width: 820px; font-family: Arial, Helvetica, sans-serif; color: #000; line-height: 1.45;">
+                    <div class="text-center mb-4">
+                        <h5 class="fw-bold mb-0 text-dark" style="font-size: 12pt;">Daftar Pengeluaran Riil</h5>
+                    </div>
+
+                    <table class="table table-borderless table-sm mb-3" style="font-size: 10.5pt; width: auto;">
+                        <tr>
+                            <td style="width: 210px; padding: 2px 0;">Yang bertanda tangan dibawah ini</td>
+                            <td style="width: 15px; padding: 2px 0;">:</td>
+                            <td></td>
+                        </tr>
+                        <tr><td colspan="3" style="height: 6px; padding: 0;"></td></tr>
+                        <tr>
+                            <td style="padding: 2px 0;">Nama</td>
+                            <td style="padding: 2px 0;">:</td>
+                            <td class="fw-semibold text-dark" id="dpr_officer_name" style="padding: 2px 0;">-</td>
+                        </tr>
+                        <tr>
+                            <td style="padding: 2px 0;">NIK</td>
+                            <td style="padding: 2px 0;">:</td>
+                            <td id="dpr_officer_nik" style="padding: 2px 0;">-</td>
+                        </tr>
+                        <tr>
+                            <td style="padding: 2px 0;">Jabatan</td>
+                            <td style="padding: 2px 0;">:</td>
+                            <td id="dpr_officer_position" style="padding: 2px 0;">-</td>
+                        </tr>
+                    </table>
+
+                    <p style="text-align: justify; font-size: 10.5pt; margin-bottom: 14px;">
+                        berdasarkan <span id="dpr_st_text">Surat Tugas</span>, dengan ini kami menyatakan dengan sesungguhnya bahwa :
+                    </p>
+
+                    <div style="font-size: 10.5pt; margin-bottom: 10px;">
+                        1.&nbsp;&nbsp;Biaya transport pegawai di bawah ini yang tidak dapat diperoleh bukti-bukti pengeluarannya, meliputi:
+                    </div>
+
+                    <div class="table-responsive mb-3">
+                        <table class="table table-bordered border-dark table-sm mb-0" style="font-size: 10pt; border-color: #000 !important;">
+                            <thead class="text-center align-middle" style="border-color: #000;">
+                                <tr>
+                                    <th style="width: 45px; font-weight: normal; border-color: #000;">No</th>
+                                    <th style="font-weight: normal; border-color: #000;">Perincian Biaya</th>
+                                    <th style="width: 165px; font-weight: normal; border-color: #000;">Jumlah (Rp)</th>
+                                </tr>
+                                <tr>
+                                    <td style="font-size: 9pt; border-color: #000; padding: 2px;">(1)</td>
+                                    <td style="font-size: 9pt; border-color: #000; padding: 2px;">(2)</td>
+                                    <td style="font-size: 9pt; border-color: #000; padding: 2px;">(3)</td>
+                                </tr>
+                            </thead>
+                            <tbody id="dpr_expense_tbody" style="border-color: #000;"></tbody>
+                            <tfoot style="border-color: #000;">
+                                <tr>
+                                    <td colspan="2" class="text-center fw-bold" style="border-color: #000;">JUMLAH</td>
+                                    <td rowspan="2" id="dpr_total_amount" class="text-center align-middle fw-bold" style="border-color: #000;">Rp. 0,-</td>
+                                </tr>
+                                <tr>
+                                    <td colspan="2" class="text-center fw-bold fst-italic" style="border-color: #000;">
+                                        (<span id="dpr_total_terbilang">Nol Rupiah</span>)
+                                    </td>
+                                </tr>
+                            </tfoot>
+                        </table>
+                    </div>
+
+                    <div style="font-size: 10.5pt; text-align: justify; margin-bottom: 12px;">
+                        2.&nbsp;&nbsp;Jumlah uang tersebut pada angka 1 diatas benar-benar dikeluarkan untuk pelaksanaan perjalanan dinas dimaksud dan apabila di kemudian hari terdapat kelebihan atas pembayaran, kami bersedia untuk menyetorkan kelebihan tersebut ke Kas Negara.
+                    </div>
+
+                    <p style="font-size: 10.5pt; margin-left: 22px; margin-bottom: 24px;">
+                        Demikian pernyataan ini kami buat dengan sebenarnya, untuk dipergunakan sebagaimana mestinya.
+                    </p>
+
+                    <div class="row mt-4" style="font-size: 10.5pt;">
+                        <div class="col-6 text-center">
+                            <div>Mengetahui/Menyetujui:</div>
+                            <div>Pejabat Pembuat Komitmen</div>
+                            <div>BPS Kabupaten Kolaka Utara</div>
+                            <div style="height: 65px;"></div>
+                            <div class="fw-bold text-decoration-underline text-dark" id="dpr_ppk_name">Hidayatullah, SE</div>
+                            <div>NIP. <span id="dpr_ppk_nip">198510292011011009</span></div>
+                        </div>
+                        <div class="col-6 text-center">
+                            <div id="dpr_signing_place_date">Lasusua, -</div>
+                            <div>Pegawai</div>
+                            <div>Yang melakukan perjalanan dinas,</div>
+                            <div id="dpr_sign_img_container" style="min-height: 65px; display: flex; align-items: center; justify-content: center; margin: 4px 0;">
+                                <!-- Signature img -->
+                            </div>
+                            <div class="fw-bold text-decoration-underline text-dark" id="dpr_sign_name">-</div>
+                            <div id="dpr_sign_nip">-</div>
+                        </div>
                     </div>
                 </div>
 
@@ -1226,6 +1482,85 @@
         }
     });
 
+    const ID_MONTHS = [
+        'Januari', 'Februari', 'Maret', 'April', 'Mei', 'Juni',
+        'Juli', 'Agustus', 'September', 'Oktober', 'November', 'Desember'
+    ];
+
+    function formatIndonesianDate(dateStr) {
+        if (!dateStr) return '-';
+        const clean = dateStr.substring(0, 10);
+        const parts = clean.split('-');
+        if (parts.length !== 3) return dateStr;
+        const year = parts[0];
+        const monthIdx = parseInt(parts[1], 10) - 1;
+        const day = parseInt(parts[2], 10);
+        if (isNaN(day) || monthIdx < 0 || monthIdx > 11) return dateStr;
+        return day + ' ' + ID_MONTHS[monthIdx] + ' ' + year;
+    }
+
+    function formatRupiah(angka) {
+        const num = Math.max(0, Math.round(Number(angka) || 0));
+        return 'Rp. ' + num.toString().replace(/\B(?=(\d{3})+(?!\d))/g, '.') + ',-';
+    }
+
+    function terbilangInt(angka) {
+        const n = Math.floor(Math.abs(Number(angka) || 0));
+        const words = ['', 'Satu', 'Dua', 'Tiga', 'Empat', 'Lima', 'Enam', 'Tujuh', 'Delapan', 'Sembilan', 'Sepuluh', 'Sebelas'];
+        if (n < 12) return words[n];
+        if (n < 20) return terbilangInt(n - 10) + ' Belas';
+        if (n < 100) return (terbilangInt(Math.floor(n / 10)) + ' Puluh ' + terbilangInt(n % 10)).trim();
+        if (n < 200) return ('Seratus ' + terbilangInt(n - 100)).trim();
+        if (n < 1000) return (terbilangInt(Math.floor(n / 100)) + ' Ratus ' + terbilangInt(n % 100)).trim();
+        if (n < 2000) return ('Seribu ' + terbilangInt(n - 1000)).trim();
+        if (n < 1000000) return (terbilangInt(Math.floor(n / 1000)) + ' Ribu ' + terbilangInt(n % 1000)).trim();
+        if (n < 1000000000) return (terbilangInt(Math.floor(n / 1000000)) + ' Juta ' + terbilangInt(n % 1000000)).trim();
+        if (n < 1000000000000) return (terbilangInt(Math.floor(n / 1000000000)) + ' Miliar ' + terbilangInt(n % 1000000000)).trim();
+        return n.toString();
+    }
+
+    function terbilangRupiah(angka) {
+        const n = Math.round(Number(angka) || 0);
+        if (n <= 0) return 'Nol Rupiah';
+        return terbilangInt(n).replace(/\s+/g, ' ').trim() + ' Rupiah';
+    }
+
+    function syncBasisSt(numInputId, dateInputId, targetTextareaId) {
+        const numEl = document.getElementById(numInputId);
+        const dateEl = document.getElementById(dateInputId);
+        const outEl = document.getElementById(targetTextareaId);
+        if (!outEl) return;
+
+        const num = (numEl && numEl.value.trim()) ? numEl.value.trim() : '-';
+        const dateFormatted = (dateEl && dateEl.value) ? formatIndonesianDate(dateEl.value) : '-';
+        outEl.value = `Surat Tugas Kepala Badan Pusat Statistik Kabupaten Kolaka Utara Nomor ${num} Tanggal ${dateFormatted}.`;
+    }
+
+    function syncCreateBasisSt() {
+        syncBasisSt('create_st_number', 'create_st_date', 'create_basis_st');
+    }
+
+    function syncEditBasisSt() {
+        syncBasisSt('edit_st_number', 'edit_st_date', 'edit_basis_st');
+    }
+
+    function buildDefaultExpenseDesc(location) {
+        const origin = (location && location.trim()) ? location.trim() : 'Wilayah Tugas';
+        return `Biaya transport dari ${origin} ke Kantor BPS Kabupaten Kolaka Utara (P.P.) selama 1 hari`;
+    }
+
+    function syncDefaultExpenseDesc(locInputId, tbodyId) {
+        const locEl = document.getElementById(locInputId);
+        const tbody = document.getElementById(tbodyId);
+        if (!locEl || !tbody) return;
+        const firstDesc = tbody.querySelector('tr:first-child .expense-desc-input');
+        if (!firstDesc) return;
+        const val = firstDesc.value.trim();
+        if (!val || (val.startsWith('Biaya transport dari ') && val.includes('ke Kantor BPS Kabupaten Kolaka Utara'))) {
+            firstDesc.value = buildDefaultExpenseDesc(locEl.value);
+        }
+    }
+
     function autoFillLocation(selectElem, targetInputId) {
         const selectedOpt = selectElem.options[selectElem.selectedIndex];
         if (selectedOpt) {
@@ -1237,6 +1572,102 @@
         }
     }
 
+    function autoFillLocationAndExpense(selectElem, targetInputId, tbodyId) {
+        autoFillLocation(selectElem, targetInputId);
+        syncDefaultExpenseDesc(targetInputId, tbodyId);
+    }
+
+    function renumberExpenseRows(tbodyId) {
+        const tbody = document.getElementById(tbodyId);
+        if (!tbody) return;
+        tbody.querySelectorAll('tr').forEach((tr, idx) => {
+            const noCell = tr.querySelector('td:first-child');
+            if (noCell) noCell.textContent = idx + 1;
+        });
+    }
+
+    function addExpenseRow(tbodyId, totalId, terbilangId, desc = '', amount = 0) {
+        const tbody = document.getElementById(tbodyId);
+        if (!tbody) return;
+        const rowNum = tbody.querySelectorAll('tr').length + 1;
+
+        const tr = document.createElement('tr');
+        const tdNo = document.createElement('td');
+        tdNo.className = 'text-center small fw-bold';
+        tdNo.textContent = rowNum;
+
+        const tdDesc = document.createElement('td');
+        const inpDesc = document.createElement('input');
+        inpDesc.type = 'text';
+        inpDesc.name = 'expense_descriptions[]';
+        inpDesc.className = 'form-control form-control-sm expense-desc-input';
+        inpDesc.value = desc;
+        inpDesc.placeholder = 'Contoh: Biaya transport dari Kantor ke lokasi kegiatan (P.P.) selama 1 hari';
+        inpDesc.required = true;
+        tdDesc.appendChild(inpDesc);
+
+        const tdAmt = document.createElement('td');
+        const inpAmt = document.createElement('input');
+        inpAmt.type = 'number';
+        inpAmt.name = 'expense_amounts[]';
+        inpAmt.className = 'form-control form-control-sm text-end fw-semibold expense-amt-input';
+        inpAmt.min = '0';
+        inpAmt.value = Number(amount) || 0;
+        inpAmt.required = true;
+        inpAmt.addEventListener('input', function() {
+            recalcExpenses(tbodyId, totalId, terbilangId);
+        });
+        tdAmt.appendChild(inpAmt);
+
+        const tdAct = document.createElement('td');
+        tdAct.className = 'text-center';
+        const btnDel = document.createElement('button');
+        btnDel.type = 'button';
+        btnDel.className = 'btn btn-sm btn-outline-danger py-0 px-1.5';
+        btnDel.title = 'Hapus baris';
+        btnDel.innerHTML = '<i class="fa-solid fa-xmark"></i>';
+        btnDel.addEventListener('click', function() {
+            removeExpenseRow(btnDel, tbodyId, totalId, terbilangId);
+        });
+        tdAct.appendChild(btnDel);
+
+        tr.appendChild(tdNo);
+        tr.appendChild(tdDesc);
+        tr.appendChild(tdAmt);
+        tr.appendChild(tdAct);
+        tbody.appendChild(tr);
+
+        recalcExpenses(tbodyId, totalId, terbilangId);
+    }
+
+    function removeExpenseRow(btn, tbodyId, totalId, terbilangId) {
+        const tbody = document.getElementById(tbodyId);
+        if (!tbody) return;
+        const rows = tbody.querySelectorAll('tr');
+        if (rows.length <= 1) {
+            const amt = rows[0].querySelector('.expense-amt-input');
+            if (amt) amt.value = 0;
+        } else {
+            const tr = btn.closest('tr');
+            if (tr) tr.remove();
+            renumberExpenseRows(tbodyId);
+        }
+        recalcExpenses(tbodyId, totalId, terbilangId);
+    }
+
+    function recalcExpenses(tbodyId, totalId, terbilangId) {
+        const tbody = document.getElementById(tbodyId);
+        if (!tbody) return;
+        let total = 0;
+        tbody.querySelectorAll('.expense-amt-input').forEach(inp => {
+            total += Math.max(0, Math.round(Number(inp.value) || 0));
+        });
+        const totalEl = document.getElementById(totalId);
+        const terbEl = document.getElementById(terbilangId);
+        if (totalEl) totalEl.textContent = formatRupiah(total);
+        if (terbEl) terbEl.textContent = terbilangRupiah(total);
+    }
+
     function clearCreateCanvas() {
         if (createSigPad) createSigPad.clear();
     }
@@ -1245,38 +1676,72 @@
         if (editSigPad) editSigPad.clear();
     }
 
+    function buildStPhrase(rep) {
+        if (rep.resolved_st_text) return rep.resolved_st_text;
+        const actDate = rep.activity_date ? rep.activity_date.substring(0, 10) : '';
+        if (rep.st_number) {
+            const stDate = rep.st_date ? rep.st_date.substring(0, 10) : actDate;
+            return `Surat Tugas Nomor ${rep.st_number} Tanggal ${formatIndonesianDate(stDate)}`;
+        }
+        const raw = (rep.basis_st || '').trim().replace(/\.$/, '');
+        if (!raw) {
+            const year = actDate ? actDate.substring(0, 4) : new Date().getFullYear();
+            return `Surat Tugas Nomor B-1812/74080/HM.300/${year} Tanggal ${formatIndonesianDate(actDate)}`;
+        }
+        return raw.replace(/^(Surat Tugas|Berdasarkan Surat Tugas)\s+(Kepala BPS[^N]*?)?(?=Nomor)/i, 'Surat Tugas ');
+    }
+
     function openEditModal(rep) {
         document.getElementById('editReportForm').action = '/petugas/reports/' + rep.id;
         
-        // Pelaksana
-        document.getElementById('edit_officer_name').value = rep.officer_name || '';
+        // Pelaksana (fallback ke profil user bila kolom kosong)
+        document.getElementById('edit_officer_name').value = rep.resolved_officer_name || rep.officer_name || (rep.user ? rep.user.name : '') || '';
         document.getElementById('edit_id_type').value = rep.id_type || 'NIK';
-        document.getElementById('edit_officer_nip').value = rep.officer_nip || '';
-        document.getElementById('edit_officer_rank').value = rep.officer_rank || '-';
-        document.getElementById('edit_officer_position').value = rep.officer_position || 'Mitra BPS Kabupaten Kolaka Utara';
+        document.getElementById('edit_officer_nip').value = rep.resolved_officer_nik || rep.officer_nip || (rep.user ? rep.user.nik : '') || '';
+        document.getElementById('edit_officer_rank').value = rep.officer_rank || (rep.user ? rep.user.rank : '') || '-';
+        document.getElementById('edit_officer_position').value = rep.officer_position || (rep.user ? rep.user.position : '') || 'Mitra BPS Kabupaten Kolaka Utara';
 
         // Dasar
         document.getElementById('edit_basis_dipa').value = rep.basis_dipa || '';
+        document.getElementById('edit_st_number').value = rep.st_number || '';
+        document.getElementById('edit_st_date').value = rep.st_date ? rep.st_date.substring(0, 10) : (rep.activity_date ? rep.activity_date.substring(0, 10) : '');
         document.getElementById('edit_basis_st').value = rep.basis_st || '';
 
         // Tujuan & Waktu
         document.getElementById('edit_title').value = rep.activity_title || '';
         document.getElementById('edit_assignment').value = rep.assignment_id || '';
-        document.getElementById('edit_activity_location').value = rep.activity_location || (rep.assignment ? rep.assignment.location : '');
+        const actLoc = rep.activity_location || (rep.assignment ? rep.assignment.location : '') || '';
+        document.getElementById('edit_activity_location').value = actLoc;
         document.getElementById('edit_destination_purpose').value = rep.destination_purpose || '';
-        document.getElementById('edit_duration_text').value = rep.duration_text || 'Selama 1 (Satu) Hari';
+        document.getElementById('edit_duration_text').value = rep.duration_text || 'Selama 1 (satu) Hari';
         document.getElementById('edit_date').value = rep.activity_date ? rep.activity_date.substring(0, 10) : '';
 
-        // Uraian & Rekomendasi
+        // Uraian, Kendala, Solusi & Rekomendasi
         document.getElementById('edit_description').value = rep.work_description || '';
+        document.getElementById('edit_obstacles').value = rep.obstacles || '';
+        document.getElementById('edit_solutions').value = rep.solutions || '';
         document.getElementById('edit_recommendations').value = rep.recommendations || '-';
+
+        // Dokumen 2: Daftar Pengeluaran Riil
+        const editTbody = document.getElementById('edit_expense_list');
+        editTbody.innerHTML = '';
+        const items = (Array.isArray(rep.resolved_expense_items) && rep.resolved_expense_items.length)
+            ? rep.resolved_expense_items
+            : (Array.isArray(rep.expense_items) && rep.expense_items.length
+                ? rep.expense_items
+                : [{ description: buildDefaultExpenseDesc(actLoc), amount: 50000 }]);
+        items.forEach(item => {
+            addExpenseRow('edit_expense_list', 'edit_expense_total', 'edit_expense_terbilang', item.description || '', Number(item.amount || 0));
+        });
+        document.getElementById('edit_ppk_name').value = rep.ppk_name || 'Hidayatullah, SE';
+        document.getElementById('edit_ppk_nip').value = rep.ppk_nip || '198510292011011009';
 
         // Penandatanganan
         document.getElementById('edit_signing_city').value = rep.signing_city || 'Lasusua';
         document.getElementById('edit_signing_date').value = rep.signing_date ? rep.signing_date.substring(0, 10) : (rep.activity_date ? rep.activity_date.substring(0, 10) : '');
 
-        // Surat Pernyataan Checkbox
-        document.getElementById('edit_vehicle_stmt').checked = (rep.include_vehicle_statement !== false && rep.include_vehicle_statement !== 0);
+        // Surat Pernyataan Checkbox (opsional)
+        document.getElementById('edit_vehicle_stmt').checked = (rep.include_vehicle_statement === true || rep.include_vehicle_statement === 1);
 
         // Preview Signature jika sudah ada
         const sigContainer = document.getElementById('edit_current_sig_container');
@@ -1310,74 +1775,132 @@
         badge.className = 'badge ' + (rep.status_badge || 'bg-secondary');
         badge.innerText = rep.status_label || rep.status;
 
-        // Section A
-        document.getElementById('det_officer_name').innerText = rep.officer_name || (rep.user ? rep.user.name : '-');
-        document.getElementById('det_label_id').innerText = rep.id_type || 'NIK';
-        document.getElementById('det_officer_nip').innerText = rep.officer_nip || '-';
-        document.getElementById('det_officer_rank').innerText = rep.officer_rank || '-';
-        document.getElementById('det_officer_position').innerText = rep.officer_position || 'Mitra BPS Kabupaten Kolaka Utara';
+        const officerName = rep.resolved_officer_name || rep.officer_name || (rep.user ? rep.user.name : '-') || '-';
+        const officerNik = rep.resolved_officer_nik || rep.officer_nip || (rep.user ? rep.user.nik : '-') || '-';
+        const officerRank = rep.officer_rank || (rep.user ? rep.user.rank : '-') || '-';
+        const officerPosition = rep.officer_position || (rep.user ? rep.user.position : '') || 'Mitra BPS Kabupaten Kolaka Utara';
+        const idType = rep.id_type || 'NIK';
+
+        // Dokumen 1 - Section A
+        document.getElementById('det_officer_name').innerText = officerName;
+        document.getElementById('det_label_id').innerText = idType;
+        document.getElementById('det_officer_nip').innerText = officerNik;
+        document.getElementById('det_officer_rank').innerText = officerRank;
+        document.getElementById('det_officer_position').innerText = officerPosition;
 
         // Section B
         const year = rep.activity_date ? new Date(rep.activity_date).getFullYear() : new Date().getFullYear();
+        const actDateRaw = rep.activity_date ? rep.activity_date.substring(0, 10) : '';
+        const actDateFormatted = actDateRaw ? formatIndonesianDate(actDateRaw) : '-';
         document.getElementById('det_basis_dipa').innerText = rep.basis_dipa || ('DIPA Satuan Kerja Badan Pusat Statistik Kabupaten Kolaka Utara Tahun Anggaran ' + year + ' Nomor SP DIPA-054.01.2.667477/' + year + ' tanggal 1 Desember ' + (year - 1) + '.');
-        document.getElementById('det_basis_st').innerText = rep.basis_st || ('Surat Tugas Kepala Badan Pusat Statistik Kabupaten Kolaka Utara Nomor: B-969/74080/VS.330/' + year + ' Tanggal ' + (rep.activity_date ? rep.activity_date.substring(0, 10) : '') + '.');
+        document.getElementById('det_basis_st').innerText = rep.basis_st || ('Surat Tugas Kepala Badan Pusat Statistik Kabupaten Kolaka Utara Nomor: B-1812/74080/HM.300/' + year + ' Tanggal ' + actDateFormatted + '.');
 
         // Section C
         document.getElementById('det_destination_purpose').innerText = rep.destination_purpose || ('Perjalanan Dinas Biasa dalam kota lebih dari 8 jam dalam rangka pendataan ' + rep.activity_title + '.');
 
         // Section D
-        const actDateStr = rep.activity_date ? rep.activity_date.substring(0, 10) : '-';
-        document.getElementById('det_duration_info').innerText = (rep.duration_text || 'Selama 1 (Satu) Hari') + ', pada tanggal ' + actDateStr;
+        document.getElementById('det_duration_info').innerText = (rep.duration_text || 'Selama 1 (satu) Hari') + ', pada tanggal ' + actDateFormatted;
 
         // Section E & F
         document.getElementById('det_work_description').innerText = rep.work_description || '-';
+
+        const obsBox = document.getElementById('det_obstacles_box');
+        if (rep.obstacles && rep.obstacles.trim()) {
+            obsBox.classList.remove('d-none');
+            document.getElementById('det_obstacles').innerText = rep.obstacles;
+        } else {
+            obsBox.classList.add('d-none');
+        }
+
+        const solBox = document.getElementById('det_solutions_box');
+        if (rep.solutions && rep.solutions.trim()) {
+            solBox.classList.remove('d-none');
+            document.getElementById('det_solutions').innerText = rep.solutions;
+        } else {
+            solBox.classList.add('d-none');
+        }
+
         document.getElementById('det_recommendations').innerText = rep.recommendations || '-';
 
-        // Signer & Tanda Tangan
+        // Signer & Tanda Tangan (1x input tampil di Dokumen 1 & Dokumen 2)
         const signCity = rep.signing_city || 'Lasusua';
-        const signDate = rep.signing_date ? rep.signing_date.substring(0, 10) : actDateStr;
-        document.getElementById('det_signing_place_date').innerText = signCity + ', ' + signDate;
-        document.getElementById('det_sign_name').innerText = rep.officer_name || (rep.user ? rep.user.name : '-');
-        if (rep.officer_nip && rep.officer_nip !== '-') {
-            document.getElementById('det_sign_nip').innerText = (rep.id_type || 'NIK') + '. ' + rep.officer_nip;
-        } else {
-            document.getElementById('det_sign_nip').innerText = '';
-        }
+        const signDateRaw = rep.signing_date ? rep.signing_date.substring(0, 10) : actDateRaw;
+        const signPlaceDate = signCity + ', ' + formatIndonesianDate(signDateRaw);
+        const signImgHtml = rep.signature_path
+            ? `<img src="/storage/${rep.signature_path}" style="max-height: 60px; max-width: 170px;" alt="Tanda Tangan">`
+            : `<div style="height: 55px;"></div>`;
 
-        // Render Signature image or space
-        const signImgContainer = document.getElementById('det_sign_img_container');
-        if (rep.signature_path) {
-            signImgContainer.innerHTML = `<img src="/storage/${rep.signature_path}" style="max-height: 60px; max-width: 170px;" alt="Tanda Tangan">`;
-        } else {
-            signImgContainer.innerHTML = `<div style="height: 55px;"></div>`;
-        }
+        document.getElementById('det_signing_place_date').innerText = signPlaceDate;
+        document.getElementById('det_sign_name').innerText = officerName;
+        document.getElementById('det_sign_nip').innerText = (officerNik && officerNik !== '-') ? (idType + '. ' + officerNik) : '';
+        document.getElementById('det_sign_img_container').innerHTML = signImgHtml;
 
-        // Surat Pernyataan Kendaraan Dinas Preview
+        // Dokumen 2 - Daftar Pengeluaran Riil
+        document.getElementById('dpr_officer_name').innerText = officerName;
+        document.getElementById('dpr_officer_nik').innerText = officerNik;
+        document.getElementById('dpr_officer_position').innerText = officerPosition;
+        document.getElementById('dpr_st_text').innerText = buildStPhrase(rep);
+
+        const dprTbody = document.getElementById('dpr_expense_tbody');
+        dprTbody.innerHTML = '';
+        const locFallback = rep.activity_location || (rep.assignment ? rep.assignment.location : '') || '';
+        const expenseItems = (Array.isArray(rep.resolved_expense_items) && rep.resolved_expense_items.length)
+            ? rep.resolved_expense_items
+            : (Array.isArray(rep.expense_items) && rep.expense_items.length
+                ? rep.expense_items
+                : [{ description: buildDefaultExpenseDesc(locFallback), amount: 50000 }]);
+
+        let totalExpense = 0;
+        expenseItems.forEach((item, idx) => {
+            const amt = Math.max(0, Math.round(Number(item.amount) || 0));
+            totalExpense += amt;
+            const tr = document.createElement('tr');
+
+            const tdNo = document.createElement('td');
+            tdNo.className = 'text-center';
+            tdNo.style.borderColor = '#000';
+            tdNo.textContent = idx + 1;
+
+            const tdDesc = document.createElement('td');
+            tdDesc.style.borderColor = '#000';
+            tdDesc.textContent = item.description || '-';
+
+            const tdAmt = document.createElement('td');
+            tdAmt.className = 'text-center';
+            tdAmt.style.borderColor = '#000';
+            tdAmt.textContent = formatRupiah(amt);
+
+            tr.appendChild(tdNo);
+            tr.appendChild(tdDesc);
+            tr.appendChild(tdAmt);
+            dprTbody.appendChild(tr);
+        });
+
+        document.getElementById('dpr_total_amount').innerText = formatRupiah(totalExpense);
+        document.getElementById('dpr_total_terbilang').innerText = terbilangRupiah(totalExpense);
+        document.getElementById('dpr_ppk_name').innerText = rep.ppk_name || 'Hidayatullah, SE';
+        document.getElementById('dpr_ppk_nip').innerText = rep.ppk_nip || '198510292011011009';
+        document.getElementById('dpr_signing_place_date').innerText = signPlaceDate;
+        document.getElementById('dpr_sign_img_container').innerHTML = signImgHtml;
+        document.getElementById('dpr_sign_name').innerText = officerName;
+        document.getElementById('dpr_sign_nip').innerText = (officerNik && officerNik !== '-') ? ('NIK/NIP. ' + officerNik) : '';
+
+        // Surat Pernyataan Kendaraan Dinas Preview (opsional)
         const stmtPaper = document.getElementById('det_vehicle_stmt_paper');
-        if (rep.include_vehicle_statement !== false && rep.include_vehicle_statement !== 0) {
+        if (rep.include_vehicle_statement === true || rep.include_vehicle_statement === 1) {
             stmtPaper.classList.remove('d-none');
-            document.getElementById('stmt_officer_name').innerText = rep.officer_name || (rep.user ? rep.user.name : '-');
-            document.getElementById('stmt_officer_nip').innerText = rep.officer_nip || '-';
-            document.getElementById('stmt_officer_rank').innerText = rep.officer_rank || '-';
-            document.getElementById('stmt_officer_position').innerText = rep.officer_position || 'Mitra BPS Kabupaten Kolaka Utara';
-            
-            const loc = rep.activity_location || ((rep.assignment && rep.assignment.location) ? rep.assignment.location : 'Kabupaten Kolaka Utara');
-            document.getElementById('stmt_body_text').innerText = `Menerangkan bahwa dalam rangka ${rep.activity_title} di ${loc} sesuai Surat Perjalanan Dinas ${rep.basis_st || 'Nomor Surat Tugas BPS Kolaka Utara'}. Saya benar-benar tidak menggunakan kendaraan dinas pada tanggal ${actDateStr}.`;
-            
-            document.getElementById('stmt_signing_place_date').innerText = signCity + ', ' + signDate;
-            document.getElementById('stmt_sign_name').innerText = rep.officer_name || (rep.user ? rep.user.name : '-');
-            if (rep.officer_nip && rep.officer_nip !== '-') {
-                document.getElementById('stmt_sign_nip').innerText = (rep.id_type || 'NIK') + '. ' + rep.officer_nip;
-            } else {
-                document.getElementById('stmt_sign_nip').innerText = '';
-            }
+            document.getElementById('stmt_officer_name').innerText = officerName;
+            document.getElementById('stmt_officer_nip').innerText = officerNik;
+            document.getElementById('stmt_officer_rank').innerText = officerRank;
+            document.getElementById('stmt_officer_position').innerText = officerPosition;
 
-            const stmtSignContainer = document.getElementById('stmt_sign_img_container');
-            if (rep.signature_path) {
-                stmtSignContainer.innerHTML = `<img src="/storage/${rep.signature_path}" style="max-height: 60px; max-width: 170px;" alt="Tanda Tangan">`;
-            } else {
-                stmtSignContainer.innerHTML = `<div style="height: 55px;"></div>`;
-            }
+            const loc = locFallback || 'Kabupaten Kolaka Utara';
+            document.getElementById('stmt_body_text').innerText = `Menerangkan bahwa dalam rangka ${rep.activity_title} di ${loc} sesuai Surat Perjalanan Dinas ${rep.basis_st || 'Nomor Surat Tugas BPS Kolaka Utara'}. Saya benar-benar tidak menggunakan kendaraan dinas pada tanggal ${actDateFormatted}.`;
+
+            document.getElementById('stmt_signing_place_date').innerText = signPlaceDate;
+            document.getElementById('stmt_sign_name').innerText = officerName;
+            document.getElementById('stmt_sign_nip').innerText = (officerNik && officerNik !== '-') ? (idType + '. ' + officerNik) : '';
+            document.getElementById('stmt_sign_img_container').innerHTML = signImgHtml;
         } else {
             stmtPaper.classList.add('d-none');
         }

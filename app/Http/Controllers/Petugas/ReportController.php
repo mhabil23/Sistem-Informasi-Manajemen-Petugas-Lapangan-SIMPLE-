@@ -69,45 +69,24 @@ class ReportController extends Controller
 
     public function store(Request $request)
     {
-        $validated = $request->validate([
-            'activity_date' => ['required', 'date'],
-            'activity_title' => ['required', 'string', 'max:255'],
-            'activity_location' => ['nullable', 'string', 'max:255'],
-            'assignment_id' => ['nullable', 'exists:assignments,id'],
-            'officer_name' => ['nullable', 'string', 'max:255'],
-            'officer_nip' => ['nullable', 'string', 'max:100'],
-            'id_type' => ['nullable', 'string', 'in:NIK,NIP'],
-            'officer_rank' => ['nullable', 'string', 'max:100'],
-            'officer_position' => ['nullable', 'string', 'max:150'],
-            'basis_dipa' => ['nullable', 'string', 'max:500'],
-            'basis_st' => ['nullable', 'string', 'max:500'],
-            'destination_purpose' => ['nullable', 'string', 'max:500'],
-            'duration_text' => ['nullable', 'string', 'max:150'],
-            'work_description' => ['required', 'string'],
-            'recommendations' => ['nullable', 'string'],
-            'signing_city' => ['nullable', 'string', 'max:100'],
-            'signing_date' => ['nullable', 'date'],
-            'include_vehicle_statement' => ['nullable'],
-            'signature_file' => ['nullable', 'image', 'mimes:png,jpg,jpeg', 'max:3072'],
-            'signature_data' => ['nullable', 'string'],
-            'action_type' => ['required', Rule::in(['draft', 'submitted'])],
-            'photos.*' => ['nullable', 'file', 'mimes:jpg,jpeg,png,pdf', 'max:5120'], // Max 5MB per file
-        ], [
-            'activity_date.required' => 'Tanggal kegiatan wajib diisi.',
-            'activity_title.required' => 'Judul kegiatan wajib diisi.',
-            'work_description.required' => 'Uraian pekerjaan / laporan wajib diisi.',
-        ]);
+        $validated = $this->validateReportRequest($request);
+        $user = Auth::user();
 
-        $signaturePath = null;
-        if ($request->hasFile('signature_file')) {
-            $signaturePath = $request->file('signature_file')->store('signatures', 'public');
-        } elseif (!empty($request->input('signature_data')) && str_starts_with($request->input('signature_data'), 'data:image')) {
-            $data = $request->input('signature_data');
-            $data = substr($data, strpos($data, ',') + 1);
-            $data = base64_decode($data);
-            $fileName = 'signatures/' . uniqid('sign_') . '.png';
-            Storage::disk('public')->put($fileName, $data);
-            $signaturePath = $fileName;
+        $signaturePath = $this->resolveSignaturePath($request);
+        $this->syncUserIdentityIfMissing($validated);
+
+        $officerName = !empty($validated['officer_name']) ? $validated['officer_name'] : $user->name;
+        $officerNik = !empty($validated['officer_nip']) ? $validated['officer_nip'] : ($user->nik ?: '-');
+        $officerRank = !empty($validated['officer_rank']) ? $validated['officer_rank'] : ($user->rank ?: '-');
+        $officerPosition = !empty($validated['officer_position']) ? $validated['officer_position'] : ($user->position ?: 'Mitra BPS Kabupaten Kolaka Utara');
+
+        $expenseItems = $this->buildExpenseItems($request);
+        $basisSt = $validated['basis_st'] ?? null;
+        if (empty($basisSt) && !empty($validated['st_number'])) {
+            $stDateStr = !empty($validated['st_date'])
+                ? \Carbon\Carbon::parse($validated['st_date'])->translatedFormat('d F Y')
+                : \Carbon\Carbon::parse($validated['activity_date'])->translatedFormat('d F Y');
+            $basisSt = "Surat Tugas Kepala Badan Pusat Statistik Kabupaten Kolaka Utara Nomor {$validated['st_number']} Tanggal {$stDateStr}.";
         }
 
         $year = now()->format('Y');
@@ -116,43 +95,38 @@ class ReportController extends Controller
 
         $report = OfficerReport::create([
             'report_number' => $reportNumber,
-            'user_id' => Auth::id(),
+            'user_id' => $user->id,
             'assignment_id' => $validated['assignment_id'] ?? null,
-            'officer_name' => !empty($validated['officer_name']) ? $validated['officer_name'] : Auth::user()->name,
-            'officer_nip' => !empty($validated['officer_nip']) ? $validated['officer_nip'] : '-',
+            'officer_name' => $officerName,
+            'officer_nip' => $officerNik,
             'id_type' => $validated['id_type'] ?? 'NIK',
-            'officer_rank' => !empty($validated['officer_rank']) ? $validated['officer_rank'] : '- / -',
-            'officer_position' => !empty($validated['officer_position']) ? $validated['officer_position'] : 'Mitra / BPS Kabupaten Kolaka Utara',
+            'officer_rank' => $officerRank,
+            'officer_position' => $officerPosition,
             'basis_dipa' => $validated['basis_dipa'] ?? null,
-            'basis_st' => $validated['basis_st'] ?? null,
+            'basis_st' => $basisSt,
+            'st_number' => $validated['st_number'] ?? null,
+            'st_date' => $validated['st_date'] ?? null,
             'destination_purpose' => $validated['destination_purpose'] ?? null,
             'duration_text' => !empty($validated['duration_text']) ? $validated['duration_text'] : 'Selama 1 (satu) Hari',
             'activity_date' => $validated['activity_date'],
             'activity_title' => $validated['activity_title'],
             'activity_location' => $validated['activity_location'] ?? null,
             'work_description' => $validated['work_description'],
+            'obstacles' => $validated['obstacles'] ?? null,
+            'solutions' => $validated['solutions'] ?? null,
             'recommendations' => $validated['recommendations'] ?? '-',
             'signing_city' => !empty($validated['signing_city']) ? $validated['signing_city'] : 'Lasusua',
             'signing_date' => !empty($validated['signing_date']) ? $validated['signing_date'] : $validated['activity_date'],
             'signature_path' => $signaturePath,
-            'include_vehicle_statement' => $request->has('include_vehicle_statement') ? (bool)$request->input('include_vehicle_statement') : true,
+            'include_vehicle_statement' => $request->boolean('include_vehicle_statement'),
+            'expense_items' => $expenseItems,
+            'ppk_name' => !empty($validated['ppk_name']) ? $validated['ppk_name'] : 'Hidayatullah, SE',
+            'ppk_nip' => !empty($validated['ppk_nip']) ? $validated['ppk_nip'] : '198510292011011009',
             'status' => $validated['action_type'],
         ]);
 
         // Handle File Attachments
-        if ($request->hasFile('photos')) {
-            foreach ($request->file('photos') as $file) {
-                $path = $file->store('reports', 'public');
-                ReportAttachment::create([
-                    'report_id' => $report->id,
-                    'file_name' => $file->getClientOriginalName(),
-                    'file_path' => $path,
-                    'file_type' => $file->getMimeType(),
-                    'file_size' => $file->getSize(),
-                    'caption' => 'Dokumentasi ' . $report->activity_title,
-                ]);
-            }
-        }
+        $this->savePhotoAttachments($request, $report);
 
         if ($this->sheetService->isConfigured()) {
             $this->sheetService->insert('officer_reports', [
@@ -170,16 +144,18 @@ class ReportController extends Controller
         }
 
         $msg = $report->status === 'submitted'
-            ? "Laporan '{$report->activity_title}' berhasil diajukan ke Admin untuk diverifikasi!"
-            : "Laporan '{$report->activity_title}' berhasil disimpan sebagai draft.";
+            ? "Laporan Perjadin & Daftar Pengeluaran Riil '{$report->activity_title}' berhasil diajukan dan siap dicetak menjadi 1 PDF!"
+            : "Laporan Perjadin & Daftar Pengeluaran Riil '{$report->activity_title}' berhasil disimpan sebagai draft.";
 
         ActivityLog::log(
             'create',
             'reports',
-            "Petugas membuat laporan kegiatan '{$report->activity_title}' (Status: {$report->status})."
+            "Petugas membuat laporan perjadin '{$report->activity_title}' (Status: {$report->status})."
         );
 
-        return redirect()->route('petugas.reports.index')->with('success', $msg);
+        return redirect()->route('petugas.reports.index')
+            ->with('success', $msg)
+            ->with('created_report_id', $report->id);
     }
 
     public function show(OfficerReport $report)
@@ -223,41 +199,17 @@ class ReportController extends Controller
             return back()->with('error', 'Laporan yang sedang diperiksa atau telah disetujui tidak dapat diubah.');
         }
 
-        $validated = $request->validate([
-            'activity_date' => ['required', 'date'],
-            'activity_title' => ['required', 'string', 'max:255'],
-            'activity_location' => ['nullable', 'string', 'max:255'],
-            'assignment_id' => ['nullable', 'exists:assignments,id'],
-            'officer_name' => ['nullable', 'string', 'max:255'],
-            'officer_nip' => ['nullable', 'string', 'max:100'],
-            'id_type' => ['nullable', 'string', 'in:NIK,NIP'],
-            'officer_rank' => ['nullable', 'string', 'max:100'],
-            'officer_position' => ['nullable', 'string', 'max:150'],
-            'basis_dipa' => ['nullable', 'string', 'max:500'],
-            'basis_st' => ['nullable', 'string', 'max:500'],
-            'destination_purpose' => ['nullable', 'string', 'max:500'],
-            'duration_text' => ['nullable', 'string', 'max:150'],
-            'work_description' => ['required', 'string'],
-            'recommendations' => ['nullable', 'string'],
-            'signing_city' => ['nullable', 'string', 'max:100'],
-            'signing_date' => ['nullable', 'date'],
-            'include_vehicle_statement' => ['nullable'],
-            'signature_file' => ['nullable', 'image', 'mimes:png,jpg,jpeg', 'max:3072'],
-            'signature_data' => ['nullable', 'string'],
-            'action_type' => ['required', Rule::in(['draft', 'submitted'])],
-            'photos.*' => ['nullable', 'file', 'mimes:jpg,jpeg,png,pdf', 'max:5120'],
-        ]);
+        $validated = $this->validateReportRequest($request);
+        $signaturePath = $this->resolveSignaturePath($request, $report->signature_path);
+        $this->syncUserIdentityIfMissing($validated);
 
-        $signaturePath = $report->signature_path;
-        if ($request->hasFile('signature_file')) {
-            $signaturePath = $request->file('signature_file')->store('signatures', 'public');
-        } elseif (!empty($request->input('signature_data')) && str_starts_with($request->input('signature_data'), 'data:image')) {
-            $data = $request->input('signature_data');
-            $data = substr($data, strpos($data, ',') + 1);
-            $data = base64_decode($data);
-            $fileName = 'signatures/' . uniqid('sign_') . '.png';
-            Storage::disk('public')->put($fileName, $data);
-            $signaturePath = $fileName;
+        $expenseItems = $this->buildExpenseItems($request);
+        $basisSt = $validated['basis_st'] ?? $report->basis_st;
+        if (empty($basisSt) && !empty($validated['st_number'])) {
+            $stDateStr = !empty($validated['st_date'])
+                ? \Carbon\Carbon::parse($validated['st_date'])->translatedFormat('d F Y')
+                : \Carbon\Carbon::parse($validated['activity_date'])->translatedFormat('d F Y');
+            $basisSt = "Surat Tugas Kepala Badan Pusat Statistik Kabupaten Kolaka Utara Nomor {$validated['st_number']} Tanggal {$stDateStr}.";
         }
 
         $report->update([
@@ -271,31 +223,26 @@ class ReportController extends Controller
             'officer_rank' => !empty($validated['officer_rank']) ? $validated['officer_rank'] : $report->officer_rank,
             'officer_position' => !empty($validated['officer_position']) ? $validated['officer_position'] : $report->officer_position,
             'basis_dipa' => $validated['basis_dipa'] ?? $report->basis_dipa,
-            'basis_st' => $validated['basis_st'] ?? $report->basis_st,
+            'basis_st' => $basisSt,
+            'st_number' => $validated['st_number'] ?? $report->st_number,
+            'st_date' => $validated['st_date'] ?? $report->st_date,
             'destination_purpose' => $validated['destination_purpose'] ?? $report->destination_purpose,
             'duration_text' => !empty($validated['duration_text']) ? $validated['duration_text'] : $report->duration_text,
             'work_description' => $validated['work_description'],
+            'obstacles' => $validated['obstacles'] ?? $report->obstacles,
+            'solutions' => $validated['solutions'] ?? $report->solutions,
             'recommendations' => $validated['recommendations'] ?? ($report->recommendations ?? '-'),
             'signing_city' => !empty($validated['signing_city']) ? $validated['signing_city'] : $report->signing_city,
             'signing_date' => !empty($validated['signing_date']) ? $validated['signing_date'] : $report->signing_date,
             'signature_path' => $signaturePath,
-            'include_vehicle_statement' => $request->has('include_vehicle_statement') ? (bool)$request->input('include_vehicle_statement') : false,
+            'include_vehicle_statement' => $request->boolean('include_vehicle_statement'),
+            'expense_items' => !empty($expenseItems) ? $expenseItems : $report->expense_items,
+            'ppk_name' => !empty($validated['ppk_name']) ? $validated['ppk_name'] : ($report->ppk_name ?? 'Hidayatullah, SE'),
+            'ppk_nip' => !empty($validated['ppk_nip']) ? $validated['ppk_nip'] : ($report->ppk_nip ?? '198510292011011009'),
             'status' => $validated['action_type'],
         ]);
 
-        if ($request->hasFile('photos')) {
-            foreach ($request->file('photos') as $file) {
-                $path = $file->store('reports', 'public');
-                ReportAttachment::create([
-                    'report_id' => $report->id,
-                    'file_name' => $file->getClientOriginalName(),
-                    'file_path' => $path,
-                    'file_type' => $file->getMimeType(),
-                    'file_size' => $file->getSize(),
-                    'caption' => 'Dokumentasi ' . $report->activity_title,
-                ]);
-            }
-        }
+        $this->savePhotoAttachments($request, $report);
 
         if ($this->sheetService->isConfigured()) {
             $this->sheetService->update('officer_reports', $report->id, [
@@ -317,7 +264,9 @@ class ReportController extends Controller
             "Petugas memperbarui laporan '{$report->activity_title}'."
         );
 
-        return redirect()->route('petugas.reports.index')->with('success', $msg);
+        return redirect()->route('petugas.reports.index')
+            ->with('success', $msg)
+            ->with('created_report_id', $report->id);
     }
 
     public function destroy(OfficerReport $report)
@@ -337,6 +286,128 @@ class ReportController extends Controller
         }
 
         return back()->with('success', "Draft laporan '{$title}' berhasil dihapus.");
+    }
+
+    private function validateReportRequest(Request $request): array
+    {
+        return $request->validate([
+            'activity_date' => ['required', 'date'],
+            'activity_title' => ['required', 'string', 'max:255'],
+            'activity_location' => ['nullable', 'string', 'max:255'],
+            'assignment_id' => ['nullable', 'exists:assignments,id'],
+            'officer_name' => ['nullable', 'string', 'max:255'],
+            'officer_nip' => ['nullable', 'string', 'max:100'],
+            'id_type' => ['nullable', 'string', 'in:NIK,NIP'],
+            'officer_rank' => ['nullable', 'string', 'max:100'],
+            'officer_position' => ['nullable', 'string', 'max:150'],
+            'basis_dipa' => ['nullable', 'string', 'max:500'],
+            'basis_st' => ['nullable', 'string', 'max:500'],
+            'st_number' => ['nullable', 'string', 'max:150'],
+            'st_date' => ['nullable', 'date'],
+            'destination_purpose' => ['nullable', 'string', 'max:500'],
+            'duration_text' => ['nullable', 'string', 'max:150'],
+            'work_description' => ['required', 'string'],
+            'obstacles' => ['nullable', 'string'],
+            'solutions' => ['nullable', 'string'],
+            'recommendations' => ['nullable', 'string'],
+            'signing_city' => ['nullable', 'string', 'max:100'],
+            'signing_date' => ['nullable', 'date'],
+            'include_vehicle_statement' => ['nullable'],
+            'expense_descriptions.*' => ['nullable', 'string', 'max:500'],
+            'expense_amounts.*' => ['nullable', 'numeric', 'min:0'],
+            'ppk_name' => ['nullable', 'string', 'max:150'],
+            'ppk_nip' => ['nullable', 'string', 'max:50'],
+            'signature_file' => ['nullable', 'image', 'mimes:png,jpg,jpeg', 'max:3072'],
+            'signature_data' => ['nullable', 'string'],
+            'action_type' => ['required', Rule::in(['draft', 'submitted'])],
+            'photos.*' => ['nullable', 'file', 'mimes:jpg,jpeg,png,pdf', 'max:5120'],
+        ], [
+            'activity_date.required' => 'Tanggal kegiatan wajib diisi.',
+            'activity_title.required' => 'Judul kegiatan wajib diisi.',
+            'work_description.required' => 'Uraian pekerjaan / laporan wajib diisi.',
+        ]);
+    }
+
+    private function resolveSignaturePath(Request $request, ?string $existingPath = null): ?string
+    {
+        if ($request->hasFile('signature_file')) {
+            return $request->file('signature_file')->store('signatures', 'public');
+        }
+
+        $sigData = $request->input('signature_data');
+        if (!empty($sigData) && str_starts_with($sigData, 'data:image')) {
+            $data = substr($sigData, strpos($sigData, ',') + 1);
+            $decoded = base64_decode($data);
+            if ($decoded !== false) {
+                $fileName = 'signatures/' . uniqid('sign_') . '.png';
+                Storage::disk('public')->put($fileName, $decoded);
+                return $fileName;
+            }
+        }
+
+        return $existingPath;
+    }
+
+    private function buildExpenseItems(Request $request): array
+    {
+        $descriptions = $request->input('expense_descriptions', []);
+        $amounts = $request->input('expense_amounts', []);
+        $items = [];
+
+        foreach ($descriptions as $idx => $desc) {
+            $cleanDesc = trim((string) $desc);
+            $amount = isset($amounts[$idx]) ? (int) preg_replace('/[^0-9]/', '', (string) $amounts[$idx]) : 0;
+            if ($cleanDesc !== '' || $amount > 0) {
+                $items[] = [
+                    'description' => $cleanDesc ?: 'Biaya transport perjalanan dinas',
+                    'amount' => $amount,
+                ];
+            }
+        }
+
+        return $items;
+    }
+
+    private function syncUserIdentityIfMissing(array $validated): void
+    {
+        $user = Auth::user();
+        if (!$user) {
+            return;
+        }
+
+        $updates = [];
+        if (empty($user->nik) && !empty($validated['officer_nip']) && $validated['officer_nip'] !== '-') {
+            $updates['nik'] = $validated['officer_nip'];
+        }
+        if (empty($user->rank) && !empty($validated['officer_rank'])) {
+            $updates['rank'] = $validated['officer_rank'];
+        }
+        if (empty($user->position) && !empty($validated['officer_position'])) {
+            $updates['position'] = $validated['officer_position'];
+        }
+
+        if (!empty($updates)) {
+            $user->update($updates);
+        }
+    }
+
+    private function savePhotoAttachments(Request $request, OfficerReport $report): void
+    {
+        if (!$request->hasFile('photos')) {
+            return;
+        }
+
+        foreach ($request->file('photos') as $file) {
+            $path = $file->store('reports', 'public');
+            ReportAttachment::create([
+                'report_id' => $report->id,
+                'file_name' => $file->getClientOriginalName(),
+                'file_path' => $path,
+                'file_type' => $file->getMimeType(),
+                'file_size' => $file->getSize(),
+                'caption' => 'Dokumentasi ' . $report->activity_title,
+            ]);
+        }
     }
 }
 

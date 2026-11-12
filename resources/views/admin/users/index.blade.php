@@ -155,7 +155,12 @@
                                     </div>
                                     <div>
                                         <div class="fw-bold text-dark">{{ $user->name }}</div>
-                                        <div class="text-muted small">@<span>{{ $user->username }}</span></div>
+                                        <div class="text-muted small">
+                                            @<span>{{ $user->username }}</span>
+                                            @if($user->nik)
+                                                &bull; <span class="font-monospace">NIK: {{ $user->nik }}</span>
+                                            @endif
+                                        </div>
                                     </div>
                                 </div>
                             </td>
@@ -294,6 +299,21 @@
                     </div>
 
                     <div class="row g-3 mb-3">
+                        <div class="col-md-4">
+                            <label class="form-label small fw-semibold text-secondary">NIK / NIP PETUGAS</label>
+                            <input type="text" name="nik" class="form-control" value="{{ old('nik') }}" placeholder="Contoh: 7408011505950001">
+                        </div>
+                        <div class="col-md-4">
+                            <label class="form-label small fw-semibold text-secondary">PANGKAT / GOLONGAN</label>
+                            <input type="text" name="rank" class="form-control" value="{{ old('rank', '-') }}" placeholder="Contoh: - atau Pengatur, II/d">
+                        </div>
+                        <div class="col-md-4">
+                            <label class="form-label small fw-semibold text-secondary">JABATAN</label>
+                            <input type="text" name="position" class="form-control" value="{{ old('position', 'Mitra BPS Kabupaten Kolaka Utara') }}" placeholder="Jabatan petugas">
+                        </div>
+                    </div>
+
+                    <div class="row g-3 mb-3">
                         <div class="col-md-6">
                             <label class="form-label small fw-semibold text-secondary">KATA SANDI AWAL <span class="text-danger">*</span></label>
                             <input type="password" name="password" class="form-control" placeholder="Minimal 6 karakter" required>
@@ -360,6 +380,21 @@
                         <div class="col-md-6">
                             <label class="form-label small fw-semibold text-secondary">NOMOR HP / WHATSAPP</label>
                             <input type="text" id="edit_phone" name="phone" class="form-control">
+                        </div>
+                    </div>
+
+                    <div class="row g-3 mb-3">
+                        <div class="col-md-4">
+                            <label class="form-label small fw-semibold text-secondary">NIK / NIP PETUGAS</label>
+                            <input type="text" id="edit_nik" name="nik" class="form-control" placeholder="Contoh: 7408011505950001">
+                        </div>
+                        <div class="col-md-4">
+                            <label class="form-label small fw-semibold text-secondary">PANGKAT / GOLONGAN</label>
+                            <input type="text" id="edit_rank" name="rank" class="form-control" placeholder="-">
+                        </div>
+                        <div class="col-md-4">
+                            <label class="form-label small fw-semibold text-secondary">JABATAN</label>
+                            <input type="text" id="edit_position" name="position" class="form-control" placeholder="Mitra BPS Kabupaten Kolaka Utara">
                         </div>
                     </div>
 
@@ -477,6 +512,9 @@
         document.getElementById('edit_username').value = user.username;
         document.getElementById('edit_email').value = user.email;
         document.getElementById('edit_phone').value = user.phone || '';
+        document.getElementById('edit_nik').value = user.nik || '';
+        document.getElementById('edit_rank').value = user.rank || '';
+        document.getElementById('edit_position').value = user.position || '';
         document.getElementById('edit_role').value = user.role;
         document.getElementById('edit_status').value = user.status;
 

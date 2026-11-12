@@ -24,6 +24,9 @@ class ProfileController extends Controller
             'name' => ['required', 'string', 'max:255'],
             'email' => ['required', 'string', 'email', 'max:255', Rule::unique('users')->ignore($user->id)],
             'phone' => ['nullable', 'string', 'max:20'],
+            'nik' => ['nullable', 'string', 'max:32'],
+            'rank' => ['nullable', 'string', 'max:100'],
+            'position' => ['nullable', 'string', 'max:150'],
         ], [
             'name.required' => 'Nama lengkap wajib diisi.',
             'email.required' => 'Email wajib diisi.',

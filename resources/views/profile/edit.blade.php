@@ -25,6 +25,14 @@
             </div>
             <div class="border-top pt-3 text-start small">
                 <div class="d-flex justify-content-between py-1">
+                    <span class="text-muted">NIK / NIP:</span>
+                    <strong class="text-dark font-monospace">{{ $user->nik ?? '-' }}</strong>
+                </div>
+                <div class="d-flex justify-content-between py-1">
+                    <span class="text-muted">Jabatan:</span>
+                    <strong class="text-dark">{{ $user->position ?? '-' }}</strong>
+                </div>
+                <div class="d-flex justify-content-between py-1">
                     <span class="text-muted">Email:</span>
                     <strong class="text-dark">{{ $user->email }}</strong>
                 </div>
@@ -88,6 +96,25 @@
                             @error('phone')
                                 <div class="invalid-feedback">{{ $message }}</div>
                             @enderror
+                        </div>
+                    </div>
+
+                    <div class="row g-3 mb-3">
+                        <div class="col-md-4">
+                            <label class="form-label small fw-semibold text-secondary">NIK / NIP PETUGAS</label>
+                            <input type="text" name="nik" class="form-control @error('nik') is-invalid @enderror" value="{{ old('nik', $user->nik) }}" placeholder="Contoh: 7408011505950001">
+                            <small class="text-muted" style="font-size: 0.72rem;">Terisi otomatis di Laporan Perjadin &amp; Pengeluaran Riil.</small>
+                            @error('nik')
+                                <div class="invalid-feedback">{{ $message }}</div>
+                            @enderror
+                        </div>
+                        <div class="col-md-4">
+                            <label class="form-label small fw-semibold text-secondary">PANGKAT / GOLONGAN</label>
+                            <input type="text" name="rank" class="form-control" value="{{ old('rank', $user->rank ?? '-') }}" placeholder="Contoh: - atau Pengatur, II/d">
+                        </div>
+                        <div class="col-md-4">
+                            <label class="form-label small fw-semibold text-secondary">JABATAN</label>
+                            <input type="text" name="position" class="form-control" value="{{ old('position', $user->position ?? 'Mitra BPS Kabupaten Kolaka Utara') }}" placeholder="Contoh: Mitra BPS Kab. Kolaka Utara">
                         </div>
                     </div>
 

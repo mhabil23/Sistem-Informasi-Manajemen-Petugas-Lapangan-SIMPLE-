@@ -27,13 +27,14 @@ class UserController extends Controller
     {
         $query = User::query();
 
-        // 1. Search (Name, Username, Email, Phone)
+        // 1. Search (Name, Username, Email, Phone, NIK)
         if ($search = $request->input('search')) {
             $query->where(function ($q) use ($search) {
                 $q->where('name', 'like', "%{$search}%")
                   ->orWhere('username', 'like', "%{$search}%")
                   ->orWhere('email', 'like', "%{$search}%")
-                  ->orWhere('phone', 'like', "%{$search}%");
+                  ->orWhere('phone', 'like', "%{$search}%")
+                  ->orWhere('nik', 'like', "%{$search}%");
             });
         }
 
@@ -75,6 +76,9 @@ class UserController extends Controller
             'username' => ['required', 'string', 'max:50', 'alpha_dash', 'unique:users,username'],
             'email' => ['required', 'string', 'email', 'max:255', 'unique:users,email'],
             'phone' => ['nullable', 'string', 'max:20'],
+            'nik' => ['nullable', 'string', 'max:32'],
+            'rank' => ['nullable', 'string', 'max:100'],
+            'position' => ['nullable', 'string', 'max:150'],
             'password' => ['required', 'string', 'min:6'],
             'role' => ['required', Rule::in(['admin', 'petugas'])],
             'status' => ['required', Rule::in(['active', 'inactive'])],
@@ -96,6 +100,9 @@ class UserController extends Controller
             'username' => strtolower($validated['username']),
             'email' => strtolower($validated['email']),
             'phone' => $validated['phone'] ?? null,
+            'nik' => $validated['nik'] ?? null,
+            'rank' => $validated['rank'] ?? null,
+            'position' => $validated['position'] ?? null,
             'password' => Hash::make($validated['password']),
             'role' => $validated['role'],
             'status' => $validated['status'],
@@ -136,6 +143,9 @@ class UserController extends Controller
             'username' => ['required', 'string', 'max:50', 'alpha_dash', Rule::unique('users')->ignore($user->id)],
             'email' => ['required', 'string', 'email', 'max:255', Rule::unique('users')->ignore($user->id)],
             'phone' => ['nullable', 'string', 'max:20'],
+            'nik' => ['nullable', 'string', 'max:32'],
+            'rank' => ['nullable', 'string', 'max:100'],
+            'position' => ['nullable', 'string', 'max:150'],
             'password' => ['nullable', 'string', 'min:6'],
             'role' => ['required', Rule::in(['admin', 'petugas'])],
             'status' => ['required', Rule::in(['active', 'inactive'])],
@@ -163,6 +173,9 @@ class UserController extends Controller
             'username' => strtolower($validated['username']),
             'email' => strtolower($validated['email']),
             'phone' => $validated['phone'] ?? null,
+            'nik' => $validated['nik'] ?? null,
+            'rank' => $validated['rank'] ?? null,
+            'position' => $validated['position'] ?? null,
             'role' => $validated['role'],
             'status' => $validated['status'],
         ];
