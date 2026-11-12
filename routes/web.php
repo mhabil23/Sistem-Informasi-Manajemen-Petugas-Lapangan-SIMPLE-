@@ -85,6 +85,7 @@ Route::middleware(['auth', 'role:admin'])->prefix('admin')->as('admin.')->group(
     Route::delete('/basts/officers/{bast}', [\App\Http\Controllers\Admin\OfficerBastController::class, 'destroy'])->name('basts.officers.destroy');
     // Laporan Petugas & Verifikasi (Admin)
     Route::get('/reports', [\App\Http\Controllers\Admin\ReportController::class, 'index'])->name('reports.index');
+    Route::put('/reports/basis-settings', [\App\Http\Controllers\Admin\ReportController::class, 'updateBasisSettings'])->name('reports.basis-settings');
     Route::get('/reports/{report}', [\App\Http\Controllers\Admin\ReportController::class, 'show'])->name('reports.show');
     Route::get('/reports/{report}/download', [\App\Http\Controllers\Admin\ReportController::class, 'downloadPdf'])->name('reports.download');
     Route::get('/reports/{report}/preview', [\App\Http\Controllers\Admin\ReportController::class, 'previewPdf'])->name('reports.preview');

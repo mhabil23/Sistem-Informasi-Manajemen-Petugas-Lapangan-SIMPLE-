@@ -19,6 +19,10 @@ class Assignment extends Model
         'start_date',
         'end_date',
         'location',
+        'basis_dipa',
+        'st_number',
+        'st_date',
+        'basis_st',
         'target_respondents',
         'status',
         'created_by',
@@ -29,6 +33,7 @@ class Assignment extends Model
         return [
             'start_date' => 'date',
             'end_date' => 'date',
+            'st_date' => 'date',
             'target_respondents' => 'integer',
         ];
     }

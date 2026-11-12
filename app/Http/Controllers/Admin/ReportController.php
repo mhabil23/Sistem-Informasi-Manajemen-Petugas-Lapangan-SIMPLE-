@@ -72,6 +72,7 @@ class ReportController extends Controller
 
         $officers = User::where('role', 'petugas')->where('status', 'active')->orderBy('name')->get();
         $assignments = Assignment::orderBy('title')->get();
+        $basisSettings = OfficerReport::getMasterBasisSettings();
 
         return view('admin.reports.index', compact(
             'reports',
@@ -81,8 +82,33 @@ class ReportController extends Controller
             'revisionNeededCount',
             'approvedCount',
             'officers',
-            'assignments'
+            'assignments',
+            'basisSettings'
         ));
+    }
+
+    public function updateBasisSettings(Request $request)
+    {
+        $validated = $request->validate([
+            'basis_dipa' => ['required', 'string', 'max:1000'],
+            'st_number' => ['required', 'string', 'max:150'],
+            'st_date' => ['required', 'date'],
+            'basis_st' => ['nullable', 'string', 'max:1000'],
+        ], [
+            'basis_dipa.required' => '1. DIPA Satuan Kerja wajib diisi.',
+            'st_number.required' => '2a. Nomor Surat Tugas wajib diisi.',
+            'st_date.required' => '2b. Tanggal Surat Tugas wajib diisi.',
+        ]);
+
+        OfficerReport::saveMasterBasisSettings($validated);
+
+        ActivityLog::log(
+            'update',
+            'reports',
+            "Admin memperbarui pengaturan default B. Dasar Pelaksanaan (ST: {$validated['st_number']})."
+        );
+
+        return back()->with('success', 'Pengaturan default B. Dasar Pelaksanaan (DIPA & Surat Tugas) berhasil disimpan dan otomatis diterapkan pada pengisian laporan petugas!');
     }
 
     public function show(OfficerReport $report)
@@ -120,14 +146,30 @@ class ReportController extends Controller
         $validated = $request->validate([
             'status' => ['required', Rule::in(['reviewing', 'revision_needed', 'approved'])],
             'admin_notes' => ['nullable', 'string', 'max:2000'],
+            'basis_dipa' => ['nullable', 'string', 'max:1000'],
+            'st_number' => ['nullable', 'string', 'max:150'],
+            'st_date' => ['nullable', 'date'],
+            'basis_st' => ['nullable', 'string', 'max:1000'],
         ], [
             'status.required' => 'Status verifikasi laporan wajib dipilih.',
         ]);
 
-        $oldStatus = $report->status;
+        $stNumber = array_key_exists('st_number', $validated) ? trim((string) $validated['st_number']) : $report->st_number;
+        $stDate = array_key_exists('st_date', $validated) ? $validated['st_date'] : $report->st_date;
+        $basisSt = array_key_exists('basis_st', $validated) ? trim((string) $validated['basis_st']) : $report->basis_st;
+        if (empty($basisSt) && !empty($stNumber)) {
+            $basisSt = OfficerReport::formatBasisSt($stNumber, $stDate ? substr((string) $stDate, 0, 10) : null);
+        }
+
         $report->update([
             'status' => $validated['status'],
             'admin_notes' => $validated['admin_notes'] ?? null,
+            'basis_dipa' => array_key_exists('basis_dipa', $validated) && trim((string) $validated['basis_dipa']) !== ''
+                ? trim((string) $validated['basis_dipa'])
+                : $report->basis_dipa,
+            'st_number' => $stNumber ?: $report->st_number,
+            'st_date' => $stDate ?: $report->st_date,
+            'basis_st' => $basisSt ?: $report->basis_st,
             'reviewed_by' => Auth::id(),
             'reviewed_at' => now(),
         ]);

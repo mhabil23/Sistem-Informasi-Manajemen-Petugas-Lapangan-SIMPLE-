@@ -465,32 +465,8 @@
                         </div>
                     </div>
 
-                    <!-- Bagian B: Dasar Pelaksanaan -->
-                    <div class="card mb-3 border">
-                        <div class="card-header bg-light py-2 px-3 fw-bold text-dark small">
-                            <i class="fa-solid fa-scale-balanced text-primary me-1"></i> B. DASAR PELAKSANAAN (LAPORAN &amp; PENGELUARAN RIIL)
-                        </div>
-                        <div class="card-body p-3">
-                            <div class="mb-3">
-                                <label class="form-label small fw-semibold text-secondary">1. DIPA Satuan Kerja</label>
-                                <textarea name="basis_dipa" class="form-control" rows="2">{{ 'DIPA Satuan Kerja Badan Pusat Statistik Kabupaten Kolaka Utara Tahun Anggaran ' . date('Y') . ' Nomor SP DIPA-054.01.2.667477/' . date('Y') . ' tanggal 1 Desember ' . (date('Y') - 1) . '.' }}</textarea>
-                            </div>
-                            <div class="row g-3 mb-2">
-                                <div class="col-md-7">
-                                    <label class="form-label small fw-semibold text-secondary">2a. Nomor Surat Tugas <span class="text-danger">*</span></label>
-                                    <input type="text" name="st_number" id="create_st_number" class="form-control" value="B-1812/74080/HM.300/{{ date('Y') }}" oninput="syncCreateBasisSt()" required>
-                                </div>
-                                <div class="col-md-5">
-                                    <label class="form-label small fw-semibold text-secondary">2b. Tanggal Surat Tugas <span class="text-danger">*</span></label>
-                                    <input type="date" name="st_date" id="create_st_date" class="form-control" value="{{ date('Y-m-d') }}" oninput="syncCreateBasisSt()" required>
-                                </div>
-                            </div>
-                            <div>
-                                <label class="form-label small fw-semibold text-secondary">Teks Lengkap Dasar Surat Tugas (Otomatis Terbentuk)</label>
-                                <textarea name="basis_st" id="create_basis_st" class="form-control" rows="2">{{ 'Surat Tugas Kepala Badan Pusat Statistik Kabupaten Kolaka Utara Nomor B-1812/74080/HM.300/' . date('Y') . ' Tanggal ' . \Carbon\Carbon::now()->translatedFormat('d F Y') . '.' }}</textarea>
-                            </div>
-                        </div>
-                    </div>
+                    <!-- Bagian B: Dasar Pelaksanaan (Read-Only - Diisi Role Admin) -->
+                    @include('petugas.reports._basis_readonly', ['prefix' => 'create', 'defaults' => $basisDefaults])
 
                     <!-- Bagian C & D: Tujuan & Waktu Perjalanan Dinas -->
                     <div class="card mb-3 border">
@@ -505,10 +481,15 @@
                                 </div>
                                 <div class="col-md-5">
                                     <label class="form-label small fw-semibold text-secondary">Penugasan Terkait</label>
-                                    <select name="assignment_id" id="create_assignment_id" class="form-select" onchange="autoFillLocationAndExpense(this, 'create_activity_location', 'create_expense_list')">
-                                        <option value="" data-location="">-- Kegiatan Mandiri / Umum --</option>
+                                    <select name="assignment_id" id="create_assignment_id" class="form-select" onchange="handlePetugasAssignmentChange('create', this, 'create_activity_location', 'create_expense_list')">
+                                        <option value="" data-location="" data-basis-dipa="" data-st-number="" data-st-date="" data-basis-st="">-- Kegiatan Mandiri / Umum --</option>
                                         @foreach($myAssignments as $asgn)
-                                            <option value="{{ $asgn->id }}" data-location="{{ $asgn->location }}">{{ $asgn->title }}</option>
+                                            <option value="{{ $asgn->id }}"
+                                                data-location="{{ $asgn->location }}"
+                                                data-basis-dipa="{{ $asgn->basis_dipa }}"
+                                                data-st-number="{{ $asgn->st_number }}"
+                                                data-st-date="{{ $asgn->st_date ? $asgn->st_date->format('Y-m-d') : '' }}"
+                                                data-basis-st="{{ $asgn->basis_st ?: ($asgn->st_number ? \App\Models\OfficerReport::formatBasisSt($asgn->st_number, $asgn->st_date?->format('Y-m-d')) : '') }}">{{ $asgn->title }}</option>
                                         @endforeach
                                     </select>
                                 </div>
@@ -788,32 +769,8 @@
                         </div>
                     </div>
 
-                    <!-- Bagian B: Dasar Pelaksanaan -->
-                    <div class="card mb-3 border">
-                        <div class="card-header bg-light py-2 px-3 fw-bold text-dark small">
-                            <i class="fa-solid fa-scale-balanced text-primary me-1"></i> B. DASAR PELAKSANAAN (LAPORAN &amp; PENGELUARAN RIIL)
-                        </div>
-                        <div class="card-body p-3">
-                            <div class="mb-3">
-                                <label class="form-label small fw-semibold text-secondary">1. DIPA Satuan Kerja</label>
-                                <textarea id="edit_basis_dipa" name="basis_dipa" class="form-control" rows="2"></textarea>
-                            </div>
-                            <div class="row g-3 mb-2">
-                                <div class="col-md-7">
-                                    <label class="form-label small fw-semibold text-secondary">2a. Nomor Surat Tugas</label>
-                                    <input type="text" id="edit_st_number" name="st_number" class="form-control" oninput="syncEditBasisSt()">
-                                </div>
-                                <div class="col-md-5">
-                                    <label class="form-label small fw-semibold text-secondary">2b. Tanggal Surat Tugas</label>
-                                    <input type="date" id="edit_st_date" name="st_date" class="form-control" oninput="syncEditBasisSt()">
-                                </div>
-                            </div>
-                            <div>
-                                <label class="form-label small fw-semibold text-secondary">2. Teks Lengkap Surat Tugas Kepala BPS</label>
-                                <textarea id="edit_basis_st" name="basis_st" class="form-control" rows="2"></textarea>
-                            </div>
-                        </div>
-                    </div>
+                    <!-- Bagian B: Dasar Pelaksanaan (Read-Only - Diisi Role Admin) -->
+                    @include('petugas.reports._basis_readonly', ['prefix' => 'edit', 'defaults' => $basisDefaults])
 
                     <!-- Bagian C & D: Tujuan & Waktu Perjalanan Dinas -->
                     <div class="card mb-3 border">
@@ -828,10 +785,15 @@
                                 </div>
                                 <div class="col-md-5">
                                     <label class="form-label small fw-semibold text-secondary">Penugasan Terkait</label>
-                                    <select id="edit_assignment" name="assignment_id" class="form-select" onchange="autoFillLocationAndExpense(this, 'edit_activity_location', 'edit_expense_list')">
-                                        <option value="" data-location="">-- Kegiatan Mandiri / Umum --</option>
+                                    <select id="edit_assignment" name="assignment_id" class="form-select" onchange="handlePetugasAssignmentChange('edit', this, 'edit_activity_location', 'edit_expense_list')">
+                                        <option value="" data-location="" data-basis-dipa="" data-st-number="" data-st-date="" data-basis-st="">-- Kegiatan Mandiri / Umum --</option>
                                         @foreach($myAssignments as $asgn)
-                                            <option value="{{ $asgn->id }}" data-location="{{ $asgn->location }}">{{ $asgn->title }}</option>
+                                            <option value="{{ $asgn->id }}"
+                                                data-location="{{ $asgn->location }}"
+                                                data-basis-dipa="{{ $asgn->basis_dipa }}"
+                                                data-st-number="{{ $asgn->st_number }}"
+                                                data-st-date="{{ $asgn->st_date ? $asgn->st_date->format('Y-m-d') : '' }}"
+                                                data-basis-st="{{ $asgn->basis_st ?: ($asgn->st_number ? \App\Models\OfficerReport::formatBasisSt($asgn->st_number, $asgn->st_date?->format('Y-m-d')) : '') }}">{{ $asgn->title }}</option>
                                         @endforeach
                                     </select>
                                 </div>
@@ -1506,23 +1468,54 @@
         return terbilangInt(n).replace(/\s+/g, ' ').trim() + ' Rupiah';
     }
 
-    function syncBasisSt(numInputId, dateInputId, targetTextareaId) {
-        const numEl = document.getElementById(numInputId);
-        const dateEl = document.getElementById(dateInputId);
-        const outEl = document.getElementById(targetTextareaId);
-        if (!outEl) return;
+    const ADMIN_BASIS_DEFAULTS = @json($basisDefaults);
 
-        const num = (numEl && numEl.value.trim()) ? numEl.value.trim() : '-';
-        const dateFormatted = (dateEl && dateEl.value) ? formatIndonesianDate(dateEl.value) : '-';
-        outEl.value = `Surat Tugas Kepala Badan Pusat Statistik Kabupaten Kolaka Utara Nomor ${num} Tanggal ${dateFormatted}.`;
+    function updateReadonlyBasisFromValues(prefix, dipa, stNumber, stDate, basisSt) {
+        const hasCustomStNum = !!(stNumber && String(stNumber).trim());
+        const finalDipa = (dipa && String(dipa).trim()) ? String(dipa).trim() : (ADMIN_BASIS_DEFAULTS.basis_dipa || '-');
+        const finalStNum = hasCustomStNum ? String(stNumber).trim() : (ADMIN_BASIS_DEFAULTS.st_number || '-');
+        const rawDate = (stDate && String(stDate).trim()) ? String(stDate).trim().substring(0, 10) : (ADMIN_BASIS_DEFAULTS.st_date || '');
+        const finalDateText = rawDate ? formatIndonesianDate(rawDate) : '-';
+
+        let finalBasisSt = (basisSt && String(basisSt).trim()) ? String(basisSt).trim() : '';
+        if (!finalBasisSt) {
+            finalBasisSt = hasCustomStNum
+                ? `Surat Tugas Kepala Badan Pusat Statistik Kabupaten Kolaka Utara Nomor ${finalStNum} Tanggal ${finalDateText}.`
+                : (ADMIN_BASIS_DEFAULTS.basis_st || `Surat Tugas Kepala Badan Pusat Statistik Kabupaten Kolaka Utara Nomor ${finalStNum} Tanggal ${finalDateText}.`);
+        }
+
+        const elDipa = document.getElementById(prefix + '_ro_basis_dipa');
+        const elNum = document.getElementById(prefix + '_ro_st_number');
+        const elDate = document.getElementById(prefix + '_ro_st_date');
+        const elSt = document.getElementById(prefix + '_ro_basis_st');
+        if (elDipa) elDipa.innerText = finalDipa;
+        if (elNum) elNum.innerText = finalStNum;
+        if (elDate) elDate.innerText = finalDateText;
+        if (elSt) elSt.innerText = finalBasisSt;
     }
 
-    function syncCreateBasisSt() {
-        syncBasisSt('create_st_number', 'create_st_date', 'create_basis_st');
+    function syncReadonlyBasisFromSelect(prefix, selectElem) {
+        if (!selectElem) {
+            updateReadonlyBasisFromValues(prefix, '', '', '', '');
+            return;
+        }
+        const opt = selectElem.options[selectElem.selectedIndex];
+        if (!opt || !opt.value) {
+            updateReadonlyBasisFromValues(prefix, '', '', '', '');
+            return;
+        }
+        updateReadonlyBasisFromValues(
+            prefix,
+            opt.getAttribute('data-basis-dipa') || '',
+            opt.getAttribute('data-st-number') || '',
+            opt.getAttribute('data-st-date') || '',
+            opt.getAttribute('data-basis-st') || ''
+        );
     }
 
-    function syncEditBasisSt() {
-        syncBasisSt('edit_st_number', 'edit_st_date', 'edit_basis_st');
+    function handlePetugasAssignmentChange(prefix, selectElem, locInputId, tbodyId) {
+        autoFillLocationAndExpense(selectElem, locInputId, tbodyId);
+        syncReadonlyBasisFromSelect(prefix, selectElem);
     }
 
     function buildDefaultExpenseDesc(location) {
@@ -1682,11 +1675,14 @@
         document.getElementById('edit_officer_rank').value = rep.officer_rank || (rep.user ? rep.user.rank : '') || '-';
         document.getElementById('edit_officer_position').value = rep.officer_position || (rep.user ? rep.user.position : '') || 'Mitra BPS Kabupaten Kolaka Utara';
 
-        // Dasar
-        document.getElementById('edit_basis_dipa').value = rep.basis_dipa || '';
-        document.getElementById('edit_st_number').value = rep.st_number || '';
-        document.getElementById('edit_st_date').value = rep.st_date ? rep.st_date.substring(0, 10) : (rep.activity_date ? rep.activity_date.substring(0, 10) : '');
-        document.getElementById('edit_basis_st').value = rep.basis_st || '';
+        // Dasar (Read-Only - Diisi oleh Role Admin)
+        updateReadonlyBasisFromValues(
+            'edit',
+            rep.basis_dipa || (rep.assignment ? rep.assignment.basis_dipa : '') || '',
+            rep.st_number || (rep.assignment ? rep.assignment.st_number : '') || '',
+            rep.st_date || (rep.assignment ? rep.assignment.st_date : '') || '',
+            rep.basis_st || (rep.assignment ? rep.assignment.basis_st : '') || ''
+        );
 
         // Tujuan & Waktu
         document.getElementById('edit_title').value = rep.activity_title || '';
@@ -1789,8 +1785,8 @@
         const year = rep.activity_date ? new Date(rep.activity_date).getFullYear() : new Date().getFullYear();
         const actDateRaw = rep.activity_date ? rep.activity_date.substring(0, 10) : '';
         const actDateFormatted = actDateRaw ? formatIndonesianDate(actDateRaw) : '-';
-        document.getElementById('det_basis_dipa').innerText = rep.basis_dipa || ('DIPA Satuan Kerja Badan Pusat Statistik Kabupaten Kolaka Utara Tahun Anggaran ' + year + ' Nomor SP DIPA-054.01.2.667477/' + year + ' tanggal 1 Desember ' + (year - 1) + '.');
-        document.getElementById('det_basis_st').innerText = rep.basis_st || ('Surat Tugas Kepala Badan Pusat Statistik Kabupaten Kolaka Utara Nomor: B-1812/74080/HM.300/' + year + ' Tanggal ' + actDateFormatted + '.');
+        document.getElementById('det_basis_dipa').innerText = rep.basis_dipa || ADMIN_BASIS_DEFAULTS.basis_dipa || ('DIPA Satuan Kerja Badan Pusat Statistik Kabupaten Kolaka Utara Tahun Anggaran ' + year + ' Nomor SP DIPA-054.01.2.667477/' + year + ' tanggal 1 Desember ' + (year - 1) + '.');
+        document.getElementById('det_basis_st').innerText = rep.basis_st || ADMIN_BASIS_DEFAULTS.basis_st || ('Surat Tugas Kepala Badan Pusat Statistik Kabupaten Kolaka Utara Nomor: B-1812/74080/HM.300/' + year + ' Tanggal ' + actDateFormatted + '.');
 
         // Section C
         document.getElementById('det_destination_purpose').innerText = rep.destination_purpose || ('Perjalanan Dinas Biasa dalam kota lebih dari 8 jam dalam rangka pendataan ' + rep.activity_title + '.');
@@ -2568,6 +2564,7 @@
         const createModalEl = document.getElementById('createReportModal');
         if (createModalEl) {
             createModalEl.addEventListener('shown.bs.modal', function() {
+                syncReadonlyBasisFromSelect('create', document.getElementById('create_assignment_id'));
                 perjadinCamera.reset('create');
                 perjadinCamera.start('create');
             });

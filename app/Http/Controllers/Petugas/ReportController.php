@@ -55,6 +55,7 @@ class ReportController extends Controller
 
         $myAssignmentIds = AssignmentOfficer::where('user_id', $userId)->pluck('assignment_id');
         $myAssignments = Assignment::whereIn('id', $myAssignmentIds)->get();
+        $basisDefaults = OfficerReport::getMasterBasisSettings();
 
         return view('petugas.reports.index', compact(
             'reports',
@@ -63,7 +64,8 @@ class ReportController extends Controller
             'submittedCount',
             'revisionCount',
             'approvedCount',
-            'myAssignments'
+            'myAssignments',
+            'basisDefaults'
         ));
     }
 
@@ -81,13 +83,8 @@ class ReportController extends Controller
         $officerPosition = !empty($validated['officer_position']) ? $validated['officer_position'] : ($user->position ?: 'Mitra BPS Kabupaten Kolaka Utara');
 
         $expenseItems = $this->buildExpenseItems($request);
-        $basisSt = $validated['basis_st'] ?? null;
-        if (empty($basisSt) && !empty($validated['st_number'])) {
-            $stDateStr = !empty($validated['st_date'])
-                ? \Carbon\Carbon::parse($validated['st_date'])->translatedFormat('d F Y')
-                : \Carbon\Carbon::parse($validated['activity_date'])->translatedFormat('d F Y');
-            $basisSt = "Surat Tugas Kepala Badan Pusat Statistik Kabupaten Kolaka Utara Nomor {$validated['st_number']} Tanggal {$stDateStr}.";
-        }
+        $assignment = !empty($validated['assignment_id']) ? Assignment::find($validated['assignment_id']) : null;
+        $basis = OfficerReport::resolveAuthoritativeBasis($assignment, $validated['activity_date']);
 
         $year = now()->format('Y');
         $count = OfficerReport::whereYear('created_at', now()->year)->count() + 1;
@@ -96,16 +93,16 @@ class ReportController extends Controller
         $report = OfficerReport::create([
             'report_number' => $reportNumber,
             'user_id' => $user->id,
-            'assignment_id' => $validated['assignment_id'] ?? null,
+            'assignment_id' => !empty($validated['assignment_id']) ? (int) $validated['assignment_id'] : null,
             'officer_name' => $officerName,
             'officer_nip' => $officerNik,
             'id_type' => $validated['id_type'] ?? 'NIK',
             'officer_rank' => $officerRank,
             'officer_position' => $officerPosition,
-            'basis_dipa' => $validated['basis_dipa'] ?? null,
-            'basis_st' => $basisSt,
-            'st_number' => $validated['st_number'] ?? null,
-            'st_date' => $validated['st_date'] ?? null,
+            'basis_dipa' => $basis['basis_dipa'],
+            'basis_st' => $basis['basis_st'],
+            'st_number' => $basis['st_number'],
+            'st_date' => $basis['st_date'],
             'destination_purpose' => $validated['destination_purpose'] ?? null,
             'duration_text' => !empty($validated['duration_text']) ? $validated['duration_text'] : 'Selama 1 (satu) Hari',
             'activity_date' => $validated['activity_date'],
@@ -204,28 +201,29 @@ class ReportController extends Controller
         $this->syncUserIdentityIfMissing($validated);
 
         $expenseItems = $this->buildExpenseItems($request);
-        $basisSt = $validated['basis_st'] ?? $report->basis_st;
-        if (empty($basisSt) && !empty($validated['st_number'])) {
-            $stDateStr = !empty($validated['st_date'])
-                ? \Carbon\Carbon::parse($validated['st_date'])->translatedFormat('d F Y')
-                : \Carbon\Carbon::parse($validated['activity_date'])->translatedFormat('d F Y');
-            $basisSt = "Surat Tugas Kepala Badan Pusat Statistik Kabupaten Kolaka Utara Nomor {$validated['st_number']} Tanggal {$stDateStr}.";
-        }
+        $assignment = !empty($validated['assignment_id']) ? Assignment::find($validated['assignment_id']) : null;
+        $authoritativeBasis = OfficerReport::resolveAuthoritativeBasis($assignment, $validated['activity_date']);
+        $assignmentChanged = ((int) ($validated['assignment_id'] ?? 0)) !== ((int) ($report->assignment_id ?? 0));
+
+        $basisDipa = (!$assignmentChanged && !empty($report->basis_dipa)) ? $report->basis_dipa : $authoritativeBasis['basis_dipa'];
+        $stNumber = (!$assignmentChanged && !empty($report->st_number)) ? $report->st_number : $authoritativeBasis['st_number'];
+        $stDate = (!$assignmentChanged && !empty($report->st_date)) ? $report->st_date : $authoritativeBasis['st_date'];
+        $basisSt = (!$assignmentChanged && !empty($report->basis_st)) ? $report->basis_st : $authoritativeBasis['basis_st'];
 
         $report->update([
             'activity_date' => $validated['activity_date'],
             'activity_title' => $validated['activity_title'],
             'activity_location' => $validated['activity_location'] ?? $report->activity_location,
-            'assignment_id' => $validated['assignment_id'] ?? null,
+            'assignment_id' => !empty($validated['assignment_id']) ? (int) $validated['assignment_id'] : null,
             'officer_name' => !empty($validated['officer_name']) ? $validated['officer_name'] : $report->officer_name,
             'officer_nip' => !empty($validated['officer_nip']) ? $validated['officer_nip'] : $report->officer_nip,
             'id_type' => $validated['id_type'] ?? ($report->id_type ?? 'NIK'),
             'officer_rank' => !empty($validated['officer_rank']) ? $validated['officer_rank'] : $report->officer_rank,
             'officer_position' => !empty($validated['officer_position']) ? $validated['officer_position'] : $report->officer_position,
-            'basis_dipa' => $validated['basis_dipa'] ?? $report->basis_dipa,
+            'basis_dipa' => $basisDipa,
             'basis_st' => $basisSt,
-            'st_number' => $validated['st_number'] ?? $report->st_number,
-            'st_date' => $validated['st_date'] ?? $report->st_date,
+            'st_number' => $stNumber,
+            'st_date' => $stDate,
             'destination_purpose' => $validated['destination_purpose'] ?? $report->destination_purpose,
             'duration_text' => !empty($validated['duration_text']) ? $validated['duration_text'] : $report->duration_text,
             'work_description' => $validated['work_description'],
@@ -301,10 +299,6 @@ class ReportController extends Controller
             'id_type' => ['nullable', 'string', 'in:NIK,NIP'],
             'officer_rank' => ['nullable', 'string', 'max:100'],
             'officer_position' => ['nullable', 'string', 'max:150'],
-            'basis_dipa' => ['nullable', 'string', 'max:500'],
-            'basis_st' => ['nullable', 'string', 'max:500'],
-            'st_number' => ['nullable', 'string', 'max:150'],
-            'st_date' => ['nullable', 'date'],
             'destination_purpose' => ['nullable', 'string', 'max:500'],
             'duration_text' => ['nullable', 'string', 'max:150'],
             'work_description' => ['required', 'string'],

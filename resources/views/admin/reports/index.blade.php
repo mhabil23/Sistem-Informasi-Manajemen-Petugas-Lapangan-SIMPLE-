@@ -15,12 +15,15 @@
         <h4 class="fw-bold text-dark mb-1">Verifikasi & Penilaian Laporan Lapangan</h4>
         <p class="text-muted small mb-0">Tinjau laporan kegiatan lapangan dari petugas, periksa bukti dokumentasi foto/berkas, dan berikan status persetujuan atau catatan revisi.</p>
     </div>
-    <div class="col-md-5 text-md-end mt-2 mt-md-0">
+    <div class="col-md-5 text-md-end mt-2 mt-md-0 d-flex flex-wrap justify-content-md-end align-items-center gap-2">
         @if($submittedCount > 0)
             <span class="badge bg-warning text-dark px-2.5 py-1.5 fs-7 shadow-sm">
                 <i class="fa-solid fa-bell me-1"></i> {{ $submittedCount }} Laporan Perlu Diverifikasi
             </span>
         @endif
+        <button type="button" class="btn btn-sm btn-sp-primary" data-bs-toggle="modal" data-bs-target="#basisSettingsModal">
+            <i class="fa-solid fa-scale-balanced me-1"></i> Atur B. Dasar Pelaksanaan
+        </button>
     </div>
 </div>
 
@@ -332,12 +335,15 @@
                     <!-- Galeri Lampiran -->
                     <div class="mb-4">
                         <label class="form-label small fw-semibold text-secondary">
-                            <i class="fa-solid fa-paperclip text-primary me-1"></i> BUKTI DOKUMENTASI & LAMPIRAN:
+                            <i class="fa-solid fa-paperclip text-primary me-1"></i> BUKTI DOKUMENTASI &amp; LAMPIRAN:
                         </label>
                         <div id="rev_attachments_container" class="row g-2">
                             <!-- Populated by JS -->
                         </div>
                     </div>
+
+                    <!-- B. Dasar Pelaksanaan (Dapat disesuaikan Admin per Laporan) -->
+                    @include('admin.partials._basis_fields', ['prefix' => 'rev', 'defaults' => [], 'required' => false])
 
                     <!-- Aksi Verifikasi Admin -->
                     <div class="border-top pt-3">
@@ -379,10 +385,43 @@
         </div>
     </div>
 </div>
+<!-- ==============================================================
+     MODAL PENGATURAN DEFAULT B. DASAR PELAKSANAAN (ROLE ADMIN)
+     ============================================================== -->
+<div class="modal fade" id="basisSettingsModal" tabindex="-1" aria-labelledby="basisSettingsModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered modal-lg">
+        <div class="modal-content border-0 shadow">
+            <div class="modal-header bg-light border-bottom">
+                <div>
+                    <h5 class="modal-title fw-bold" id="basisSettingsModalLabel">
+                        <i class="fa-solid fa-scale-balanced text-primary me-2"></i> Atur B. Dasar Pelaksanaan (Role Admin)
+                    </h5>
+                    <div class="small text-muted">Nilai DIPA &amp; Surat Tugas di sini otomatis diterapkan saat petugas mengisi Laporan Perjadin &amp; Pengeluaran Riil.</div>
+                </div>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <form method="POST" action="{{ route('admin.reports.basis-settings') }}">
+                @csrf
+                @method('PUT')
+                <div class="modal-body p-4">
+                    @include('admin.partials._basis_fields', ['prefix' => 'master', 'defaults' => $basisSettings, 'required' => true])
+                </div>
+                <div class="modal-footer bg-light border-top">
+                    <button type="button" class="btn btn-light" data-bs-dismiss="modal">Batal</button>
+                    <button type="submit" class="btn btn-sp-primary">
+                        <i class="fa-solid fa-floppy-disk me-1"></i> Simpan Pengaturan Admin
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
 @endsection
 
 @push('scripts')
 <script>
+    const ADMIN_BASIS_DEFAULTS = @json($basisSettings);
+
     function openReviewModal(rep) {
         document.getElementById('reviewReportForm').action = '/admin/reports/' + rep.id + '/review';
         document.getElementById('rev_number').innerText = rep.report_number || ('LAP-' + rep.id);
@@ -392,6 +431,18 @@
         document.getElementById('rev_location').innerText = rep.activity_location || (rep.assignment ? rep.assignment.location : '-');
         document.getElementById('rev_description').innerText = rep.work_description;
         document.getElementById('rev_admin_notes').value = rep.admin_notes || '';
+
+        // B. Dasar Pelaksanaan laporan ini (diisi/disesuaikan oleh Admin)
+        document.getElementById('rev_basis_dipa').value = rep.basis_dipa || (rep.assignment ? rep.assignment.basis_dipa : '') || ADMIN_BASIS_DEFAULTS.basis_dipa || '';
+        document.getElementById('rev_st_number').value = rep.st_number || (rep.assignment ? rep.assignment.st_number : '') || ADMIN_BASIS_DEFAULTS.st_number || '';
+        document.getElementById('rev_st_date').value = rep.st_date
+            ? rep.st_date.substring(0, 10)
+            : ((rep.assignment && rep.assignment.st_date) ? rep.assignment.st_date.substring(0, 10) : (ADMIN_BASIS_DEFAULTS.st_date || ''));
+        if (rep.basis_st) {
+            document.getElementById('rev_basis_st').value = rep.basis_st;
+        } else {
+            syncAdminBasisSt('rev');
+        }
 
         // Select status
         const statusSelect = document.getElementById('rev_status_select');

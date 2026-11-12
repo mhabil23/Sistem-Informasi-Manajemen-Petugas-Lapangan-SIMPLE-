@@ -77,6 +77,18 @@
                     </div>
                 </div>
 
+                @if($assignment->basis_dipa || $assignment->st_number || $assignment->basis_st)
+                    <div class="border-top pt-3 mb-3">
+                        <div class="text-muted small fw-semibold mb-1">
+                            <i class="fa-solid fa-scale-balanced text-primary me-1"></i> B. Dasar Pelaksanaan (Laporan &amp; Pengeluaran Riil):
+                        </div>
+                        <div class="small text-dark mb-1"><strong>1. DIPA:</strong> {{ $assignment->basis_dipa ?? '-' }}</div>
+                        <div class="small text-dark">
+                            <strong>2. Surat Tugas:</strong> {{ $assignment->basis_st ?: ($assignment->st_number ?? '-') }}
+                        </div>
+                    </div>
+                @endif
+
                 <div class="border-top pt-3">
                     <div class="text-muted small mb-1">Deskripsi & Petunjuk Teknis:</div>
                     <p class="text-secondary small mb-0" style="white-space: pre-line;">

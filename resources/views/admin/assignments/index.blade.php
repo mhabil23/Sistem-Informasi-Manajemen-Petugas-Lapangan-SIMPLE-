@@ -319,6 +319,8 @@
                         </div>
                     </div>
 
+                    @include('admin.partials._basis_fields', ['prefix' => 'create_asgn', 'defaults' => $basisDefaults, 'required' => false])
+
                     <div class="mb-3">
                         <label class="form-label small fw-semibold text-secondary">URAIAN / DESKRIPSI KEGIATAN</label>
                         <textarea name="description" class="form-control" rows="3" placeholder="Tuliskan tujuan, sasaran responden, dan instruksi umum kegiatan..."></textarea>
@@ -420,10 +422,12 @@
                         </div>
                     </div>
 
-                    <div class="mb-0">
+                    <div class="mb-3">
                         <label class="form-label small fw-semibold text-secondary">URAIAN / DESKRIPSI KEGIATAN</label>
                         <textarea id="edit_description" name="description" class="form-control" rows="3"></textarea>
                     </div>
+
+                    @include('admin.partials._basis_fields', ['prefix' => 'edit_asgn', 'defaults' => [], 'required' => false])
                 </div>
                 <div class="modal-footer bg-light border-top">
                     <button type="button" class="btn btn-light" data-bs-dismiss="modal">Batal</button>
@@ -473,6 +477,8 @@
         });
     });
 
+    const ADMIN_BASIS_DEFAULTS = @json($basisDefaults);
+
     function openEditAssignmentModal(item) {
         document.getElementById('editAssignmentForm').action = '/admin/assignments/' + item.id;
         document.getElementById('edit_title').value = item.title;
@@ -482,6 +488,15 @@
         document.getElementById('edit_target_respondents').value = item.target_respondents || 0;
         document.getElementById('edit_status').value = item.status;
         document.getElementById('edit_description').value = item.description || '';
+
+        document.getElementById('edit_asgn_basis_dipa').value = item.basis_dipa || ADMIN_BASIS_DEFAULTS.basis_dipa || '';
+        document.getElementById('edit_asgn_st_number').value = item.st_number || ADMIN_BASIS_DEFAULTS.st_number || '';
+        document.getElementById('edit_asgn_st_date').value = item.st_date ? item.st_date.substring(0, 10) : (ADMIN_BASIS_DEFAULTS.st_date || '');
+        if (item.basis_st) {
+            document.getElementById('edit_asgn_basis_st').value = item.basis_st;
+        } else {
+            syncAdminBasisSt('edit_asgn');
+        }
 
         const modal = new bootstrap.Modal(document.getElementById('editAssignmentModal'));
         modal.show();

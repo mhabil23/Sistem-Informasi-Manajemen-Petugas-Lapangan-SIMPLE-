@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Models\ActivityLog;
 use App\Models\Assignment;
 use App\Models\AssignmentOfficer;
+use App\Models\OfficerReport;
 use App\Models\User;
 use App\Services\GoogleSheetService;
 use Illuminate\Http\Request;
@@ -53,6 +54,7 @@ class AssignmentController extends Controller
 
         // Get list of officers for quick assignment modals
         $officers = User::where('role', 'petugas')->where('status', 'active')->orderBy('name')->get();
+        $basisDefaults = OfficerReport::getMasterBasisSettings();
 
         return view('admin.assignments.index', compact(
             'assignments',
@@ -60,7 +62,8 @@ class AssignmentController extends Controller
             'totalOngoing',
             'totalCompleted',
             'totalDraft',
-            'officers'
+            'officers',
+            'basisDefaults'
         ));
     }
 
@@ -69,25 +72,8 @@ class AssignmentController extends Controller
      */
     public function store(Request $request)
     {
-        $validated = $request->validate([
-            'title' => ['required', 'string', 'max:255'],
-            'description' => ['nullable', 'string'],
-            'start_date' => ['required', 'date'],
-            'end_date' => ['required', 'date', 'after_or_equal:start_date'],
-            'location' => ['required', 'string', 'max:255'],
-            'target_respondents' => ['nullable', 'integer', 'min:0'],
-            'status' => ['required', Rule::in(['draft', 'ongoing', 'completed', 'cancelled'])],
-            'officer_ids' => ['nullable', 'array'],
-            'officer_ids.*' => ['exists:users,id'],
-        ], [
-            'title.required' => 'Judul kegiatan wajib diisi.',
-            'start_date.required' => 'Tanggal mulai wajib diisi.',
-            'end_date.required' => 'Tanggal selesai wajib diisi.',
-            'end_date.after_or_equal' => 'Tanggal selesai harus sama atau setelah tanggal mulai.',
-            'location.required' => 'Lokasi kegiatan wajib diisi.',
-            'target_respondents.integer' => 'Target responden harus berupa angka bulat positif.',
-            'target_respondents.min' => 'Target responden tidak boleh bernilai negatif.',
-        ]);
+        $validated = $this->validateAssignmentRequest($request, true);
+        $basis = $this->buildAssignmentBasisPayload($validated);
 
         $assignment = Assignment::create([
             'title' => $validated['title'],
@@ -95,6 +81,10 @@ class AssignmentController extends Controller
             'start_date' => $validated['start_date'],
             'end_date' => $validated['end_date'],
             'location' => $validated['location'],
+            'basis_dipa' => $basis['basis_dipa'],
+            'st_number' => $basis['st_number'],
+            'st_date' => $basis['st_date'],
+            'basis_st' => $basis['basis_st'],
             'target_respondents' => $validated['target_respondents'] ?? 0,
             'status' => $validated['status'],
             'created_by' => Auth::id(),
@@ -167,18 +157,8 @@ class AssignmentController extends Controller
      */
     public function update(Request $request, Assignment $assignment)
     {
-        $validated = $request->validate([
-            'title' => ['required', 'string', 'max:255'],
-            'description' => ['nullable', 'string'],
-            'start_date' => ['required', 'date'],
-            'end_date' => ['required', 'date', 'after_or_equal:start_date'],
-            'location' => ['required', 'string', 'max:255'],
-            'target_respondents' => ['nullable', 'integer', 'min:0'],
-            'status' => ['required', Rule::in(['draft', 'ongoing', 'completed', 'cancelled'])],
-        ], [
-            'target_respondents.integer' => 'Target responden harus berupa angka bulat positif.',
-            'target_respondents.min' => 'Target responden tidak boleh bernilai negatif.',
-        ]);
+        $validated = $this->validateAssignmentRequest($request, false);
+        $basis = $this->buildAssignmentBasisPayload($validated);
 
         $assignment->update([
             'title' => $validated['title'],
@@ -186,6 +166,10 @@ class AssignmentController extends Controller
             'start_date' => $validated['start_date'],
             'end_date' => $validated['end_date'],
             'location' => $validated['location'],
+            'basis_dipa' => $basis['basis_dipa'],
+            'st_number' => $basis['st_number'],
+            'st_date' => $basis['st_date'],
+            'basis_st' => $basis['basis_st'],
             'target_respondents' => $validated['target_respondents'] ?? 0,
             'status' => $validated['status'],
         ]);
@@ -335,6 +319,58 @@ class AssignmentController extends Controller
         );
 
         return back()->with('success', "Penugasan untuk {$officerName} telah dihapus.");
+    }
+
+    private function validateAssignmentRequest(Request $request, bool $includeOfficers): array
+    {
+        $rules = [
+            'title' => ['required', 'string', 'max:255'],
+            'description' => ['nullable', 'string'],
+            'start_date' => ['required', 'date'],
+            'end_date' => ['required', 'date', 'after_or_equal:start_date'],
+            'location' => ['required', 'string', 'max:255'],
+            'basis_dipa' => ['nullable', 'string', 'max:1000'],
+            'st_number' => ['nullable', 'string', 'max:150'],
+            'st_date' => ['nullable', 'date'],
+            'basis_st' => ['nullable', 'string', 'max:1000'],
+            'target_respondents' => ['nullable', 'integer', 'min:0'],
+            'status' => ['required', Rule::in(['draft', 'ongoing', 'completed', 'cancelled'])],
+        ];
+
+        if ($includeOfficers) {
+            $rules['officer_ids'] = ['nullable', 'array'];
+            $rules['officer_ids.*'] = ['exists:users,id'];
+        }
+
+        return $request->validate($rules, [
+            'title.required' => 'Judul kegiatan wajib diisi.',
+            'start_date.required' => 'Tanggal mulai wajib diisi.',
+            'end_date.required' => 'Tanggal selesai wajib diisi.',
+            'end_date.after_or_equal' => 'Tanggal selesai harus sama atau setelah tanggal mulai.',
+            'location.required' => 'Lokasi kegiatan wajib diisi.',
+            'target_respondents.integer' => 'Target responden harus berupa angka bulat positif.',
+            'target_respondents.min' => 'Target responden tidak boleh bernilai negatif.',
+        ]);
+    }
+
+    private function buildAssignmentBasisPayload(array $validated): array
+    {
+        $defaults = OfficerReport::getMasterBasisSettings();
+        $basisDipa = trim((string) ($validated['basis_dipa'] ?? '')) ?: $defaults['basis_dipa'];
+        $stNumber = trim((string) ($validated['st_number'] ?? '')) ?: $defaults['st_number'];
+        $stDate = !empty($validated['st_date']) ? $validated['st_date'] : $defaults['st_date'];
+        $basisSt = trim((string) ($validated['basis_st'] ?? ''));
+
+        if ($basisSt === '') {
+            $basisSt = OfficerReport::formatBasisSt($stNumber, $stDate);
+        }
+
+        return [
+            'basis_dipa' => $basisDipa,
+            'st_number' => $stNumber,
+            'st_date' => $stDate,
+            'basis_st' => $basisSt,
+        ];
     }
 }
 
