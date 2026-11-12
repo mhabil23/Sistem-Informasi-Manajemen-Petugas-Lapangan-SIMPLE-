@@ -252,45 +252,39 @@
         const col = document.createElement('div');
         col.className = 'col-6 col-md-4';
 
-        const card = document.createElement('div');
-        card.className = 'card h-100 border p-2 shadow-sm text-center';
-
         const isImg = att.file_type && att.file_type.startsWith('image/');
         const mediaUrl = storageMediaUrl(att.file_path);
+
         if (isImg) {
             const a = document.createElement('a');
             a.href = mediaUrl;
             a.target = '_blank';
+            a.className = 'd-block border rounded p-1 bg-white shadow-sm';
+            a.title = 'Klik untuk memperbesar gambar';
+
             const img = document.createElement('img');
             img.src = mediaUrl;
             img.alt = att.file_name || 'Foto Dokumentasi';
-            img.className = 'img-fluid rounded mb-2';
-            img.style.maxHeight = '120px';
-            img.style.objectFit = 'cover';
+            img.className = 'img-fluid rounded w-100';
+            img.style.maxHeight = '220px';
+            img.style.objectFit = 'contain';
             a.appendChild(img);
-            card.appendChild(a);
-        } else {
-            const pdfBox = document.createElement('div');
-            pdfBox.className = 'py-3';
-            pdfBox.innerHTML = '<i class="fa-regular fa-file-pdf fa-3x text-danger"></i>';
-            card.appendChild(pdfBox);
+            col.appendChild(a);
+            return col;
         }
 
-        const nameEl = document.createElement('div');
-        nameEl.className = 'small text-truncate fw-medium text-dark';
-        nameEl.title = att.file_name || '';
-        nameEl.textContent = att.file_name || '';
-        card.appendChild(nameEl);
-
-        card.appendChild(buildAttachmentMetaBlock(att));
+        const card = document.createElement('div');
+        card.className = 'card h-100 border p-2 shadow-sm text-center';
+        const pdfBox = document.createElement('div');
+        pdfBox.className = 'py-3';
+        pdfBox.innerHTML = '<i class="fa-regular fa-file-pdf fa-3x text-danger"></i>';
+        card.appendChild(pdfBox);
 
         const openBtn = document.createElement('a');
         openBtn.href = mediaUrl;
         openBtn.target = '_blank';
         openBtn.className = 'btn btn-sm btn-link text-decoration-none mt-auto pt-1';
-        openBtn.innerHTML = isImg
-            ? '<i class="fa-solid fa-arrow-up-right-from-square me-1"></i> Buka Foto'
-            : '<i class="fa-solid fa-arrow-up-right-from-square me-1"></i> Buka Berkas';
+        openBtn.innerHTML = '<i class="fa-solid fa-arrow-up-right-from-square me-1"></i> Buka Berkas';
         card.appendChild(openBtn);
 
         col.appendChild(card);

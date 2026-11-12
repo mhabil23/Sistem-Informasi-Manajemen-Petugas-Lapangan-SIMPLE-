@@ -70,7 +70,7 @@
 
                     <!-- E. HASIL PERJALANAN DINAS -->
                     <div class="fw-bold mb-1 mt-2" style="font-size: 10.5pt;">E. Hasil Perjalanan Dinas</div>
-                    <div id="det_work_description" class="ms-3 mb-2 text-justify p-2 bg-light rounded" style="font-size: 10.5pt; white-space: pre-line;">-</div>
+                    <div id="det_work_description" class="ms-3 mb-2 text-justify" style="font-size: 10.5pt; white-space: pre-line;">-</div>
                     <div id="det_obstacles_box" class="ms-3 mb-2 d-none" style="font-size: 10.5pt;">
                         <div class="fw-bold">Kendala :</div>
                         <div id="det_obstacles" class="ms-2" style="white-space: pre-line;"></div>

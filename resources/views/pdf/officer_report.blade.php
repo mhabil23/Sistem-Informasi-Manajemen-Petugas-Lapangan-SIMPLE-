@@ -461,20 +461,6 @@
             @if($attData)
                 <div class="photo-single">
                     <img src="data:{{ $att->file_type }};base64,{{ $attData }}" alt="{{ $att->file_name }}">
-                    @if($att->caption || ($att->latitude && $att->longitude) || $att->location_address)
-                        <div style="font-size: 8.5pt; color: #333; margin-top: 6px; line-height: 1.35;">
-                            @if($att->caption)
-                                <div>{{ $att->caption }}</div>
-                            @elseif($att->location_address || ($att->latitude && $att->longitude))
-                                <div>
-                                    {{ $att->location_address }}
-                                    @if($att->latitude && $att->longitude)
-                                        ({{ number_format($att->latitude, 6, '.', '') }}, {{ number_format($att->longitude, 6, '.', '') }})
-                                    @endif
-                                </div>
-                            @endif
-                        </div>
-                    @endif
                 </div>
             @endif
         @elseif($imageAttachments->count() > 1)
@@ -489,7 +475,6 @@
                                 @endphp
                                 @if($attData)
                                     <img src="data:{{ $att->file_type }};base64,{{ $attData }}" class="photo-img" alt="{{ $att->file_name }}">
-                                    <div style="font-size: 8.5pt; margin-top: 4px; color: #444;">{{ $att->caption ?: $att->file_name }}</div>
                                 @endif
                             </td>
                         @endforeach
