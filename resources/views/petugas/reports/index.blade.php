@@ -12,8 +12,8 @@
 <!-- Header & Action -->
 <div class="row align-items-center mb-4">
     <div class="col-md-7">
-        <h3 class="fw-bold text-dark mb-1">Pengisian Laporan Perjadin &amp; Pengeluaran Riil</h3>
-        <p class="text-muted small mb-0">Satu kali pengisian &amp; satu kali tanda tangan digital menghasilkan <strong>1 File PDF Resmi</strong> berisi <em>Laporan Perjalanan Dinas (+ Dokumentasi)</em> dan <em>Daftar Pengeluaran Riil</em>. <strong>Unduh PDF terbuka setelah mendapat persetujuan (ACC) Administrator.</strong></p>
+        <h3 class="fw-bold text-dark mb-1">Pengisian Laporan Perjalanan Dinas</h3>
+        <p class="text-muted small mb-0">Isi detail kegiatan, cukup <strong>1 kali tanda tangan digital</strong>, dan foto kamera real-time. Identitas, Dasar Pelaksanaan &amp; Pengeluaran Riil dilengkapi Administrator — <strong>unduh PDF terbuka setelah mendapat ACC Administrator.</strong></p>
     </div>
     <div class="col-md-5 text-md-end mt-3 mt-md-0">
         <button type="button" class="btn btn-sp-primary" data-bs-toggle="modal" data-bs-target="#createReportModal">
@@ -433,9 +433,9 @@
             <div class="modal-header bg-light border-bottom">
                 <div>
                     <h5 class="modal-title fw-bold text-dark" id="createReportModalLabel">
-                        <i class="fa-solid fa-file-signature text-primary me-2"></i> Pengisian Laporan Perjadin &amp; Pengeluaran Riil
+                        <i class="fa-solid fa-file-signature text-primary me-2"></i> Pengisian Laporan Perjalanan Dinas Lapangan
                     </h5>
-                    <div class="small text-muted">Menghasilkan 1 File PDF Gabungan: Laporan Perjalanan Dinas (+ Dokumentasi) &amp; Daftar Pengeluaran Riil</div>
+                    <div class="small text-muted">Isi detail kegiatan, tanda tangan digital (1x), dan foto kamera lapangan. Identitas, Dasar Pelaksanaan &amp; Pengeluaran Riil otomatis dilengkapi Admin.</div>
                 </div>
                 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
@@ -445,52 +445,14 @@
                     <div class="alert alert-primary bg-primary bg-opacity-10 border-primary border-opacity-25 py-2 px-3 mb-3 d-flex align-items-center">
                         <i class="fa-solid fa-circle-info text-primary me-2 fa-lg"></i>
                         <div class="small text-dark">
-                            <strong>Terintegrasi 1 File PDF:</strong> Nama &amp; NIK terisi otomatis dari akun Anda, dan cukup <strong>1 kali tanda tangan digital</strong> untuk muncul otomatis di <em>Laporan Perjalanan Dinas</em> maupun <em>Daftar Pengeluaran Riil</em>.
+                            <strong>Formulir Ringkas Petugas:</strong> Identitas Anda (Nama/NIK), <em>B. Dasar Pelaksanaan</em>, dan <em>Daftar Pengeluaran Riil</em> otomatis terisi dari akun Anda &amp; diisi/disesuaikan oleh Administrator. Anda cukup mengisi laporan kegiatan, <strong>1x tanda tangan digital</strong>, dan foto kamera lapangan.
                         </div>
                     </div>
 
-                    <!-- Bagian A: Yang Melakukan Perjalanan Dinas -->
-                    <div class="card mb-3 border">
-                        <div class="card-header bg-light py-2 px-3 fw-bold text-dark small d-flex justify-content-between align-items-center">
-                            <span><i class="fa-solid fa-user-tie text-primary me-1"></i> A. IDENTITAS PETUGAS (TERISI OTOMATIS)</span>
-                            <span class="badge bg-success-subtle text-success border border-success-subtle">Otomatis dari Profil Akun</span>
-                        </div>
-                        <div class="card-body p-3">
-                            <div class="row g-3">
-                                <div class="col-md-5">
-                                    <label class="form-label small fw-semibold text-secondary">Nama Lengkap <span class="text-danger">*</span></label>
-                                    <input type="text" name="officer_name" class="form-control bg-light fw-semibold" value="{{ auth()->user()->name }}" required>
-                                </div>
-                                <div class="col-md-3">
-                                    <label class="form-label small fw-semibold text-secondary">Jenis Identitas</label>
-                                    <select name="id_type" class="form-select">
-                                        <option value="NIK" selected>NIK (KTP)</option>
-                                        <option value="NIP">NIP (Pegawai/PNS)</option>
-                                    </select>
-                                </div>
-                                <div class="col-md-4">
-                                    <label class="form-label small fw-semibold text-secondary">Nomor NIK / NIP <span class="text-danger">*</span></label>
-                                    <input type="text" name="officer_nip" class="form-control bg-light fw-semibold font-monospace" value="{{ auth()->user()->nik ?? '' }}" placeholder="Masukkan NIK / NIP Anda" required>
-                                </div>
-                                <div class="col-md-6">
-                                    <label class="form-label small fw-semibold text-secondary">Pangkat / Golongan</label>
-                                    <input type="text" name="officer_rank" class="form-control" value="{{ auth()->user()->rank ?? '-' }}" placeholder="Contoh: - atau Pengatur, II/d">
-                                </div>
-                                <div class="col-md-6">
-                                    <label class="form-label small fw-semibold text-secondary">Jabatan</label>
-                                    <input type="text" name="officer_position" class="form-control" value="{{ auth()->user()->position ?? 'Mitra BPS Kabupaten Kolaka Utara' }}">
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- Bagian B: Dasar Pelaksanaan (Read-Only - Diisi Role Admin) -->
-                    @include('petugas.reports._basis_readonly', ['prefix' => 'create', 'defaults' => $basisDefaults])
-
-                    <!-- Bagian C & D: Tujuan & Waktu Perjalanan Dinas -->
+                    <!-- Informasi Kegiatan, Tujuan & Waktu Perjalanan Dinas -->
                     <div class="card mb-3 border">
                         <div class="card-header bg-light py-2 px-3 fw-bold text-dark small">
-                            <i class="fa-solid fa-map-location-dot text-primary me-1"></i> C &amp; D. TUJUAN &amp; WAKTU PERJALANAN DINAS
+                            <i class="fa-solid fa-map-location-dot text-primary me-1"></i> KEGIATAN, TUJUAN &amp; WAKTU PERJALANAN DINAS
                         </div>
                         <div class="card-body p-3">
                             <div class="row g-3 mb-3">
@@ -500,15 +462,11 @@
                                 </div>
                                 <div class="col-md-5">
                                     <label class="form-label small fw-semibold text-secondary">Penugasan Terkait</label>
-                                    <select name="assignment_id" id="create_assignment_id" class="form-select" onchange="handlePetugasAssignmentChange('create', this, 'create_activity_location', 'create_expense_list')">
-                                        <option value="" data-location="" data-basis-dipa="" data-st-number="" data-st-date="" data-basis-st="">-- Kegiatan Mandiri / Umum --</option>
+                                    <select name="assignment_id" id="create_assignment_id" class="form-select" onchange="autoFillLocation(this, 'create_activity_location')">
+                                        <option value="" data-location="">-- Kegiatan Mandiri / Umum --</option>
                                         @foreach($myAssignments as $asgn)
                                             <option value="{{ $asgn->id }}"
-                                                data-location="{{ $asgn->location }}"
-                                                data-basis-dipa="{{ $asgn->basis_dipa }}"
-                                                data-st-number="{{ $asgn->st_number }}"
-                                                data-st-date="{{ $asgn->st_date ? $asgn->st_date->format('Y-m-d') : '' }}"
-                                                data-basis-st="{{ $asgn->basis_st ?: ($asgn->st_number ? \App\Models\OfficerReport::formatBasisSt($asgn->st_number, $asgn->st_date?->format('Y-m-d')) : '') }}">{{ $asgn->title }}</option>
+                                                data-location="{{ $asgn->location }}">{{ $asgn->title }}</option>
                                         @endforeach
                                     </select>
                                 </div>
@@ -516,17 +474,17 @@
                                     <label class="form-label small fw-semibold text-secondary">
                                         <i class="fa-solid fa-location-dot text-primary me-1"></i> Lokasi / Wilayah Tugas / Asal Keberangkatan
                                     </label>
-                                    <input type="text" name="activity_location" id="create_activity_location" class="form-control" placeholder="Contoh: Kecamatan Batu Putih" oninput="syncDefaultExpenseDesc('create_activity_location', 'create_expense_list')">
-                                    <div class="form-text small">Digunakan pada tujuan perjalanan dinas dan rincian asal biaya transport Daftar Pengeluaran Riil.</div>
+                                    <input type="text" name="activity_location" id="create_activity_location" class="form-control" placeholder="Contoh: Kecamatan Batu Putih">
+                                    <div class="form-text small">Digunakan pada tujuan perjalanan dinas dan informasi wilayah pada halaman dokumentasi.</div>
                                 </div>
                             </div>
                             <div class="mb-3">
-                                <label class="form-label small fw-semibold text-secondary">C. Tujuan Perjalanan Dinas (Teks Lengkap)</label>
+                                <label class="form-label small fw-semibold text-secondary">Tujuan Perjalanan Dinas (Opsional / Ringkasan)</label>
                                 <textarea name="destination_purpose" class="form-control" rows="2" placeholder="Contoh: Perjalanan Dinas Biasa dalam kota sampai dengan 8 jam dalam rangka melaksanakan pendataan di Kecamatan Batu Putih."></textarea>
                             </div>
                             <div class="row g-3">
                                 <div class="col-md-6">
-                                    <label class="form-label small fw-semibold text-secondary">D. Durasi / Lama Waktu Perjalanan</label>
+                                    <label class="form-label small fw-semibold text-secondary">Durasi / Lama Waktu Perjalanan</label>
                                     <input type="text" name="duration_text" class="form-control" value="Selama 1 (satu) Hari">
                                 </div>
                                 <div class="col-md-6">
@@ -537,14 +495,14 @@
                         </div>
                     </div>
 
-                    <!-- Bagian E & F: Hasil Perjalanan Dinas, Kendala, Solusi & Saran -->
+                    <!-- Hasil Perjalanan Dinas, Kendala, Solusi & Saran -->
                     <div class="card mb-3 border">
                         <div class="card-header bg-light py-2 px-3 fw-bold text-dark small">
-                            <i class="fa-solid fa-list-check text-primary me-1"></i> E &amp; F. HASIL PERJALANAN DINAS, KENDALA, SOLUSI &amp; SARAN
+                            <i class="fa-solid fa-list-check text-primary me-1"></i> HASIL PERJALANAN DINAS, KENDALA, SOLUSI &amp; SARAN
                         </div>
                         <div class="card-body p-3">
                             <div class="mb-3">
-                                <label class="form-label small fw-semibold text-secondary">E. Uraian Hasil Perjalanan Dinas <span class="text-danger">*</span></label>
+                                <label class="form-label small fw-semibold text-secondary">Uraian Hasil Perjalanan Dinas <span class="text-danger">*</span></label>
                                 <textarea name="work_description" class="form-control" rows="4" placeholder="Menuju lokasi kegiatan..., melakukan koordinasi..., melaksanakan pendataan..., submit data..." required></textarea>
                             </div>
                             <div class="row g-3 mb-3">
@@ -558,65 +516,8 @@
                                 </div>
                             </div>
                             <div>
-                                <label class="form-label small fw-semibold text-secondary">F. Saran dan Rekomendasi / Tindak Lanjut</label>
+                                <label class="form-label small fw-semibold text-secondary">Saran dan Rekomendasi / Tindak Lanjut</label>
                                 <textarea name="recommendations" class="form-control" rows="2" placeholder="Ketik '-' jika tidak ada">-</textarea>
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- DOKUMEN 2: DAFTAR PENGELUARAN RIIL -->
-                    <div class="card mb-3 border border-success">
-                        <div class="card-header bg-success-subtle text-success-emphasis py-2 px-3 fw-bold small d-flex justify-content-between align-items-center">
-                            <span><i class="fa-solid fa-receipt me-1"></i> DAFTAR PENGELUARAN RIIL (DIGABUNG OTOMATIS KE 1 PDF)</span>
-                            <button type="button" class="btn btn-xs btn-success py-0.5 px-2" style="font-size: 0.72rem;" onclick="addExpenseRow('create_expense_list', 'create_expense_total', 'create_expense_terbilang')">
-                                <i class="fa-solid fa-plus me-1"></i> Tambah Baris Biaya
-                            </button>
-                        </div>
-                        <div class="card-body p-3">
-                            <div class="table-responsive mb-2">
-                                <table class="table table-bordered table-sm align-middle mb-0">
-                                    <thead class="table-light text-center small">
-                                        <tr>
-                                            <th style="width: 50px;">No</th>
-                                            <th>Perincian Biaya</th>
-                                            <th style="width: 180px;">Jumlah (Rp)</th>
-                                            <th style="width: 45px;"></th>
-                                        </tr>
-                                    </thead>
-                                    <tbody id="create_expense_list">
-                                        <tr>
-                                            <td class="text-center small fw-bold">1</td>
-                                            <td>
-                                                <input type="text" name="expense_descriptions[]" class="form-control form-control-sm expense-desc-input" value="Biaya transport dari Wilayah Tugas ke Kantor BPS Kabupaten Kolaka Utara (P.P.) selama 1 hari" required>
-                                            </td>
-                                            <td>
-                                                <input type="number" name="expense_amounts[]" class="form-control form-control-sm text-end fw-semibold expense-amt-input" value="50000" min="0" oninput="recalcExpenses('create_expense_list', 'create_expense_total', 'create_expense_terbilang')" required>
-                                            </td>
-                                            <td class="text-center">
-                                                <button type="button" class="btn btn-sm btn-outline-danger py-0 px-1.5" onclick="removeExpenseRow(this, 'create_expense_list', 'create_expense_total', 'create_expense_terbilang')" title="Hapus baris"><i class="fa-solid fa-xmark"></i></button>
-                                            </td>
-                                        </tr>
-                                    </tbody>
-                                    <tfoot>
-                                        <tr class="table-light">
-                                            <th colspan="2" class="text-center small">
-                                                JUMLAH (<span id="create_expense_terbilang" class="fst-italic fw-semibold text-success">Lima Puluh Ribu Rupiah</span>)
-                                            </th>
-                                            <th class="text-end font-monospace text-dark" id="create_expense_total">Rp. 50.000,-</th>
-                                            <th></th>
-                                        </tr>
-                                    </tfoot>
-                                </table>
-                            </div>
-                            <div class="row g-2 mt-2">
-                                <div class="col-md-6">
-                                    <label class="form-label small fw-semibold text-secondary mb-1">Pejabat Pembuat Komitmen (Menyetujui)</label>
-                                    <input type="text" name="ppk_name" class="form-control form-control-sm" value="Hidayatullah, SE">
-                                </div>
-                                <div class="col-md-6">
-                                    <label class="form-label small fw-semibold text-secondary mb-1">NIP Pejabat Pembuat Komitmen</label>
-                                    <input type="text" name="ppk_nip" class="form-control form-control-sm font-monospace" value="198510292011011009">
-                                </div>
                             </div>
                         </div>
                     </div>
@@ -757,47 +658,10 @@
                         <div id="edit_admin_notes_text" class="small text-dark"></div>
                     </div>
 
-                    <!-- Bagian A: Yang Melakukan Perjalanan Dinas -->
+                    <!-- Informasi Kegiatan, Tujuan & Waktu Perjalanan Dinas -->
                     <div class="card mb-3 border">
                         <div class="card-header bg-light py-2 px-3 fw-bold text-dark small">
-                            <i class="fa-solid fa-user-tie text-primary me-1"></i> A. YANG MELAKUKAN PERJALANAN DINAS
-                        </div>
-                        <div class="card-body p-3">
-                            <div class="row g-3">
-                                <div class="col-md-5">
-                                    <label class="form-label small fw-semibold text-secondary">Nama Lengkap <span class="text-danger">*</span></label>
-                                    <input type="text" id="edit_officer_name" name="officer_name" class="form-control" required>
-                                </div>
-                                <div class="col-md-3">
-                                    <label class="form-label small fw-semibold text-secondary">Jenis Identitas</label>
-                                    <select id="edit_id_type" name="id_type" class="form-select">
-                                        <option value="NIK">NIK (KTP)</option>
-                                        <option value="NIP">NIP (Pegawai/PNS)</option>
-                                    </select>
-                                </div>
-                                <div class="col-md-4">
-                                    <label class="form-label small fw-semibold text-secondary">Nomor NIK / NIP</label>
-                                    <input type="text" id="edit_officer_nip" name="officer_nip" class="form-control">
-                                </div>
-                                <div class="col-md-6">
-                                    <label class="form-label small fw-semibold text-secondary">Pangkat / Golongan</label>
-                                    <input type="text" id="edit_officer_rank" name="officer_rank" class="form-control">
-                                </div>
-                                <div class="col-md-6">
-                                    <label class="form-label small fw-semibold text-secondary">Jabatan</label>
-                                    <input type="text" id="edit_officer_position" name="officer_position" class="form-control">
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- Bagian B: Dasar Pelaksanaan (Read-Only - Diisi Role Admin) -->
-                    @include('petugas.reports._basis_readonly', ['prefix' => 'edit', 'defaults' => $basisDefaults])
-
-                    <!-- Bagian C & D: Tujuan & Waktu Perjalanan Dinas -->
-                    <div class="card mb-3 border">
-                        <div class="card-header bg-light py-2 px-3 fw-bold text-dark small">
-                            <i class="fa-solid fa-map-location-dot text-primary me-1"></i> C &amp; D. TUJUAN &amp; WAKTU PERJALANAN DINAS
+                            <i class="fa-solid fa-map-location-dot text-primary me-1"></i> KEGIATAN, TUJUAN &amp; WAKTU PERJALANAN DINAS
                         </div>
                         <div class="card-body p-3">
                             <div class="row g-3 mb-3">
@@ -807,15 +671,11 @@
                                 </div>
                                 <div class="col-md-5">
                                     <label class="form-label small fw-semibold text-secondary">Penugasan Terkait</label>
-                                    <select id="edit_assignment" name="assignment_id" class="form-select" onchange="handlePetugasAssignmentChange('edit', this, 'edit_activity_location', 'edit_expense_list')">
-                                        <option value="" data-location="" data-basis-dipa="" data-st-number="" data-st-date="" data-basis-st="">-- Kegiatan Mandiri / Umum --</option>
+                                    <select id="edit_assignment" name="assignment_id" class="form-select" onchange="autoFillLocation(this, 'edit_activity_location')">
+                                        <option value="" data-location="">-- Kegiatan Mandiri / Umum --</option>
                                         @foreach($myAssignments as $asgn)
                                             <option value="{{ $asgn->id }}"
-                                                data-location="{{ $asgn->location }}"
-                                                data-basis-dipa="{{ $asgn->basis_dipa }}"
-                                                data-st-number="{{ $asgn->st_number }}"
-                                                data-st-date="{{ $asgn->st_date ? $asgn->st_date->format('Y-m-d') : '' }}"
-                                                data-basis-st="{{ $asgn->basis_st ?: ($asgn->st_number ? \App\Models\OfficerReport::formatBasisSt($asgn->st_number, $asgn->st_date?->format('Y-m-d')) : '') }}">{{ $asgn->title }}</option>
+                                                data-location="{{ $asgn->location }}">{{ $asgn->title }}</option>
                                         @endforeach
                                     </select>
                                 </div>
@@ -823,17 +683,17 @@
                                     <label class="form-label small fw-semibold text-secondary">
                                         <i class="fa-solid fa-location-dot text-primary me-1"></i> Lokasi / Tempat Pelaksanaan &amp; Asal Keberangkatan
                                     </label>
-                                    <input type="text" id="edit_activity_location" name="activity_location" class="form-control" placeholder="Contoh: Kecamatan Batu Putih" oninput="syncDefaultExpenseDesc('edit_activity_location', 'edit_expense_list')">
-                                    <div class="form-text small">Digunakan pada tujuan perjalanan dinas, halaman Dokumentasi, dan rincian asal biaya Daftar Pengeluaran Riil.</div>
+                                    <input type="text" id="edit_activity_location" name="activity_location" class="form-control" placeholder="Contoh: Kecamatan Batu Putih">
+                                    <div class="form-text small">Digunakan pada tujuan perjalanan dinas dan informasi wilayah pada halaman dokumentasi.</div>
                                 </div>
                             </div>
                             <div class="mb-3">
-                                <label class="form-label small fw-semibold text-secondary">C. Tujuan Perjalanan Dinas (Teks Lengkap SPD)</label>
+                                <label class="form-label small fw-semibold text-secondary">Tujuan Perjalanan Dinas (Opsional / Ringkasan)</label>
                                 <textarea id="edit_destination_purpose" name="destination_purpose" class="form-control" rows="2"></textarea>
                             </div>
                             <div class="row g-3">
                                 <div class="col-md-6">
-                                    <label class="form-label small fw-semibold text-secondary">D. Durasi / Lama Waktu Perjalanan</label>
+                                    <label class="form-label small fw-semibold text-secondary">Durasi / Lama Waktu Perjalanan</label>
                                     <input type="text" id="edit_duration_text" name="duration_text" class="form-control">
                                 </div>
                                 <div class="col-md-6">
@@ -844,14 +704,14 @@
                         </div>
                     </div>
 
-                    <!-- Bagian E & F: Hasil Perjalanan Dinas, Kendala, Solusi & Saran -->
+                    <!-- Hasil Perjalanan Dinas, Kendala, Solusi & Saran -->
                     <div class="card mb-3 border">
                         <div class="card-header bg-light py-2 px-3 fw-bold text-dark small">
-                            <i class="fa-solid fa-list-check text-primary me-1"></i> E &amp; F. HASIL PERJALANAN DINAS, KENDALA, SOLUSI &amp; SARAN
+                            <i class="fa-solid fa-list-check text-primary me-1"></i> HASIL PERJALANAN DINAS, KENDALA, SOLUSI &amp; SARAN
                         </div>
                         <div class="card-body p-3">
                             <div class="mb-3">
-                                <label class="form-label small fw-semibold text-secondary">E. Uraian Hasil Perjalanan Dinas <span class="text-danger">*</span></label>
+                                <label class="form-label small fw-semibold text-secondary">Uraian Hasil Perjalanan Dinas <span class="text-danger">*</span></label>
                                 <textarea id="edit_description" name="work_description" class="form-control" rows="4" required></textarea>
                             </div>
                             <div class="row g-3 mb-3">
@@ -865,52 +725,8 @@
                                 </div>
                             </div>
                             <div>
-                                <label class="form-label small fw-semibold text-secondary">F. Saran dan Rekomendasi / Tindak Lanjut</label>
+                                <label class="form-label small fw-semibold text-secondary">Saran dan Rekomendasi / Tindak Lanjut</label>
                                 <textarea id="edit_recommendations" name="recommendations" class="form-control" rows="2">-</textarea>
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- DOKUMEN 2: DAFTAR PENGELUARAN RIIL -->
-                    <div class="card mb-3 border border-success">
-                        <div class="card-header bg-success-subtle text-success-emphasis py-2 px-3 fw-bold small d-flex justify-content-between align-items-center">
-                            <span><i class="fa-solid fa-receipt me-1"></i> DAFTAR PENGELUARAN RIIL (DIGABUNG OTOMATIS KE 1 PDF)</span>
-                            <button type="button" class="btn btn-xs btn-success py-0.5 px-2" style="font-size: 0.72rem;" onclick="addExpenseRow('edit_expense_list', 'edit_expense_total', 'edit_expense_terbilang')">
-                                <i class="fa-solid fa-plus me-1"></i> Tambah Baris Biaya
-                            </button>
-                        </div>
-                        <div class="card-body p-3">
-                            <div class="table-responsive mb-2">
-                                <table class="table table-bordered table-sm align-middle mb-0">
-                                    <thead class="table-light text-center small">
-                                        <tr>
-                                            <th style="width: 50px;">No</th>
-                                            <th>Perincian Biaya</th>
-                                            <th style="width: 180px;">Jumlah (Rp)</th>
-                                            <th style="width: 45px;"></th>
-                                        </tr>
-                                    </thead>
-                                    <tbody id="edit_expense_list"></tbody>
-                                    <tfoot>
-                                        <tr class="table-light">
-                                            <th colspan="2" class="text-center small">
-                                                JUMLAH (<span id="edit_expense_terbilang" class="fst-italic fw-semibold text-success">Nol Rupiah</span>)
-                                            </th>
-                                            <th class="text-end font-monospace text-dark" id="edit_expense_total">Rp. 0,-</th>
-                                            <th></th>
-                                        </tr>
-                                    </tfoot>
-                                </table>
-                            </div>
-                            <div class="row g-2 mt-2">
-                                <div class="col-md-6">
-                                    <label class="form-label small fw-semibold text-secondary mb-1">Pejabat Pembuat Komitmen (Menyetujui)</label>
-                                    <input type="text" id="edit_ppk_name" name="ppk_name" class="form-control form-control-sm" value="Hidayatullah, SE">
-                                </div>
-                                <div class="col-md-6">
-                                    <label class="form-label small fw-semibold text-secondary mb-1">NIP Pejabat Pembuat Komitmen</label>
-                                    <input type="text" id="edit_ppk_nip" name="ppk_nip" class="form-control form-control-sm font-monospace" value="198510292011011009">
-                                </div>
                             </div>
                         </div>
                     </div>
@@ -1175,54 +991,7 @@
     });
 
     const ADMIN_BASIS_DEFAULTS = @json($basisDefaults);
-
-    function updateReadonlyBasisFromValues(prefix, dipa, stNumber, stDate, basisSt) {
-        const hasCustomStNum = !!(stNumber && String(stNumber).trim());
-        const finalDipa = (dipa && String(dipa).trim()) ? String(dipa).trim() : (ADMIN_BASIS_DEFAULTS.basis_dipa || '-');
-        const finalStNum = hasCustomStNum ? String(stNumber).trim() : (ADMIN_BASIS_DEFAULTS.st_number || '-');
-        const rawDate = (stDate && String(stDate).trim()) ? String(stDate).trim().substring(0, 10) : (ADMIN_BASIS_DEFAULTS.st_date || '');
-        const finalDateText = rawDate ? formatIndonesianDate(rawDate) : '-';
-
-        let finalBasisSt = (basisSt && String(basisSt).trim()) ? String(basisSt).trim() : '';
-        if (!finalBasisSt) {
-            finalBasisSt = hasCustomStNum
-                ? `Surat Tugas Kepala Badan Pusat Statistik Kabupaten Kolaka Utara Nomor ${finalStNum} Tanggal ${finalDateText}.`
-                : (ADMIN_BASIS_DEFAULTS.basis_st || `Surat Tugas Kepala Badan Pusat Statistik Kabupaten Kolaka Utara Nomor ${finalStNum} Tanggal ${finalDateText}.`);
-        }
-
-        const elDipa = document.getElementById(prefix + '_ro_basis_dipa');
-        const elNum = document.getElementById(prefix + '_ro_st_number');
-        const elDate = document.getElementById(prefix + '_ro_st_date');
-        const elSt = document.getElementById(prefix + '_ro_basis_st');
-        if (elDipa) elDipa.innerText = finalDipa;
-        if (elNum) elNum.innerText = finalStNum;
-        if (elDate) elDate.innerText = finalDateText;
-        if (elSt) elSt.innerText = finalBasisSt;
-    }
-
-    function syncReadonlyBasisFromSelect(prefix, selectElem) {
-        if (!selectElem) {
-            updateReadonlyBasisFromValues(prefix, '', '', '', '');
-            return;
-        }
-        const opt = selectElem.options[selectElem.selectedIndex];
-        if (!opt || !opt.value) {
-            updateReadonlyBasisFromValues(prefix, '', '', '', '');
-            return;
-        }
-        updateReadonlyBasisFromValues(
-            prefix,
-            opt.getAttribute('data-basis-dipa') || '',
-            opt.getAttribute('data-st-number') || '',
-            opt.getAttribute('data-st-date') || '',
-            opt.getAttribute('data-basis-st') || ''
-        );
-    }
-
-    function handlePetugasAssignmentChange(prefix, selectElem, locInputId, tbodyId) {
-        autoFillLocationAndExpense(selectElem, locInputId, tbodyId);
-        syncReadonlyBasisFromSelect(prefix, selectElem);
-    }
+    const AUTH_OFFICER_NAME = @json(auth()->user()->name);
 
     function clearCreateCanvas() {
         if (createSigPad) createSigPad.clear();
@@ -1234,22 +1003,6 @@
 
     function openEditModal(rep) {
         document.getElementById('editReportForm').action = '/petugas/reports/' + rep.id;
-        
-        // Pelaksana (fallback ke profil user bila kolom kosong)
-        document.getElementById('edit_officer_name').value = rep.resolved_officer_name || rep.officer_name || (rep.user ? rep.user.name : '') || '';
-        document.getElementById('edit_id_type').value = rep.id_type || 'NIK';
-        document.getElementById('edit_officer_nip').value = rep.resolved_officer_nik || rep.officer_nip || (rep.user ? rep.user.nik : '') || '';
-        document.getElementById('edit_officer_rank').value = rep.officer_rank || (rep.user ? rep.user.rank : '') || '-';
-        document.getElementById('edit_officer_position').value = rep.officer_position || (rep.user ? rep.user.position : '') || 'Mitra BPS Kabupaten Kolaka Utara';
-
-        // Dasar (Read-Only - Diisi oleh Role Admin)
-        updateReadonlyBasisFromValues(
-            'edit',
-            rep.basis_dipa || (rep.assignment ? rep.assignment.basis_dipa : '') || '',
-            rep.st_number || (rep.assignment ? rep.assignment.st_number : '') || '',
-            rep.st_date || (rep.assignment ? rep.assignment.st_date : '') || '',
-            rep.basis_st || (rep.assignment ? rep.assignment.basis_st : '') || ''
-        );
 
         // Tujuan & Waktu
         document.getElementById('edit_title').value = rep.activity_title || '';
@@ -1265,20 +1018,6 @@
         document.getElementById('edit_obstacles').value = rep.obstacles || '';
         document.getElementById('edit_solutions').value = rep.solutions || '';
         document.getElementById('edit_recommendations').value = rep.recommendations || '-';
-
-        // Dokumen 2: Daftar Pengeluaran Riil
-        const editTbody = document.getElementById('edit_expense_list');
-        editTbody.innerHTML = '';
-        const items = (Array.isArray(rep.resolved_expense_items) && rep.resolved_expense_items.length)
-            ? rep.resolved_expense_items
-            : (Array.isArray(rep.expense_items) && rep.expense_items.length
-                ? rep.expense_items
-                : [{ description: buildDefaultExpenseDesc(actLoc), amount: 50000 }]);
-        items.forEach(item => {
-            addExpenseRow('edit_expense_list', 'edit_expense_total', 'edit_expense_terbilang', item.description || '', Number(item.amount || 0));
-        });
-        document.getElementById('edit_ppk_name').value = rep.ppk_name || 'Hidayatullah, SE';
-        document.getElementById('edit_ppk_nip').value = rep.ppk_nip || '198510292011011009';
 
         // Penandatanganan
         document.getElementById('edit_signing_city').value = rep.signing_city || 'Lasusua';
@@ -1405,11 +1144,8 @@
             return locEl ? locEl.value.trim() : '';
         }
 
-        function getFieldOfficerName(prefix) {
-            const modalEl = document.getElementById(prefix + 'ReportModal');
-            if (!modalEl) return '';
-            const inp = modalEl.querySelector('input[name="officer_name"]');
-            return inp ? inp.value.trim() : '';
+        function getFieldOfficerName() {
+            return AUTH_OFFICER_NAME || '';
         }
 
         function getEffectiveLocationLabel(prefix) {
@@ -1842,7 +1578,6 @@
         const createModalEl = document.getElementById('createReportModal');
         if (createModalEl) {
             createModalEl.addEventListener('shown.bs.modal', function() {
-                syncReadonlyBasisFromSelect('create', document.getElementById('create_assignment_id'));
                 perjadinCamera.reset('create');
                 perjadinCamera.start('create');
             });
