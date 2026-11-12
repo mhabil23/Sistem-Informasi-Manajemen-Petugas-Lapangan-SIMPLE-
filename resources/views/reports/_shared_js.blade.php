@@ -498,15 +498,19 @@
             notesBox.classList.add('d-none');
         }
 
+        const docsPaper = document.getElementById('det_docs_paper');
         const container = document.getElementById('det_attachments_container');
         container.innerHTML = '';
         if (rep.attachments && rep.attachments.length > 0) {
+            if (docsPaper) {
+                docsPaper.classList.remove('d-none');
+            }
             const total = rep.attachments.length;
             rep.attachments.forEach(att => {
                 container.appendChild(buildPreviewAttachmentCard(att, total));
             });
-        } else {
-            container.innerHTML = '<div class="col-12 text-center text-muted small fst-italic">Tidak ada lampiran foto dokumentasi.</div>';
+        } else if (docsPaper) {
+            docsPaper.classList.add('d-none');
         }
     }
 </script>
