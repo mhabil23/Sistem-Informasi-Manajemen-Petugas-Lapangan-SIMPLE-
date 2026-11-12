@@ -20,11 +20,85 @@
         <a href="{{ route('admin.basts.respondents.index') }}" class="btn btn-sm btn-outline-success">
             <i class="fa-solid fa-file-signature me-1"></i> Data BAST
         </a>
-        <a href="{{ route('admin.reports.index') }}" class="btn btn-sm btn-outline-primary">
+        <a href="{{ route('admin.reports.index') }}" class="btn btn-sm btn-outline-primary position-relative">
             <i class="fa-solid fa-clipboard-check me-1"></i> Verifikasi Laporan
+            @if(($reportsPending ?? 0) > 0)
+                <span class="badge bg-warning text-dark ms-1">{{ $reportsPending }}</span>
+            @endif
         </a>
     </div>
 </div>
+
+<!-- Pemberitahuan Laporan Perjadin Baru / Menunggu ACC Admin -->
+@if(isset($incomingApprovalReports) && $incomingApprovalReports->isNotEmpty())
+    <div class="sp-card mb-3 border-warning border-opacity-50 shadow-sm">
+        <div class="sp-card-header py-2 px-3 bg-warning bg-opacity-10 d-flex flex-wrap justify-content-between align-items-center gap-2">
+            <div class="d-flex align-items-center gap-2">
+                <span class="badge bg-warning text-dark">
+                    <i class="fa-solid fa-bell me-1"></i> {{ $incomingApprovalReports->count() }} Masuk
+                </span>
+                <span class="fw-bold text-dark small">
+                    Informasi Laporan Perjadin Petugas (Menunggu Pemeriksaan / ACC Admin)
+                </span>
+            </div>
+            <a href="{{ route('admin.reports.index', ['status' => 'submitted']) }}" class="btn btn-xs btn-outline-primary py-0.5 px-2" style="font-size: 0.72rem;">
+                Kelola Semua Laporan &rarr;
+            </a>
+        </div>
+        <div class="sp-card-body p-0">
+            <div class="table-responsive">
+                <table class="table table-sm align-middle mb-0" style="font-size: 0.78rem;">
+                    <thead class="table-light">
+                        <tr>
+                            <th class="ps-3">Petugas</th>
+                            <th>Judul &amp; No. Laporan</th>
+                            <th>Tanggal</th>
+                            <th>Status</th>
+                            <th class="text-end pe-3">Aksi Cepat Admin</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach($incomingApprovalReports->take(5) as $incRep)
+                            <tr>
+                                <td class="ps-3 fw-semibold text-dark">{{ $incRep->user ? $incRep->user->name : ($incRep->officer_name ?? '-') }}</td>
+                                <td>
+                                    <span class="fw-bold text-primary">{{ $incRep->activity_title }}</span>
+                                    <span class="text-muted font-monospace ms-1">({{ $incRep->report_number ?? 'LAP-'.$incRep->id }})</span>
+                                </td>
+                                <td class="text-muted text-nowrap">
+                                    {{ $incRep->activity_date ? $incRep->activity_date->format('d/m/Y') : '-' }}
+                                    <small class="d-block" style="font-size: 0.68rem;">{{ $incRep->created_at?->diffForHumans() }}</small>
+                                </td>
+                                <td>
+                                    <span class="badge {{ $incRep->status_badge }}">{{ $incRep->status_label }}</span>
+                                </td>
+                                <td class="text-end pe-3 text-nowrap">
+                                    <div class="d-inline-flex gap-1">
+                                        <a href="{{ route('admin.reports.index', ['inspect' => $incRep->id]) }}"
+                                           class="btn btn-xs btn-outline-info py-0.5 px-2" style="font-size: 0.72rem;" title="Lihat Laporan">
+                                            <i class="fa-solid fa-eye me-1"></i> Lihat
+                                        </a>
+                                        <a href="{{ route('admin.reports.index', ['edit' => $incRep->id]) }}"
+                                           class="btn btn-xs btn-outline-warning text-dark py-0.5 px-2" style="font-size: 0.72rem;" title="Edit Inputan Laporan">
+                                            <i class="fa-regular fa-pen-to-square me-1"></i> Edit
+                                        </a>
+                                        <form method="POST" action="{{ route('admin.reports.approve', $incRep) }}" class="d-inline" onsubmit="return confirm('ACC (Setujui) laporan {{ addslashes($incRep->activity_title) }} agar petugas dapat mengunduh PDF?');">
+                                            @csrf
+                                            @method('PATCH')
+                                            <button type="submit" class="btn btn-xs btn-success py-0.5 px-2" style="font-size: 0.72rem;" title="ACC / Setujui Laporan">
+                                                <i class="fa-solid fa-check-double me-1"></i> ACC
+                                            </button>
+                                        </form>
+                                    </div>
+                                </td>
+                            </tr>
+                        @endforeach
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+@endif
 
 <!-- ==============================================================
      FILTER MONITORING TOOLBAR (KOMPAK & FIT 100% ZOOM)

@@ -13,7 +13,7 @@
 <div class="row align-items-center mb-4">
     <div class="col-md-7">
         <h3 class="fw-bold text-dark mb-1">Pengisian Laporan Perjadin &amp; Pengeluaran Riil</h3>
-        <p class="text-muted small mb-0">Satu kali pengisian &amp; satu kali tanda tangan digital menghasilkan <strong>1 File PDF Resmi</strong> berisi <em>Laporan Perjalanan Dinas (+ Dokumentasi)</em> dan <em>Daftar Pengeluaran Riil</em>.</p>
+        <p class="text-muted small mb-0">Satu kali pengisian &amp; satu kali tanda tangan digital menghasilkan <strong>1 File PDF Resmi</strong> berisi <em>Laporan Perjalanan Dinas (+ Dokumentasi)</em> dan <em>Daftar Pengeluaran Riil</em>. <strong>Unduh PDF terbuka setelah mendapat persetujuan (ACC) Administrator.</strong></p>
     </div>
     <div class="col-md-5 text-md-end mt-3 mt-md-0">
         <button type="button" class="btn btn-sp-primary" data-bs-toggle="modal" data-bs-target="#createReportModal">
@@ -22,23 +22,20 @@
     </div>
 </div>
 
-<!-- Banner Cepat Cetak PDF Gabungan setelah Berhasil Simpan -->
-@if(session('created_report_id'))
-    <div class="alert alert-success border-success d-flex flex-wrap align-items-center justify-content-between gap-3 mb-4 shadow-sm" role="alert">
+<!-- Banner Pemberitahuan Pengiriman ke Admin (Menunggu ACC sebelum Unduh PDF) -->
+@if(session('pending_approval_report_id'))
+    <div class="alert alert-info border-info d-flex flex-wrap align-items-center justify-content-between gap-3 mb-4 shadow-sm" role="alert">
         <div class="d-flex align-items-center">
-            <i class="fa-solid fa-file-circle-check fa-2x me-3 text-success"></i>
+            <i class="fa-solid fa-hourglass-half fa-2x me-3 text-info"></i>
             <div>
-                <h6 class="alert-heading fw-bold mb-1">Dokumen Gabungan (1 PDF) Siap Dicetak!</h6>
-                <div class="small">Laporan Perjalanan Dinas dan Daftar Pengeluaran Riil beserta tanda tangan digital Anda telah digabung dalam 1 file PDF.</div>
+                <h6 class="alert-heading fw-bold mb-1">Laporan Tersimpan &amp; Pemberitahuan Terkirim ke Administrator</h6>
+                <div class="small">Laporan perjalanan dinas Anda sedang <strong>menunggu pemeriksaan / ACC Administrator</strong>. Tombol unduh &amp; cetak PDF validasi akan otomatis aktif setelah disetujui Admin.</div>
             </div>
         </div>
-        <div class="d-flex gap-2">
-            <a href="{{ route('petugas.reports.preview', session('created_report_id')) }}" target="_blank" class="btn btn-sm btn-primary fw-semibold">
-                <i class="fa-solid fa-print me-1"></i> Preview / Cetak 1 File PDF
-            </a>
-            <a href="{{ route('petugas.reports.download', session('created_report_id')) }}" class="btn btn-sm btn-success fw-semibold">
-                <i class="fa-solid fa-file-pdf me-1"></i> Unduh PDF
-            </a>
+        <div>
+            <span class="badge bg-info text-dark px-3 py-2 fw-semibold">
+                <i class="fa-solid fa-lock me-1"></i> Menunggu ACC Admin
+            </span>
         </div>
     </div>
 @endif
@@ -230,6 +227,12 @@
                                 <span class="badge {{ $rep->status_badge }} px-2 py-1">
                                     {{ $rep->status_label }}
                                 </span>
+                                @if(! $rep->canBeDownloadedByOfficer())
+                                    <div class="text-muted mt-1" style="font-size: 0.72rem;">
+                                        <i class="fa-solid fa-lock me-1"></i>
+                                        {{ $rep->status === 'draft' ? 'Draft (Belum ACC Admin)' : 'PDF terbuka setelah ACC Admin' }}
+                                    </div>
+                                @endif
                             </td>
                             <td class="text-end text-nowrap">
                                 <div class="sp-action-btn-group">
@@ -242,22 +245,32 @@
                                         <i class="fa-solid fa-eye"></i>
                                     </button>
 
-                                    <!-- Preview & Cetak PDF -->
-                                    <a href="{{ route('petugas.reports.preview', $rep) }}" 
-                                       target="_blank"
-                                       class="btn btn-light border sp-action-btn text-primary" 
-                                       title="Cetak / Preview PDF" 
-                                       data-bs-toggle="tooltip">
-                                        <i class="fa-solid fa-print"></i>
-                                    </a>
+                                    @if($rep->canBeDownloadedByOfficer())
+                                        <!-- Preview & Cetak PDF (Terbuka Setelah ACC Admin) -->
+                                        <a href="{{ route('petugas.reports.preview', $rep) }}" 
+                                           target="_blank"
+                                           class="btn btn-light border sp-action-btn text-primary" 
+                                           title="Cetak / Preview PDF" 
+                                           data-bs-toggle="tooltip">
+                                            <i class="fa-solid fa-print"></i>
+                                        </a>
 
-                                    <!-- Unduh PDF Resmi -->
-                                    <a href="{{ route('petugas.reports.download', $rep) }}" 
-                                       class="btn btn-light border sp-action-btn text-danger" 
-                                       title="Unduh PDF Resmi" 
-                                       data-bs-toggle="tooltip">
-                                        <i class="fa-solid fa-file-pdf"></i>
-                                    </a>
+                                        <!-- Unduh PDF Resmi (Terbuka Setelah ACC Admin) -->
+                                        <a href="{{ route('petugas.reports.download', $rep) }}" 
+                                           class="btn btn-light border sp-action-btn text-danger" 
+                                           title="Unduh PDF Resmi" 
+                                           data-bs-toggle="tooltip">
+                                            <i class="fa-solid fa-file-pdf"></i>
+                                        </a>
+                                    @else
+                                        <button type="button"
+                                                class="btn btn-light border sp-action-btn text-secondary disabled"
+                                                disabled
+                                                title="Unduh PDF menunggu ACC Administrator"
+                                                data-bs-toggle="tooltip">
+                                            <i class="fa-solid fa-lock"></i>
+                                        </button>
+                                    @endif
 
                                     <!-- Edit / Perbaiki jika Draft atau Perlu Revisi -->
                                     @if(in_array($rep->status, ['draft', 'revision_needed']))
@@ -352,17 +365,23 @@
                                     onclick="openDetailModal({{ json_encode($rep) }})">
                                 <i class="fa-solid fa-eye me-1"></i> Detail
                             </button>
-                            <a href="{{ route('petugas.reports.preview', $rep) }}" 
-                               target="_blank" 
-                               class="btn btn-sm btn-light border text-primary shadow-sm" 
-                               title="Cetak">
-                                <i class="fa-solid fa-print"></i>
-                            </a>
-                            <a href="{{ route('petugas.reports.download', $rep) }}" 
-                               class="btn btn-sm btn-light border text-danger shadow-sm" 
-                               title="Unduh PDF">
-                                <i class="fa-solid fa-file-pdf"></i>
-                            </a>
+                            @if($rep->canBeDownloadedByOfficer())
+                                <a href="{{ route('petugas.reports.preview', $rep) }}" 
+                                   target="_blank" 
+                                   class="btn btn-sm btn-light border text-primary shadow-sm" 
+                                   title="Cetak">
+                                    <i class="fa-solid fa-print"></i>
+                                </a>
+                                <a href="{{ route('petugas.reports.download', $rep) }}" 
+                                   class="btn btn-sm btn-light border text-danger shadow-sm" 
+                                   title="Unduh PDF">
+                                    <i class="fa-solid fa-file-pdf"></i>
+                                </a>
+                            @else
+                                <span class="badge bg-secondary-subtle text-secondary border px-2 py-1 d-inline-flex align-items-center" title="Tunggu ACC Admin untuk mengunduh PDF">
+                                    <i class="fa-solid fa-lock me-1"></i> Tunggu ACC
+                                </span>
+                            @endif
                             @if(in_array($rep->status, ['draft', 'revision_needed']))
                                 <button type="button" 
                                         class="btn btn-sm btn-light border text-warning shadow-sm" 
@@ -685,7 +704,7 @@
                             <div class="form-check">
                                 <input class="form-check-input" type="radio" name="action_type" id="actionSubmit" value="submitted" checked>
                                 <label class="form-check-label fw-bold text-primary" for="actionSubmit">
-                                    <i class="fa-solid fa-paper-plane me-1"></i> Ajukan &amp; Buat 1 PDF Gabungan
+                                    <i class="fa-solid fa-paper-plane me-1"></i> Ajukan ke Admin (Menunggu ACC untuk Unduh PDF)
                                 </label>
                             </div>
                             <div class="form-check">
@@ -695,12 +714,15 @@
                                 </label>
                             </div>
                         </div>
+                        <div class="small text-muted mt-2">
+                            <i class="fa-solid fa-circle-info text-info me-1"></i> Administrator akan otomatis menerima informasi laporan Anda. File PDF resmi baru dapat diunduh setelah disetujui (ACC) Administrator.
+                        </div>
                     </div>
                 </div>
                 <div class="modal-footer bg-light border-top">
                     <button type="button" class="btn btn-light" data-bs-dismiss="modal">Batal</button>
                     <button type="submit" class="btn btn-sp-primary">
-                        <i class="fa-solid fa-file-pdf me-1"></i> Simpan &amp; Gabung Jadi 1 PDF
+                        <i class="fa-solid fa-paper-plane me-1"></i> Simpan &amp; Kirim Pemberitahuan ke Admin
                     </button>
                 </div>
             </form>
@@ -1027,292 +1049,18 @@
                 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
             <div class="modal-body p-4 bg-light">
-                <!-- Catatan Evaluasi Admin jika ada -->
-                <div id="det_admin_notes_box" class="alert alert-warning border-warning p-3 mb-3 d-none">
-                    <div class="fw-bold small text-dark mb-1">
-                        <i class="fa-solid fa-triangle-exclamation text-warning me-1"></i> Catatan Evaluasi Administrator:
-                    </div>
-                    <div id="det_admin_notes_text" class="small text-secondary"></div>
-                </div>
-
-                <!-- Simulation of Official Document Paper -->
-                <div class="bg-white p-4 p-md-5 rounded shadow-sm border mx-auto mb-4" style="max-width: 820px; font-family: Arial, Helvetica, sans-serif; color: #000; line-height: 1.45;">
-                    <!-- KOP SURAT BPS -->
-                    <div class="d-flex align-items-center pb-2 border-bottom border-dark border-2 mb-3">
-                        <div style="width: 85px;" class="me-3 text-center">
-                            <img src="{{ asset('images/logo.png') }}" style="width: 70px; height: auto;" alt="Logo BPS" onerror="this.style.display='none'">
-                        </div>
-                        <div class="flex-grow-1 text-center">
-                            <div class="fw-bold text-uppercase" style="font-size: 13pt; color: #2b3990; letter-spacing: 0.5px;">BADAN PUSAT STATISTIK</div>
-                            <div class="fw-bold text-uppercase" style="font-size: 13pt; color: #333; letter-spacing: 0.5px;">KABUPATEN KOLAKA UTARA</div>
-                            <div style="font-size: 8pt; color: #444; line-height: 1.35;">
-                                Jalan Protokol Poros DPRD Lasusua 93911 Telp. (0405) 2330029; Fax. (0405) 2330029,<br>
-                                Homepage: http://kolutkab.bps.go.id E-mail: bps7408@bps.go.id
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- JUDUL DOKUMEN -->
-                    <div class="text-center my-3">
-                        <h5 class="fw-bold text-decoration-underline mb-0 text-dark" style="font-size: 12pt;">Laporan Perjalanan Dinas</h5>
-                    </div>
-
-                    <!-- A. YANG MELAKUKAN PERJALANAN DINAS -->
-                    <div class="fw-bold mb-1 mt-3" style="font-size: 10.5pt;">A. Yang Melakukan Perjalanan Dinas</div>
-                    <table class="table table-borderless table-sm mb-2 ms-3" style="font-size: 10.5pt; width: auto;">
-                        <tr>
-                            <td style="width: 170px; padding: 2px 0;">Nama</td>
-                            <td style="width: 15px; padding: 2px 0;">:</td>
-                            <td class="fw-semibold text-dark" id="det_officer_name" style="padding: 2px 0;">-</td>
-                        </tr>
-                        <tr>
-                            <td style="padding: 2px 0;" id="det_label_id">NIK</td>
-                            <td style="padding: 2px 0;">:</td>
-                            <td id="det_officer_nip" style="padding: 2px 0;">-</td>
-                        </tr>
-                        <tr>
-                            <td style="padding: 2px 0;">Pangkat/Golongan</td>
-                            <td style="padding: 2px 0;">:</td>
-                            <td id="det_officer_rank" style="padding: 2px 0;">-</td>
-                        </tr>
-                        <tr>
-                            <td style="padding: 2px 0;">Jabatan</td>
-                            <td style="padding: 2px 0;">:</td>
-                            <td id="det_officer_position" style="padding: 2px 0;">-</td>
-                        </tr>
-                    </table>
-
-                    <!-- B. DASAR PELAKSANAAN -->
-                    <div class="fw-bold mb-1 mt-2" style="font-size: 10.5pt;">B. Dasar Pelaksanaan</div>
-                    <ol class="ms-3 mb-2" style="font-size: 10.5pt; padding-left: 20px;">
-                        <li id="det_basis_dipa" class="mb-1 text-justify">-</li>
-                        <li id="det_basis_st" class="text-justify">-</li>
-                    </ol>
-
-                    <!-- C. TUJUAN PERJALANAN DINAS -->
-                    <div class="fw-bold mb-1 mt-2" style="font-size: 10.5pt;">C. Tujuan Perjalanan Dinas</div>
-                    <div id="det_destination_purpose" class="ms-3 mb-2 text-justify" style="font-size: 10.5pt;">-</div>
-
-                    <!-- D. WAKTU PERJALANAN DINAS -->
-                    <div class="fw-bold mb-1 mt-2" style="font-size: 10.5pt;">D. Waktu Perjalanan Dinas</div>
-                    <div id="det_duration_info" class="ms-3 mb-2" style="font-size: 10.5pt;">-</div>
-
-                    <!-- E. HASIL PERJALANAN DINAS -->
-                    <div class="fw-bold mb-1 mt-2" style="font-size: 10.5pt;">E. Hasil Perjalanan Dinas</div>
-                    <div id="det_work_description" class="ms-3 mb-2 text-justify p-2 bg-light rounded" style="font-size: 10.5pt; white-space: pre-line;">-</div>
-                    <div id="det_obstacles_box" class="ms-3 mb-2 d-none" style="font-size: 10.5pt;">
-                        <div class="fw-bold">Kendala :</div>
-                        <div id="det_obstacles" class="ms-2" style="white-space: pre-line;"></div>
-                    </div>
-                    <div id="det_solutions_box" class="ms-3 mb-3 d-none" style="font-size: 10.5pt;">
-                        <div class="fw-bold">Solusi :</div>
-                        <div id="det_solutions" class="ms-2" style="white-space: pre-line;"></div>
-                    </div>
-
-                    <!-- F. SARAN DAN REKOMENDASI / TINDAK LANJUT -->
-                    <div class="fw-bold mb-1 mt-2" style="font-size: 10.5pt;">F. Saran dan Rekomendasi / Tindak Lanjut</div>
-                    <div id="det_recommendations" class="ms-3 mb-3 text-justify" style="font-size: 10.5pt; white-space: pre-line;">-</div>
-
-                    <!-- TANDA TANGAN -->
-                    <div class="row mt-4 pt-2">
-                        <div class="col-6"></div>
-                        <div class="col-6 text-center" style="font-size: 10.5pt;">
-                            <div id="det_signing_place_date">Lasusua, -</div>
-                            <div>Pelaksana Perjalanan Dinas,</div>
-                            <div id="det_sign_img_container" style="min-height: 65px; display: flex; align-items: center; justify-content: center; margin: 4px 0;">
-                                <!-- Signature img or space -->
-                            </div>
-                            <div class="fw-bold text-dark" id="det_sign_name">-</div>
-                            <div style="font-size: 9.5pt;" id="det_sign_nip"></div>
-                        </div>
-                    </div>
-
-                    <!-- FOTO DOKUMENTASI -->
-                    <div class="border-top pt-3 mt-4">
-                        <div class="fw-bold small text-secondary mb-2">
-                            <i class="fa-solid fa-camera text-primary me-1"></i> DOKUMENTASI KEGIATAN:
-                        </div>
-                        <div id="det_attachments_container" class="row g-2"></div>
-                    </div>
-                </div>
-
-                <!-- Simulation of Document 2: Daftar Pengeluaran Riil (Tanpa Kop Surat) -->
-                <div id="det_dpr_paper" class="bg-white p-4 p-md-5 rounded shadow-sm border mx-auto mb-4" style="max-width: 820px; font-family: Arial, Helvetica, sans-serif; color: #000; line-height: 1.45;">
-                    <div class="text-center mb-4">
-                        <h5 class="fw-bold mb-0 text-dark" style="font-size: 12pt;">Daftar Pengeluaran Riil</h5>
-                    </div>
-
-                    <table class="table table-borderless table-sm mb-3" style="font-size: 10.5pt; width: auto;">
-                        <tr>
-                            <td style="width: 210px; padding: 2px 0;">Yang bertanda tangan dibawah ini</td>
-                            <td style="width: 15px; padding: 2px 0;">:</td>
-                            <td></td>
-                        </tr>
-                        <tr><td colspan="3" style="height: 6px; padding: 0;"></td></tr>
-                        <tr>
-                            <td style="padding: 2px 0;">Nama</td>
-                            <td style="padding: 2px 0;">:</td>
-                            <td class="fw-semibold text-dark" id="dpr_officer_name" style="padding: 2px 0;">-</td>
-                        </tr>
-                        <tr>
-                            <td style="padding: 2px 0;">NIK</td>
-                            <td style="padding: 2px 0;">:</td>
-                            <td id="dpr_officer_nik" style="padding: 2px 0;">-</td>
-                        </tr>
-                        <tr>
-                            <td style="padding: 2px 0;">Jabatan</td>
-                            <td style="padding: 2px 0;">:</td>
-                            <td id="dpr_officer_position" style="padding: 2px 0;">-</td>
-                        </tr>
-                    </table>
-
-                    <p style="text-align: justify; font-size: 10.5pt; margin-bottom: 14px;">
-                        berdasarkan <span id="dpr_st_text">Surat Tugas</span>, dengan ini kami menyatakan dengan sesungguhnya bahwa :
-                    </p>
-
-                    <div style="font-size: 10.5pt; margin-bottom: 10px;">
-                        1.&nbsp;&nbsp;Biaya transport pegawai di bawah ini yang tidak dapat diperoleh bukti-bukti pengeluarannya, meliputi:
-                    </div>
-
-                    <div class="table-responsive mb-3">
-                        <table class="table table-bordered border-dark table-sm mb-0" style="font-size: 10pt; border-color: #000 !important;">
-                            <thead class="text-center align-middle" style="border-color: #000;">
-                                <tr>
-                                    <th style="width: 45px; font-weight: normal; border-color: #000;">No</th>
-                                    <th style="font-weight: normal; border-color: #000;">Perincian Biaya</th>
-                                    <th style="width: 165px; font-weight: normal; border-color: #000;">Jumlah (Rp)</th>
-                                </tr>
-                                <tr>
-                                    <td style="font-size: 9pt; border-color: #000; padding: 2px;">(1)</td>
-                                    <td style="font-size: 9pt; border-color: #000; padding: 2px;">(2)</td>
-                                    <td style="font-size: 9pt; border-color: #000; padding: 2px;">(3)</td>
-                                </tr>
-                            </thead>
-                            <tbody id="dpr_expense_tbody" style="border-color: #000;"></tbody>
-                            <tfoot style="border-color: #000;">
-                                <tr>
-                                    <td colspan="2" class="text-center fw-bold" style="border-color: #000;">JUMLAH</td>
-                                    <td rowspan="2" id="dpr_total_amount" class="text-center align-middle fw-bold" style="border-color: #000;">Rp. 0,-</td>
-                                </tr>
-                                <tr>
-                                    <td colspan="2" class="text-center fw-bold fst-italic" style="border-color: #000;">
-                                        (<span id="dpr_total_terbilang">Nol Rupiah</span>)
-                                    </td>
-                                </tr>
-                            </tfoot>
-                        </table>
-                    </div>
-
-                    <div style="font-size: 10.5pt; text-align: justify; margin-bottom: 12px;">
-                        2.&nbsp;&nbsp;Jumlah uang tersebut pada angka 1 diatas benar-benar dikeluarkan untuk pelaksanaan perjalanan dinas dimaksud dan apabila di kemudian hari terdapat kelebihan atas pembayaran, kami bersedia untuk menyetorkan kelebihan tersebut ke Kas Negara.
-                    </div>
-
-                    <p style="font-size: 10.5pt; margin-left: 22px; margin-bottom: 24px;">
-                        Demikian pernyataan ini kami buat dengan sebenarnya, untuk dipergunakan sebagaimana mestinya.
-                    </p>
-
-                    <div class="row mt-4" style="font-size: 10.5pt;">
-                        <div class="col-6 text-center">
-                            <div>Mengetahui/Menyetujui:</div>
-                            <div>Pejabat Pembuat Komitmen</div>
-                            <div>BPS Kabupaten Kolaka Utara</div>
-                            <div style="height: 65px;"></div>
-                            <div class="fw-bold text-decoration-underline text-dark" id="dpr_ppk_name">Hidayatullah, SE</div>
-                            <div>NIP. <span id="dpr_ppk_nip">198510292011011009</span></div>
-                        </div>
-                        <div class="col-6 text-center">
-                            <div id="dpr_signing_place_date">Lasusua, -</div>
-                            <div>Pegawai</div>
-                            <div>Yang melakukan perjalanan dinas,</div>
-                            <div id="dpr_sign_img_container" style="min-height: 65px; display: flex; align-items: center; justify-content: center; margin: 4px 0;">
-                                <!-- Signature img -->
-                            </div>
-                            <div class="fw-bold text-decoration-underline text-dark" id="dpr_sign_name">-</div>
-                            <div id="dpr_sign_nip">-</div>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Simulation of Surat Pernyataan Paper -->
-                <div id="det_vehicle_stmt_paper" class="bg-white p-4 p-md-5 rounded shadow-sm border mx-auto d-none" style="max-width: 820px; font-family: Arial, Helvetica, sans-serif; color: #000; line-height: 1.45;">
-                    <!-- KOP SURAT BPS -->
-                    <div class="d-flex align-items-center pb-2 border-bottom border-dark border-2 mb-3">
-                        <div style="width: 85px;" class="me-3 text-center">
-                            <img src="{{ asset('images/logo.png') }}" style="width: 70px; height: auto;" alt="Logo BPS" onerror="this.style.display='none'">
-                        </div>
-                        <div class="flex-grow-1 text-center">
-                            <div class="fw-bold text-uppercase" style="font-size: 13pt; color: #2b3990; letter-spacing: 0.5px;">BADAN PUSAT STATISTIK</div>
-                            <div class="fw-bold text-uppercase" style="font-size: 13pt; color: #333; letter-spacing: 0.5px;">KABUPATEN KOLAKA UTARA</div>
-                            <div style="font-size: 8pt; color: #444; line-height: 1.35;">
-                                Jalan Protokol Poros DPRD Lasusua 93911 Telp. (0405) 2330029; Fax. (0405) 2330029,<br>
-                                Homepage: http://kolutkab.bps.go.id E-mail: bps7408@bps.go.id
-                            </div>
-                        </div>
-                    </div>
-
-                    <div class="text-center my-3">
-                        <h6 class="fw-bold mb-0" style="font-size: 11pt;">SURAT PERNYATAAN</h6>
-                        <h6 class="fw-bold text-decoration-underline mb-0" style="font-size: 11pt;">TIDAK MENGGUNAKAN KENDARAAN DINAS</h6>
-                    </div>
-
-                    <div class="mb-2" style="font-size: 10.5pt;">Yang bertanda tangan di bawah ini:</div>
-                    <table class="table table-borderless table-sm mb-3 ms-3" style="font-size: 10.5pt; width: auto;">
-                        <tr>
-                            <td style="width: 170px; padding: 2px 0;">Nama</td>
-                            <td style="width: 15px; padding: 2px 0;">:</td>
-                            <td class="fw-semibold text-dark" id="stmt_officer_name">-</td>
-                        </tr>
-                        <tr>
-                            <td style="padding: 2px 0;">NIP/NIK</td>
-                            <td style="padding: 2px 0;">:</td>
-                            <td id="stmt_officer_nip">-</td>
-                        </tr>
-                        <tr>
-                            <td style="padding: 2px 0;">Pangkat/Golongan</td>
-                            <td style="padding: 2px 0;">:</td>
-                            <td id="stmt_officer_rank">-</td>
-                        </tr>
-                        <tr>
-                            <td style="padding: 2px 0;">Jabatan</td>
-                            <td style="padding: 2px 0;">:</td>
-                            <td id="stmt_officer_position">-</td>
-                        </tr>
-                        <tr>
-                            <td style="padding: 2px 0;">Unit Kerja</td>
-                            <td style="padding: 2px 0;">:</td>
-                            <td>BPS Kabupaten Kolaka Utara</td>
-                        </tr>
-                    </table>
-
-                    <p style="text-align: justify; font-size: 10.5pt; line-height: 1.5; margin-bottom: 12px;" id="stmt_body_text">
-                        Menerangkan bahwa dalam rangka pelaksanaan tugas perjalanan dinas biasa dalam kota, saya benar-benar tidak menggunakan kendaraan dinas.
-                    </p>
-
-                    <p style="text-align: justify; font-size: 10.5pt; line-height: 1.5; margin-bottom: 25px;">
-                        Demikian pernyataan ini kami buat dengan sebenar-benarnya untuk dipergunakan sebagaimana mestinya. Apabila terdapat kekeliruan dalam pertanggungjawaban SPD dan mengakibatkan kerugian negara, kami bersedia dituntut sesuai peraturan yang berlaku dan mengembalikan biaya transpor yang sudah terlanjur saya terima ke kas negara.
-                    </p>
-
-                    <div class="row mt-4 pt-2">
-                        <div class="col-6"></div>
-                        <div class="col-6 text-center" style="font-size: 10.5pt;">
-                            <div id="stmt_signing_place_date">Lasusua, -</div>
-                            <div>Pelaksana Perjalanan Dinas,</div>
-                            <div id="stmt_sign_img_container" style="min-height: 65px; display: flex; align-items: center; justify-content: center; margin: 4px 0;">
-                                <!-- Signature img or space -->
-                            </div>
-                            <div class="fw-bold text-dark" id="stmt_sign_name">-</div>
-                            <div style="font-size: 9.5pt;" id="stmt_sign_nip"></div>
-                        </div>
-                    </div>
-                </div>
+                @include('reports._document_preview_body')
             </div>
-            <div class="modal-footer bg-light border-top d-flex justify-content-between">
+            <div class="modal-footer bg-light border-top d-flex flex-wrap justify-content-between align-items-center gap-2">
                 <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Tutup</button>
-                <div class="d-flex gap-2">
-                    <a id="det_preview_link" href="#" target="_blank" class="btn btn-outline-primary">
+                <div class="d-flex flex-wrap align-items-center gap-2">
+                    <span id="det_locked_pdf_notice" class="badge bg-warning-subtle text-warning-emphasis border border-warning px-3 py-2 d-none">
+                        <i class="fa-solid fa-lock me-1"></i> PDF validasi hanya dapat diunduh setelah ACC Administrator
+                    </span>
+                    <a id="det_preview_link" href="#" target="_blank" class="btn btn-outline-primary d-none">
                         <i class="fa-solid fa-print me-1"></i> Cetak / Preview PDF
                     </a>
-                    <a id="det_download_link" href="#" class="btn btn-sp-primary">
+                    <a id="det_download_link" href="#" class="btn btn-sp-primary d-none">
                         <i class="fa-solid fa-file-pdf me-1"></i> Unduh PDF Resmi
                     </a>
                 </div>
@@ -1323,6 +1071,7 @@
 @endsection
 
 @push('scripts')
+@include('reports._shared_js')
 <script>
     let createSigPad = null;
     let editSigPad = null;
@@ -1425,49 +1174,6 @@
         }
     });
 
-    const ID_MONTHS = [
-        'Januari', 'Februari', 'Maret', 'April', 'Mei', 'Juni',
-        'Juli', 'Agustus', 'September', 'Oktober', 'November', 'Desember'
-    ];
-
-    function formatIndonesianDate(dateStr) {
-        if (!dateStr) return '-';
-        const clean = dateStr.substring(0, 10);
-        const parts = clean.split('-');
-        if (parts.length !== 3) return dateStr;
-        const year = parts[0];
-        const monthIdx = parseInt(parts[1], 10) - 1;
-        const day = parseInt(parts[2], 10);
-        if (isNaN(day) || monthIdx < 0 || monthIdx > 11) return dateStr;
-        return day + ' ' + ID_MONTHS[monthIdx] + ' ' + year;
-    }
-
-    function formatRupiah(angka) {
-        const num = Math.max(0, Math.round(Number(angka) || 0));
-        return 'Rp. ' + num.toString().replace(/\B(?=(\d{3})+(?!\d))/g, '.') + ',-';
-    }
-
-    function terbilangInt(angka) {
-        const n = Math.floor(Math.abs(Number(angka) || 0));
-        const words = ['', 'Satu', 'Dua', 'Tiga', 'Empat', 'Lima', 'Enam', 'Tujuh', 'Delapan', 'Sembilan', 'Sepuluh', 'Sebelas'];
-        if (n < 12) return words[n];
-        if (n < 20) return terbilangInt(n - 10) + ' Belas';
-        if (n < 100) return (terbilangInt(Math.floor(n / 10)) + ' Puluh ' + terbilangInt(n % 10)).trim();
-        if (n < 200) return ('Seratus ' + terbilangInt(n - 100)).trim();
-        if (n < 1000) return (terbilangInt(Math.floor(n / 100)) + ' Ratus ' + terbilangInt(n % 100)).trim();
-        if (n < 2000) return ('Seribu ' + terbilangInt(n - 1000)).trim();
-        if (n < 1000000) return (terbilangInt(Math.floor(n / 1000)) + ' Ribu ' + terbilangInt(n % 1000)).trim();
-        if (n < 1000000000) return (terbilangInt(Math.floor(n / 1000000)) + ' Juta ' + terbilangInt(n % 1000000)).trim();
-        if (n < 1000000000000) return (terbilangInt(Math.floor(n / 1000000000)) + ' Miliar ' + terbilangInt(n % 1000000000)).trim();
-        return n.toString();
-    }
-
-    function terbilangRupiah(angka) {
-        const n = Math.round(Number(angka) || 0);
-        if (n <= 0) return 'Nol Rupiah';
-        return terbilangInt(n).replace(/\s+/g, ' ').trim() + ' Rupiah';
-    }
-
     const ADMIN_BASIS_DEFAULTS = @json($basisDefaults);
 
     function updateReadonlyBasisFromValues(prefix, dipa, stNumber, stDate, basisSt) {
@@ -1518,151 +1224,12 @@
         syncReadonlyBasisFromSelect(prefix, selectElem);
     }
 
-    function buildDefaultExpenseDesc(location) {
-        const origin = (location && location.trim()) ? location.trim() : 'Wilayah Tugas';
-        return `Biaya transport dari ${origin} ke Kantor BPS Kabupaten Kolaka Utara (P.P.) selama 1 hari`;
-    }
-
-    function syncDefaultExpenseDesc(locInputId, tbodyId) {
-        const locEl = document.getElementById(locInputId);
-        const tbody = document.getElementById(tbodyId);
-        if (!locEl || !tbody) return;
-        const firstDesc = tbody.querySelector('tr:first-child .expense-desc-input');
-        if (!firstDesc) return;
-        const val = firstDesc.value.trim();
-        if (!val || (val.startsWith('Biaya transport dari ') && val.includes('ke Kantor BPS Kabupaten Kolaka Utara'))) {
-            firstDesc.value = buildDefaultExpenseDesc(locEl.value);
-        }
-    }
-
-    function autoFillLocation(selectElem, targetInputId) {
-        const selectedOpt = selectElem.options[selectElem.selectedIndex];
-        if (selectedOpt) {
-            const loc = selectedOpt.getAttribute('data-location');
-            const targetInput = document.getElementById(targetInputId);
-            if (targetInput && loc) {
-                targetInput.value = loc;
-            }
-        }
-    }
-
-    function autoFillLocationAndExpense(selectElem, targetInputId, tbodyId) {
-        autoFillLocation(selectElem, targetInputId);
-        syncDefaultExpenseDesc(targetInputId, tbodyId);
-    }
-
-    function renumberExpenseRows(tbodyId) {
-        const tbody = document.getElementById(tbodyId);
-        if (!tbody) return;
-        tbody.querySelectorAll('tr').forEach((tr, idx) => {
-            const noCell = tr.querySelector('td:first-child');
-            if (noCell) noCell.textContent = idx + 1;
-        });
-    }
-
-    function addExpenseRow(tbodyId, totalId, terbilangId, desc = '', amount = 0) {
-        const tbody = document.getElementById(tbodyId);
-        if (!tbody) return;
-        const rowNum = tbody.querySelectorAll('tr').length + 1;
-
-        const tr = document.createElement('tr');
-        const tdNo = document.createElement('td');
-        tdNo.className = 'text-center small fw-bold';
-        tdNo.textContent = rowNum;
-
-        const tdDesc = document.createElement('td');
-        const inpDesc = document.createElement('input');
-        inpDesc.type = 'text';
-        inpDesc.name = 'expense_descriptions[]';
-        inpDesc.className = 'form-control form-control-sm expense-desc-input';
-        inpDesc.value = desc;
-        inpDesc.placeholder = 'Contoh: Biaya transport dari Kantor ke lokasi kegiatan (P.P.) selama 1 hari';
-        inpDesc.required = true;
-        tdDesc.appendChild(inpDesc);
-
-        const tdAmt = document.createElement('td');
-        const inpAmt = document.createElement('input');
-        inpAmt.type = 'number';
-        inpAmt.name = 'expense_amounts[]';
-        inpAmt.className = 'form-control form-control-sm text-end fw-semibold expense-amt-input';
-        inpAmt.min = '0';
-        inpAmt.value = Number(amount) || 0;
-        inpAmt.required = true;
-        inpAmt.addEventListener('input', function() {
-            recalcExpenses(tbodyId, totalId, terbilangId);
-        });
-        tdAmt.appendChild(inpAmt);
-
-        const tdAct = document.createElement('td');
-        tdAct.className = 'text-center';
-        const btnDel = document.createElement('button');
-        btnDel.type = 'button';
-        btnDel.className = 'btn btn-sm btn-outline-danger py-0 px-1.5';
-        btnDel.title = 'Hapus baris';
-        btnDel.innerHTML = '<i class="fa-solid fa-xmark"></i>';
-        btnDel.addEventListener('click', function() {
-            removeExpenseRow(btnDel, tbodyId, totalId, terbilangId);
-        });
-        tdAct.appendChild(btnDel);
-
-        tr.appendChild(tdNo);
-        tr.appendChild(tdDesc);
-        tr.appendChild(tdAmt);
-        tr.appendChild(tdAct);
-        tbody.appendChild(tr);
-
-        recalcExpenses(tbodyId, totalId, terbilangId);
-    }
-
-    function removeExpenseRow(btn, tbodyId, totalId, terbilangId) {
-        const tbody = document.getElementById(tbodyId);
-        if (!tbody) return;
-        const rows = tbody.querySelectorAll('tr');
-        if (rows.length <= 1) {
-            const amt = rows[0].querySelector('.expense-amt-input');
-            if (amt) amt.value = 0;
-        } else {
-            const tr = btn.closest('tr');
-            if (tr) tr.remove();
-            renumberExpenseRows(tbodyId);
-        }
-        recalcExpenses(tbodyId, totalId, terbilangId);
-    }
-
-    function recalcExpenses(tbodyId, totalId, terbilangId) {
-        const tbody = document.getElementById(tbodyId);
-        if (!tbody) return;
-        let total = 0;
-        tbody.querySelectorAll('.expense-amt-input').forEach(inp => {
-            total += Math.max(0, Math.round(Number(inp.value) || 0));
-        });
-        const totalEl = document.getElementById(totalId);
-        const terbEl = document.getElementById(terbilangId);
-        if (totalEl) totalEl.textContent = formatRupiah(total);
-        if (terbEl) terbEl.textContent = terbilangRupiah(total);
-    }
-
     function clearCreateCanvas() {
         if (createSigPad) createSigPad.clear();
     }
 
     function clearEditCanvas() {
         if (editSigPad) editSigPad.clear();
-    }
-
-    function buildStPhrase(rep) {
-        if (rep.resolved_st_text) return rep.resolved_st_text;
-        const actDate = rep.activity_date ? rep.activity_date.substring(0, 10) : '';
-        if (rep.st_number) {
-            const stDate = rep.st_date ? rep.st_date.substring(0, 10) : actDate;
-            return `Surat Tugas Nomor ${rep.st_number} Tanggal ${formatIndonesianDate(stDate)}`;
-        }
-        const raw = (rep.basis_st || '').trim().replace(/\.$/, '');
-        if (!raw) {
-            const year = actDate ? actDate.substring(0, 4) : new Date().getFullYear();
-            return `Surat Tugas Nomor B-1812/74080/HM.300/${year} Tanggal ${formatIndonesianDate(actDate)}`;
-        }
-        return raw.replace(/^(Surat Tugas|Berdasarkan Surat Tugas)\s+(Kepala BPS[^N]*?)?(?=Nomor)/i, 'Surat Tugas ');
     }
 
     function openEditModal(rep) {
@@ -1763,318 +1330,29 @@
     }
 
     function openDetailModal(rep) {
-        // Badges & Status
-        const badge = document.getElementById('det_status_badge');
-        badge.className = 'badge ' + (rep.status_badge || 'bg-secondary');
-        badge.innerText = rep.status_label || rep.status;
+        populateReportDocumentPreview(rep, ADMIN_BASIS_DEFAULTS);
 
-        const officerName = rep.resolved_officer_name || rep.officer_name || (rep.user ? rep.user.name : '-') || '-';
-        const officerNik = rep.resolved_officer_nik || rep.officer_nip || (rep.user ? rep.user.nik : '-') || '-';
-        const officerRank = rep.officer_rank || (rep.user ? rep.user.rank : '-') || '-';
-        const officerPosition = rep.officer_position || (rep.user ? rep.user.position : '') || 'Mitra BPS Kabupaten Kolaka Utara';
-        const idType = rep.id_type || 'NIK';
+        const isApproved = rep.status === 'approved';
+        const previewBtn = document.getElementById('det_preview_link');
+        const downloadBtn = document.getElementById('det_download_link');
+        const lockedNotice = document.getElementById('det_locked_pdf_notice');
 
-        // Dokumen 1 - Section A
-        document.getElementById('det_officer_name').innerText = officerName;
-        document.getElementById('det_label_id').innerText = idType;
-        document.getElementById('det_officer_nip').innerText = officerNik;
-        document.getElementById('det_officer_rank').innerText = officerRank;
-        document.getElementById('det_officer_position').innerText = officerPosition;
-
-        // Section B
-        const year = rep.activity_date ? new Date(rep.activity_date).getFullYear() : new Date().getFullYear();
-        const actDateRaw = rep.activity_date ? rep.activity_date.substring(0, 10) : '';
-        const actDateFormatted = actDateRaw ? formatIndonesianDate(actDateRaw) : '-';
-        document.getElementById('det_basis_dipa').innerText = rep.basis_dipa || ADMIN_BASIS_DEFAULTS.basis_dipa || ('DIPA Satuan Kerja Badan Pusat Statistik Kabupaten Kolaka Utara Tahun Anggaran ' + year + ' Nomor SP DIPA-054.01.2.667477/' + year + ' tanggal 1 Desember ' + (year - 1) + '.');
-        document.getElementById('det_basis_st').innerText = rep.basis_st || ADMIN_BASIS_DEFAULTS.basis_st || ('Surat Tugas Kepala Badan Pusat Statistik Kabupaten Kolaka Utara Nomor: B-1812/74080/HM.300/' + year + ' Tanggal ' + actDateFormatted + '.');
-
-        // Section C
-        document.getElementById('det_destination_purpose').innerText = rep.destination_purpose || ('Perjalanan Dinas Biasa dalam kota lebih dari 8 jam dalam rangka pendataan ' + rep.activity_title + '.');
-
-        // Section D
-        document.getElementById('det_duration_info').innerText = (rep.duration_text || 'Selama 1 (satu) Hari') + ', pada tanggal ' + actDateFormatted;
-
-        // Section E & F
-        document.getElementById('det_work_description').innerText = rep.work_description || '-';
-
-        const obsBox = document.getElementById('det_obstacles_box');
-        if (rep.obstacles && rep.obstacles.trim()) {
-            obsBox.classList.remove('d-none');
-            document.getElementById('det_obstacles').innerText = rep.obstacles;
+        if (isApproved) {
+            previewBtn.href = '/petugas/reports/' + rep.id + '/preview';
+            downloadBtn.href = '/petugas/reports/' + rep.id + '/download';
+            previewBtn.classList.remove('d-none');
+            downloadBtn.classList.remove('d-none');
+            lockedNotice.classList.add('d-none');
         } else {
-            obsBox.classList.add('d-none');
+            previewBtn.href = '#';
+            downloadBtn.href = '#';
+            previewBtn.classList.add('d-none');
+            downloadBtn.classList.add('d-none');
+            lockedNotice.classList.remove('d-none');
         }
-
-        const solBox = document.getElementById('det_solutions_box');
-        if (rep.solutions && rep.solutions.trim()) {
-            solBox.classList.remove('d-none');
-            document.getElementById('det_solutions').innerText = rep.solutions;
-        } else {
-            solBox.classList.add('d-none');
-        }
-
-        document.getElementById('det_recommendations').innerText = rep.recommendations || '-';
-
-        // Signer & Tanda Tangan (1x input tampil di Dokumen 1 & Dokumen 2)
-        const signCity = rep.signing_city || 'Lasusua';
-        const signDateRaw = rep.signing_date ? rep.signing_date.substring(0, 10) : actDateRaw;
-        const signPlaceDate = signCity + ', ' + formatIndonesianDate(signDateRaw);
-        const signImgHtml = rep.signature_path
-            ? `<img src="/storage/${rep.signature_path}" style="max-height: 60px; max-width: 170px;" alt="Tanda Tangan">`
-            : `<div style="height: 55px;"></div>`;
-
-        document.getElementById('det_signing_place_date').innerText = signPlaceDate;
-        document.getElementById('det_sign_name').innerText = officerName;
-        document.getElementById('det_sign_nip').innerText = (officerNik && officerNik !== '-') ? (idType + '. ' + officerNik) : '';
-        document.getElementById('det_sign_img_container').innerHTML = signImgHtml;
-
-        // Dokumen 2 - Daftar Pengeluaran Riil
-        document.getElementById('dpr_officer_name').innerText = officerName;
-        document.getElementById('dpr_officer_nik').innerText = officerNik;
-        document.getElementById('dpr_officer_position').innerText = officerPosition;
-        document.getElementById('dpr_st_text').innerText = buildStPhrase(rep);
-
-        const dprTbody = document.getElementById('dpr_expense_tbody');
-        dprTbody.innerHTML = '';
-        const locFallback = rep.activity_location || (rep.assignment ? rep.assignment.location : '') || '';
-        const expenseItems = (Array.isArray(rep.resolved_expense_items) && rep.resolved_expense_items.length)
-            ? rep.resolved_expense_items
-            : (Array.isArray(rep.expense_items) && rep.expense_items.length
-                ? rep.expense_items
-                : [{ description: buildDefaultExpenseDesc(locFallback), amount: 50000 }]);
-
-        let totalExpense = 0;
-        expenseItems.forEach((item, idx) => {
-            const amt = Math.max(0, Math.round(Number(item.amount) || 0));
-            totalExpense += amt;
-            const tr = document.createElement('tr');
-
-            const tdNo = document.createElement('td');
-            tdNo.className = 'text-center';
-            tdNo.style.borderColor = '#000';
-            tdNo.textContent = idx + 1;
-
-            const tdDesc = document.createElement('td');
-            tdDesc.style.borderColor = '#000';
-            tdDesc.textContent = item.description || '-';
-
-            const tdAmt = document.createElement('td');
-            tdAmt.className = 'text-center';
-            tdAmt.style.borderColor = '#000';
-            tdAmt.textContent = formatRupiah(amt);
-
-            tr.appendChild(tdNo);
-            tr.appendChild(tdDesc);
-            tr.appendChild(tdAmt);
-            dprTbody.appendChild(tr);
-        });
-
-        document.getElementById('dpr_total_amount').innerText = formatRupiah(totalExpense);
-        document.getElementById('dpr_total_terbilang').innerText = terbilangRupiah(totalExpense);
-        document.getElementById('dpr_ppk_name').innerText = rep.ppk_name || 'Hidayatullah, SE';
-        document.getElementById('dpr_ppk_nip').innerText = rep.ppk_nip || '198510292011011009';
-        document.getElementById('dpr_signing_place_date').innerText = signPlaceDate;
-        document.getElementById('dpr_sign_img_container').innerHTML = signImgHtml;
-        document.getElementById('dpr_sign_name').innerText = officerName;
-        document.getElementById('dpr_sign_nip').innerText = (officerNik && officerNik !== '-') ? ('NIK/NIP. ' + officerNik) : '';
-
-        // Surat Pernyataan Kendaraan Dinas Preview (opsional)
-        const stmtPaper = document.getElementById('det_vehicle_stmt_paper');
-        if (rep.include_vehicle_statement === true || rep.include_vehicle_statement === 1) {
-            stmtPaper.classList.remove('d-none');
-            document.getElementById('stmt_officer_name').innerText = officerName;
-            document.getElementById('stmt_officer_nip').innerText = officerNik;
-            document.getElementById('stmt_officer_rank').innerText = officerRank;
-            document.getElementById('stmt_officer_position').innerText = officerPosition;
-
-            const loc = locFallback || 'Kabupaten Kolaka Utara';
-            document.getElementById('stmt_body_text').innerText = `Menerangkan bahwa dalam rangka ${rep.activity_title} di ${loc} sesuai Surat Perjalanan Dinas ${rep.basis_st || 'Nomor Surat Tugas BPS Kolaka Utara'}. Saya benar-benar tidak menggunakan kendaraan dinas pada tanggal ${actDateFormatted}.`;
-
-            document.getElementById('stmt_signing_place_date').innerText = signPlaceDate;
-            document.getElementById('stmt_sign_name').innerText = officerName;
-            document.getElementById('stmt_sign_nip').innerText = (officerNik && officerNik !== '-') ? (idType + '. ' + officerNik) : '';
-            document.getElementById('stmt_sign_img_container').innerHTML = signImgHtml;
-        } else {
-            stmtPaper.classList.add('d-none');
-        }
-
-        // Admin Notes
-        const notesBox = document.getElementById('det_admin_notes_box');
-        const notesText = document.getElementById('det_admin_notes_text');
-        if (rep.admin_notes) {
-            notesBox.classList.remove('d-none');
-            notesText.innerText = rep.admin_notes;
-        } else {
-            notesBox.classList.add('d-none');
-        }
-
-        // Attachments
-        const container = document.getElementById('det_attachments_container');
-        container.innerHTML = '';
-        if (rep.attachments && rep.attachments.length > 0) {
-            rep.attachments.forEach(att => {
-                container.appendChild(buildPreviewAttachmentCard(att));
-            });
-        } else {
-            container.innerHTML = '<div class="col-12 text-muted small fst-italic">Tidak ada lampiran foto dokumentasi.</div>';
-        }
-
-        // Set action download / preview links
-        document.getElementById('det_preview_link').href = '/petugas/reports/' + rep.id + '/preview';
-        document.getElementById('det_download_link').href = '/petugas/reports/' + rep.id + '/download';
 
         const modal = new bootstrap.Modal(document.getElementById('detailReportModal'));
         modal.show();
-    }
-
-    function formatCapturedTime(isoStr) {
-        if (!isoStr) return '';
-        const d = new Date(isoStr);
-        if (isNaN(d.getTime())) return isoStr;
-        return new Intl.DateTimeFormat('id-ID', {
-            day: '2-digit',
-            month: 'short',
-            year: 'numeric',
-            hour: '2-digit',
-            minute: '2-digit',
-            second: '2-digit',
-            timeZoneName: 'short'
-        }).format(d);
-    }
-
-    function buildAttachmentMetaBlock(att) {
-        const meta = document.createElement('div');
-        meta.className = 'text-start mt-1 pt-1 border-top';
-        meta.style.fontSize = '0.72rem';
-
-        const timeLabel = formatCapturedTime(att.captured_at);
-        if (timeLabel) {
-            const tDiv = document.createElement('div');
-            tDiv.className = 'text-dark fw-semibold';
-            tDiv.innerHTML = '<i class="fa-regular fa-clock text-primary me-1"></i>';
-            tDiv.appendChild(document.createTextNode(timeLabel));
-            meta.appendChild(tDiv);
-        }
-
-        if (att.location_address) {
-            const lDiv = document.createElement('div');
-            lDiv.className = 'text-secondary text-truncate';
-            lDiv.title = att.location_address;
-            lDiv.innerHTML = '<i class="fa-solid fa-location-dot text-danger me-1"></i>';
-            lDiv.appendChild(document.createTextNode(att.location_address));
-            meta.appendChild(lDiv);
-        }
-
-        if (att.latitude !== null && att.latitude !== undefined && att.longitude !== null && att.longitude !== undefined) {
-            const lat = Number(att.latitude).toFixed(6);
-            const lng = Number(att.longitude).toFixed(6);
-            const cDiv = document.createElement('div');
-            cDiv.className = 'font-monospace text-muted';
-            cDiv.textContent = `${lat}, ${lng}`;
-            meta.appendChild(cDiv);
-
-            const mapLink = document.createElement('a');
-            mapLink.href = `https://www.google.com/maps?q=${lat},${lng}`;
-            mapLink.target = '_blank';
-            mapLink.className = 'badge bg-info-subtle text-info-emphasis border border-info-subtle text-decoration-none mt-1';
-            mapLink.innerHTML = '<i class="fa-solid fa-map-location-dot me-1"></i> Lihat Peta GPS';
-            meta.appendChild(mapLink);
-        } else if (att.caption) {
-            const capDiv = document.createElement('div');
-            capDiv.className = 'text-muted';
-            capDiv.textContent = att.caption;
-            meta.appendChild(capDiv);
-        }
-
-        return meta;
-    }
-
-    function buildPreviewAttachmentCard(att) {
-        const col = document.createElement('div');
-        col.className = 'col-6 col-md-4';
-
-        const card = document.createElement('div');
-        card.className = 'card h-100 border p-2 shadow-sm text-center';
-
-        const isImg = att.file_type && att.file_type.startsWith('image/');
-        if (isImg) {
-            const a = document.createElement('a');
-            a.href = '/storage/' + att.file_path;
-            a.target = '_blank';
-            const img = document.createElement('img');
-            img.src = '/storage/' + att.file_path;
-            img.alt = att.file_name || 'Foto Dokumentasi';
-            img.className = 'img-fluid rounded mb-2';
-            img.style.maxHeight = '120px';
-            img.style.objectFit = 'cover';
-            a.appendChild(img);
-            card.appendChild(a);
-        } else {
-            const pdfBox = document.createElement('div');
-            pdfBox.className = 'py-3';
-            pdfBox.innerHTML = '<i class="fa-regular fa-file-pdf fa-3x text-danger"></i>';
-            card.appendChild(pdfBox);
-        }
-
-        const nameEl = document.createElement('div');
-        nameEl.className = 'small text-truncate fw-medium text-dark';
-        nameEl.title = att.file_name || '';
-        nameEl.textContent = att.file_name || '';
-        card.appendChild(nameEl);
-
-        card.appendChild(buildAttachmentMetaBlock(att));
-
-        const openBtn = document.createElement('a');
-        openBtn.href = '/storage/' + att.file_path;
-        openBtn.target = '_blank';
-        openBtn.className = 'btn btn-sm btn-link text-decoration-none mt-auto pt-1';
-        openBtn.innerHTML = '<i class="fa-solid fa-arrow-up-right-from-square me-1"></i> Buka Foto';
-        card.appendChild(openBtn);
-
-        col.appendChild(card);
-        return col;
-    }
-
-    function buildExistingEditAttachmentCard(att) {
-        const col = document.createElement('div');
-        col.className = 'col-6 col-md-4';
-
-        const card = document.createElement('div');
-        card.className = 'card h-100 border p-2 bg-light-subtle';
-
-        const isImg = att.file_type && att.file_type.startsWith('image/');
-        if (isImg) {
-            const img = document.createElement('img');
-            img.src = '/storage/' + att.file_path;
-            img.alt = att.file_name || 'Foto Tersimpan';
-            img.className = 'img-fluid rounded mb-2 w-100';
-            img.style.maxHeight = '105px';
-            img.style.objectFit = 'cover';
-            card.appendChild(img);
-        }
-
-        card.appendChild(buildAttachmentMetaBlock(att));
-
-        const chkWrap = document.createElement('div');
-        chkWrap.className = 'form-check mt-2 pt-1 border-top';
-        const chk = document.createElement('input');
-        chk.type = 'checkbox';
-        chk.className = 'form-check-input border-danger';
-        chk.name = 'delete_attachment_ids[]';
-        chk.value = att.id;
-        chk.id = 'del_att_' + att.id;
-
-        const lbl = document.createElement('label');
-        lbl.className = 'form-check-label small text-danger fw-semibold';
-        lbl.setAttribute('for', chk.id);
-        lbl.textContent = 'Hapus foto ini';
-
-        chkWrap.appendChild(chk);
-        chkWrap.appendChild(lbl);
-        card.appendChild(chkWrap);
-
-        col.appendChild(card);
-        return col;
     }
 
     const perjadinCamera = (function() {

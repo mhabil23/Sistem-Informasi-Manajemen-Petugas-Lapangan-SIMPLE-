@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Petugas;
 
 use App\Http\Controllers\Controller;
 use App\Models\ActivityLog;
+use App\Models\AdminNotification;
 use App\Models\Assignment;
 use App\Models\AssignmentOfficer;
 use App\Models\OfficerReport;
@@ -82,7 +83,10 @@ class ReportController extends Controller
         $officerRank = !empty($validated['officer_rank']) ? $validated['officer_rank'] : ($user->rank ?: '-');
         $officerPosition = !empty($validated['officer_position']) ? $validated['officer_position'] : ($user->position ?: 'Mitra BPS Kabupaten Kolaka Utara');
 
-        $expenseItems = $this->buildExpenseItems($request);
+        $expenseItems = OfficerReport::buildExpenseItems(
+            (array) $request->input('expense_descriptions', []),
+            (array) $request->input('expense_amounts', [])
+        );
         $assignment = !empty($validated['assignment_id']) ? Assignment::find($validated['assignment_id']) : null;
         $basis = OfficerReport::resolveAuthoritativeBasis($assignment, $validated['activity_date']);
 
@@ -140,9 +144,12 @@ class ReportController extends Controller
             ]);
         }
 
+        // Kirim notifikasi ke Admin saat petugas membuat laporan perjadin
+        AdminNotification::notifyReportEvent($report, $user, 'created');
+
         $msg = $report->status === 'submitted'
-            ? "Laporan Perjadin & Daftar Pengeluaran Riil '{$report->activity_title}' berhasil diajukan dan siap dicetak menjadi 1 PDF!"
-            : "Laporan Perjadin & Daftar Pengeluaran Riil '{$report->activity_title}' berhasil disimpan sebagai draft.";
+            ? "Laporan Perjadin '{$report->activity_title}' berhasil diajukan & pemberitahuan dikirim ke Admin. Unduh PDF akan terbuka setelah disetujui (ACC) Admin."
+            : "Laporan Perjadin '{$report->activity_title}' berhasil disimpan sebagai draft & diberitahukan ke Admin. Ajukan dan tunggu persetujuan (ACC) Admin untuk mengunduh PDF.";
 
         ActivityLog::log(
             'create',
@@ -152,7 +159,7 @@ class ReportController extends Controller
 
         return redirect()->route('petugas.reports.index')
             ->with('success', $msg)
-            ->with('created_report_id', $report->id);
+            ->with('pending_approval_report_id', $report->id);
     }
 
     public function show(OfficerReport $report)
@@ -168,24 +175,29 @@ class ReportController extends Controller
 
     public function downloadPdf(OfficerReport $report)
     {
-        abort_if($report->user_id !== Auth::id(), 403);
-        $report->load(['user', 'assignment', 'attachments']);
-
-        $pdf = Pdf::loadView('pdf.officer_report', compact('report'))->setPaper('a4', 'portrait');
-        $filename = 'Laporan-Perjalanan-Dinas-' . str_replace(['/', '\\'], '-', $report->report_number ?: ('LAP-' . $report->id)) . '.pdf';
-
-        return $pdf->download($filename);
+        return $this->renderAuthorizedPdf($report, 'download');
     }
 
     public function previewPdf(OfficerReport $report)
     {
-        abort_if($report->user_id !== Auth::id(), 403);
-        $report->load(['user', 'assignment', 'attachments']);
+        return $this->renderAuthorizedPdf($report, 'stream');
+    }
 
+    private function renderAuthorizedPdf(OfficerReport $report, string $mode)
+    {
+        abort_if($report->user_id !== Auth::id(), 403);
+
+        if (!$report->canBeDownloadedByOfficer()) {
+            return redirect()
+                ->route('petugas.reports.index')
+                ->with('error', "Laporan '{$report->activity_title}' belum disetujui (ACC) oleh Admin. Tunggu persetujuan Admin terlebih dahulu untuk mengunduh atau mencetak PDF.");
+        }
+
+        $report->load(['user', 'assignment', 'attachments']);
         $pdf = Pdf::loadView('pdf.officer_report', compact('report'))->setPaper('a4', 'portrait');
         $filename = 'Laporan-Perjalanan-Dinas-' . str_replace(['/', '\\'], '-', $report->report_number ?: ('LAP-' . $report->id)) . '.pdf';
 
-        return $pdf->stream($filename);
+        return $mode === 'stream' ? $pdf->stream($filename) : $pdf->download($filename);
     }
 
     public function update(Request $request, OfficerReport $report)
@@ -200,7 +212,10 @@ class ReportController extends Controller
         $signaturePath = $this->resolveSignaturePath($request, $report->signature_path);
         $this->syncUserIdentityIfMissing($validated);
 
-        $expenseItems = $this->buildExpenseItems($request);
+        $expenseItems = OfficerReport::buildExpenseItems(
+            (array) $request->input('expense_descriptions', []),
+            (array) $request->input('expense_amounts', [])
+        );
         $assignment = !empty($validated['assignment_id']) ? Assignment::find($validated['assignment_id']) : null;
         $authoritativeBasis = OfficerReport::resolveAuthoritativeBasis($assignment, $validated['activity_date']);
         $assignmentChanged = ((int) ($validated['assignment_id'] ?? 0)) !== ((int) ($report->assignment_id ?? 0));
@@ -240,7 +255,7 @@ class ReportController extends Controller
             'status' => $validated['action_type'],
         ]);
 
-        $this->deleteSelectedAttachments($request, $report);
+        $report->deleteAttachmentsByIds((array) $request->input('delete_attachment_ids', []));
         $this->savePhotoAttachments($request, $report);
 
         if ($this->sheetService->isConfigured()) {
@@ -253,8 +268,12 @@ class ReportController extends Controller
             ]);
         }
 
+        if (Auth::user()) {
+            AdminNotification::notifyReportEvent($report, Auth::user(), 'resubmitted');
+        }
+
         $msg = $report->status === 'submitted'
-            ? "Laporan '{$report->activity_title}' berhasil diajukan kembali ke Admin!"
+            ? "Laporan '{$report->activity_title}' berhasil diajukan ulang & diberitahukan ke Admin. Menunggu persetujuan (ACC) untuk mengunduh PDF."
             : "Laporan '{$report->activity_title}' berhasil diperbarui.";
 
         ActivityLog::log(
@@ -265,7 +284,7 @@ class ReportController extends Controller
 
         return redirect()->route('petugas.reports.index')
             ->with('success', $msg)
-            ->with('created_report_id', $report->id);
+            ->with('pending_approval_report_id', $report->id);
     }
 
     public function destroy(OfficerReport $report)
@@ -278,6 +297,7 @@ class ReportController extends Controller
 
         $title = $report->activity_title;
         $id = $report->id;
+        AdminNotification::where('report_id', $id)->delete();
         $report->delete();
 
         if ($this->sheetService->isConfigured()) {
@@ -359,26 +379,6 @@ class ReportController extends Controller
         return $existingPath;
     }
 
-    private function buildExpenseItems(Request $request): array
-    {
-        $descriptions = $request->input('expense_descriptions', []);
-        $amounts = $request->input('expense_amounts', []);
-        $items = [];
-
-        foreach ($descriptions as $idx => $desc) {
-            $cleanDesc = trim((string) $desc);
-            $amount = isset($amounts[$idx]) ? (int) preg_replace('/[^0-9]/', '', (string) $amounts[$idx]) : 0;
-            if ($cleanDesc !== '' || $amount > 0) {
-                $items[] = [
-                    'description' => $cleanDesc ?: 'Biaya transport perjalanan dinas',
-                    'amount' => $amount,
-                ];
-            }
-        }
-
-        return $items;
-    }
-
     private function syncUserIdentityIfMissing(array $validated): void
     {
         $user = Auth::user();
@@ -399,25 +399,6 @@ class ReportController extends Controller
 
         if (!empty($updates)) {
             $user->update($updates);
-        }
-    }
-
-    private function deleteSelectedAttachments(Request $request, OfficerReport $report): void
-    {
-        $ids = array_filter((array) $request->input('delete_attachment_ids', []));
-        if (empty($ids)) {
-            return;
-        }
-
-        $attachments = ReportAttachment::where('report_id', $report->id)
-            ->whereIn('id', $ids)
-            ->get();
-
-        foreach ($attachments as $att) {
-            if ($att->file_path && Storage::disk('public')->exists($att->file_path)) {
-                Storage::disk('public')->delete($att->file_path);
-            }
-            $att->delete();
         }
     }
 

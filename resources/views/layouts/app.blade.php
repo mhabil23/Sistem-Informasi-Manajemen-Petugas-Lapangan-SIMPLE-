@@ -87,10 +87,12 @@
                         <i class="fa-solid fa-clipboard-check sp-nav-icon"></i>
                         <span>Laporan Petugas</span>
                         @php
-                            $pendingCount = \App\Models\OfficerReport::whereIn('status', ['submitted', 'reviewing'])->count();
+                            $sidebarReportBadge = max((int) ($adminPendingReportsCount ?? 0), (int) ($adminUnreadNotifCount ?? 0));
                         @endphp
-                        @if($pendingCount > 0)
-                            <span class="badge bg-warning text-dark sp-nav-badge">{{ $pendingCount }}</span>
+                        @if($sidebarReportBadge > 0)
+                            <span id="sidebarReportBadge" class="badge bg-warning text-dark sp-nav-badge">{{ $sidebarReportBadge }}</span>
+                        @else
+                            <span id="sidebarReportBadge" class="badge bg-warning text-dark sp-nav-badge d-none">0</span>
                         @endif
                     </a>
                     <a href="{{ route('admin.trainings.index') }}" class="sp-nav-link {{ request()->routeIs('admin.trainings.*') ? 'active' : '' }}">
@@ -167,6 +169,73 @@
                 @endif
 
                 <div class="d-flex align-items-center gap-3">
+                    @if(auth()->user()->isAdmin())
+                        <!-- Notifikasi Laporan Perjadin Masuk (Admin) -->
+                        <div class="dropdown">
+                            <button type="button"
+                                    id="adminNotifDropdownBtn"
+                                    class="btn btn-light btn-sm position-relative border rounded-circle d-flex align-items-center justify-content-center"
+                                    style="width: 36px; height: 36px;"
+                                    data-bs-toggle="dropdown"
+                                    aria-expanded="false"
+                                    title="Informasi Laporan Perjadin Petugas">
+                                <i class="fa-solid fa-bell text-secondary"></i>
+                                @php $unreadBadge = (int) ($adminUnreadNotifCount ?? 0); @endphp
+                                <span id="adminNotifBadge"
+                                      class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger {{ $unreadBadge > 0 ? '' : 'd-none' }}"
+                                      style="font-size: 0.65rem;">
+                                    {{ $unreadBadge }}
+                                </span>
+                            </button>
+                            <div class="dropdown-menu dropdown-menu-end shadow border-0 mt-2 p-0" style="width: 350px; max-width: 92vw;">
+                                <div class="px-3 py-2.5 bg-light border-bottom d-flex justify-content-between align-items-center">
+                                    <div>
+                                        <div class="fw-bold small text-dark">Notifikasi Laporan Perjadin</div>
+                                        <div class="text-muted" style="font-size: 0.7rem;">
+                                            <span id="adminPendingSubtitle">{{ (int) ($adminPendingReportsCount ?? 0) }} menunggu ACC</span>
+                                        </div>
+                                    </div>
+                                    <form method="POST" action="{{ route('admin.notifications.mark-all-read') }}" class="m-0">
+                                        @csrf
+                                        <button type="submit" class="btn btn-link btn-sm text-decoration-none p-0 small" style="font-size: 0.72rem;">
+                                            Tandai dibaca
+                                        </button>
+                                    </form>
+                                </div>
+                                <div id="adminNotifList" class="list-group list-group-flush" style="max-height: 320px; overflow-y: auto;">
+                                    @if(isset($adminRecentNotifs) && $adminRecentNotifs->isNotEmpty())
+                                        @foreach($adminRecentNotifs as $notif)
+                                            <a href="{{ $notif->report_id ? route('admin.reports.index', ['inspect' => $notif->report_id, 'notif_id' => $notif->id]) : route('admin.reports.index') }}"
+                                               class="list-group-item list-group-item-action py-2 px-3 {{ !$notif->is_read ? 'bg-primary-subtle bg-opacity-25' : '' }}">
+                                                <div class="d-flex justify-content-between align-items-start gap-2">
+                                                    <div class="fw-bold small text-dark text-truncate">
+                                                        @if(!$notif->is_read)
+                                                            <span class="badge bg-danger me-1" style="font-size: 0.6rem;">Baru</span>
+                                                        @endif
+                                                        {{ $notif->officer?->name ?? 'Petugas' }}
+                                                    </div>
+                                                    <small class="text-muted text-nowrap" style="font-size: 0.68rem;">{{ $notif->created_at?->diffForHumans() }}</small>
+                                                </div>
+                                                <div class="small text-primary fw-semibold text-truncate">{{ $notif->report?->activity_title ?? $notif->title }}</div>
+                                                <div class="text-muted text-truncate" style="font-size: 0.72rem;">{{ $notif->message }}</div>
+                                            </a>
+                                        @endforeach
+                                    @else
+                                        <div class="text-center py-4 px-3 text-muted small">
+                                            <i class="fa-regular fa-bell-slash d-block mb-1 fs-5 opacity-50"></i>
+                                            Belum ada pemberitahuan laporan perjadin baru.
+                                        </div>
+                                    @endif
+                                </div>
+                                <div class="px-3 py-2 bg-light border-top text-center">
+                                    <a href="{{ route('admin.reports.index') }}" class="small fw-semibold text-decoration-none">
+                                        Buka Halaman Laporan Petugas &rarr;
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
+                    @endif
+
                     <!-- Status / Role Badge -->
                     <span class="badge {{ auth()->user()->isAdmin() ? 'badge-role-admin' : 'badge-role-petugas' }} d-none d-md-inline-block">
                         <i class="fa-solid {{ auth()->user()->isAdmin() ? 'fa-shield-halved' : 'fa-user-check' }} me-1"></i>
@@ -352,6 +421,150 @@
             }, { passive: true });
         }
     </script>
+    @if(auth()->user()->isAdmin())
+        <div class="toast-container position-fixed bottom-0 end-0 p-3" id="adminNotifToastContainer" style="z-index: 1085;"></div>
+        <script>
+            (function() {
+                let lastUnreadCount = {{ (int) ($adminUnreadNotifCount ?? 0) }};
+                let lastTopNotifId = {{ (int) ($adminRecentNotifs->first()?->id ?? 0) }};
+
+                function renderNotifItems(items) {
+                    const list = document.getElementById('adminNotifList');
+                    if (!list) return;
+                    list.innerHTML = '';
+
+                    if (!Array.isArray(items) || items.length === 0) {
+                        const empty = document.createElement('div');
+                        empty.className = 'text-center py-4 px-3 text-muted small';
+                        empty.innerHTML = '<i class="fa-regular fa-bell-slash d-block mb-1 fs-5 opacity-50"></i>Belum ada pemberitahuan laporan perjadin baru.';
+                        list.appendChild(empty);
+                        return;
+                    }
+
+                    items.forEach(item => {
+                        const a = document.createElement('a');
+                        a.href = item.url || '#';
+                        a.className = 'list-group-item list-group-item-action py-2 px-3' + (!item.is_read ? ' bg-primary-subtle bg-opacity-25' : '');
+
+                        const topRow = document.createElement('div');
+                        topRow.className = 'd-flex justify-content-between align-items-start gap-2';
+
+                        const nameDiv = document.createElement('div');
+                        nameDiv.className = 'fw-bold small text-dark text-truncate';
+                        if (!item.is_read) {
+                            const b = document.createElement('span');
+                            b.className = 'badge bg-danger me-1';
+                            b.style.fontSize = '0.6rem';
+                            b.textContent = 'Baru';
+                            nameDiv.appendChild(b);
+                        }
+                        nameDiv.appendChild(document.createTextNode(item.officer_name || 'Petugas'));
+
+                        const timeEl = document.createElement('small');
+                        timeEl.className = 'text-muted text-nowrap';
+                        timeEl.style.fontSize = '0.68rem';
+                        timeEl.textContent = item.time_ago || '';
+
+                        topRow.appendChild(nameDiv);
+                        topRow.appendChild(timeEl);
+
+                        const titleEl = document.createElement('div');
+                        titleEl.className = 'small text-primary fw-semibold text-truncate';
+                        titleEl.textContent = item.report_title || item.title || '-';
+
+                        const msgEl = document.createElement('div');
+                        msgEl.className = 'text-muted text-truncate';
+                        msgEl.style.fontSize = '0.72rem';
+                        msgEl.textContent = item.message || '';
+
+                        a.appendChild(topRow);
+                        a.appendChild(titleEl);
+                        a.appendChild(msgEl);
+                        list.appendChild(a);
+                    });
+                }
+
+                function showIncomingReportToast(item) {
+                    const container = document.getElementById('adminNotifToastContainer');
+                    if (!container || typeof bootstrap === 'undefined') return;
+                    const toastEl = document.createElement('div');
+                    toastEl.className = 'toast border-0 shadow-lg';
+                    toastEl.setAttribute('role', 'alert');
+
+                    const header = document.createElement('div');
+                    header.className = 'toast-header bg-primary text-white';
+                    header.innerHTML = '<i class="fa-solid fa-bell me-2"></i><strong class="me-auto small">Laporan Perjadin Baru</strong><button type="button" class="btn-close btn-close-white ms-2" data-bs-dismiss="toast"></button>';
+
+                    const body = document.createElement('div');
+                    body.className = 'toast-body bg-white small';
+
+                    const msg = document.createElement('div');
+                    msg.className = 'mb-2 text-dark';
+                    msg.textContent = `${item.officer_name || 'Petugas'} membuat laporan "${item.report_title || '-'}".`;
+
+                    const action = document.createElement('a');
+                    action.href = item.url || '{{ route('admin.reports.index') }}';
+                    action.className = 'btn btn-xs btn-sp-primary py-1 px-2';
+                    action.style.fontSize = '0.75rem';
+                    action.innerHTML = '<i class="fa-solid fa-eye me-1"></i> Lihat, Edit &amp; ACC';
+
+                    body.appendChild(msg);
+                    body.appendChild(action);
+                    toastEl.appendChild(header);
+                    toastEl.appendChild(body);
+                    container.appendChild(toastEl);
+
+                    const toast = new bootstrap.Toast(toastEl, { delay: 9000 });
+                    toast.show();
+                    toastEl.addEventListener('hidden.bs.toast', () => toastEl.remove());
+                }
+
+                async function pollAdminNotifications() {
+                    if (document.hidden) return;
+                    try {
+                        const res = await fetch('{{ route('admin.notifications.poll') }}', {
+                            headers: { 'Accept': 'application/json' },
+                            credentials: 'same-origin'
+                        });
+                        if (!res.ok) return;
+                        const data = await res.json();
+
+                        const badge = document.getElementById('adminNotifBadge');
+                        if (badge) {
+                            badge.textContent = data.unread_count;
+                            badge.classList.toggle('d-none', data.unread_count <= 0);
+                        }
+
+                        const sidebarBadge = document.getElementById('sidebarReportBadge');
+                        const sbCount = Math.max(Number(data.pending_count || 0), Number(data.unread_count || 0));
+                        if (sidebarBadge) {
+                            sidebarBadge.textContent = sbCount;
+                            sidebarBadge.classList.toggle('d-none', sbCount <= 0);
+                        }
+
+                        const subtitle = document.getElementById('adminPendingSubtitle');
+                        if (subtitle) {
+                            subtitle.textContent = `${data.pending_count || 0} menunggu ACC`;
+                        }
+
+                        if (Array.isArray(data.notifications)) {
+                            renderNotifItems(data.notifications);
+                            const topItem = data.notifications[0];
+                            if (topItem && topItem.id > lastTopNotifId && data.unread_count > lastUnreadCount) {
+                                showIncomingReportToast(topItem);
+                            }
+                            lastTopNotifId = topItem ? topItem.id : lastTopNotifId;
+                        }
+                        lastUnreadCount = Number(data.unread_count || 0);
+                    } catch (e) {
+                        // silent background poll
+                    }
+                }
+
+                setInterval(pollAdminNotifications, 20000);
+            })();
+        </script>
+    @endif
     @stack('scripts')
 </body>
 </html>

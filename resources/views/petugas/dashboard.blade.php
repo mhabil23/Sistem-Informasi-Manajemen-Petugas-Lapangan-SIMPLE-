@@ -105,17 +105,22 @@
                     <span class="petugas-notif-bullet bullet-red"></span>
                     <div class="text-danger fw-semibold">
                         <i class="fa-solid fa-triangle-exclamation me-1"></i>
-                        Perhatian: Ada <strong>{{ $reportsRevision }} laporan perjalanan dinas</strong> yang perlu diperbaiki / direvisi.
+                        Perhatian: Ada <strong>{{ $reportsRevision }} laporan perjalanan dinas</strong> yang perlu diperbaiki / direvisi sebelum mendapat ACC Admin.
                     </div>
-                @elseif($reportsDraft > 0 || $reportsSubmitted == 0)
-                    <span class="petugas-notif-bullet bullet-amber"></span>
-                    <div>
-                        Laporan perjalanan dinas: <strong>{{ $reportsDraft > 0 ? $reportsDraft . ' laporan masih draft' : 'Belum membuat laporan kegiatan lapangan' }}</strong>. Harap submit laporan setelah kunjungan selesai.
-                    </div>
-                @else
+                @elseif($reportsApproved > 0 && $reportsSubmitted == 0 && $reportsDraft == 0)
                     <span class="petugas-notif-bullet bullet-green"></span>
                     <div>
-                        Laporan perjalanan dinas lengkap ({{ $reportsApproved }} disetujui admin).
+                        Laporan perjalanan dinas lengkap (<strong>{{ $reportsApproved }} telah di-ACC Admin</strong> &amp; siap diunduh PDF).
+                    </div>
+                @elseif($reportsSubmitted > 0)
+                    <span class="petugas-notif-bullet bullet-amber"></span>
+                    <div>
+                        Laporan perjalanan dinas: <strong>{{ $reportsSubmitted }} laporan menunggu persetujuan (ACC) Administrator</strong> sebelum file PDF validasi dapat diunduh.
+                    </div>
+                @else
+                    <span class="petugas-notif-bullet bullet-amber"></span>
+                    <div>
+                        Laporan perjalanan dinas: <strong>{{ $reportsDraft > 0 ? $reportsDraft . ' laporan masih draft' : 'Belum membuat laporan kegiatan lapangan' }}</strong>. Harap ajukan laporan setelah kunjungan selesai untuk proses ACC Admin.
                     </div>
                 @endif
             </li>
@@ -217,8 +222,8 @@
                             <span class="sketch-btn-title">Pengisian Laporan Perjadin</span>
                         </div>
                         <div class="sketch-btn-sub">Laporan Perjadin &amp; Pengeluaran Riil</div>
-                        <span class="badge {{ $reportsRevision > 0 ? 'bg-danger text-white' : ($reportsApproved > 0 ? 'bg-success-subtle text-success border border-success-subtle' : 'bg-secondary-subtle text-secondary border') }} mt-1" style="font-size: 0.68rem;">
-                            {{ $reportsRevision > 0 ? $reportsRevision . ' Perlu Revisi' : ($reportsApproved > 0 ? $reportsApproved . ' Disetujui' : 'Draft / Buat') }}
+                        <span class="badge {{ $reportsRevision > 0 ? 'bg-danger text-white' : ($reportsApproved > 0 ? 'bg-success-subtle text-success border border-success-subtle' : ($reportsSubmitted > 0 ? 'bg-info-subtle text-info-emphasis border border-info-subtle' : 'bg-secondary-subtle text-secondary border')) }} mt-1" style="font-size: 0.68rem;">
+                            {{ $reportsRevision > 0 ? $reportsRevision . ' Perlu Revisi' : ($reportsApproved > 0 ? $reportsApproved . ' ACC' : ($reportsSubmitted > 0 ? $reportsSubmitted . ' Menunggu ACC' : 'Draft / Buat')) }}
                         </span>
                     </div>
                 </div>

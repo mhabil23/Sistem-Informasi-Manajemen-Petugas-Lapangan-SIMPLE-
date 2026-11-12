@@ -87,10 +87,17 @@ Route::middleware(['auth', 'role:admin'])->prefix('admin')->as('admin.')->group(
     Route::get('/reports', [\App\Http\Controllers\Admin\ReportController::class, 'index'])->name('reports.index');
     Route::put('/reports/basis-settings', [\App\Http\Controllers\Admin\ReportController::class, 'updateBasisSettings'])->name('reports.basis-settings');
     Route::get('/reports/{report}', [\App\Http\Controllers\Admin\ReportController::class, 'show'])->name('reports.show');
+    Route::put('/reports/{report}', [\App\Http\Controllers\Admin\ReportController::class, 'update'])->name('reports.update');
+    Route::patch('/reports/{report}/approve', [\App\Http\Controllers\Admin\ReportController::class, 'approve'])->name('reports.approve');
     Route::get('/reports/{report}/download', [\App\Http\Controllers\Admin\ReportController::class, 'downloadPdf'])->name('reports.download');
     Route::get('/reports/{report}/preview', [\App\Http\Controllers\Admin\ReportController::class, 'previewPdf'])->name('reports.preview');
     Route::put('/reports/{report}/review', [\App\Http\Controllers\Admin\ReportController::class, 'review'])->name('reports.review');
     Route::delete('/reports/{report}', [\App\Http\Controllers\Admin\ReportController::class, 'destroy'])->name('reports.destroy');
+
+    // Notifikasi Admin (Laporan Perjadin Baru)
+    Route::get('/notifications/poll', [\App\Http\Controllers\Admin\NotificationController::class, 'poll'])->name('notifications.poll');
+    Route::post('/notifications/mark-all-read', [\App\Http\Controllers\Admin\NotificationController::class, 'markAllRead'])->name('notifications.mark-all-read');
+    Route::patch('/notifications/{notification}/read', [\App\Http\Controllers\Admin\NotificationController::class, 'markAsRead'])->name('notifications.read');
 
     // Administrasi Pelatihan SPKRT (Admin)
     Route::get('/trainings', [\App\Http\Controllers\Admin\TrainingController::class, 'index'])->name('trainings.index');

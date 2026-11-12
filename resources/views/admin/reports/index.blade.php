@@ -16,16 +16,34 @@
         <p class="text-muted small mb-0">Tinjau laporan kegiatan lapangan dari petugas, periksa bukti dokumentasi foto/berkas, dan berikan status persetujuan atau catatan revisi.</p>
     </div>
     <div class="col-md-5 text-md-end mt-2 mt-md-0 d-flex flex-wrap justify-content-md-end align-items-center gap-2">
-        @if($submittedCount > 0)
-            <span class="badge bg-warning text-dark px-2.5 py-1.5 fs-7 shadow-sm">
-                <i class="fa-solid fa-bell me-1"></i> {{ $submittedCount }} Laporan Perlu Diverifikasi
-            </span>
+        @if($submittedCount > 0 || ($draftCount ?? 0) > 0)
+            <a href="{{ route('admin.reports.index', ['status' => 'submitted']) }}" class="badge bg-warning text-dark px-2.5 py-1.5 fs-7 shadow-sm text-decoration-none">
+                <i class="fa-solid fa-bell me-1"></i> {{ $submittedCount }} Menunggu ACC
+                @if(($draftCount ?? 0) > 0)
+                    &bull; {{ $draftCount }} Draft Baru
+                @endif
+            </a>
         @endif
         <button type="button" class="btn btn-sm btn-sp-primary" data-bs-toggle="modal" data-bs-target="#basisSettingsModal">
             <i class="fa-solid fa-scale-balanced me-1"></i> Atur B. Dasar Pelaksanaan
         </button>
     </div>
 </div>
+
+@if(($unreadNotifCount ?? 0) > 0)
+    <div class="alert alert-warning border-warning d-flex flex-wrap justify-content-between align-items-center gap-2 mb-3 py-2 px-3 shadow-sm">
+        <div class="small text-dark">
+            <i class="fa-solid fa-bell text-warning me-1"></i>
+            <strong>Informasi Baru:</strong> Terdapat <strong>{{ $unreadNotifCount }} pemberitahuan</strong> laporan perjadin baru/diperbarui dari petugas lapangan. Silakan klik ikon <strong>Lihat</strong> (<i class="fa-solid fa-eye"></i>), <strong>Edit Inputan</strong> (<i class="fa-regular fa-pen-to-square"></i>), atau <strong>ACC</strong> (<i class="fa-solid fa-check-double text-success"></i>).
+        </div>
+        <form method="POST" action="{{ route('admin.notifications.mark-all-read') }}" class="m-0">
+            @csrf
+            <button type="submit" class="btn btn-xs btn-outline-dark py-1 px-2" style="font-size: 0.72rem;">
+                <i class="fa-solid fa-check me-1"></i> Tandai Dibaca
+            </button>
+        </form>
+    </div>
+@endif
 
 <!-- Stat Cards -->
 <div class="row g-2 mb-3">
@@ -168,13 +186,13 @@
             <table class="table sp-table align-middle">
                 <thead>
                     <tr>
-                        <th style="width: 15%;">No. Laporan</th>
-                        <th style="width: 17%;">Petugas Lapangan</th>
-                        <th style="width: 22%;">Kegiatan &amp; Tanggal</th>
-                        <th style="width: 22%;">Uraian Singkat</th>
+                        <th style="width: 14%;">No. Laporan</th>
+                        <th style="width: 16%;">Petugas Lapangan</th>
+                        <th style="width: 21%;">Kegiatan &amp; Tanggal</th>
+                        <th style="width: 20%;">Uraian Singkat</th>
                         <th class="text-center" style="width: 7%;">Lampiran</th>
                         <th class="text-center" style="width: 9%;">Status</th>
-                        <th class="text-end" style="width: 8%;">Aksi</th>
+                        <th class="text-end" style="min-width: 220px;">Aksi</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -221,20 +239,57 @@
                                 </span>
                             </td>
                             <td class="text-end text-nowrap">
-                                <div class="sp-action-btn-group">
-                                    <!-- Tombol Tinjau / Verifikasi -->
+                                <div class="sp-action-btn-group d-inline-flex align-items-center gap-1">
+                                    <!-- 1. Melihat Laporan Lengkap -->
+                                    <button type="button"
+                                            class="btn btn-light border sp-action-btn text-info"
+                                            title="Lihat Detail &amp; Pratinjau Laporan"
+                                            data-bs-toggle="tooltip"
+                                            onclick='openViewReportModal(@json($rep))'>
+                                        <i class="fa-solid fa-eye"></i>
+                                    </button>
+
+                                    <!-- 2. Edit Inputan Laporan Petugas -->
+                                    <button type="button"
+                                            class="btn btn-light border sp-action-btn text-warning"
+                                            title="Edit Inputan Laporan"
+                                            data-bs-toggle="tooltip"
+                                            onclick='openAdminEditModal(@json($rep))'>
+                                        <i class="fa-regular fa-pen-to-square"></i>
+                                    </button>
+
+                                    <!-- 3. ACC Laporan (Setujui Cepat) -->
+                                    @if($rep->status !== 'approved')
+                                        <form method="POST" action="{{ route('admin.reports.approve', $rep) }}" class="d-inline" onsubmit="return confirm('ACC (Setujui) laporan {{ addslashes($rep->activity_title) }} agar petugas dapat mengunduh PDF resminya?');">
+                                            @csrf
+                                            @method('PATCH')
+                                            <button type="submit"
+                                                    class="btn btn-success btn-sm px-2 py-1 fw-semibold"
+                                                    title="ACC / Setujui Laporan"
+                                                    data-bs-toggle="tooltip"
+                                                    style="font-size: 0.72rem;">
+                                                <i class="fa-solid fa-check-double me-0.5"></i> ACC
+                                            </button>
+                                        </form>
+                                    @else
+                                        <span class="badge bg-success-subtle text-success border border-success-subtle py-1 px-1.5" style="font-size: 0.68rem;" title="Sudah Di-ACC (Petugas dapat download PDF)">
+                                            <i class="fa-solid fa-circle-check me-0.5"></i> ACC
+                                        </span>
+                                    @endif
+
+                                    <!-- Verifikasi / Revisi dengan Catatan -->
                                     <button type="button" 
                                             class="btn btn-light border sp-action-btn text-primary" 
-                                            title="Periksa & Verifikasi Laporan" 
+                                            title="Verifikasi / Catatan Revisi" 
                                             data-bs-toggle="tooltip"
-                                            onclick="openReviewModal({{ json_encode($rep) }})">
+                                            onclick='openReviewModal(@json($rep))'>
                                         <i class="fa-solid fa-file-circle-check"></i>
                                     </button>
 
                                     <!-- Pratinjau / Cetak PDF -->
                                     <a href="{{ route('admin.reports.preview', $rep) }}" 
                                        target="_blank"
-                                       class="btn btn-light border sp-action-btn text-info" 
+                                       class="btn btn-light border sp-action-btn text-secondary" 
                                        title="Pratinjau / Cetak Dokumen PDF" 
                                        data-bs-toggle="tooltip">
                                         <i class="fa-solid fa-print"></i>
@@ -416,6 +471,288 @@
         </div>
     </div>
 </div>
+
+<!-- ==============================================================
+     MODAL LIHAT DETAIL & PRATINJAU DOKUMEN (ADMIN)
+     ============================================================== -->
+<div class="modal fade" id="viewReportModal" tabindex="-1" aria-labelledby="viewReportModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered modal-xl">
+        <div class="modal-content border-0 shadow">
+            <div class="modal-header bg-light border-bottom">
+                <div class="d-flex align-items-center gap-2">
+                    <h5 class="modal-title fw-bold text-dark mb-0" id="viewReportModalLabel">
+                        <i class="fa-solid fa-eye text-info me-2"></i> Lihat Detail &amp; Dokumen Laporan Petugas
+                    </h5>
+                    <span id="det_status_badge" class="badge"></span>
+                </div>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body p-4 bg-light">
+                @include('reports._document_preview_body')
+            </div>
+            <div class="modal-footer bg-light border-top d-flex flex-wrap justify-content-between gap-2">
+                <div class="d-flex gap-2">
+                    <a id="adm_view_preview_link" href="#" target="_blank" class="btn btn-outline-primary">
+                        <i class="fa-solid fa-print me-1"></i> Cetak / Preview PDF
+                    </a>
+                    <a id="adm_view_download_link" href="#" class="btn btn-outline-danger">
+                        <i class="fa-solid fa-file-pdf me-1"></i> Unduh PDF
+                    </a>
+                </div>
+                <div class="d-flex flex-wrap gap-2 align-items-center">
+                    <button type="button" class="btn btn-warning text-dark fw-semibold" onclick="switchAdminViewToEdit()">
+                        <i class="fa-regular fa-pen-to-square me-1"></i> Edit Inputan Laporan
+                    </button>
+                    <form id="adm_view_approve_form" method="POST" action="" class="d-inline" onsubmit="return confirm('ACC (Setujui) laporan ini agar petugas dapat mengunduh PDF resminya?');">
+                        @csrf
+                        @method('PATCH')
+                        <button type="submit" class="btn btn-success fw-semibold">
+                            <i class="fa-solid fa-check-double me-1"></i> ACC / Setujui Laporan
+                        </button>
+                    </form>
+                    <span id="adm_view_already_acc_badge" class="badge bg-success-subtle text-success border border-success-subtle py-2 px-3 d-none">
+                        <i class="fa-solid fa-circle-check me-1"></i> Sudah Di-ACC Admin
+                    </span>
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Tutup</button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- ==============================================================
+     MODAL EDIT INPUTAN LAPORAN PETUGAS (ROLE ADMIN)
+     ============================================================== -->
+<div class="modal fade" id="adminEditReportModal" tabindex="-1" aria-labelledby="adminEditReportModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered modal-xl">
+        <div class="modal-content border-0 shadow">
+            <div class="modal-header bg-light border-bottom">
+                <div>
+                    <h5 class="modal-title fw-bold text-dark" id="adminEditReportModalLabel">
+                        <i class="fa-regular fa-pen-to-square text-warning me-2"></i> Edit Inputan Laporan Perjadin Petugas
+                    </h5>
+                    <div class="small text-muted">Administrator dapat mengoreksi seluruh isian laporan, rincian pengeluaran riil, maupun dasar pelaksanaan, lalu menyimpan atau langsung ACC.</div>
+                </div>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <form id="adminEditReportForm" method="POST" action="">
+                @csrf
+                @method('PUT')
+                <div class="modal-body p-4">
+                    <!-- A. Identitas Pelaksana -->
+                    <div class="card mb-3 border">
+                        <div class="card-header bg-light py-2 px-3 fw-bold text-dark small">
+                            <i class="fa-solid fa-user-tie text-primary me-1"></i> A. YANG MELAKUKAN PERJALANAN DINAS
+                        </div>
+                        <div class="card-body p-3">
+                            <div class="row g-3">
+                                <div class="col-md-5">
+                                    <label class="form-label small fw-semibold text-secondary">Nama Lengkap <span class="text-danger">*</span></label>
+                                    <input type="text" id="adm_edit_officer_name" name="officer_name" class="form-control" required>
+                                </div>
+                                <div class="col-md-3">
+                                    <label class="form-label small fw-semibold text-secondary">Jenis Identitas</label>
+                                    <select id="adm_edit_id_type" name="id_type" class="form-select">
+                                        <option value="NIK">NIK (KTP)</option>
+                                        <option value="NIP">NIP (Pegawai/PNS)</option>
+                                    </select>
+                                </div>
+                                <div class="col-md-4">
+                                    <label class="form-label small fw-semibold text-secondary">Nomor NIK / NIP</label>
+                                    <input type="text" id="adm_edit_officer_nip" name="officer_nip" class="form-control font-monospace">
+                                </div>
+                                <div class="col-md-6">
+                                    <label class="form-label small fw-semibold text-secondary">Pangkat / Golongan</label>
+                                    <input type="text" id="adm_edit_officer_rank" name="officer_rank" class="form-control">
+                                </div>
+                                <div class="col-md-6">
+                                    <label class="form-label small fw-semibold text-secondary">Jabatan</label>
+                                    <input type="text" id="adm_edit_officer_position" name="officer_position" class="form-control">
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- B. Dasar Pelaksanaan -->
+                    @include('admin.partials._basis_fields', ['prefix' => 'adm_edit', 'defaults' => $basisSettings, 'required' => false])
+
+                    <!-- C & D. Tujuan & Waktu -->
+                    <div class="card mb-3 border">
+                        <div class="card-header bg-light py-2 px-3 fw-bold text-dark small">
+                            <i class="fa-solid fa-map-location-dot text-primary me-1"></i> C &amp; D. TUJUAN &amp; WAKTU PERJALANAN DINAS
+                        </div>
+                        <div class="card-body p-3">
+                            <div class="row g-3 mb-3">
+                                <div class="col-md-7">
+                                    <label class="form-label small fw-semibold text-secondary">Judul Kegiatan / Agenda <span class="text-danger">*</span></label>
+                                    <input type="text" id="adm_edit_title" name="activity_title" class="form-control" required>
+                                </div>
+                                <div class="col-md-5">
+                                    <label class="form-label small fw-semibold text-secondary">Penugasan Terkait</label>
+                                    <select id="adm_edit_assignment" name="assignment_id" class="form-select" onchange="autoFillLocationAndExpense(this, 'adm_edit_activity_location', 'adm_edit_expense_list')">
+                                        <option value="" data-location="">-- Kegiatan Mandiri / Umum --</option>
+                                        @foreach($assignments as $asgn)
+                                            <option value="{{ $asgn->id }}" data-location="{{ $asgn->location }}">{{ $asgn->title }}</option>
+                                        @endforeach
+                                    </select>
+                                </div>
+                                <div class="col-12">
+                                    <label class="form-label small fw-semibold text-secondary">Lokasi / Wilayah Tugas / Asal Keberangkatan</label>
+                                    <input type="text" id="adm_edit_activity_location" name="activity_location" class="form-control" oninput="syncDefaultExpenseDesc('adm_edit_activity_location', 'adm_edit_expense_list')">
+                                </div>
+                            </div>
+                            <div class="mb-3">
+                                <label class="form-label small fw-semibold text-secondary">C. Tujuan Perjalanan Dinas (Teks Lengkap)</label>
+                                <textarea id="adm_edit_destination_purpose" name="destination_purpose" class="form-control" rows="2"></textarea>
+                            </div>
+                            <div class="row g-3">
+                                <div class="col-md-6">
+                                    <label class="form-label small fw-semibold text-secondary">D. Durasi / Lama Waktu Perjalanan</label>
+                                    <input type="text" id="adm_edit_duration_text" name="duration_text" class="form-control">
+                                </div>
+                                <div class="col-md-6">
+                                    <label class="form-label small fw-semibold text-secondary">Tanggal Pelaksanaan Kegiatan <span class="text-danger">*</span></label>
+                                    <input type="date" id="adm_edit_date" name="activity_date" class="form-control" required>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- E & F. Hasil, Kendala, Solusi & Saran -->
+                    <div class="card mb-3 border">
+                        <div class="card-header bg-light py-2 px-3 fw-bold text-dark small">
+                            <i class="fa-solid fa-file-lines text-primary me-1"></i> E &amp; F. HASIL PERJALANAN DINAS &amp; SARAN
+                        </div>
+                        <div class="card-body p-3">
+                            <div class="mb-3">
+                                <label class="form-label small fw-semibold text-secondary">E. Uraian Hasil Perjalanan Dinas <span class="text-danger">*</span></label>
+                                <textarea id="adm_edit_description" name="work_description" class="form-control" rows="4" required></textarea>
+                            </div>
+                            <div class="row g-3 mb-3">
+                                <div class="col-md-6">
+                                    <label class="form-label small fw-semibold text-secondary">Kendala</label>
+                                    <textarea id="adm_edit_obstacles" name="obstacles" class="form-control" rows="3"></textarea>
+                                </div>
+                                <div class="col-md-6">
+                                    <label class="form-label small fw-semibold text-secondary">Solusi</label>
+                                    <textarea id="adm_edit_solutions" name="solutions" class="form-control" rows="3"></textarea>
+                                </div>
+                            </div>
+                            <div>
+                                <label class="form-label small fw-semibold text-secondary">F. Saran dan Rekomendasi / Tindak Lanjut</label>
+                                <textarea id="adm_edit_recommendations" name="recommendations" class="form-control" rows="2"></textarea>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Daftar Pengeluaran Riil -->
+                    <div class="card mb-3 border border-success">
+                        <div class="card-header bg-success-subtle text-success-emphasis py-2 px-3 fw-bold small d-flex justify-content-between align-items-center">
+                            <span><i class="fa-solid fa-receipt me-1"></i> DAFTAR PENGELUARAN RIIL</span>
+                            <button type="button" class="btn btn-xs btn-success py-0.5 px-2" style="font-size: 0.72rem;" onclick="addExpenseRow('adm_edit_expense_list', 'adm_edit_expense_total', 'adm_edit_expense_terbilang')">
+                                <i class="fa-solid fa-plus me-1"></i> Tambah Baris Biaya
+                            </button>
+                        </div>
+                        <div class="card-body p-3">
+                            <div class="table-responsive mb-2">
+                                <table class="table table-bordered table-sm align-middle mb-0">
+                                    <thead class="table-light text-center small">
+                                        <tr>
+                                            <th style="width: 50px;">No</th>
+                                            <th>Perincian Biaya</th>
+                                            <th style="width: 180px;">Jumlah (Rp)</th>
+                                            <th style="width: 45px;"></th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="adm_edit_expense_list"></tbody>
+                                    <tfoot>
+                                        <tr class="table-light">
+                                            <th colspan="2" class="text-center small">
+                                                JUMLAH (<span id="adm_edit_expense_terbilang" class="fst-italic fw-semibold text-success">Nol Rupiah</span>)
+                                            </th>
+                                            <th class="text-end font-monospace text-dark" id="adm_edit_expense_total">Rp. 0,-</th>
+                                            <th></th>
+                                        </tr>
+                                    </tfoot>
+                                </table>
+                            </div>
+                            <div class="row g-2 mt-2">
+                                <div class="col-md-6">
+                                    <label class="form-label small fw-semibold text-secondary mb-1">Pejabat Pembuat Komitmen (Menyetujui)</label>
+                                    <input type="text" id="adm_edit_ppk_name" name="ppk_name" class="form-control form-control-sm">
+                                </div>
+                                <div class="col-md-6">
+                                    <label class="form-label small fw-semibold text-secondary mb-1">NIP Pejabat Pembuat Komitmen</label>
+                                    <input type="text" id="adm_edit_ppk_nip" name="ppk_nip" class="form-control form-control-sm font-monospace">
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Penandatanganan & Opsional -->
+                    <div class="card mb-3 border">
+                        <div class="card-header bg-light py-2 px-3 fw-bold text-dark small">
+                            <i class="fa-solid fa-signature text-primary me-1"></i> PENGESAHAN &amp; LAMPIRAN OPSIONAL
+                        </div>
+                        <div class="card-body p-3">
+                            <div class="row g-3 mb-3">
+                                <div class="col-md-6">
+                                    <label class="form-label small fw-semibold text-secondary">Kota Penandatanganan</label>
+                                    <input type="text" id="adm_edit_signing_city" name="signing_city" class="form-control">
+                                </div>
+                                <div class="col-md-6">
+                                    <label class="form-label small fw-semibold text-secondary">Tanggal Tanda Tangan</label>
+                                    <input type="date" id="adm_edit_signing_date" name="signing_date" class="form-control">
+                                </div>
+                            </div>
+
+                            <div id="adm_edit_current_sig_container" class="mb-3 d-none">
+                                <div class="small fw-semibold text-secondary mb-1">Tanda Tangan Digital Petugas (Tersimpan):</div>
+                                <div class="p-2 bg-light border rounded d-inline-block">
+                                    <img id="adm_edit_current_sig_img" src="" alt="Tanda Tangan Petugas" style="max-height: 65px;">
+                                </div>
+                            </div>
+
+                            <div class="form-check form-switch mb-2">
+                                <input class="form-check-input" type="checkbox" name="include_vehicle_statement" value="1" id="adm_edit_vehicle_stmt">
+                                <label class="form-check-label fw-semibold text-dark small" for="adm_edit_vehicle_stmt">
+                                    Sertakan Surat Pernyataan Tidak Menggunakan Kendaraan Dinas
+                                </label>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Foto Dokumentasi Tersimpan (Admin dapat meninjau atau menghapus foto tidak sesuai) -->
+                    <div id="adm_edit_existing_photos_box" class="card mb-3 border d-none">
+                        <div class="card-header bg-light py-2 px-3 fw-bold text-dark small">
+                            <i class="fa-solid fa-camera text-primary me-1"></i> DOKUMENTASI FOTO TERSIMPAN
+                        </div>
+                        <div class="card-body p-3">
+                            <div id="adm_edit_existing_photos_list" class="row g-2"></div>
+                        </div>
+                    </div>
+
+                    <!-- Catatan Opsional Admin -->
+                    <div>
+                        <label class="form-label small fw-semibold text-secondary">Catatan Admin (Opsional)</label>
+                        <textarea id="adm_edit_admin_notes" name="admin_notes" class="form-control form-control-sm" rows="2" placeholder="Catatan perbaikan oleh admin atau persetujuan (opsional)..."></textarea>
+                    </div>
+                </div>
+                <div class="modal-footer bg-light border-top d-flex flex-wrap justify-content-between gap-2">
+                    <button type="button" class="btn btn-light" data-bs-dismiss="modal">Batal</button>
+                    <div class="d-flex flex-wrap gap-2">
+                        <button type="submit" name="after_action" value="save" class="btn btn-sp-primary">
+                            <i class="fa-solid fa-floppy-disk me-1"></i> Simpan Perubahan
+                        </button>
+                        <button type="submit" name="after_action" value="approve" class="btn btn-success fw-semibold">
+                            <i class="fa-solid fa-check-double me-1"></i> Simpan &amp; ACC Laporan
+                        </button>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
 @endsection
 
 @push('scripts')
@@ -554,6 +891,127 @@
         const modal = new bootstrap.Modal(document.getElementById('reviewReportModal'));
         modal.show();
     }
+
+    let currentInspectedReport = null;
+
+    function openViewReportModal(rep) {
+        currentInspectedReport = rep;
+        populateReportDocumentPreview(rep, ADMIN_BASIS_DEFAULTS);
+
+        document.getElementById('adm_view_preview_link').href = '/admin/reports/' + rep.id + '/preview';
+        document.getElementById('adm_view_download_link').href = '/admin/reports/' + rep.id + '/download';
+
+        const approveForm = document.getElementById('adm_view_approve_form');
+        const alreadyBadge = document.getElementById('adm_view_already_acc_badge');
+        if (rep.status === 'approved') {
+            approveForm.classList.add('d-none');
+            alreadyBadge.classList.remove('d-none');
+        } else {
+            approveForm.action = '/admin/reports/' + rep.id + '/approve';
+            approveForm.classList.remove('d-none');
+            alreadyBadge.classList.add('d-none');
+        }
+
+        const modal = bootstrap.Modal.getOrCreateInstance(document.getElementById('viewReportModal'));
+        modal.show();
+    }
+
+    function switchAdminViewToEdit() {
+        const viewEl = document.getElementById('viewReportModal');
+        const viewInst = bootstrap.Modal.getInstance(viewEl);
+        if (viewInst) viewInst.hide();
+        if (currentInspectedReport) {
+            setTimeout(() => openAdminEditModal(currentInspectedReport), 220);
+        }
+    }
+
+    function openAdminEditModal(rep) {
+        document.getElementById('adminEditReportForm').action = '/admin/reports/' + rep.id;
+
+        document.getElementById('adm_edit_officer_name').value = rep.resolved_officer_name || rep.officer_name || (rep.user ? rep.user.name : '') || '';
+        document.getElementById('adm_edit_id_type').value = rep.id_type || 'NIK';
+        document.getElementById('adm_edit_officer_nip').value = rep.resolved_officer_nik || rep.officer_nip || (rep.user ? rep.user.nik : '') || '';
+        document.getElementById('adm_edit_officer_rank').value = rep.officer_rank || (rep.user ? rep.user.rank : '') || '-';
+        document.getElementById('adm_edit_officer_position').value = rep.officer_position || (rep.user ? rep.user.position : '') || 'Mitra BPS Kabupaten Kolaka Utara';
+
+        document.getElementById('adm_edit_basis_dipa').value = rep.basis_dipa || (rep.assignment ? rep.assignment.basis_dipa : '') || ADMIN_BASIS_DEFAULTS.basis_dipa || '';
+        document.getElementById('adm_edit_st_number').value = rep.st_number || (rep.assignment ? rep.assignment.st_number : '') || ADMIN_BASIS_DEFAULTS.st_number || '';
+        document.getElementById('adm_edit_st_date').value = rep.st_date
+            ? rep.st_date.substring(0, 10)
+            : ((rep.assignment && rep.assignment.st_date) ? rep.assignment.st_date.substring(0, 10) : (ADMIN_BASIS_DEFAULTS.st_date || ''));
+        if (rep.basis_st) {
+            document.getElementById('adm_edit_basis_st').value = rep.basis_st;
+        } else {
+            syncAdminBasisSt('adm_edit');
+        }
+
+        document.getElementById('adm_edit_title').value = rep.activity_title || '';
+        document.getElementById('adm_edit_assignment').value = rep.assignment_id || '';
+        const actLoc = rep.activity_location || (rep.assignment ? rep.assignment.location : '') || '';
+        document.getElementById('adm_edit_activity_location').value = actLoc;
+        document.getElementById('adm_edit_destination_purpose').value = rep.destination_purpose || '';
+        document.getElementById('adm_edit_duration_text').value = rep.duration_text || 'Selama 1 (satu) Hari';
+        document.getElementById('adm_edit_date').value = rep.activity_date ? rep.activity_date.substring(0, 10) : '';
+
+        document.getElementById('adm_edit_description').value = rep.work_description || '';
+        document.getElementById('adm_edit_obstacles').value = rep.obstacles || '';
+        document.getElementById('adm_edit_solutions').value = rep.solutions || '';
+        document.getElementById('adm_edit_recommendations').value = rep.recommendations || '-';
+
+        const tbody = document.getElementById('adm_edit_expense_list');
+        tbody.innerHTML = '';
+        const items = (Array.isArray(rep.resolved_expense_items) && rep.resolved_expense_items.length)
+            ? rep.resolved_expense_items
+            : (Array.isArray(rep.expense_items) && rep.expense_items.length
+                ? rep.expense_items
+                : [{ description: buildDefaultExpenseDesc(actLoc), amount: 50000 }]);
+        items.forEach(item => {
+            addExpenseRow('adm_edit_expense_list', 'adm_edit_expense_total', 'adm_edit_expense_terbilang', item.description || '', Number(item.amount || 0));
+        });
+
+        document.getElementById('adm_edit_ppk_name').value = rep.ppk_name || 'Hidayatullah, SE';
+        document.getElementById('adm_edit_ppk_nip').value = rep.ppk_nip || '198510292011011009';
+        document.getElementById('adm_edit_signing_city').value = rep.signing_city || 'Lasusua';
+        document.getElementById('adm_edit_signing_date').value = rep.signing_date ? rep.signing_date.substring(0, 10) : (rep.activity_date ? rep.activity_date.substring(0, 10) : '');
+        document.getElementById('adm_edit_vehicle_stmt').checked = (rep.include_vehicle_statement === true || rep.include_vehicle_statement === 1);
+        document.getElementById('adm_edit_admin_notes').value = rep.admin_notes || '';
+
+        const sigBox = document.getElementById('adm_edit_current_sig_container');
+        const sigImg = document.getElementById('adm_edit_current_sig_img');
+        if (rep.signature_path) {
+            sigBox.classList.remove('d-none');
+            sigImg.src = '/storage/' + rep.signature_path;
+        } else {
+            sigBox.classList.add('d-none');
+        }
+
+        const existBox = document.getElementById('adm_edit_existing_photos_box');
+        const existList = document.getElementById('adm_edit_existing_photos_list');
+        existList.innerHTML = '';
+        if (Array.isArray(rep.attachments) && rep.attachments.length > 0) {
+            existBox.classList.remove('d-none');
+            rep.attachments.forEach(att => {
+                existList.appendChild(buildExistingEditAttachmentCard(att));
+            });
+        } else {
+            existBox.classList.add('d-none');
+        }
+
+        const modal = bootstrap.Modal.getOrCreateInstance(document.getElementById('adminEditReportModal'));
+        modal.show();
+    }
+
+    @if(isset($autoOpenReport) && $autoOpenReport)
+        document.addEventListener('DOMContentLoaded', function() {
+            const autoRep = @json($autoOpenReport);
+            @if(($autoOpenMode ?? 'view') === 'edit')
+                openAdminEditModal(autoRep);
+            @else
+                openViewReportModal(autoRep);
+            @endif
+        });
+    @endif
 </script>
+@include('reports._shared_js')
 @endpush
 

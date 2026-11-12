@@ -344,5 +344,72 @@ class OfficerReport extends Model
             'basis_st' => $basisSt,
         ];
     }
+
+    public function canBeDownloadedByOfficer(): bool
+    {
+        return $this->status === 'approved';
+    }
+
+    public static function buildExpenseItems(array $descriptions, array $amounts): array
+    {
+        $items = [];
+
+        foreach ($descriptions as $idx => $desc) {
+            $cleanDesc = trim((string) $desc);
+            $amount = isset($amounts[$idx]) ? (int) preg_replace('/[^0-9]/', '', (string) $amounts[$idx]) : 0;
+            if ($cleanDesc !== '' || $amount > 0) {
+                $items[] = [
+                    'description' => $cleanDesc ?: 'Biaya transport perjalanan dinas',
+                    'amount' => $amount,
+                ];
+            }
+        }
+
+        return $items;
+    }
+
+    public function deleteAttachmentsByIds(array $ids): void
+    {
+        $cleanIds = array_filter($ids);
+        if (empty($cleanIds)) {
+            return;
+        }
+
+        $attachments = ReportAttachment::where('report_id', $this->id)
+            ->whereIn('id', $cleanIds)
+            ->get();
+
+        foreach ($attachments as $att) {
+            if ($att->file_path && \Illuminate\Support\Facades\Storage::disk('public')->exists($att->file_path)) {
+                \Illuminate\Support\Facades\Storage::disk('public')->delete($att->file_path);
+            }
+            $att->delete();
+        }
+    }
+
+    public function notifyOfficerDecision(?int $adminId = null): void
+    {
+        if (!$this->user_id || !in_array($this->status, ['approved', 'revision_needed'], true)) {
+            return;
+        }
+
+        $title = $this->status === 'approved'
+            ? "Laporan Perjadin Disetujui (ACC): {$this->activity_title}"
+            : "Perlu Revisi Laporan Perjadin: {$this->activity_title}";
+
+        $message = $this->status === 'approved'
+            ? "Laporan perjalanan dinas '{$this->activity_title}' ({$this->report_number}) telah di-ACC oleh Administrator. File PDF resmi sekarang sudah dapat diunduh."
+            : "Laporan perjalanan dinas '{$this->activity_title}' ({$this->report_number}) dikembalikan Administrator untuk diperbaiki."
+                . ($this->admin_notes ? " Catatan Admin: {$this->admin_notes}" : '');
+
+        OfficerNotice::create([
+            'user_id' => $this->user_id,
+            'sender_id' => $adminId ?? \Illuminate\Support\Facades\Auth::id(),
+            'type' => $this->status === 'approved' ? 'report_approved' : 'report_revision',
+            'title' => $title,
+            'message' => $message,
+            'is_read' => false,
+        ]);
+    }
 }
 

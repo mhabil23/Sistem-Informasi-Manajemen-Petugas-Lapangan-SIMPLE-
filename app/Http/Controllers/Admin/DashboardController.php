@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
 use App\Models\ActivityLog;
+use App\Models\AdminNotification;
 use App\Models\Assignment;
 use App\Models\OfficerBast;
 use App\Models\OfficerReport;
@@ -227,10 +228,17 @@ class DashboardController extends Controller
         // Daftar petugas yang belum membuat laporan
         $officersWithoutReports = collect($officerMonitoringList)->where('has_report', false)->values();
 
-        // Report statuses
+        // Report statuses & newly created/pending reports for Admin info
         $reportsPending = OfficerReport::whereIn('status', ['submitted', 'reviewing'])->count();
+        $reportsDraft = OfficerReport::where('status', 'draft')->count();
         $reportsApproved = OfficerReport::where('status', 'approved')->count();
         $reportsRevision = OfficerReport::where('status', 'revision_needed')->count();
+        $unreadAdminNotifsCount = AdminNotification::unread()->count();
+        $incomingApprovalReports = OfficerReport::with(['user', 'assignment'])
+            ->whereIn('status', ['submitted', 'reviewing', 'draft'])
+            ->latest('created_at')
+            ->take(8)
+            ->get();
 
         // Data dropdown filter
         $assignmentsList = Assignment::orderBy('title')->get();
@@ -275,8 +283,11 @@ class DashboardController extends Controller
             'reportSubmissionRate',
             'officersWithoutReports',
             'reportsPending',
+            'reportsDraft',
             'reportsApproved',
             'reportsRevision',
+            'unreadAdminNotifsCount',
+            'incomingApprovalReports',
             'assignmentsList',
             'districtsList',
             'allOfficersDropdown',
