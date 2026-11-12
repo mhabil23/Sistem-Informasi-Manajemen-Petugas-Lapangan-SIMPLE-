@@ -100,13 +100,23 @@
                             </td>
                             <td>
                                 <span class="small fw-semibold text-dark text-truncate d-block" style="max-width: 200px;">
-                                    {{ $item->assignment ? $item->assignment->title : '-' }}
+                                    {{ $item->activity_subtitle ?: ($item->assignment ? $item->assignment->title : '-') }}
                                 </span>
-                                <small class="text-muted"><i class="fa-solid fa-location-dot me-1 text-danger"></i> {{ $item->assignment ? $item->assignment->location : '-' }}</small>
+                                <small class="text-muted"><i class="fa-solid fa-location-dot me-1 text-danger"></i> {{ $item->document_place ?: ($item->assignment ? $item->assignment->location : '-') }}</small>
+                                @if($item->recipients->count() > 1)
+                                    <div>
+                                        <span class="badge bg-primary-subtle text-primary border border-primary-subtle mt-1" style="font-size: 0.65rem;">
+                                            <i class="fa-solid fa-users me-1"></i> Kolektif ({{ $item->recipients->count() }} Petugas)
+                                        </span>
+                                    </div>
+                                @endif
                             </td>
                             <td>
+                                @if($item->isKantorKePetugas() && $item->document_title)
+                                    <div class="small fw-semibold text-dark text-truncate" style="max-width: 260px;">{{ $item->document_title }}</div>
+                                @endif
                                 <div class="small text-secondary text-truncate" style="max-width: 260px;" title="{{ $item->description }}">
-                                    {{ Str::limit($item->description, 55) }}
+                                    {{ Str::limit(str_replace("\n", ', ', $item->description), 55) }}
                                 </div>
                             </td>
                             <td class="text-end text-nowrap">
@@ -163,9 +173,16 @@
                                         </span>
                                     </div>
                                 @endif
-                                @if($item->assignment)
-                                    <h6 class="fw-bold text-dark mt-1 mb-0">{{ $item->assignment->title }}</h6>
-                                    <small class="text-muted"><i class="fa-solid fa-location-dot me-1 text-danger"></i> {{ $item->assignment->location }}</small>
+                                @if($item->assignment || $item->activity_subtitle)
+                                    <h6 class="fw-bold text-dark mt-1 mb-0">{{ $item->activity_subtitle ?: $item->assignment->title }}</h6>
+                                    <small class="text-muted"><i class="fa-solid fa-location-dot me-1 text-danger"></i> {{ $item->document_place ?: ($item->assignment->location ?? '-') }}</small>
+                                @endif
+                                @if($item->recipients->count() > 1)
+                                    <div class="mt-1">
+                                        <span class="badge bg-primary-subtle text-primary border border-primary-subtle" style="font-size: 0.65rem;">
+                                            <i class="fa-solid fa-users me-1"></i> Kolektif ({{ $item->recipients->count() }} Petugas)
+                                        </span>
+                                    </div>
                                 @endif
                             </div>
                             <div class="d-flex gap-1.5">
@@ -184,9 +201,12 @@
                         </div>
 
                         <div class="small text-secondary mb-2">
+                            @if($item->isKantorKePetugas() && $item->document_title)
+                                <div class="fw-semibold text-dark mb-0.5">{{ $item->document_title }}</div>
+                            @endif
                             <div class="mb-1">
                                 <i class="fa-solid fa-align-left text-muted me-1.5" style="width: 14px;"></i>
-                                <span>{{ Str::limit($item->description, 70) }}</span>
+                                <span>{{ Str::limit(str_replace("\n", ', ', $item->description), 70) }}</span>
                             </div>
                         </div>
 

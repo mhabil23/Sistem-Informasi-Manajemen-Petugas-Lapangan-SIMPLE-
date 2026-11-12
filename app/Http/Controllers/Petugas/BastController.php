@@ -182,8 +182,8 @@ class BastController extends Controller
         $userId = Auth::id();
         $currentType = $request->query('type'); // 'kantor_ke_petugas', 'petugas_ke_kantor', or null
 
-        $query = OfficerBast::with(['assignment'])
-            ->where('officer_id', $userId);
+        $query = OfficerBast::with(['assignment', 'recipients'])
+            ->forOfficer($userId);
 
         if ($currentType === 'kantor_ke_petugas') {
             $query->where(function ($q) {
@@ -194,15 +194,15 @@ class BastController extends Controller
             $query->where('bast_type', 'petugas_ke_kantor');
         }
 
-        $basts = $query->latest('bast_date')->paginate(10)->withQueryString();
+        $basts = $query->latest('bast_date')->latest('id')->paginate(10)->withQueryString();
 
-        $countBlanko = OfficerBast::where('officer_id', $userId)
+        $countBlanko = OfficerBast::forOfficer($userId)
             ->where(function ($q) {
                 $q->where('bast_type', 'kantor_ke_petugas')
                   ->orWhereNull('bast_type');
             })->count();
 
-        $countTerisi = OfficerBast::where('officer_id', $userId)
+        $countTerisi = OfficerBast::forOfficer($userId)
             ->where('bast_type', 'petugas_ke_kantor')
             ->count();
 
@@ -227,24 +227,41 @@ class BastController extends Controller
             'description.required' => 'Rincian serah terima dokumen/perlengkapan wajib diisi.',
         ]);
 
-        $year = now()->format('Y');
-        $romanMonths = ['I','II','III','IV','V','VI','VII','VIII','IX','X','XI','XII'];
-        $month = $romanMonths[now()->month - 1];
-        $count = OfficerBast::whereYear('created_at', now()->year)->count() + 1;
+        $bastNumber = OfficerBast::generateBastNumber($validated['bast_type']);
+        $assignment = Assignment::findOrFail($validated['assignment_id']);
+        $user = Auth::user();
+        $year = date('Y', strtotime($validated['bast_date']));
 
-        $prefix = $validated['bast_type'] === 'kantor_ke_petugas' ? 'BAST-BLANKO' : 'BAST-TERISI';
-        $bastNumber = sprintf('%s/%s/%s/%04d', $prefix, $year, $month, $count);
-
-        $bast = OfficerBast::create([
+        $payload = [
             'bast_number' => $bastNumber,
             'bast_type' => $validated['bast_type'],
             'bast_date' => $validated['bast_date'],
             'assignment_id' => $validated['assignment_id'],
-            'officer_id' => Auth::id(),
+            'officer_id' => $user->id,
             'description' => $validated['description'],
             'notes' => $validated['notes'] ?? null,
             'status' => 'finalized',
-        ]);
+        ];
+
+        if ($validated['bast_type'] === 'kantor_ke_petugas') {
+            $payload['document_title'] = 'Tanda Terima Blanko & Perlengkapan';
+            $payload['activity_subtitle'] = $assignment->title;
+            $payload['institution_name'] = "BPS Kabupaten Kolaka Utara Tahun {$year}";
+            $payload['document_place'] = $assignment->location ?: 'Lasusua';
+            $payload['maker_name'] = 'Koordinator Logistik BPS';
+        }
+
+        $bast = OfficerBast::create($payload);
+
+        if ($validated['bast_type'] === 'kantor_ke_petugas') {
+            $bast->recipients()->create([
+                'user_id' => $user->id,
+                'recipient_name' => $user->name,
+                'position_unit' => $user->position ?: ($user->isPegawai() ? 'Pegawai BPS' : 'Mitra'),
+                'origin_role' => $assignment->location ?: '-',
+                'sort_order' => 1,
+            ]);
+        }
 
         if ($this->sheetService->isConfigured()) {
             $this->sheetService->insert('officer_basts', [
@@ -276,26 +293,26 @@ class BastController extends Controller
 
     public function downloadOfficerPdf(OfficerBast $bast)
     {
-        if ($bast->officer_id !== Auth::id()) {
+        if (!$bast->includesOfficer(Auth::id())) {
             abort(403);
         }
 
-        $bast->load(['officer', 'assignment']);
-        $pdf = Pdf::loadView('pdf.bast_officer', compact('bast'))->setPaper('a4', 'portrait');
+        $bast->load(['officer', 'assignment', 'recipients']);
+        $pdf = Pdf::loadView($bast->pdfViewName(), compact('bast'))->setPaper('a4', 'portrait');
 
-        return $pdf->download('BAST-Petugas-' . str_replace(['/', '\\'], '-', $bast->bast_number) . '.pdf');
+        return $pdf->download($bast->pdfFilename());
     }
 
     public function previewOfficerPdf(OfficerBast $bast)
     {
-        if ($bast->officer_id !== Auth::id()) {
+        if (!$bast->includesOfficer(Auth::id())) {
             abort(403);
         }
 
-        $bast->load(['officer', 'assignment']);
-        $pdf = Pdf::loadView('pdf.bast_officer', compact('bast'))->setPaper('a4', 'portrait');
+        $bast->load(['officer', 'assignment', 'recipients']);
+        $pdf = Pdf::loadView($bast->pdfViewName(), compact('bast'))->setPaper('a4', 'portrait');
 
-        return $pdf->stream('BAST-Petugas-' . str_replace(['/', '\\'], '-', $bast->bast_number) . '.pdf');
+        return $pdf->stream($bast->pdfFilename());
     }
 }
 

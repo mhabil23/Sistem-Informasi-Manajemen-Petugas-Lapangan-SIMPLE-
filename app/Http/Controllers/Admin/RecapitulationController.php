@@ -94,14 +94,14 @@ class RecapitulationController extends Controller
                             $b->status,
                         ]);
                     }
-                    $officerBastsQuery = OfficerBast::with(['officer', 'assignment']);
+                    $officerBastsQuery = OfficerBast::with(['officer', 'assignment', 'recipients']);
                     $this->applyFilters($officerBastsQuery, $filters, 'bast_date');
                     foreach ($officerBastsQuery->get() as $ob) {
                         fputcsv($handle, [
                             $counter++,
                             $ob->bast_number,
                             'BAST Petugas',
-                            $ob->officer ? $ob->officer->name : '-',
+                            $ob->recipient_summary,
                             $ob->bast_date ? $ob->bast_date->format('Y-m-d') : '-',
                             $ob->assignment ? $ob->assignment->title : '-',
                             $ob->status,
@@ -192,7 +192,7 @@ class RecapitulationController extends Controller
         $this->applyFilters($bastRespQuery, $filters, 'bast_date');
         $respondentBasts = $bastRespQuery->latest('bast_date')->get();
 
-        $bastOfficerQuery = OfficerBast::with(['officer', 'assignment']);
+        $bastOfficerQuery = OfficerBast::with(['officer', 'assignment', 'recipients']);
         $this->applyFilters($bastOfficerQuery, $filters, 'bast_date');
         $officerBasts = $bastOfficerQuery->latest('bast_date')->get();
 

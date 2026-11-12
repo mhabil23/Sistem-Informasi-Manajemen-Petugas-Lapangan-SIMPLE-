@@ -75,8 +75,9 @@ Route::middleware(['auth', 'role:admin'])->prefix('admin')->as('admin.')->group(
     Route::post('/basts/respondents', [\App\Http\Controllers\Admin\RespondentBastController::class, 'store'])->name('basts.respondents.store');
     Route::delete('/basts/respondents/{bast}', [\App\Http\Controllers\Admin\RespondentBastController::class, 'destroy'])->name('basts.respondents.destroy');
 
-    // Aksi BAST Petugas (Create & Delete Admin)
+    // Aksi BAST Petugas (Create, Update & Delete Admin)
     Route::post('/basts/officers', [\App\Http\Controllers\Admin\OfficerBastController::class, 'store'])->name('basts.officers.store');
+    Route::put('/basts/officers/{bast}', [\App\Http\Controllers\Admin\OfficerBastController::class, 'update'])->name('basts.officers.update');
     Route::delete('/basts/officers/{bast}', [\App\Http\Controllers\Admin\OfficerBastController::class, 'destroy'])->name('basts.officers.destroy');
 
     // Aksi Laporan Petugas & ACC/Basis Pelaksanaan (Admin)

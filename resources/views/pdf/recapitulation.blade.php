@@ -238,7 +238,7 @@
                     <td style="text-align: center;">{{ $bastNo++ }}</td>
                     <td><strong>{{ $ob->bast_number }}</strong></td>
                     <td>BAST Petugas</td>
-                    <td>{{ $ob->officer ? $ob->officer->name : '-' }}</td>
+                    <td>{{ $ob->recipient_summary }}</td>
                     <td>{{ $ob->assignment ? $ob->assignment->title : '-' }}</td>
                     <td style="text-align: center;">{{ $ob->bast_date ? $ob->bast_date->format('d/m/Y') : '-' }}</td>
                     <td style="text-align: center;">{{ strtoupper($ob->status) }}</td>
