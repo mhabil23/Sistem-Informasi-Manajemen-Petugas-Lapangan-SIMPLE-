@@ -12,6 +12,8 @@ class OfficerReport extends Model
 {
     use HasFactory, SoftDeletes;
 
+    public const LOCAL_TIMEZONE = 'Asia/Makassar';
+
     protected $fillable = [
         'report_number',
         'user_id',
@@ -54,6 +56,7 @@ class OfficerReport extends Model
         'resolved_officer_name',
         'resolved_officer_nik',
         'resolved_st_text',
+        'resolved_signing_date',
         'resolved_expense_items',
         'total_expense',
         'total_expense_terbilang',
@@ -160,6 +163,30 @@ class OfficerReport extends Model
         $dateStr = $this->activity_date ? $this->activity_date->translatedFormat('d F Y') : date('d F Y');
 
         return "Surat Tugas Nomor B-1812/74080/HM.300/{$year} Tanggal {$dateStr}";
+    }
+
+    /**
+     * Resolve local date string for automatic report input/submission timestamp.
+     */
+    public static function currentInputDate(): string
+    {
+        return now(self::LOCAL_TIMEZONE)->toDateString();
+    }
+
+    /**
+     * Use explicit signing date if present, otherwise default to the date the report was inputted.
+     */
+    public function getResolvedSigningDateAttribute(): string
+    {
+        if ($this->signing_date) {
+            return $this->signing_date->toDateString();
+        }
+
+        if ($this->created_at) {
+            return $this->created_at->copy()->timezone(self::LOCAL_TIMEZONE)->toDateString();
+        }
+
+        return self::currentInputDate();
     }
 
     public function getResolvedExpenseItemsAttribute(): array

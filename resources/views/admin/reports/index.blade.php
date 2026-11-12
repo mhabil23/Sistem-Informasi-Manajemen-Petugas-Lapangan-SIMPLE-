@@ -973,7 +973,7 @@
         document.getElementById('adm_edit_ppk_name').value = rep.ppk_name || 'Hidayatullah, SE';
         document.getElementById('adm_edit_ppk_nip').value = rep.ppk_nip || '198510292011011009';
         document.getElementById('adm_edit_signing_city').value = rep.signing_city || 'Lasusua';
-        document.getElementById('adm_edit_signing_date').value = rep.signing_date ? rep.signing_date.substring(0, 10) : (rep.activity_date ? rep.activity_date.substring(0, 10) : '');
+        document.getElementById('adm_edit_signing_date').value = rep.resolved_signing_date || (rep.signing_date ? rep.signing_date.substring(0, 10) : '');
         document.getElementById('adm_edit_vehicle_stmt').checked = (rep.include_vehicle_statement === true || rep.include_vehicle_statement === 1);
         document.getElementById('adm_edit_admin_notes').value = rep.admin_notes || '';
 

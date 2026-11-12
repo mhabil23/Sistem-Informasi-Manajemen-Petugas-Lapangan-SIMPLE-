@@ -243,7 +243,7 @@ class ReportController extends Controller
             'solutions' => $validated['solutions'] ?? $report->solutions,
             'recommendations' => $validated['recommendations'] ?? ($report->recommendations ?? '-'),
             'signing_city' => !empty($validated['signing_city']) ? $validated['signing_city'] : ($report->signing_city ?? 'Lasusua'),
-            'signing_date' => !empty($validated['signing_date']) ? $validated['signing_date'] : $report->signing_date,
+            'signing_date' => !empty($validated['signing_date']) ? $validated['signing_date'] : $report->resolved_signing_date,
             'include_vehicle_statement' => $request->boolean('include_vehicle_statement'),
             'expense_items' => !empty($expenseItems) ? $expenseItems : $report->expense_items,
             'ppk_name' => !empty($validated['ppk_name']) ? $validated['ppk_name'] : ($report->ppk_name ?? 'Hidayatullah, SE'),

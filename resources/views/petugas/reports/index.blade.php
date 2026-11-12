@@ -535,8 +535,8 @@
                                     <input type="text" name="signing_city" class="form-control" value="Lasusua" required>
                                 </div>
                                 <div class="col-md-6">
-                                    <label class="form-label small fw-semibold text-secondary">Tanggal Tanda Tangan</label>
-                                    <input type="date" name="signing_date" class="form-control" value="{{ date('Y-m-d') }}">
+                                    <label class="form-label small fw-semibold text-secondary">Tanggal Penandatanganan</label>
+                                    <input type="text" class="form-control bg-light text-secondary" value="{{ now(\App\Models\OfficerReport::LOCAL_TIMEZONE)->translatedFormat('d F Y') }} (Otomatis tanggal input)" readonly>
                                 </div>
                             </div>
 
@@ -744,8 +744,8 @@
                                     <input type="text" id="edit_signing_city" name="signing_city" class="form-control" required>
                                 </div>
                                 <div class="col-md-6">
-                                    <label class="form-label small fw-semibold text-secondary">Tanggal Tanda Tangan</label>
-                                    <input type="date" id="edit_signing_date" name="signing_date" class="form-control">
+                                    <label class="form-label small fw-semibold text-secondary">Tanggal Penandatanganan</label>
+                                    <input type="text" id="edit_signing_date_display" class="form-control bg-light text-secondary" readonly>
                                 </div>
                             </div>
 
@@ -1021,7 +1021,8 @@
 
         // Penandatanganan
         document.getElementById('edit_signing_city').value = rep.signing_city || 'Lasusua';
-        document.getElementById('edit_signing_date').value = rep.signing_date ? rep.signing_date.substring(0, 10) : (rep.activity_date ? rep.activity_date.substring(0, 10) : '');
+        const editSignRaw = rep.resolved_signing_date || (rep.signing_date ? rep.signing_date.substring(0, 10) : '');
+        document.getElementById('edit_signing_date_display').value = (editSignRaw ? formatIndonesianDate(editSignRaw) : '-') + ' (Otomatis tanggal input)';
 
         // Surat Pernyataan Checkbox (opsional)
         document.getElementById('edit_vehicle_stmt').checked = (rep.include_vehicle_statement === true || rep.include_vehicle_statement === 1);

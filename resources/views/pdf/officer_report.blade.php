@@ -306,7 +306,7 @@
         $officerNik = $report->resolved_officer_nik;
         $idLabel = $report->id_type ?: 'NIK';
         $actDateObj = $report->activity_date ? \Carbon\Carbon::parse($report->activity_date) : now();
-        $signDateObj = $report->signing_date ? \Carbon\Carbon::parse($report->signing_date) : $actDateObj;
+        $signDateObj = \Carbon\Carbon::parse($report->resolved_signing_date);
         $signDateStr = $signDateObj->translatedFormat('d F Y');
         $actYear = $actDateObj->format('Y');
 

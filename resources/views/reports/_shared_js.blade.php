@@ -396,7 +396,7 @@
         document.getElementById('det_recommendations').innerText = rep.recommendations || '-';
 
         const signCity = rep.signing_city || 'Lasusua';
-        const signDateRaw = rep.signing_date ? rep.signing_date.substring(0, 10) : actDateRaw;
+        const signDateRaw = rep.resolved_signing_date || (rep.signing_date ? rep.signing_date.substring(0, 10) : actDateRaw);
         const signPlaceDate = signCity + ', ' + formatIndonesianDate(signDateRaw);
         const renderSignatureInto = (elId) => {
             const box = document.getElementById(elId);
