@@ -88,7 +88,8 @@ class ReportController extends Controller
             (array) $request->input('expense_amounts', [])
         );
         $assignment = !empty($validated['assignment_id']) ? Assignment::find($validated['assignment_id']) : null;
-        $basis = OfficerReport::resolveAuthoritativeBasis($assignment, $validated['activity_date']);
+        $defaultActivityDate = OfficerReport::currentInputDate();
+        $basis = OfficerReport::resolveAuthoritativeBasis($assignment, $defaultActivityDate);
 
         $year = now()->format('Y');
         $count = OfficerReport::whereYear('created_at', now()->year)->count() + 1;
@@ -108,8 +109,8 @@ class ReportController extends Controller
             'st_number' => $basis['st_number'],
             'st_date' => $basis['st_date'],
             'destination_purpose' => $validated['destination_purpose'] ?? null,
-            'duration_text' => !empty($validated['duration_text']) ? $validated['duration_text'] : 'Selama 1 (satu) Hari',
-            'activity_date' => $validated['activity_date'],
+            'duration_text' => 'Selama 1 (satu) Hari',
+            'activity_date' => $defaultActivityDate,
             'activity_title' => $validated['activity_title'],
             'activity_location' => $validated['activity_location'] ?? null,
             'work_description' => $validated['work_description'],
@@ -228,7 +229,8 @@ class ReportController extends Controller
             (array) $request->input('expense_amounts', [])
         );
         $assignment = !empty($validated['assignment_id']) ? Assignment::find($validated['assignment_id']) : null;
-        $authoritativeBasis = OfficerReport::resolveAuthoritativeBasis($assignment, $validated['activity_date']);
+        $preservedActivityDate = $report->activity_date ? $report->activity_date->toDateString() : OfficerReport::currentInputDate();
+        $authoritativeBasis = OfficerReport::resolveAuthoritativeBasis($assignment, $preservedActivityDate);
         $assignmentChanged = ((int) ($validated['assignment_id'] ?? 0)) !== ((int) ($report->assignment_id ?? 0));
 
         $basisDipa = (!$assignmentChanged && !empty($report->basis_dipa)) ? $report->basis_dipa : $authoritativeBasis['basis_dipa'];
@@ -237,7 +239,7 @@ class ReportController extends Controller
         $basisSt = (!$assignmentChanged && !empty($report->basis_st)) ? $report->basis_st : $authoritativeBasis['basis_st'];
 
         $report->update([
-            'activity_date' => $validated['activity_date'],
+            'activity_date' => $preservedActivityDate,
             'activity_title' => $validated['activity_title'],
             'activity_location' => $validated['activity_location'] ?? $report->activity_location,
             'assignment_id' => !empty($validated['assignment_id']) ? (int) $validated['assignment_id'] : null,
@@ -251,7 +253,7 @@ class ReportController extends Controller
             'st_number' => $stNumber,
             'st_date' => $stDate,
             'destination_purpose' => $validated['destination_purpose'] ?? $report->destination_purpose,
-            'duration_text' => !empty($validated['duration_text']) ? $validated['duration_text'] : $report->duration_text,
+            'duration_text' => 'Selama 1 (satu) Hari',
             'work_description' => $validated['work_description'],
             'obstacles' => $validated['obstacles'] ?? $report->obstacles,
             'solutions' => $validated['solutions'] ?? $report->solutions,
@@ -333,7 +335,6 @@ class ReportController extends Controller
     private function validateReportRequest(Request $request): array
     {
         return $request->validate([
-            'activity_date' => ['required', 'date'],
             'activity_title' => ['required', 'string', 'max:255'],
             'activity_location' => ['nullable', 'string', 'max:255'],
             'assignment_id' => ['nullable', 'exists:assignments,id'],
@@ -343,7 +344,6 @@ class ReportController extends Controller
             'officer_rank' => ['nullable', 'string', 'max:100'],
             'officer_position' => ['nullable', 'string', 'max:150'],
             'destination_purpose' => ['nullable', 'string', 'max:500'],
-            'duration_text' => ['nullable', 'string', 'max:150'],
             'work_description' => ['required', 'string'],
             'obstacles' => ['nullable', 'string'],
             'solutions' => ['nullable', 'string'],
@@ -375,7 +375,6 @@ class ReportController extends Controller
             'delete_attachment_ids' => ['nullable', 'array'],
             'delete_attachment_ids.*' => ['integer'],
         ], [
-            'activity_date.required' => 'Tanggal kegiatan wajib diisi.',
             'activity_title.required' => 'Judul kegiatan wajib diisi.',
             'work_description.required' => 'Uraian pekerjaan / laporan wajib diisi.',
             'camera_photos.max' => 'Maksimal 10 foto kamera dalam satu kali penyimpanan.',

@@ -16,7 +16,7 @@
         @if(auth()->user()->isPegawai())
             <p class="text-muted small mb-0">Isi detail kegiatan, cukup <strong>1 kali tanda tangan digital</strong>, dan foto kamera real-time. <strong>Sebagai Pegawai / PML, dokumen PDF dapat langsung diunduh &amp; dicetak setelah laporan disimpan.</strong></p>
         @else
-            <p class="text-muted small mb-0">Isi detail kegiatan, cukup <strong>1 kali tanda tangan digital</strong>, dan foto kamera real-time. Identitas, Dasar Pelaksanaan &amp; Pengeluaran Riil dilengkapi Administrator — <strong>unduh PDF terbuka setelah mendapat ACC Administrator.</strong></p>
+            <p class="text-muted small mb-0">Isi detail kegiatan, cukup <strong>1 kali tanda tangan digital</strong>, dan foto kamera real-time. Identitas, Dasar Pelaksanaan, Tanggal Pelaksanaan &amp; Pengeluaran Riil dilengkapi Administrator — <strong>unduh PDF terbuka setelah mendapat ACC Administrator.</strong></p>
         @endif
     </div>
     <div class="col-md-5 text-md-end mt-3 mt-md-0">
@@ -453,10 +453,10 @@
                         </div>
                     </div>
 
-                    <!-- Informasi Kegiatan, Tujuan & Waktu Perjalanan Dinas -->
+                    <!-- Informasi Kegiatan, Lokasi & Tujuan Perjalanan Dinas -->
                     <div class="card mb-3 border">
                         <div class="card-header bg-light py-2 px-3 fw-bold text-dark small">
-                            <i class="fa-solid fa-map-location-dot text-primary me-1"></i> KEGIATAN, TUJUAN &amp; WAKTU PERJALANAN DINAS
+                            <i class="fa-solid fa-map-location-dot text-primary me-1"></i> KEGIATAN, LOKASI &amp; TUJUAN PERJALANAN DINAS
                         </div>
                         <div class="card-body p-3">
                             <div class="row g-3 mb-3">
@@ -482,19 +482,10 @@
                                     <div class="form-text small">Digunakan pada tujuan perjalanan dinas dan informasi wilayah pada halaman dokumentasi.</div>
                                 </div>
                             </div>
-                            <div class="mb-3">
+                            <div class="mb-0">
                                 <label class="form-label small fw-semibold text-secondary">Tujuan Perjalanan Dinas (Opsional / Ringkasan)</label>
                                 <textarea name="destination_purpose" class="form-control" rows="2" placeholder="Contoh: Perjalanan Dinas Biasa dalam kota sampai dengan 8 jam dalam rangka melaksanakan pendataan di Kecamatan Batu Putih."></textarea>
-                            </div>
-                            <div class="row g-3">
-                                <div class="col-md-6">
-                                    <label class="form-label small fw-semibold text-secondary">Durasi / Lama Waktu Perjalanan</label>
-                                    <input type="text" name="duration_text" class="form-control" value="Selama 1 (satu) Hari">
-                                </div>
-                                <div class="col-md-6">
-                                    <label class="form-label small fw-semibold text-secondary">Tanggal Pelaksanaan Kegiatan <span class="text-danger">*</span></label>
-                                    <input type="date" name="activity_date" class="form-control" value="{{ date('Y-m-d') }}" required>
-                                </div>
+                                <div class="form-text small">Durasi otomatis 1 (satu) hari dan tanggal pelaksanaan diisi/disesuaikan oleh Administrator.</div>
                             </div>
                         </div>
                     </div>
@@ -662,10 +653,10 @@
                         <div id="edit_admin_notes_text" class="small text-dark"></div>
                     </div>
 
-                    <!-- Informasi Kegiatan, Tujuan & Waktu Perjalanan Dinas -->
+                    <!-- Informasi Kegiatan, Lokasi & Tujuan Perjalanan Dinas -->
                     <div class="card mb-3 border">
                         <div class="card-header bg-light py-2 px-3 fw-bold text-dark small">
-                            <i class="fa-solid fa-map-location-dot text-primary me-1"></i> KEGIATAN, TUJUAN &amp; WAKTU PERJALANAN DINAS
+                            <i class="fa-solid fa-map-location-dot text-primary me-1"></i> KEGIATAN, LOKASI &amp; TUJUAN PERJALANAN DINAS
                         </div>
                         <div class="card-body p-3">
                             <div class="row g-3 mb-3">
@@ -691,19 +682,10 @@
                                     <div class="form-text small">Digunakan pada tujuan perjalanan dinas dan informasi wilayah pada halaman dokumentasi.</div>
                                 </div>
                             </div>
-                            <div class="mb-3">
+                            <div class="mb-0">
                                 <label class="form-label small fw-semibold text-secondary">Tujuan Perjalanan Dinas (Opsional / Ringkasan)</label>
                                 <textarea id="edit_destination_purpose" name="destination_purpose" class="form-control" rows="2"></textarea>
-                            </div>
-                            <div class="row g-3">
-                                <div class="col-md-6">
-                                    <label class="form-label small fw-semibold text-secondary">Durasi / Lama Waktu Perjalanan</label>
-                                    <input type="text" id="edit_duration_text" name="duration_text" class="form-control">
-                                </div>
-                                <div class="col-md-6">
-                                    <label class="form-label small fw-semibold text-secondary">Tanggal Pelaksanaan Kegiatan <span class="text-danger">*</span></label>
-                                    <input type="date" id="edit_date" name="activity_date" class="form-control" required>
-                                </div>
+                                <div class="form-text small">Durasi otomatis 1 (satu) hari dan tanggal pelaksanaan diisi/disesuaikan oleh Administrator.</div>
                             </div>
                         </div>
                     </div>
@@ -1015,8 +997,6 @@
         const actLoc = rep.activity_location || (rep.assignment ? rep.assignment.location : '') || '';
         document.getElementById('edit_activity_location').value = actLoc;
         document.getElementById('edit_destination_purpose').value = rep.destination_purpose || '';
-        document.getElementById('edit_duration_text').value = rep.duration_text || 'Selama 1 (satu) Hari';
-        document.getElementById('edit_date').value = rep.activity_date ? rep.activity_date.substring(0, 10) : '';
 
         // Uraian, Kendala, Solusi & Rekomendasi
         document.getElementById('edit_description').value = rep.work_description || '';

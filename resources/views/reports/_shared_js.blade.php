@@ -374,7 +374,7 @@
         document.getElementById('det_basis_st').innerText = rep.basis_st || basisDefaults.basis_st || ('Surat Tugas Kepala Badan Pusat Statistik Kabupaten Kolaka Utara Nomor: B-1812/74080/HM.300/' + year + ' Tanggal ' + actDateFormatted + '.');
 
         document.getElementById('det_destination_purpose').innerText = rep.destination_purpose || ('Perjalanan Dinas Biasa dalam kota lebih dari 8 jam dalam rangka pendataan ' + rep.activity_title + '.');
-        document.getElementById('det_duration_info').innerText = (rep.duration_text || 'Selama 1 (satu) Hari') + ', pada tanggal ' + actDateFormatted;
+        document.getElementById('det_duration_info').innerText = 'Selama 1 (satu) Hari, pada tanggal ' + actDateFormatted;
         document.getElementById('det_work_description').innerText = rep.work_description || '-';
 
         const obsBox = document.getElementById('det_obstacles_box');

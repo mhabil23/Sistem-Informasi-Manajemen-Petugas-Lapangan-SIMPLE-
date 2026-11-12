@@ -614,12 +614,9 @@
                             </div>
                             <div class="row g-3">
                                 <div class="col-md-6">
-                                    <label class="form-label small fw-semibold text-secondary">D. Durasi / Lama Waktu Perjalanan</label>
-                                    <input type="text" id="adm_edit_duration_text" name="duration_text" class="form-control">
-                                </div>
-                                <div class="col-md-6">
-                                    <label class="form-label small fw-semibold text-secondary">Tanggal Pelaksanaan Kegiatan <span class="text-danger">*</span></label>
+                                    <label class="form-label small fw-semibold text-secondary">D. Tanggal Pelaksanaan Kegiatan <span class="text-danger">*</span></label>
                                     <input type="date" id="adm_edit_date" name="activity_date" class="form-control" required>
+                                    <div class="form-text small">Durasi otomatis ditetapkan selama 1 (satu) hari.</div>
                                 </div>
                             </div>
                         </div>
@@ -959,7 +956,6 @@
         const actLoc = rep.activity_location || (rep.assignment ? rep.assignment.location : '') || '';
         document.getElementById('adm_edit_activity_location').value = actLoc;
         document.getElementById('adm_edit_destination_purpose').value = rep.destination_purpose || '';
-        document.getElementById('adm_edit_duration_text').value = rep.duration_text || 'Selama 1 (satu) Hari';
         document.getElementById('adm_edit_date').value = rep.activity_date ? rep.activity_date.substring(0, 10) : '';
 
         document.getElementById('adm_edit_description').value = rep.work_description || '';

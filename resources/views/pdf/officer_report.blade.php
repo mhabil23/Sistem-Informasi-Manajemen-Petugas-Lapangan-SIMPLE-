@@ -385,7 +385,7 @@
 
     <div class="section-title">D. Waktu Perjalanan Dinas</div>
     <div class="section-desc">
-        {{ $report->duration_text ?: 'Selama 1 (satu) Hari' }}, pada tanggal {{ $actDateObj->translatedFormat('d F Y') }}
+        Selama 1 (satu) Hari, pada tanggal {{ $actDateObj->translatedFormat('d F Y') }}
     </div>
 
     <div class="section-title">E. Hasil perjalanan dinas</div>
