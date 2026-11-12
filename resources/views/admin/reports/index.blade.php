@@ -801,12 +801,13 @@
                 card.className = 'card h-100 border text-center p-2';
 
                 const isImg = att.file_type && att.file_type.startsWith('image/');
+                const mediaUrl = '/media/' + String(att.file_path || '').replace(/^\/+/, '');
                 if (isImg) {
                     const a = document.createElement('a');
-                    a.href = '/storage/' + att.file_path;
+                    a.href = mediaUrl;
                     a.target = '_blank';
                     const img = document.createElement('img');
-                    img.src = '/storage/' + att.file_path;
+                    img.src = mediaUrl;
                     img.alt = att.file_name || 'Foto Dokumentasi';
                     img.className = 'img-fluid rounded mb-2';
                     img.style.maxHeight = '110px';
@@ -871,7 +872,7 @@
                 card.appendChild(meta);
 
                 const openBtn = document.createElement('a');
-                openBtn.href = '/storage/' + att.file_path;
+                openBtn.href = mediaUrl;
                 openBtn.target = '_blank';
                 openBtn.className = 'btn btn-sm btn-link text-decoration-none mt-1';
                 openBtn.innerHTML = '<i class="fa-solid fa-arrow-up-right-from-square"></i> Buka File';
@@ -980,7 +981,7 @@
         const sigImg = document.getElementById('adm_edit_current_sig_img');
         if (rep.signature_path) {
             sigBox.classList.remove('d-none');
-            sigImg.src = '/storage/' + rep.signature_path;
+            sigImg.src = storageMediaUrl(rep.signature_path);
         } else {
             sigBox.classList.add('d-none');
         }

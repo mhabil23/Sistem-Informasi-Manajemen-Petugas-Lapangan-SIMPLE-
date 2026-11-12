@@ -1031,7 +1031,7 @@
         const sigImg = document.getElementById('edit_current_sig_img');
         if (rep.signature_path) {
             sigContainer.classList.remove('d-none');
-            sigImg.src = '/storage/' + rep.signature_path;
+            sigImg.src = storageMediaUrl(rep.signature_path);
         } else {
             sigContainer.classList.add('d-none');
         }

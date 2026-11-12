@@ -111,7 +111,7 @@
                                     <button type="button" 
                                             class="btn btn-sm btn-light border text-success shadow-none py-1 px-2" 
                                             style="font-size: 0.75rem;" 
-                                            onclick="previewSignatureModal('{{ asset('storage/' . $item->signature_path) }}', '{{ $item->bast_number }}', '{{ $item->recipient_display_name }}')">
+                                            onclick="previewSignatureModal('{{ route('media.file', ['path' => ltrim($item->signature_path, '/')]) }}', '{{ $item->bast_number }}', '{{ $item->recipient_display_name }}')">
                                         <i class="fa-solid fa-signature me-1"></i> Lihat TTD
                                     </button>
                                 @else

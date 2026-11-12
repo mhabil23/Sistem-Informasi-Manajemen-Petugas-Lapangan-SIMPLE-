@@ -30,6 +30,11 @@ Route::middleware('auth')->group(function () {
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
     Route::put('/profile', [ProfileController::class, 'update'])->name('profile.update');
     Route::put('/profile/password', [ProfileController::class, 'updatePassword'])->name('profile.password.update');
+
+    // Penyajian berkas dokumentasi & tanda tangan dari public storage secara aman
+    Route::get('/media/{path}', [\App\Http\Controllers\StorageFileController::class, 'show'])
+        ->where('path', '.*')
+        ->name('media.file');
 });
 
 // Admin Area (Protected by role:admin)

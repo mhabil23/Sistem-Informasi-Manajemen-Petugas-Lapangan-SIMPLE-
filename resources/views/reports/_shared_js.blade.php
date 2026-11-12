@@ -1,4 +1,9 @@
 <script>
+    function storageMediaUrl(path) {
+        if (!path) return '';
+        return '/media/' + String(path).replace(/^\/+/, '');
+    }
+
     const ID_MONTHS = [
         'Januari', 'Februari', 'Maret', 'April', 'Mei', 'Juni',
         'Juli', 'Agustus', 'September', 'Oktober', 'November', 'Desember'
@@ -251,12 +256,13 @@
         card.className = 'card h-100 border p-2 shadow-sm text-center';
 
         const isImg = att.file_type && att.file_type.startsWith('image/');
+        const mediaUrl = storageMediaUrl(att.file_path);
         if (isImg) {
             const a = document.createElement('a');
-            a.href = '/storage/' + att.file_path;
+            a.href = mediaUrl;
             a.target = '_blank';
             const img = document.createElement('img');
-            img.src = '/storage/' + att.file_path;
+            img.src = mediaUrl;
             img.alt = att.file_name || 'Foto Dokumentasi';
             img.className = 'img-fluid rounded mb-2';
             img.style.maxHeight = '120px';
@@ -279,10 +285,12 @@
         card.appendChild(buildAttachmentMetaBlock(att));
 
         const openBtn = document.createElement('a');
-        openBtn.href = '/storage/' + att.file_path;
+        openBtn.href = mediaUrl;
         openBtn.target = '_blank';
         openBtn.className = 'btn btn-sm btn-link text-decoration-none mt-auto pt-1';
-        openBtn.innerHTML = '<i class="fa-solid fa-arrow-up-right-from-square me-1"></i> Buka Foto';
+        openBtn.innerHTML = isImg
+            ? '<i class="fa-solid fa-arrow-up-right-from-square me-1"></i> Buka Foto'
+            : '<i class="fa-solid fa-arrow-up-right-from-square me-1"></i> Buka Berkas';
         card.appendChild(openBtn);
 
         col.appendChild(card);
@@ -297,9 +305,10 @@
         card.className = 'card h-100 border p-2 bg-light-subtle';
 
         const isImg = att.file_type && att.file_type.startsWith('image/');
+        const mediaUrl = storageMediaUrl(att.file_path);
         if (isImg) {
             const img = document.createElement('img');
-            img.src = '/storage/' + att.file_path;
+            img.src = mediaUrl;
             img.alt = att.file_name || 'Foto Tersimpan';
             img.className = 'img-fluid rounded mb-2 w-100';
             img.style.maxHeight = '105px';
@@ -381,14 +390,28 @@
         const signCity = rep.signing_city || 'Lasusua';
         const signDateRaw = rep.signing_date ? rep.signing_date.substring(0, 10) : actDateRaw;
         const signPlaceDate = signCity + ', ' + formatIndonesianDate(signDateRaw);
-        const signImgHtml = rep.signature_path
-            ? `<img src="/storage/${rep.signature_path}" style="max-height: 60px; max-width: 170px;" alt="Tanda Tangan">`
-            : `<div style="height: 55px;"></div>`;
+        const renderSignatureInto = (elId) => {
+            const box = document.getElementById(elId);
+            if (!box) return;
+            box.innerHTML = '';
+            if (rep.signature_path) {
+                const img = document.createElement('img');
+                img.src = storageMediaUrl(rep.signature_path);
+                img.alt = 'Tanda Tangan';
+                img.style.maxHeight = '60px';
+                img.style.maxWidth = '170px';
+                box.appendChild(img);
+            } else {
+                const sp = document.createElement('div');
+                sp.style.height = '55px';
+                box.appendChild(sp);
+            }
+        };
 
         document.getElementById('det_signing_place_date').innerText = signPlaceDate;
         document.getElementById('det_sign_name').innerText = officerName;
         document.getElementById('det_sign_nip').innerText = (officerNik && officerNik !== '-') ? (idType + '. ' + officerNik) : '';
-        document.getElementById('det_sign_img_container').innerHTML = signImgHtml;
+        renderSignatureInto('det_sign_img_container');
 
         document.getElementById('dpr_officer_name').innerText = officerName;
         document.getElementById('dpr_officer_nik').innerText = officerNik;
@@ -435,7 +458,7 @@
         document.getElementById('dpr_ppk_name').innerText = rep.ppk_name || 'Hidayatullah, SE';
         document.getElementById('dpr_ppk_nip').innerText = rep.ppk_nip || '198510292011011009';
         document.getElementById('dpr_signing_place_date').innerText = signPlaceDate;
-        document.getElementById('dpr_sign_img_container').innerHTML = signImgHtml;
+        renderSignatureInto('dpr_sign_img_container');
         document.getElementById('dpr_sign_name').innerText = officerName;
         document.getElementById('dpr_sign_nip').innerText = (officerNik && officerNik !== '-') ? ('NIK/NIP. ' + officerNik) : '';
 
@@ -453,7 +476,7 @@
             document.getElementById('stmt_signing_place_date').innerText = signPlaceDate;
             document.getElementById('stmt_sign_name').innerText = officerName;
             document.getElementById('stmt_sign_nip').innerText = (officerNik && officerNik !== '-') ? (idType + '. ' + officerNik) : '';
-            document.getElementById('stmt_sign_img_container').innerHTML = signImgHtml;
+            renderSignatureInto('stmt_sign_img_container');
         } else {
             stmtPaper.classList.add('d-none');
         }
