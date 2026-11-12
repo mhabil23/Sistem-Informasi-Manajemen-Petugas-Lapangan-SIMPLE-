@@ -99,11 +99,8 @@
                     </div>
 
                     <!-- FOTO DOKUMENTASI -->
-                    <div class="border-top pt-3 mt-4">
-                        <div class="fw-bold small text-secondary mb-2">
-                            <i class="fa-solid fa-camera text-primary me-1"></i> DOKUMENTASI KEGIATAN:
-                        </div>
-                        <div id="det_attachments_container" class="row g-2"></div>
+                    <div class="border-top pt-4 mt-4">
+                        <div id="det_attachments_container" class="row g-3 justify-content-center"></div>
                     </div>
                 </div>
 

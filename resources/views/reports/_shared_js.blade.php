@@ -248,9 +248,10 @@
         return meta;
     }
 
-    function buildPreviewAttachmentCard(att) {
+    function buildPreviewAttachmentCard(att, totalCount = 1) {
+        const isSingle = totalCount === 1;
         const col = document.createElement('div');
-        col.className = 'col-6 col-md-4';
+        col.className = isSingle ? 'col-12 col-md-11 text-center' : 'col-12 col-md-6 text-center';
 
         const isImg = att.file_type && att.file_type.startsWith('image/');
         const mediaUrl = storageMediaUrl(att.file_path);
@@ -259,15 +260,28 @@
             const a = document.createElement('a');
             a.href = mediaUrl;
             a.target = '_blank';
-            a.className = 'd-block border rounded p-1 bg-white shadow-sm';
+            a.className = 'd-inline-block w-100 text-center';
+            if (isSingle) {
+                a.style.maxWidth = '680px';
+            }
             a.title = 'Klik untuk memperbesar gambar';
 
             const img = document.createElement('img');
-            img.src = mediaUrl;
             img.alt = att.file_name || 'Foto Dokumentasi';
-            img.className = 'img-fluid rounded w-100';
-            img.style.maxHeight = '220px';
+            img.className = 'img-fluid rounded border p-1 bg-white shadow-sm d-block mx-auto';
+            img.style.width = '100%';
+            img.style.height = 'auto';
+            img.style.maxHeight = isSingle ? '520px' : '360px';
             img.style.objectFit = 'contain';
+            img.onload = () => {
+                if (img.naturalHeight > img.naturalWidth) {
+                    img.style.width = 'auto';
+                }
+            };
+            img.src = mediaUrl;
+            if (img.complete && img.naturalHeight > img.naturalWidth) {
+                img.style.width = 'auto';
+            }
             a.appendChild(img);
             col.appendChild(a);
             return col;
@@ -487,11 +501,12 @@
         const container = document.getElementById('det_attachments_container');
         container.innerHTML = '';
         if (rep.attachments && rep.attachments.length > 0) {
+            const total = rep.attachments.length;
             rep.attachments.forEach(att => {
-                container.appendChild(buildPreviewAttachmentCard(att));
+                container.appendChild(buildPreviewAttachmentCard(att, total));
             });
         } else {
-            container.innerHTML = '<div class="col-12 text-muted small fst-italic">Tidak ada lampiran foto dokumentasi.</div>';
+            container.innerHTML = '<div class="col-12 text-center text-muted small fst-italic">Tidak ada lampiran foto dokumentasi.</div>';
         }
     }
 </script>
