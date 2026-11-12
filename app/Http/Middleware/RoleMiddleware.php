@@ -35,6 +35,10 @@ class RoleMiddleware
                 return redirect()->route('admin.dashboard')->with('error', 'Anda tidak memiliki hak akses ke halaman tersebut.');
             }
 
+            if ($user->isPegawai()) {
+                return redirect()->route('petugas.dashboard')->with('error', 'Halaman ini khusus untuk Administrator.');
+            }
+
             return redirect()->route('petugas.dashboard')->with('error', 'Halaman ini khusus untuk Administrator.');
         }
 

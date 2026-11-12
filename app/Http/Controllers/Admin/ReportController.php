@@ -83,16 +83,20 @@ class ReportController extends Controller
         if ($editId = $request->input('edit')) {
             $autoOpenReport = OfficerReport::with(['user', 'assignment', 'reviewer', 'attachments'])->find((int) $editId);
             $autoOpenMode = 'edit';
-            AdminNotification::markReadForReport((int) $editId);
+            if (Auth::user()?->isAdmin()) {
+                AdminNotification::markReadForReport((int) $editId);
+            }
         } elseif ($inspectId = $request->input('inspect')) {
             $autoOpenReport = OfficerReport::with(['user', 'assignment', 'reviewer', 'attachments'])->find((int) $inspectId);
             $autoOpenMode = 'view';
-            AdminNotification::markReadForReport((int) $inspectId);
+            if (Auth::user()?->isAdmin()) {
+                AdminNotification::markReadForReport((int) $inspectId);
+            }
         }
 
         $reports = $query->latest('activity_date')->latest('id')->paginate(10)->withQueryString();
 
-        $officers = User::where('role', 'petugas')->where('status', 'active')->orderBy('name')->get();
+        $officers = User::fieldStaff()->where('status', 'active')->orderBy('name')->get();
         $assignments = Assignment::orderBy('title')->get();
         $basisSettings = OfficerReport::getMasterBasisSettings();
 

@@ -52,6 +52,7 @@ class UserController extends Controller
         $totalUsers = User::count();
         $totalAdmins = User::where('role', 'admin')->count();
         $totalOfficers = User::where('role', 'petugas')->count();
+        $totalPegawai = User::where('role', 'pegawai')->count();
         $totalInactive = User::where('status', 'inactive')->count();
 
         // 5. Fetch Paginated Users
@@ -62,6 +63,7 @@ class UserController extends Controller
             'totalUsers',
             'totalAdmins',
             'totalOfficers',
+            'totalPegawai',
             'totalInactive'
         ));
     }
@@ -80,7 +82,7 @@ class UserController extends Controller
             'rank' => ['nullable', 'string', 'max:100'],
             'position' => ['nullable', 'string', 'max:150'],
             'password' => ['required', 'string', 'min:6'],
-            'role' => ['required', Rule::in(['admin', 'petugas'])],
+            'role' => ['required', Rule::in(['admin', 'petugas', 'pegawai'])],
             'status' => ['required', Rule::in(['active', 'inactive'])],
         ], [
             'name.required' => 'Nama lengkap wajib diisi.',
@@ -147,7 +149,7 @@ class UserController extends Controller
             'rank' => ['nullable', 'string', 'max:100'],
             'position' => ['nullable', 'string', 'max:150'],
             'password' => ['nullable', 'string', 'min:6'],
-            'role' => ['required', Rule::in(['admin', 'petugas'])],
+            'role' => ['required', Rule::in(['admin', 'petugas', 'pegawai'])],
             'status' => ['required', Rule::in(['active', 'inactive'])],
         ], [
             'name.required' => 'Nama lengkap wajib diisi.',

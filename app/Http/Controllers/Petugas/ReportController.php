@@ -144,22 +144,33 @@ class ReportController extends Controller
             ]);
         }
 
+        $isPegawai = $user?->isPegawai() ?? false;
+
         // Kirim notifikasi ke Admin saat petugas membuat laporan perjadin
         AdminNotification::notifyReportEvent($report, $user, 'created');
 
-        $msg = $report->status === 'submitted'
-            ? "Laporan Perjadin '{$report->activity_title}' berhasil diajukan & pemberitahuan dikirim ke Admin. Unduh PDF akan terbuka setelah disetujui (ACC) Admin."
-            : "Laporan Perjadin '{$report->activity_title}' berhasil disimpan sebagai draft & diberitahukan ke Admin. Ajukan dan tunggu persetujuan (ACC) Admin untuk mengunduh PDF.";
+        if ($isPegawai) {
+            $msg = $report->status === 'submitted'
+                ? "Laporan Perjadin '{$report->activity_title}' berhasil diajukan & dokumen PDF siap langsung diunduh."
+                : "Laporan Perjadin '{$report->activity_title}' berhasil disimpan sebagai draft & dokumen PDF siap langsung diunduh.";
+        } else {
+            $msg = $report->status === 'submitted'
+                ? "Laporan Perjadin '{$report->activity_title}' berhasil diajukan & pemberitahuan dikirim ke Admin. Unduh PDF akan terbuka setelah disetujui (ACC) Admin."
+                : "Laporan Perjadin '{$report->activity_title}' berhasil disimpan sebagai draft & diberitahukan ke Admin. Ajukan dan tunggu persetujuan (ACC) Admin untuk mengunduh PDF.";
+        }
 
         ActivityLog::log(
             'create',
             'reports',
-            "Petugas membuat laporan perjadin '{$report->activity_title}' (Status: {$report->status})."
+            ($isPegawai ? 'Pegawai / PML' : 'Petugas') . " membuat laporan perjadin '{$report->activity_title}' (Status: {$report->status})."
         );
 
-        return redirect()->route('petugas.reports.index')
-            ->with('success', $msg)
-            ->with('pending_approval_report_id', $report->id);
+        $redirect = redirect()->route('petugas.reports.index')->with('success', $msg);
+        if (!$isPegawai) {
+            $redirect->with('pending_approval_report_id', $report->id);
+        }
+
+        return $redirect;
     }
 
     public function show(OfficerReport $report)
@@ -187,7 +198,7 @@ class ReportController extends Controller
     {
         abort_if($report->user_id !== Auth::id(), 403);
 
-        if (!$report->canBeDownloadedByOfficer()) {
+        if (!$report->canBeDownloadedByOfficer(Auth::user())) {
             return redirect()
                 ->route('petugas.reports.index')
                 ->with('error', "Laporan '{$report->activity_title}' belum disetujui (ACC) oleh Admin. Tunggu persetujuan Admin terlebih dahulu untuk mengunduh atau mencetak PDF.");
@@ -268,23 +279,35 @@ class ReportController extends Controller
             ]);
         }
 
-        if (Auth::user()) {
-            AdminNotification::notifyReportEvent($report, Auth::user(), 'resubmitted');
+        $user = Auth::user();
+        $isPegawai = $user?->isPegawai() ?? false;
+
+        if ($user) {
+            AdminNotification::notifyReportEvent($report, $user, 'resubmitted');
         }
 
-        $msg = $report->status === 'submitted'
-            ? "Laporan '{$report->activity_title}' berhasil diajukan ulang & diberitahukan ke Admin. Menunggu persetujuan (ACC) untuk mengunduh PDF."
-            : "Laporan '{$report->activity_title}' berhasil diperbarui.";
+        if ($isPegawai) {
+            $msg = $report->status === 'submitted'
+                ? "Laporan '{$report->activity_title}' berhasil diajukan ulang & dokumen PDF siap langsung diunduh."
+                : "Laporan '{$report->activity_title}' berhasil diperbarui & dokumen PDF siap langsung diunduh.";
+        } else {
+            $msg = $report->status === 'submitted'
+                ? "Laporan '{$report->activity_title}' berhasil diajukan ulang & diberitahukan ke Admin. Menunggu persetujuan (ACC) untuk mengunduh PDF."
+                : "Laporan '{$report->activity_title}' berhasil diperbarui.";
+        }
 
         ActivityLog::log(
             'update',
             'reports',
-            "Petugas memperbarui laporan '{$report->activity_title}'."
+            ($isPegawai ? 'Pegawai / PML' : 'Petugas') . " memperbarui laporan '{$report->activity_title}'."
         );
 
-        return redirect()->route('petugas.reports.index')
-            ->with('success', $msg)
-            ->with('pending_approval_report_id', $report->id);
+        $redirect = redirect()->route('petugas.reports.index')->with('success', $msg);
+        if (!$isPegawai) {
+            $redirect->with('pending_approval_report_id', $report->id);
+        }
+
+        return $redirect;
     }
 
     public function destroy(OfficerReport $report)

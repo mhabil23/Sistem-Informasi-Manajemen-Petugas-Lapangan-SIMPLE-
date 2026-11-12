@@ -19,9 +19,11 @@
         <h3 class="fw-bold text-dark mb-0">{{ $assignment->title }}</h3>
     </div>
     <div class="d-flex gap-2">
-        <button type="button" class="btn btn-sp-primary" data-bs-toggle="modal" data-bs-target="#assignOfficerModal">
-            <i class="fa-solid fa-user-plus me-1"></i> Tugaskan Petugas Baru
-        </button>
+        @if(auth()->user()->isAdmin())
+            <button type="button" class="btn btn-sp-primary" data-bs-toggle="modal" data-bs-target="#assignOfficerModal">
+                <i class="fa-solid fa-user-plus me-1"></i> Tugaskan Petugas Baru
+            </button>
+        @endif
     </div>
 </div>
 
@@ -171,9 +173,11 @@
             <i class="fa-solid fa-user-gear text-primary"></i>
             Daftar Petugas & Pembagian Tugas ({{ $assignment->assignmentOfficers->count() }})
         </h5>
-        <button type="button" class="btn btn-sm btn-sp-primary" data-bs-toggle="modal" data-bs-target="#assignOfficerModal">
-            <i class="fa-solid fa-plus me-1"></i> Tambah Petugas
-        </button>
+        @if(auth()->user()->isAdmin())
+            <button type="button" class="btn btn-sm btn-sp-primary" data-bs-toggle="modal" data-bs-target="#assignOfficerModal">
+                <i class="fa-solid fa-plus me-1"></i> Tambah Petugas
+            </button>
+        @endif
     </div>
     <div class="sp-card-body p-0">
         <div class="table-responsive">
@@ -184,7 +188,9 @@
                         <th style="min-width: 260px;">Tugas Spesifik yang Diberikan</th>
                         <th>Status Tugas</th>
                         <th style="min-width: 200px;">Catatan Progres Petugas</th>
-                        <th class="text-end" style="min-width: 100px;">Aksi</th>
+                        @if(auth()->user()->isAdmin())
+                            <th class="text-end" style="min-width: 100px;">Aksi</th>
+                        @endif
                     </tr>
                 </thead>
                 <tbody>
@@ -226,33 +232,35 @@
                                     {{ $officerAssigned->progress_notes ?? 'Belum ada catatan progres.' }}
                                 </div>
                             </td>
-                            <td class="text-end text-nowrap">
-                                <div class="sp-action-btn-group">
-                                    <!-- Edit Rincian Tugas -->
-                                    <button type="button" 
-                                            class="btn btn-light border sp-action-btn text-warning" 
-                                            title="Edit Rincian Tugas" 
-                                            data-bs-toggle="tooltip"
-                                            onclick="openEditOfficerModal({{ json_encode($officerAssigned) }})">
-                                        <i class="fa-regular fa-pen-to-square"></i>
-                                    </button>
-
-                                    <!-- Batalkan / Hapus Penugasan -->
-                                    <form method="POST" 
-                                          action="{{ route('admin.assignments.officers.remove', [$assignment, $officerAssigned]) }}" 
-                                          class="d-inline" 
-                                          onsubmit="return confirm('Batalkan penugasan untuk {{ addslashes($officerAssigned->user->name) }}?');">
-                                        @csrf
-                                        @method('DELETE')
-                                        <button type="submit" 
-                                                class="btn btn-light border sp-action-btn text-danger" 
-                                                title="Batalkan Penugasan" 
-                                                data-bs-toggle="tooltip">
-                                            <i class="fa-regular fa-trash-can"></i>
+                            @if(auth()->user()->isAdmin())
+                                <td class="text-end text-nowrap">
+                                    <div class="sp-action-btn-group">
+                                        <!-- Edit Rincian Tugas -->
+                                        <button type="button" 
+                                                class="btn btn-light border sp-action-btn text-warning" 
+                                                title="Edit Rincian Tugas" 
+                                                data-bs-toggle="tooltip"
+                                                onclick="openEditOfficerModal({{ json_encode($officerAssigned) }})">
+                                            <i class="fa-regular fa-pen-to-square"></i>
                                         </button>
-                                    </form>
-                                </div>
-                            </td>
+
+                                        <!-- Batalkan / Hapus Penugasan -->
+                                        <form method="POST" 
+                                              action="{{ route('admin.assignments.officers.remove', [$assignment, $officerAssigned]) }}" 
+                                              class="d-inline" 
+                                              onsubmit="return confirm('Batalkan penugasan untuk {{ addslashes($officerAssigned->user->name) }}?');">
+                                            @csrf
+                                            @method('DELETE')
+                                            <button type="submit" 
+                                                    class="btn btn-light border sp-action-btn text-danger" 
+                                                    title="Batalkan Penugasan" 
+                                                    data-bs-toggle="tooltip">
+                                                <i class="fa-regular fa-trash-can"></i>
+                                            </button>
+                                        </form>
+                                    </div>
+                                </td>
+                            @endif
                         </tr>
                     @empty
                         <tr>
@@ -315,6 +323,7 @@
     </div>
 </div>
 
+@if(auth()->user()->isAdmin())
 <!-- ==============================================================
      MODAL TUGASKAN PETUGAS BARU
      ============================================================== -->
@@ -416,6 +425,7 @@
         </div>
     </div>
 </div>
+@endif
 @endsection
 
 @push('scripts')

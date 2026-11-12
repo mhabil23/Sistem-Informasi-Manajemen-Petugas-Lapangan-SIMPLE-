@@ -53,7 +53,7 @@ class AssignmentController extends Controller
         $assignments = $query->latest()->paginate(10)->withQueryString();
 
         // Get list of officers for quick assignment modals
-        $officers = User::where('role', 'petugas')->where('status', 'active')->orderBy('name')->get();
+        $officers = User::fieldStaff()->where('status', 'active')->orderBy('name')->get();
         $basisDefaults = OfficerReport::getMasterBasisSettings();
 
         return view('admin.assignments.index', compact(
@@ -143,7 +143,7 @@ class AssignmentController extends Controller
 
         // Available active officers not yet assigned to this activity
         $assignedUserIds = $assignment->assignmentOfficers->pluck('user_id')->toArray();
-        $availableOfficers = User::where('role', 'petugas')
+        $availableOfficers = User::fieldStaff()
             ->where('status', 'active')
             ->whereNotIn('id', $assignedUserIds)
             ->orderBy('name')

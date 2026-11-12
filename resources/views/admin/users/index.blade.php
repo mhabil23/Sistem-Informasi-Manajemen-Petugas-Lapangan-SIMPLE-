@@ -23,8 +23,8 @@
 </div>
 
 <!-- Stat Cards -->
-<div class="row g-2 mb-3">
-    <div class="col-xl-3 col-sm-6">
+<div class="row row-cols-1 row-cols-sm-2 row-cols-xl-5 g-2 mb-3">
+    <div class="col">
         <div class="sp-stat-card">
             <div class="sp-stat-icon-wrap" style="background: #e0f2fe; color: #0284c7;">
                 <i class="fa-solid fa-users"></i>
@@ -37,7 +37,7 @@
         </div>
     </div>
 
-    <div class="col-xl-3 col-sm-6">
+    <div class="col">
         <div class="sp-stat-card">
             <div class="sp-stat-icon-wrap" style="background: #e0e7ff; color: #4338ca;">
                 <i class="fa-solid fa-shield-halved"></i>
@@ -50,7 +50,20 @@
         </div>
     </div>
 
-    <div class="col-xl-3 col-sm-6">
+    <div class="col">
+        <div class="sp-stat-card">
+            <div class="sp-stat-icon-wrap" style="background: #ecfdf5; color: #047857;">
+                <i class="fa-solid fa-user-tie"></i>
+            </div>
+            <div class="sp-stat-info">
+                <div class="sp-stat-label">Pegawai / PML</div>
+                <div class="sp-stat-value">{{ number_format($totalPegawai) }}</div>
+                <div class="sp-stat-desc">Lapangan & monitoring</div>
+            </div>
+        </div>
+    </div>
+
+    <div class="col">
         <div class="sp-stat-card">
             <div class="sp-stat-icon-wrap" style="background: #f0fdf4; color: #16a34a;">
                 <i class="fa-solid fa-user-check"></i>
@@ -63,7 +76,7 @@
         </div>
     </div>
 
-    <div class="col-xl-3 col-sm-6">
+    <div class="col">
         <div class="sp-stat-card">
             <div class="sp-stat-icon-wrap" style="background: {{ $totalInactive > 0 ? '#fee2e2' : '#f1f5f9' }}; color: {{ $totalInactive > 0 ? '#dc2626' : '#64748b' }};">
                 <i class="fa-solid fa-user-slash"></i>
@@ -98,6 +111,7 @@
                 <select name="role" class="form-select form-select-sm">
                     <option value="">-- Semua Role --</option>
                     <option value="admin" {{ request('role') === 'admin' ? 'selected' : '' }}>Administrator</option>
+                    <option value="pegawai" {{ request('role') === 'pegawai' ? 'selected' : '' }}>Pegawai / PML</option>
                     <option value="petugas" {{ request('role') === 'petugas' ? 'selected' : '' }}>Petugas Lapangan</option>
                 </select>
             </div>
@@ -165,9 +179,21 @@
                                 </div>
                             </td>
                             <td>
-                                <span class="badge {{ $user->isAdmin() ? 'badge-role-admin' : 'badge-role-petugas' }}">
-                                    <i class="fa-solid {{ $user->isAdmin() ? 'fa-shield-halved' : 'fa-user-check' }} me-1"></i>
-                                    {{ $user->isAdmin() ? 'Administrator' : 'Petugas' }}
+                                @php
+                                    $roleBadgeClass = match($user->role) {
+                                        'admin' => 'badge-role-admin',
+                                        'pegawai' => 'badge-role-pegawai',
+                                        default => 'badge-role-petugas',
+                                    };
+                                    $roleIconClass = match($user->role) {
+                                        'admin' => 'fa-shield-halved',
+                                        'pegawai' => 'fa-user-tie',
+                                        default => 'fa-user-check',
+                                    };
+                                @endphp
+                                <span class="badge {{ $roleBadgeClass }}">
+                                    <i class="fa-solid {{ $roleIconClass }} me-1"></i>
+                                    {{ $user->roleLabel() }}
                                 </span>
                             </td>
                             <td>
@@ -322,6 +348,7 @@
                             <label class="form-label small fw-semibold text-secondary">ROLE / HAK AKSES <span class="text-danger">*</span></label>
                             <select name="role" class="form-select" required>
                                 <option value="petugas" selected>Petugas Lapangan</option>
+                                <option value="pegawai">Pegawai / PML</option>
                                 <option value="admin">Administrator</option>
                             </select>
                         </div>
@@ -403,6 +430,7 @@
                             <label class="form-label small fw-semibold text-secondary">ROLE / HAK AKSES <span class="text-danger">*</span></label>
                             <select id="edit_role" name="role" class="form-select" required>
                                 <option value="petugas">Petugas Lapangan</option>
+                                <option value="pegawai">Pegawai / PML</option>
                                 <option value="admin">Administrator</option>
                             </select>
                         </div>

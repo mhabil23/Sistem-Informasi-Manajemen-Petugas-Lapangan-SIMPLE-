@@ -16,9 +16,11 @@
         <p class="text-muted small mb-0">Atur kalender kegiatan, tentukan waktu mulai & selesai, lokasi pertemuan, serta petugas penanggung jawab agenda.</p>
     </div>
     <div class="col-md-5 text-md-end mt-2 mt-md-0">
-        <button type="button" class="btn btn-sm btn-sp-primary" data-bs-toggle="modal" data-bs-target="#createScheduleModal">
-            <i class="fa-regular fa-calendar-plus me-1"></i> Buat Jadwal Baru
-        </button>
+        @if(auth()->user()->isAdmin())
+            <button type="button" class="btn btn-sm btn-sp-primary" data-bs-toggle="modal" data-bs-target="#createScheduleModal">
+                <i class="fa-regular fa-calendar-plus me-1"></i> Buat Jadwal Baru
+            </button>
+        @endif
     </div>
 </div>
 
@@ -214,28 +216,32 @@
                                 @endif
                             </td>
                             <td class="text-end text-nowrap">
-                                <div class="sp-action-btn-group">
-                                    <!-- Edit -->
-                                    <button type="button" 
-                                            class="btn btn-light border sp-action-btn text-warning" 
-                                            title="Edit Jadwal" 
-                                            data-bs-toggle="tooltip"
-                                            onclick="openEditScheduleModal({{ json_encode($item) }})">
-                                        <i class="fa-regular fa-pen-to-square"></i>
-                                    </button>
-
-                                    <!-- Hapus -->
-                                    <form method="POST" action="{{ route('admin.schedules.destroy', $item) }}" class="d-inline" onsubmit="return confirm('Hapus jadwal agenda ini?');">
-                                        @csrf
-                                        @method('DELETE')
-                                        <button type="submit" 
-                                                class="btn btn-light border sp-action-btn text-danger" 
-                                                title="Hapus Jadwal" 
-                                                data-bs-toggle="tooltip">
-                                            <i class="fa-regular fa-trash-can"></i>
+                                @if(auth()->user()->isAdmin())
+                                    <div class="sp-action-btn-group">
+                                        <!-- Edit -->
+                                        <button type="button" 
+                                                class="btn btn-light border sp-action-btn text-warning" 
+                                                title="Edit Jadwal" 
+                                                data-bs-toggle="tooltip"
+                                                onclick="openEditScheduleModal({{ json_encode($item) }})">
+                                            <i class="fa-regular fa-pen-to-square"></i>
                                         </button>
-                                    </form>
-                                </div>
+
+                                        <!-- Hapus -->
+                                        <form method="POST" action="{{ route('admin.schedules.destroy', $item) }}" class="d-inline" onsubmit="return confirm('Hapus jadwal agenda ini?');">
+                                            @csrf
+                                            @method('DELETE')
+                                            <button type="submit" 
+                                                    class="btn btn-light border sp-action-btn text-danger" 
+                                                    title="Hapus Jadwal" 
+                                                    data-bs-toggle="tooltip">
+                                                <i class="fa-regular fa-trash-can"></i>
+                                            </button>
+                                        </form>
+                                    </div>
+                                @else
+                                    <span class="text-muted small">-</span>
+                                @endif
                             </td>
                         </tr>
                     @empty
@@ -264,6 +270,7 @@
     @endif
 </div>
 
+@if(auth()->user()->isAdmin())
 <!-- ==============================================================
      MODAL BUAT JADWAL BARU
      ============================================================== -->
@@ -431,6 +438,7 @@
         </div>
     </div>
 </div>
+@endif
 @endsection
 
 @push('scripts')

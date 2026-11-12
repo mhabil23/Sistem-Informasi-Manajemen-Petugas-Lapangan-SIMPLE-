@@ -37,10 +37,8 @@ Route::middleware('auth')->group(function () {
         ->name('media.file');
 });
 
-// Admin Area (Protected by role:admin)
+// Admin Area (Manajemen Sistem & Penetapan: khusus role:admin)
 Route::middleware(['auth', 'role:admin'])->prefix('admin')->as('admin.')->group(function () {
-    Route::get('/dashboard', [AdminDashboardController::class, 'index'])->name('dashboard');
-
     // Google Spreadsheet Database Engine Settings
     Route::get('/spreadsheet', [\App\Http\Controllers\Admin\SpreadsheetController::class, 'index'])->name('spreadsheet.index');
     Route::put('/spreadsheet', [\App\Http\Controllers\Admin\SpreadsheetController::class, 'update'])->name('spreadsheet.update');
@@ -54,48 +52,37 @@ Route::middleware(['auth', 'role:admin'])->prefix('admin')->as('admin.')->group(
     Route::delete('/users/{user}', [\App\Http\Controllers\Admin\UserController::class, 'destroy'])->name('users.destroy');
     Route::patch('/users/{user}/toggle-status', [\App\Http\Controllers\Admin\UserController::class, 'toggleStatus'])->name('users.toggle-status');
     Route::patch('/users/{user}/reset-password', [\App\Http\Controllers\Admin\UserController::class, 'resetPassword'])->name('users.reset-password');
-    // Kegiatan & Penugasan (Admin)
-    Route::get('/assignments', [\App\Http\Controllers\Admin\AssignmentController::class, 'index'])->name('assignments.index');
+
+    // Aksi Penugasan (CUD Admin)
     Route::post('/assignments', [\App\Http\Controllers\Admin\AssignmentController::class, 'store'])->name('assignments.store');
-    Route::get('/assignments/{assignment}', [\App\Http\Controllers\Admin\AssignmentController::class, 'show'])->name('assignments.show');
     Route::put('/assignments/{assignment}', [\App\Http\Controllers\Admin\AssignmentController::class, 'update'])->name('assignments.update');
     Route::delete('/assignments/{assignment}', [\App\Http\Controllers\Admin\AssignmentController::class, 'destroy'])->name('assignments.destroy');
     Route::post('/assignments/{assignment}/officers', [\App\Http\Controllers\Admin\AssignmentController::class, 'assignOfficer'])->name('assignments.officers.assign');
     Route::put('/assignments/{assignment}/officers/{assignmentOfficer}', [\App\Http\Controllers\Admin\AssignmentController::class, 'updateOfficerTask'])->name('assignments.officers.update');
     Route::delete('/assignments/{assignment}/officers/{assignmentOfficer}', [\App\Http\Controllers\Admin\AssignmentController::class, 'removeOfficer'])->name('assignments.officers.remove');
-    // Jadwal Kegiatan (Admin)
-    Route::get('/schedules', [\App\Http\Controllers\Admin\ScheduleController::class, 'index'])->name('schedules.index');
+
+    // Aksi Jadwal Kegiatan (CUD Admin)
     Route::post('/schedules', [\App\Http\Controllers\Admin\ScheduleController::class, 'store'])->name('schedules.store');
     Route::put('/schedules/{schedule}', [\App\Http\Controllers\Admin\ScheduleController::class, 'update'])->name('schedules.update');
     Route::delete('/schedules/{schedule}', [\App\Http\Controllers\Admin\ScheduleController::class, 'destroy'])->name('schedules.destroy');
-    // Data Responden (Admin)
-    Route::get('/respondents', [\App\Http\Controllers\Admin\RespondentController::class, 'index'])->name('respondents.index');
+
+    // Aksi Data Responden (CUD Admin)
     Route::post('/respondents', [\App\Http\Controllers\Admin\RespondentController::class, 'store'])->name('respondents.store');
-    Route::get('/respondents/{respondent}', [\App\Http\Controllers\Admin\RespondentController::class, 'show'])->name('respondents.show');
     Route::put('/respondents/{respondent}', [\App\Http\Controllers\Admin\RespondentController::class, 'update'])->name('respondents.update');
     Route::delete('/respondents/{respondent}', [\App\Http\Controllers\Admin\RespondentController::class, 'destroy'])->name('respondents.destroy');
 
-    // BAST Responden (Admin)
-    Route::get('/basts/respondents', [\App\Http\Controllers\Admin\RespondentBastController::class, 'index'])->name('basts.respondents.index');
+    // Aksi BAST Responden (Create & Delete Admin)
     Route::post('/basts/respondents', [\App\Http\Controllers\Admin\RespondentBastController::class, 'store'])->name('basts.respondents.store');
-    Route::get('/basts/respondents/{bast}/download', [\App\Http\Controllers\Admin\RespondentBastController::class, 'downloadPdf'])->name('basts.respondents.download');
-    Route::get('/basts/respondents/{bast}/preview', [\App\Http\Controllers\Admin\RespondentBastController::class, 'previewPdf'])->name('basts.respondents.preview');
     Route::delete('/basts/respondents/{bast}', [\App\Http\Controllers\Admin\RespondentBastController::class, 'destroy'])->name('basts.respondents.destroy');
 
-    // BAST Petugas (Admin)
-    Route::get('/basts/officers', [\App\Http\Controllers\Admin\OfficerBastController::class, 'index'])->name('basts.officers.index');
+    // Aksi BAST Petugas (Create & Delete Admin)
     Route::post('/basts/officers', [\App\Http\Controllers\Admin\OfficerBastController::class, 'store'])->name('basts.officers.store');
-    Route::get('/basts/officers/{bast}/download', [\App\Http\Controllers\Admin\OfficerBastController::class, 'downloadPdf'])->name('basts.officers.download');
-    Route::get('/basts/officers/{bast}/preview', [\App\Http\Controllers\Admin\OfficerBastController::class, 'previewPdf'])->name('basts.officers.preview');
     Route::delete('/basts/officers/{bast}', [\App\Http\Controllers\Admin\OfficerBastController::class, 'destroy'])->name('basts.officers.destroy');
-    // Laporan Petugas & Verifikasi (Admin)
-    Route::get('/reports', [\App\Http\Controllers\Admin\ReportController::class, 'index'])->name('reports.index');
+
+    // Aksi Laporan Petugas & ACC/Basis Pelaksanaan (Admin)
     Route::put('/reports/basis-settings', [\App\Http\Controllers\Admin\ReportController::class, 'updateBasisSettings'])->name('reports.basis-settings');
-    Route::get('/reports/{report}', [\App\Http\Controllers\Admin\ReportController::class, 'show'])->name('reports.show');
     Route::put('/reports/{report}', [\App\Http\Controllers\Admin\ReportController::class, 'update'])->name('reports.update');
     Route::patch('/reports/{report}/approve', [\App\Http\Controllers\Admin\ReportController::class, 'approve'])->name('reports.approve');
-    Route::get('/reports/{report}/download', [\App\Http\Controllers\Admin\ReportController::class, 'downloadPdf'])->name('reports.download');
-    Route::get('/reports/{report}/preview', [\App\Http\Controllers\Admin\ReportController::class, 'previewPdf'])->name('reports.preview');
     Route::put('/reports/{report}/review', [\App\Http\Controllers\Admin\ReportController::class, 'review'])->name('reports.review');
     Route::delete('/reports/{report}', [\App\Http\Controllers\Admin\ReportController::class, 'destroy'])->name('reports.destroy');
 
@@ -115,11 +102,6 @@ Route::middleware(['auth', 'role:admin'])->prefix('admin')->as('admin.')->group(
     Route::delete('/trainings/{training}/participants/{participant}', [\App\Http\Controllers\Admin\TrainingController::class, 'destroyParticipant'])->name('trainings.participants.destroy');
     Route::get('/trainings/{training}/attendance-pdf', [\App\Http\Controllers\Admin\TrainingController::class, 'exportAttendancePdf'])->name('trainings.attendance.pdf');
 
-    // Rekapitulasi & Export (Admin)
-    Route::get('/recapitulation', [\App\Http\Controllers\Admin\RecapitulationController::class, 'index'])->name('recapitulation.index');
-    Route::get('/recapitulation/pdf', [\App\Http\Controllers\Admin\RecapitulationController::class, 'exportPdf'])->name('recapitulation.pdf');
-    Route::get('/recapitulation/excel', [\App\Http\Controllers\Admin\RecapitulationController::class, 'exportExcel'])->name('recapitulation.excel');
-
     // Template Dokumen (Admin)
     Route::get('/templates', [\App\Http\Controllers\Admin\DocumentTemplateController::class, 'index'])->name('templates.index');
     Route::post('/templates', [\App\Http\Controllers\Admin\DocumentTemplateController::class, 'store'])->name('templates.store');
@@ -137,8 +119,45 @@ Route::middleware(['auth', 'role:admin'])->prefix('admin')->as('admin.')->group(
     Route::post('/notices/send', [\App\Http\Controllers\Admin\NoticeController::class, 'send'])->name('notices.send');
 });
 
-// Petugas Lapangan Area (Protected by role:petugas)
-Route::middleware(['auth', 'role:petugas'])->prefix('petugas')->as('petugas.')->group(function () {
+// Monitoring Lapangan & Rekapitulasi (Akses: Admin & Pegawai / PML)
+Route::middleware(['auth', 'role:admin,pegawai'])->prefix('admin')->as('admin.')->group(function () {
+    Route::get('/dashboard', [AdminDashboardController::class, 'index'])->name('dashboard');
+
+    // Kegiatan & Penugasan (Read/Monitoring)
+    Route::get('/assignments', [\App\Http\Controllers\Admin\AssignmentController::class, 'index'])->name('assignments.index');
+    Route::get('/assignments/{assignment}', [\App\Http\Controllers\Admin\AssignmentController::class, 'show'])->name('assignments.show');
+
+    // Jadwal Kegiatan (Read/Monitoring)
+    Route::get('/schedules', [\App\Http\Controllers\Admin\ScheduleController::class, 'index'])->name('schedules.index');
+
+    // Data Responden (Read/Monitoring)
+    Route::get('/respondents', [\App\Http\Controllers\Admin\RespondentController::class, 'index'])->name('respondents.index');
+    Route::get('/respondents/{respondent}', [\App\Http\Controllers\Admin\RespondentController::class, 'show'])->name('respondents.show');
+
+    // BAST Responden (Read/Preview/Download)
+    Route::get('/basts/respondents', [\App\Http\Controllers\Admin\RespondentBastController::class, 'index'])->name('basts.respondents.index');
+    Route::get('/basts/respondents/{bast}/download', [\App\Http\Controllers\Admin\RespondentBastController::class, 'downloadPdf'])->name('basts.respondents.download');
+    Route::get('/basts/respondents/{bast}/preview', [\App\Http\Controllers\Admin\RespondentBastController::class, 'previewPdf'])->name('basts.respondents.preview');
+
+    // BAST Petugas (Read/Preview/Download)
+    Route::get('/basts/officers', [\App\Http\Controllers\Admin\OfficerBastController::class, 'index'])->name('basts.officers.index');
+    Route::get('/basts/officers/{bast}/download', [\App\Http\Controllers\Admin\OfficerBastController::class, 'downloadPdf'])->name('basts.officers.download');
+    Route::get('/basts/officers/{bast}/preview', [\App\Http\Controllers\Admin\OfficerBastController::class, 'previewPdf'])->name('basts.officers.preview');
+
+    // Laporan Petugas (Read/Preview/Download)
+    Route::get('/reports', [\App\Http\Controllers\Admin\ReportController::class, 'index'])->name('reports.index');
+    Route::get('/reports/{report}', [\App\Http\Controllers\Admin\ReportController::class, 'show'])->name('reports.show');
+    Route::get('/reports/{report}/download', [\App\Http\Controllers\Admin\ReportController::class, 'downloadPdf'])->name('reports.download');
+    Route::get('/reports/{report}/preview', [\App\Http\Controllers\Admin\ReportController::class, 'previewPdf'])->name('reports.preview');
+
+    // Rekapitulasi & Export
+    Route::get('/recapitulation', [\App\Http\Controllers\Admin\RecapitulationController::class, 'index'])->name('recapitulation.index');
+    Route::get('/recapitulation/pdf', [\App\Http\Controllers\Admin\RecapitulationController::class, 'exportPdf'])->name('recapitulation.pdf');
+    Route::get('/recapitulation/excel', [\App\Http\Controllers\Admin\RecapitulationController::class, 'exportExcel'])->name('recapitulation.excel');
+});
+
+// Portal Lapangan (Protected by role:petugas,pegawai)
+Route::middleware(['auth', 'role:petugas,pegawai'])->prefix('petugas')->as('petugas.')->group(function () {
     Route::get('/dashboard', [PetugasDashboardController::class, 'index'])->name('dashboard');
 
     // Tugas Saya (Petugas Lapangan)

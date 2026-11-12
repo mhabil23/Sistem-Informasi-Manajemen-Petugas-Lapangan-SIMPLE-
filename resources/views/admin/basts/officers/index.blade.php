@@ -16,9 +16,11 @@
         <p class="text-muted small mb-0">Arsip resmi penyerahan hasil tugas dan bundel berkas administrasi dari petugas lapangan kepada koordinator/Administrator.</p>
     </div>
     <div class="col-md-5 text-md-end mt-3 mt-md-0">
-        <button type="button" class="btn btn-sp-primary" data-bs-toggle="modal" data-bs-target="#createOfficerBastModal">
-            <i class="fa-solid fa-file-circle-plus me-1"></i> Terbitkan BAST Petugas
-        </button>
+        @if(auth()->user()->isAdmin())
+            <button type="button" class="btn btn-sp-primary" data-bs-toggle="modal" data-bs-target="#createOfficerBastModal">
+                <i class="fa-solid fa-file-circle-plus me-1"></i> Terbitkan BAST Petugas
+            </button>
+        @endif
     </div>
 </div>
 
@@ -124,17 +126,19 @@
                                         <i class="fa-solid fa-print"></i>
                                     </a>
 
-                                    <!-- Hapus -->
-                                    <form method="POST" action="{{ route('admin.basts.officers.destroy', $item) }}" class="d-inline" onsubmit="return confirm('Hapus arsip BAST Petugas {{ $item->bast_number }}?');">
-                                        @csrf
-                                        @method('DELETE')
-                                        <button type="submit" 
-                                                class="btn btn-light border sp-action-btn text-danger" 
-                                                title="Hapus BAST" 
-                                                data-bs-toggle="tooltip">
-                                            <i class="fa-regular fa-trash-can"></i>
-                                        </button>
-                                    </form>
+                                    @if(auth()->user()->isAdmin())
+                                        <!-- Hapus -->
+                                        <form method="POST" action="{{ route('admin.basts.officers.destroy', $item) }}" class="d-inline" onsubmit="return confirm('Hapus arsip BAST Petugas {{ $item->bast_number }}?');">
+                                            @csrf
+                                            @method('DELETE')
+                                            <button type="submit" 
+                                                    class="btn btn-light border sp-action-btn text-danger" 
+                                                    title="Hapus BAST" 
+                                                    data-bs-toggle="tooltip">
+                                                <i class="fa-regular fa-trash-can"></i>
+                                            </button>
+                                        </form>
+                                    @endif
                                 </div>
                             </td>
                         </tr>
@@ -164,6 +168,7 @@
     @endif
 </div>
 
+@if(auth()->user()->isAdmin())
 <!-- ==============================================================
      MODAL TERBITKAN BAST PETUGAS
      ============================================================== -->
@@ -250,5 +255,6 @@
         </div>
     </div>
 </div>
+@endif
 @endsection
 

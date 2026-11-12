@@ -32,7 +32,7 @@ class NoticeController extends Controller
 
         // 1. Opsi Kirim Massal ke Seluruh Petugas yang Belum Menyerahkan Laporan
         if ($validated['user_id'] === 'all_without_reports') {
-            $officersWithoutReports = User::where('role', 'petugas')
+            $officersWithoutReports = User::fieldStaff()
                 ->where('status', 'active')
                 ->whereDoesntHave('reports')
                 ->get();
@@ -73,7 +73,7 @@ class NoticeController extends Controller
         }
 
         // 2. Kirim ke Satu Petugas Khusus
-        $officer = User::where('role', 'petugas')->findOrFail($validated['user_id']);
+        $officer = User::fieldStaff()->findOrFail($validated['user_id']);
 
         $notice = OfficerNotice::create([
             'user_id' => $officer->id,

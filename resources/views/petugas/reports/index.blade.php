@@ -13,7 +13,11 @@
 <div class="row align-items-center mb-4">
     <div class="col-md-7">
         <h3 class="fw-bold text-dark mb-1">Pengisian Laporan Perjalanan Dinas</h3>
-        <p class="text-muted small mb-0">Isi detail kegiatan, cukup <strong>1 kali tanda tangan digital</strong>, dan foto kamera real-time. Identitas, Dasar Pelaksanaan &amp; Pengeluaran Riil dilengkapi Administrator — <strong>unduh PDF terbuka setelah mendapat ACC Administrator.</strong></p>
+        @if(auth()->user()->isPegawai())
+            <p class="text-muted small mb-0">Isi detail kegiatan, cukup <strong>1 kali tanda tangan digital</strong>, dan foto kamera real-time. <strong>Sebagai Pegawai / PML, dokumen PDF dapat langsung diunduh &amp; dicetak setelah laporan disimpan.</strong></p>
+        @else
+            <p class="text-muted small mb-0">Isi detail kegiatan, cukup <strong>1 kali tanda tangan digital</strong>, dan foto kamera real-time. Identitas, Dasar Pelaksanaan &amp; Pengeluaran Riil dilengkapi Administrator — <strong>unduh PDF terbuka setelah mendapat ACC Administrator.</strong></p>
+        @endif
     </div>
     <div class="col-md-5 text-md-end mt-3 mt-md-0">
         <button type="button" class="btn btn-sp-primary" data-bs-toggle="modal" data-bs-target="#createReportModal">
@@ -23,7 +27,7 @@
 </div>
 
 <!-- Banner Pemberitahuan Pengiriman ke Admin (Menunggu ACC sebelum Unduh PDF) -->
-@if(session('pending_approval_report_id'))
+@if(!auth()->user()->isPegawai() && session('pending_approval_report_id'))
     <div class="alert alert-info border-info d-flex flex-wrap align-items-center justify-content-between gap-3 mb-4 shadow-sm" role="alert">
         <div class="d-flex align-items-center">
             <i class="fa-solid fa-hourglass-half fa-2x me-3 text-info"></i>
@@ -245,8 +249,8 @@
                                         <i class="fa-solid fa-eye"></i>
                                     </button>
 
-                                    @if($rep->canBeDownloadedByOfficer())
-                                        <!-- Preview & Cetak PDF (Terbuka Setelah ACC Admin) -->
+                                    @if($rep->canBeDownloadedByOfficer(auth()->user()))
+                                        <!-- Preview & Cetak PDF -->
                                         <a href="{{ route('petugas.reports.preview', $rep) }}" 
                                            target="_blank"
                                            class="btn btn-light border sp-action-btn text-primary" 
@@ -365,7 +369,7 @@
                                     onclick="openDetailModal({{ json_encode($rep) }})">
                                 <i class="fa-solid fa-eye me-1"></i> Detail
                             </button>
-                            @if($rep->canBeDownloadedByOfficer())
+                            @if($rep->canBeDownloadedByOfficer(auth()->user()))
                                 <a href="{{ route('petugas.reports.preview', $rep) }}" 
                                    target="_blank" 
                                    class="btn btn-sm btn-light border text-primary shadow-sm" 
@@ -891,6 +895,7 @@
 <script>
     let createSigPad = null;
     let editSigPad = null;
+    const CAN_DIRECT_DOWNLOAD_PDF = {{ auth()->user()->isPegawai() ? 'true' : 'false' }};
 
     function setupSignatureCanvas(canvasId, hiddenInputId) {
         const canvas = document.getElementById(canvasId);
@@ -1072,12 +1077,12 @@
     function openDetailModal(rep) {
         populateReportDocumentPreview(rep, ADMIN_BASIS_DEFAULTS);
 
-        const isApproved = rep.status === 'approved';
+        const canDownloadPdf = CAN_DIRECT_DOWNLOAD_PDF || rep.status === 'approved';
         const previewBtn = document.getElementById('det_preview_link');
         const downloadBtn = document.getElementById('det_download_link');
         const lockedNotice = document.getElementById('det_locked_pdf_notice');
 
-        if (isApproved) {
+        if (canDownloadPdf) {
             previewBtn.href = '/petugas/reports/' + rep.id + '/preview';
             downloadBtn.href = '/petugas/reports/' + rep.id + '/download';
             previewBtn.classList.remove('d-none');

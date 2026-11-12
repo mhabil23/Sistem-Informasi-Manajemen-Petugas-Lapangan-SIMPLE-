@@ -24,13 +24,15 @@
                 @endif
             </a>
         @endif
-        <button type="button" class="btn btn-sm btn-sp-primary" data-bs-toggle="modal" data-bs-target="#basisSettingsModal">
-            <i class="fa-solid fa-scale-balanced me-1"></i> Atur B. Dasar Pelaksanaan
-        </button>
+        @if(auth()->user()->isAdmin())
+            <button type="button" class="btn btn-sm btn-sp-primary" data-bs-toggle="modal" data-bs-target="#basisSettingsModal">
+                <i class="fa-solid fa-scale-balanced me-1"></i> Atur B. Dasar Pelaksanaan
+            </button>
+        @endif
     </div>
 </div>
 
-@if(($unreadNotifCount ?? 0) > 0)
+@if(auth()->user()->isAdmin() && ($unreadNotifCount ?? 0) > 0)
     <div class="alert alert-warning border-warning d-flex flex-wrap justify-content-between align-items-center gap-2 mb-3 py-2 px-3 shadow-sm">
         <div class="small text-dark">
             <i class="fa-solid fa-bell text-warning me-1"></i>
@@ -249,42 +251,44 @@
                                         <i class="fa-solid fa-eye"></i>
                                     </button>
 
-                                    <!-- 2. Edit Inputan Laporan Petugas -->
-                                    <button type="button"
-                                            class="btn btn-light border sp-action-btn text-warning"
-                                            title="Edit Inputan Laporan"
-                                            data-bs-toggle="tooltip"
-                                            onclick='openAdminEditModal(@json($rep))'>
-                                        <i class="fa-regular fa-pen-to-square"></i>
-                                    </button>
+                                    @if(auth()->user()->isAdmin())
+                                        <!-- 2. Edit Inputan Laporan Petugas -->
+                                        <button type="button"
+                                                class="btn btn-light border sp-action-btn text-warning"
+                                                title="Edit Inputan Laporan"
+                                                data-bs-toggle="tooltip"
+                                                onclick='openAdminEditModal(@json($rep))'>
+                                            <i class="fa-regular fa-pen-to-square"></i>
+                                        </button>
 
-                                    <!-- 3. ACC Laporan (Setujui Cepat) -->
-                                    @if($rep->status !== 'approved')
-                                        <form method="POST" action="{{ route('admin.reports.approve', $rep) }}" class="d-inline" onsubmit="return confirm('ACC (Setujui) laporan {{ addslashes($rep->activity_title) }} agar petugas dapat mengunduh PDF resminya?');">
-                                            @csrf
-                                            @method('PATCH')
-                                            <button type="submit"
-                                                    class="btn btn-success btn-sm px-2 py-1 fw-semibold"
-                                                    title="ACC / Setujui Laporan"
-                                                    data-bs-toggle="tooltip"
-                                                    style="font-size: 0.72rem;">
-                                                <i class="fa-solid fa-check-double me-0.5"></i> ACC
-                                            </button>
-                                        </form>
-                                    @else
-                                        <span class="badge bg-success-subtle text-success border border-success-subtle py-1 px-1.5" style="font-size: 0.68rem;" title="Sudah Di-ACC (Petugas dapat download PDF)">
-                                            <i class="fa-solid fa-circle-check me-0.5"></i> ACC
-                                        </span>
+                                        <!-- 3. ACC Laporan (Setujui Cepat) -->
+                                        @if($rep->status !== 'approved')
+                                            <form method="POST" action="{{ route('admin.reports.approve', $rep) }}" class="d-inline" onsubmit="return confirm('ACC (Setujui) laporan {{ addslashes($rep->activity_title) }} agar petugas dapat mengunduh PDF resminya?');">
+                                                @csrf
+                                                @method('PATCH')
+                                                <button type="submit"
+                                                        class="btn btn-success btn-sm px-2 py-1 fw-semibold"
+                                                        title="ACC / Setujui Laporan"
+                                                        data-bs-toggle="tooltip"
+                                                        style="font-size: 0.72rem;">
+                                                    <i class="fa-solid fa-check-double me-0.5"></i> ACC
+                                                </button>
+                                            </form>
+                                        @else
+                                            <span class="badge bg-success-subtle text-success border border-success-subtle py-1 px-1.5" style="font-size: 0.68rem;" title="Sudah Di-ACC (Petugas dapat download PDF)">
+                                                <i class="fa-solid fa-circle-check me-0.5"></i> ACC
+                                            </span>
+                                        @endif
+
+                                        <!-- Verifikasi / Revisi dengan Catatan -->
+                                        <button type="button" 
+                                                class="btn btn-light border sp-action-btn text-primary" 
+                                                title="Verifikasi / Catatan Revisi" 
+                                                data-bs-toggle="tooltip"
+                                                onclick='openReviewModal(@json($rep))'>
+                                            <i class="fa-solid fa-file-circle-check"></i>
+                                        </button>
                                     @endif
-
-                                    <!-- Verifikasi / Revisi dengan Catatan -->
-                                    <button type="button" 
-                                            class="btn btn-light border sp-action-btn text-primary" 
-                                            title="Verifikasi / Catatan Revisi" 
-                                            data-bs-toggle="tooltip"
-                                            onclick='openReviewModal(@json($rep))'>
-                                        <i class="fa-solid fa-file-circle-check"></i>
-                                    </button>
 
                                     <!-- Pratinjau / Cetak PDF -->
                                     <a href="{{ route('admin.reports.preview', $rep) }}" 
@@ -303,17 +307,19 @@
                                         <i class="fa-solid fa-file-pdf"></i>
                                     </a>
 
-                                    <!-- Hapus Laporan -->
-                                    <form method="POST" action="{{ route('admin.reports.destroy', $rep) }}" class="d-inline" onsubmit="return confirm('Hapus laporan {{ addslashes($rep->activity_title) }}?');">
-                                        @csrf
-                                        @method('DELETE')
-                                        <button type="submit" 
-                                                class="btn btn-light border sp-action-btn text-danger" 
-                                                title="Hapus Laporan" 
-                                                data-bs-toggle="tooltip">
-                                            <i class="fa-regular fa-trash-can"></i>
-                                        </button>
-                                    </form>
+                                    @if(auth()->user()->isAdmin())
+                                        <!-- Hapus Laporan -->
+                                        <form method="POST" action="{{ route('admin.reports.destroy', $rep) }}" class="d-inline" onsubmit="return confirm('Hapus laporan {{ addslashes($rep->activity_title) }}?');">
+                                            @csrf
+                                            @method('DELETE')
+                                            <button type="submit" 
+                                                    class="btn btn-light border sp-action-btn text-danger" 
+                                                    title="Hapus Laporan" 
+                                                    data-bs-toggle="tooltip">
+                                                <i class="fa-regular fa-trash-can"></i>
+                                            </button>
+                                        </form>
+                                    @endif
                                 </div>
                             </td>
                         </tr>
@@ -343,6 +349,7 @@
     @endif
 </div>
 
+@if(auth()->user()->isAdmin())
 <!-- ==============================================================
      MODAL REVIEW / VERIFIKASI LAPORAN
      ============================================================== -->
@@ -753,6 +760,7 @@
         </div>
     </div>
 </div>
+@endif
 @endsection
 
 @push('scripts')
@@ -1005,7 +1013,7 @@
     @if(isset($autoOpenReport) && $autoOpenReport)
         document.addEventListener('DOMContentLoaded', function() {
             const autoRep = @json($autoOpenReport);
-            @if(($autoOpenMode ?? 'view') === 'edit')
+            @if(auth()->user()->isAdmin() && ($autoOpenMode ?? 'view') === 'edit')
                 openAdminEditModal(autoRep);
             @else
                 openViewReportModal(autoRep);

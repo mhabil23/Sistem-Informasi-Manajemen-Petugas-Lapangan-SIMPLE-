@@ -16,9 +16,11 @@
         <p class="text-muted small mb-0">Kelola kegiatan administrasi resmi, tentukan jadwal & lokasi, serta bagikan tugas kepada masing-masing petugas lapangan.</p>
     </div>
     <div class="col-md-5 text-md-end mt-2 mt-md-0">
-        <button type="button" class="btn btn-sm btn-sp-primary" data-bs-toggle="modal" data-bs-target="#createAssignmentModal">
-            <i class="fa-solid fa-calendar-plus me-1"></i> Buat Kegiatan Baru
-        </button>
+        @if(auth()->user()->isAdmin())
+            <button type="button" class="btn btn-sm btn-sp-primary" data-bs-toggle="modal" data-bs-target="#createAssignmentModal">
+                <i class="fa-solid fa-calendar-plus me-1"></i> Buat Kegiatan Baru
+            </button>
+        @endif
     </div>
 </div>
 
@@ -218,23 +220,25 @@
                                         <i class="fa-solid fa-list-check"></i>
                                     </a>
 
-                                    <!-- Edit -->
-                                    <button type="button" 
-                                            class="btn btn-light border sp-action-btn text-warning" 
-                                            title="Edit Kegiatan" 
-                                            data-bs-toggle="tooltip"
-                                            onclick="openEditAssignmentModal({{ json_encode($item) }})">
-                                        <i class="fa-regular fa-pen-to-square"></i>
-                                    </button>
+                                    @if(auth()->user()->isAdmin())
+                                        <!-- Edit -->
+                                        <button type="button" 
+                                                class="btn btn-light border sp-action-btn text-warning" 
+                                                title="Edit Kegiatan" 
+                                                data-bs-toggle="tooltip"
+                                                onclick="openEditAssignmentModal({{ json_encode($item) }})">
+                                            <i class="fa-regular fa-pen-to-square"></i>
+                                        </button>
 
-                                    <!-- Hapus -->
-                                    <button type="button" 
-                                            class="btn btn-light border sp-action-btn text-danger" 
-                                            title="Hapus Kegiatan" 
-                                            data-bs-toggle="tooltip"
-                                            onclick="openDeleteAssignmentModal({{ $item->id }}, '{{ addslashes($item->title) }}')">
-                                        <i class="fa-regular fa-trash-can"></i>
-                                    </button>
+                                        <!-- Hapus -->
+                                        <button type="button" 
+                                                class="btn btn-light border sp-action-btn text-danger" 
+                                                title="Hapus Kegiatan" 
+                                                data-bs-toggle="tooltip"
+                                                onclick="openDeleteAssignmentModal({{ $item->id }}, '{{ addslashes($item->title) }}')">
+                                            <i class="fa-regular fa-trash-can"></i>
+                                        </button>
+                                    @endif
                                 </div>
                             </td>
                         </tr>
@@ -264,6 +268,7 @@
     @endif
 </div>
 
+@if(auth()->user()->isAdmin())
 <!-- ==============================================================
      MODAL BUAT KEGIATAN BARU
      ============================================================== -->
@@ -466,6 +471,7 @@
         </div>
     </div>
 </div>
+@endif
 @endsection
 
 @push('scripts')

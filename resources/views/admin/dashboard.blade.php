@@ -78,17 +78,19 @@
                                            class="btn btn-xs btn-outline-info py-0.5 px-2" style="font-size: 0.72rem;" title="Lihat Laporan">
                                             <i class="fa-solid fa-eye me-1"></i> Lihat
                                         </a>
-                                        <a href="{{ route('admin.reports.index', ['edit' => $incRep->id]) }}"
-                                           class="btn btn-xs btn-outline-warning text-dark py-0.5 px-2" style="font-size: 0.72rem;" title="Edit Inputan Laporan">
-                                            <i class="fa-regular fa-pen-to-square me-1"></i> Edit
-                                        </a>
-                                        <form method="POST" action="{{ route('admin.reports.approve', $incRep) }}" class="d-inline" onsubmit="return confirm('ACC (Setujui) laporan {{ addslashes($incRep->activity_title) }} agar petugas dapat mengunduh PDF?');">
-                                            @csrf
-                                            @method('PATCH')
-                                            <button type="submit" class="btn btn-xs btn-success py-0.5 px-2" style="font-size: 0.72rem;" title="ACC / Setujui Laporan">
-                                                <i class="fa-solid fa-check-double me-1"></i> ACC
-                                            </button>
-                                        </form>
+                                        @if(auth()->user()->isAdmin())
+                                            <a href="{{ route('admin.reports.index', ['edit' => $incRep->id]) }}"
+                                               class="btn btn-xs btn-outline-warning text-dark py-0.5 px-2" style="font-size: 0.72rem;" title="Edit Inputan Laporan">
+                                                <i class="fa-regular fa-pen-to-square me-1"></i> Edit
+                                            </a>
+                                            <form method="POST" action="{{ route('admin.reports.approve', $incRep) }}" class="d-inline" onsubmit="return confirm('ACC (Setujui) laporan {{ addslashes($incRep->activity_title) }} agar petugas dapat mengunduh PDF?');">
+                                                @csrf
+                                                @method('PATCH')
+                                                <button type="submit" class="btn btn-xs btn-success py-0.5 px-2" style="font-size: 0.72rem;" title="ACC / Setujui Laporan">
+                                                    <i class="fa-solid fa-check-double me-1"></i> ACC
+                                                </button>
+                                            </form>
+                                        @endif
                                     </div>
                                 </td>
                             </tr>
@@ -340,7 +342,7 @@
                             <i class="fa-solid fa-triangle-exclamation me-1"></i> Perlu Follow-Up Laporan ({{ $officersWithoutReports->count() }} Petugas):
                         </span>
                         <div class="d-flex align-items-center gap-1.5">
-                            @if($officersWithoutReports->isNotEmpty())
+                            @if(auth()->user()->isAdmin() && $officersWithoutReports->isNotEmpty())
                                 <button type="button" 
                                         class="btn btn-xs btn-outline-danger py-0.5 px-1.5" 
                                         style="font-size: 0.68rem;"
@@ -364,15 +366,17 @@
                                         <i class="fa-solid fa-location-dot text-danger me-1"></i> {{ $offWithout->dominant_district }} &bull; BAST: {{ $offWithout->completed }}/{{ $offWithout->target }}
                                     </small>
                                 </div>
-                                <div class="flex-shrink-0">
-                                    <button type="button" 
-                                            class="btn btn-xs btn-primary py-0.5 px-2" 
-                                            style="font-size: 0.68rem;" 
-                                            title="Kirim pesan ke papan informasi petugas" 
-                                            onclick="openSendNoticeModal({{ $offWithout->id }}, '{{ addslashes($offWithout->name) }}', 'report')">
-                                        <i class="fa-solid fa-bullhorn me-1"></i> Ingatkan
-                                    </button>
-                                </div>
+                                @if(auth()->user()->isAdmin())
+                                    <div class="flex-shrink-0">
+                                        <button type="button" 
+                                                class="btn btn-xs btn-primary py-0.5 px-2" 
+                                                style="font-size: 0.68rem;" 
+                                                title="Kirim pesan ke papan informasi petugas" 
+                                                onclick="openSendNoticeModal({{ $offWithout->id }}, '{{ addslashes($offWithout->name) }}', 'report')">
+                                            <i class="fa-solid fa-bullhorn me-1"></i> Ingatkan
+                                        </button>
+                                    </div>
+                                @endif
                             </div>
                         @empty
                             <div class="text-center py-2 text-success small" style="font-size: 0.75rem;">
@@ -544,13 +548,15 @@
                             </td>
                             <td class="text-end text-nowrap">
                                 <div class="d-inline-flex gap-1 align-items-center">
-                                    <button type="button" 
-                                            class="btn btn-xs btn-primary py-1 px-2" 
-                                            style="font-size: 0.72rem;"
-                                            title="Kirim Pesan ke Papan Informasi Petugas"
-                                            onclick="openSendNoticeModal({{ $off->id }}, '{{ addslashes($off->name) }}', '{{ $off->has_report ? 'bast' : 'report' }}', '{{ $off->target }}', '{{ $off->completed }}', '{{ $off->pending }}', '{{ $off->percentage }}')">
-                                        <i class="fa-solid fa-bullhorn me-1"></i> Notif
-                                    </button>
+                                    @if(auth()->user()->isAdmin())
+                                        <button type="button" 
+                                                class="btn btn-xs btn-primary py-1 px-2" 
+                                                style="font-size: 0.72rem;"
+                                                title="Kirim Pesan ke Papan Informasi Petugas"
+                                                onclick="openSendNoticeModal({{ $off->id }}, '{{ addslashes($off->name) }}', '{{ $off->has_report ? 'bast' : 'report' }}', '{{ $off->target }}', '{{ $off->completed }}', '{{ $off->pending }}', '{{ $off->percentage }}')">
+                                            <i class="fa-solid fa-bullhorn me-1"></i> Notif
+                                        </button>
+                                    @endif
 
                                     <button type="button" 
                                             class="btn btn-xs btn-outline-secondary py-1 px-1.5" 
@@ -616,7 +622,9 @@
                     <i class="fa-solid fa-bolt text-warning me-1"></i>
                     Log Aktivitas Terkini
                 </span>
-                <a href="{{ route('admin.logs.index') }}" class="btn btn-sm btn-link text-decoration-none p-0" style="font-size: 0.72rem;">Semua</a>
+                @if(auth()->user()->isAdmin())
+                    <a href="{{ route('admin.logs.index') }}" class="btn btn-sm btn-link text-decoration-none p-0" style="font-size: 0.72rem;">Semua</a>
+                @endif
             </div>
             <div class="sp-card-body p-0 flex-grow-1">
                 <div class="list-group list-group-flush" style="max-height: 235px; overflow-y: auto;">
@@ -680,9 +688,11 @@
                 </button>
                 <div class="d-flex gap-2">
                     <button type="button" class="btn btn-sm btn-light border" data-bs-dismiss="modal">Tutup</button>
-                    <button type="button" class="btn btn-sm btn-sp-primary" onclick="transferReminderToNoticeBoard()">
-                        <i class="fa-solid fa-bullhorn me-1"></i> Kirim ke Papan Informasi Petugas
-                    </button>
+                    @if(auth()->user()->isAdmin())
+                        <button type="button" class="btn btn-sm btn-sp-primary" onclick="transferReminderToNoticeBoard()">
+                            <i class="fa-solid fa-bullhorn me-1"></i> Kirim ke Papan Informasi Petugas
+                        </button>
+                    @endif
                     <a href="#" id="modal_wa_direct_link" target="_blank" class="btn btn-sm btn-outline-success">
                         <i class="fa-brands fa-whatsapp me-1"></i> WhatsApp
                     </a>
@@ -692,6 +702,7 @@
     </div>
 </div>
 
+@if(auth()->user()->isAdmin())
 <!-- ==============================================================
      MODAL KIRIM PESAN KE PAPAN INFORMASI PETUGAS
      ============================================================== -->
@@ -754,6 +765,7 @@
         </div>
     </div>
 </div>
+@endif
 @endsection
 
 @push('scripts')

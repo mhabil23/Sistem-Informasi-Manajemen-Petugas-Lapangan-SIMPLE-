@@ -67,7 +67,7 @@ class RespondentController extends Controller
         $respondents = $query->latest('input_date')->paginate(10)->withQueryString();
 
         $assignments = Assignment::orderBy('title')->get();
-        $officers = User::where('role', 'petugas')->where('status', 'active')->orderBy('name')->get();
+        $officers = User::fieldStaff()->where('status', 'active')->orderBy('name')->get();
 
         return view('admin.respondents.index', compact(
             'respondents',

@@ -53,6 +53,35 @@ class User extends Authenticatable
         return $this->role === 'petugas';
     }
 
+    public function isPegawai(): bool
+    {
+        return $this->role === 'pegawai';
+    }
+
+    public function isFieldStaff(): bool
+    {
+        return in_array($this->role, ['petugas', 'pegawai'], true);
+    }
+
+    public function canAccessMonitoring(): bool
+    {
+        return in_array($this->role, ['admin', 'pegawai'], true);
+    }
+
+    public function roleLabel(): string
+    {
+        return match ($this->role) {
+            'admin' => 'Administrator',
+            'pegawai' => 'Pegawai / PML',
+            default => 'Petugas',
+        };
+    }
+
+    public function scopeFieldStaff($query)
+    {
+        return $query->whereIn('role', ['petugas', 'pegawai']);
+    }
+
     public function isActive(): bool
     {
         return $this->status === 'active';

@@ -24,12 +24,12 @@
     @stack('styles')
 </head>
 <body>
-    <div class="sp-wrapper {{ !auth()->user()->isAdmin() ? 'sp-wrapper-petugas' : '' }}">
-        @if(auth()->user()->isAdmin())
+    <div class="sp-wrapper {{ auth()->user()->isPetugas() ? 'sp-wrapper-petugas' : '' }}">
+        @if(auth()->user()->canAccessMonitoring())
             <!-- Sidebar Backdrop for Mobile -->
             <div class="sp-sidebar-backdrop" id="sidebarBackdrop"></div>
 
-            <!-- Sidebar Navigation (Admin Only) -->
+            <!-- Sidebar Navigation (Admin & Pegawai / PML) -->
             <aside class="sp-sidebar" id="sidebar">
                 <div class="sp-sidebar-brand">
                     <div class="d-flex align-items-center">
@@ -38,7 +38,7 @@
                         </div>
                         <div class="sp-brand-text">
                             <span class="sp-brand-title">SIMPLE</span>
-                            <span class="sp-brand-sub">Portal Administrator</span>
+                            <span class="sp-brand-sub">{{ auth()->user()->isAdmin() ? 'Portal Administrator' : 'Portal Pegawai / PML' }}</span>
                         </div>
                     </div>
                     <button class="sp-sidebar-close" id="sidebarCloseBtn" type="button" aria-label="Tutup menu">
@@ -47,76 +47,143 @@
                 </div>
 
                 <div class="sp-sidebar-nav">
-                    <!-- ADMIN MENU -->
-                    <div class="sp-nav-heading">Utama</div>
-                    <a href="{{ route('admin.dashboard') }}" class="sp-nav-link {{ request()->routeIs('admin.dashboard') ? 'active' : '' }}">
-                        <i class="fa-solid fa-gauge-high sp-nav-icon"></i>
-                        <span>Dashboard</span>
-                    </a>
+                    @if(auth()->user()->isAdmin())
+                        <!-- ADMIN MENU -->
+                        <div class="sp-nav-heading">Utama</div>
+                        <a href="{{ route('admin.dashboard') }}" class="sp-nav-link {{ request()->routeIs('admin.dashboard') ? 'active' : '' }}">
+                            <i class="fa-solid fa-gauge-high sp-nav-icon"></i>
+                            <span>Dashboard</span>
+                        </a>
 
-                    <div class="sp-nav-heading">Administrasi & Penugasan</div>
-                    <a href="{{ route('admin.users.index') }}" class="sp-nav-link {{ request()->routeIs('admin.users.*') ? 'active' : '' }}">
-                        <i class="fa-solid fa-users-gear sp-nav-icon"></i>
-                        <span>Manajemen Pengguna</span>
-                    </a>
-                    <a href="{{ route('admin.assignments.index') }}" class="sp-nav-link {{ request()->routeIs('admin.assignments.*') ? 'active' : '' }}">
-                        <i class="fa-solid fa-list-check sp-nav-icon"></i>
-                        <span>Kegiatan & Tugas</span>
-                    </a>
-                    <a href="{{ route('admin.schedules.index') }}" class="sp-nav-link {{ request()->routeIs('admin.schedules.*') ? 'active' : '' }}">
-                        <i class="fa-regular fa-calendar-days sp-nav-icon"></i>
-                        <span>Jadwal Kegiatan</span>
-                    </a>
+                        <div class="sp-nav-heading">Administrasi & Penugasan</div>
+                        <a href="{{ route('admin.users.index') }}" class="sp-nav-link {{ request()->routeIs('admin.users.*') ? 'active' : '' }}">
+                            <i class="fa-solid fa-users-gear sp-nav-icon"></i>
+                            <span>Manajemen Pengguna</span>
+                        </a>
+                        <a href="{{ route('admin.assignments.index') }}" class="sp-nav-link {{ request()->routeIs('admin.assignments.*') ? 'active' : '' }}">
+                            <i class="fa-solid fa-list-check sp-nav-icon"></i>
+                            <span>Kegiatan & Tugas</span>
+                        </a>
+                        <a href="{{ route('admin.schedules.index') }}" class="sp-nav-link {{ request()->routeIs('admin.schedules.*') ? 'active' : '' }}">
+                            <i class="fa-regular fa-calendar-days sp-nav-icon"></i>
+                            <span>Jadwal Kegiatan</span>
+                        </a>
 
-                    <div class="sp-nav-heading">Pendataan & Dokumen BAST</div>
-                    <a href="{{ route('admin.respondents.index') }}" class="sp-nav-link {{ request()->routeIs('admin.respondents.*') ? 'active' : '' }}">
-                        <i class="fa-solid fa-id-card-clip sp-nav-icon"></i>
-                        <span>Data Responden</span>
-                    </a>
-                    <a href="{{ route('admin.basts.respondents.index') }}" class="sp-nav-link {{ request()->routeIs('admin.basts.respondents.*') ? 'active' : '' }}">
-                        <i class="fa-solid fa-file-contract sp-nav-icon"></i>
-                        <span>BAST Responden</span>
-                    </a>
-                    <a href="{{ route('admin.basts.officers.index') }}" class="sp-nav-link {{ request()->routeIs('admin.basts.officers.*') ? 'active' : '' }}">
-                        <i class="fa-solid fa-file-shield sp-nav-icon"></i>
-                        <span>BAST Petugas</span>
-                    </a>
+                        <div class="sp-nav-heading">Pendataan & Dokumen BAST</div>
+                        <a href="{{ route('admin.respondents.index') }}" class="sp-nav-link {{ request()->routeIs('admin.respondents.*') ? 'active' : '' }}">
+                            <i class="fa-solid fa-id-card-clip sp-nav-icon"></i>
+                            <span>Data Responden</span>
+                        </a>
+                        <a href="{{ route('admin.basts.respondents.index') }}" class="sp-nav-link {{ request()->routeIs('admin.basts.respondents.*') ? 'active' : '' }}">
+                            <i class="fa-solid fa-file-contract sp-nav-icon"></i>
+                            <span>BAST Responden</span>
+                        </a>
+                        <a href="{{ route('admin.basts.officers.index') }}" class="sp-nav-link {{ request()->routeIs('admin.basts.officers.*') ? 'active' : '' }}">
+                            <i class="fa-solid fa-file-shield sp-nav-icon"></i>
+                            <span>BAST Petugas</span>
+                        </a>
 
-                    <div class="sp-nav-heading">Laporan & Pelatihan</div>
-                    <a href="{{ route('admin.reports.index') }}" class="sp-nav-link {{ request()->routeIs('admin.reports.*') ? 'active' : '' }}">
-                        <i class="fa-solid fa-clipboard-check sp-nav-icon"></i>
-                        <span>Laporan Petugas</span>
-                        @php
-                            $sidebarReportBadge = max((int) ($adminPendingReportsCount ?? 0), (int) ($adminUnreadNotifCount ?? 0));
-                        @endphp
-                        @if($sidebarReportBadge > 0)
-                            <span id="sidebarReportBadge" class="badge bg-warning text-dark sp-nav-badge">{{ $sidebarReportBadge }}</span>
-                        @else
-                            <span id="sidebarReportBadge" class="badge bg-warning text-dark sp-nav-badge d-none">0</span>
-                        @endif
-                    </a>
-                    <a href="{{ route('admin.trainings.index') }}" class="sp-nav-link {{ request()->routeIs('admin.trainings.*') ? 'active' : '' }}">
-                        <i class="fa-solid fa-graduation-cap sp-nav-icon"></i>
-                        <span>Administrasi Pelatihan</span>
-                    </a>
-                    <a href="{{ route('admin.recapitulation.index') }}" class="sp-nav-link {{ request()->routeIs('admin.recapitulation.*') ? 'active' : '' }}">
-                        <i class="fa-solid fa-chart-pie sp-nav-icon"></i>
-                        <span>Rekapitulasi & Export</span>
-                    </a>
+                        <div class="sp-nav-heading">Laporan & Pelatihan</div>
+                        <a href="{{ route('admin.reports.index') }}" class="sp-nav-link {{ request()->routeIs('admin.reports.*') ? 'active' : '' }}">
+                            <i class="fa-solid fa-clipboard-check sp-nav-icon"></i>
+                            <span>Laporan Petugas</span>
+                            @php
+                                $sidebarReportBadge = max((int) ($adminPendingReportsCount ?? 0), (int) ($adminUnreadNotifCount ?? 0));
+                            @endphp
+                            @if($sidebarReportBadge > 0)
+                                <span id="sidebarReportBadge" class="badge bg-warning text-dark sp-nav-badge">{{ $sidebarReportBadge }}</span>
+                            @else
+                                <span id="sidebarReportBadge" class="badge bg-warning text-dark sp-nav-badge d-none">0</span>
+                            @endif
+                        </a>
+                        <a href="{{ route('admin.trainings.index') }}" class="sp-nav-link {{ request()->routeIs('admin.trainings.*') ? 'active' : '' }}">
+                            <i class="fa-solid fa-graduation-cap sp-nav-icon"></i>
+                            <span>Administrasi Pelatihan</span>
+                        </a>
+                        <a href="{{ route('admin.recapitulation.index') }}" class="sp-nav-link {{ request()->routeIs('admin.recapitulation.*') ? 'active' : '' }}">
+                            <i class="fa-solid fa-chart-pie sp-nav-icon"></i>
+                            <span>Rekapitulasi & Export</span>
+                        </a>
 
-                    <div class="sp-nav-heading">Sistem & Audit</div>
-                    <a href="{{ route('admin.spreadsheet.index') }}" class="sp-nav-link {{ request()->routeIs('admin.spreadsheet.*') ? 'active' : '' }}">
-                        <i class="fa-solid fa-table-cells sp-nav-icon text-success"></i>
-                        <span>Database Spreadsheet</span>
-                    </a>
-                    <a href="{{ route('admin.templates.index') }}" class="sp-nav-link {{ request()->routeIs('admin.templates.*') ? 'active' : '' }}">
-                        <i class="fa-solid fa-file-lines sp-nav-icon"></i>
-                        <span>Template Dokumen</span>
-                    </a>
-                    <a href="{{ route('admin.logs.index') }}" class="sp-nav-link {{ request()->routeIs('admin.logs.*') ? 'active' : '' }}">
-                        <i class="fa-solid fa-clock-rotate-left sp-nav-icon"></i>
-                        <span>Audit Log Aktivitas</span>
-                    </a>
+                        <div class="sp-nav-heading">Sistem & Audit</div>
+                        <a href="{{ route('admin.spreadsheet.index') }}" class="sp-nav-link {{ request()->routeIs('admin.spreadsheet.*') ? 'active' : '' }}">
+                            <i class="fa-solid fa-table-cells sp-nav-icon text-success"></i>
+                            <span>Database Spreadsheet</span>
+                        </a>
+                        <a href="{{ route('admin.templates.index') }}" class="sp-nav-link {{ request()->routeIs('admin.templates.*') ? 'active' : '' }}">
+                            <i class="fa-solid fa-file-lines sp-nav-icon"></i>
+                            <span>Template Dokumen</span>
+                        </a>
+                        <a href="{{ route('admin.logs.index') }}" class="sp-nav-link {{ request()->routeIs('admin.logs.*') ? 'active' : '' }}">
+                            <i class="fa-solid fa-clock-rotate-left sp-nav-icon"></i>
+                            <span>Audit Log Aktivitas</span>
+                        </a>
+                    @else
+                        <!-- PEGAWAI / PML MENU -->
+                        <div class="sp-nav-heading">Portal Pegawai / PML</div>
+                        <a href="{{ route('petugas.dashboard') }}" class="sp-nav-link {{ request()->routeIs('petugas.dashboard') ? 'active' : '' }}">
+                            <i class="fa-solid fa-house sp-nav-icon"></i>
+                            <span>Beranda Saya</span>
+                        </a>
+                        <a href="{{ route('petugas.assignments.index') }}" class="sp-nav-link {{ request()->routeIs('petugas.assignments.*') ? 'active' : '' }}">
+                            <i class="fa-solid fa-list-check sp-nav-icon"></i>
+                            <span>Tugas Saya</span>
+                        </a>
+                        <a href="{{ route('petugas.schedules.index') }}" class="sp-nav-link {{ request()->routeIs('petugas.schedules.*') ? 'active' : '' }}">
+                            <i class="fa-regular fa-calendar-days sp-nav-icon"></i>
+                            <span>Jadwal Saya</span>
+                        </a>
+                        <a href="{{ route('petugas.respondents.index') }}" class="sp-nav-link {{ request()->routeIs('petugas.respondents.*') ? 'active' : '' }}">
+                            <i class="fa-solid fa-users sp-nav-icon"></i>
+                            <span>Responden Saya</span>
+                        </a>
+                        <a href="{{ route('petugas.basts.respondents.index') }}" class="sp-nav-link {{ request()->routeIs('petugas.basts.respondents.*') ? 'active' : '' }}">
+                            <i class="fa-solid fa-file-signature sp-nav-icon"></i>
+                            <span>BAST Responden Saya</span>
+                        </a>
+                        <a href="{{ route('petugas.basts.officers.index') }}" class="sp-nav-link {{ request()->routeIs('petugas.basts.officers.*') ? 'active' : '' }}">
+                            <i class="fa-solid fa-file-shield sp-nav-icon"></i>
+                            <span>BAST Perlengkapan</span>
+                        </a>
+                        <a href="{{ route('petugas.reports.index') }}" class="sp-nav-link {{ request()->routeIs('petugas.reports.*') ? 'active' : '' }}">
+                            <i class="fa-solid fa-route sp-nav-icon"></i>
+                            <span>Laporan Perjadin Saya</span>
+                        </a>
+
+                        <div class="sp-nav-heading">Monitoring Lapangan</div>
+                        <a href="{{ route('admin.dashboard') }}" class="sp-nav-link {{ request()->routeIs('admin.dashboard') ? 'active' : '' }}">
+                            <i class="fa-solid fa-gauge-high sp-nav-icon"></i>
+                            <span>Dashboard Monitoring</span>
+                        </a>
+                        <a href="{{ route('admin.assignments.index') }}" class="sp-nav-link {{ request()->routeIs('admin.assignments.*') ? 'active' : '' }}">
+                            <i class="fa-solid fa-briefcase sp-nav-icon"></i>
+                            <span>Kegiatan &amp; Tugas</span>
+                        </a>
+                        <a href="{{ route('admin.schedules.index') }}" class="sp-nav-link {{ request()->routeIs('admin.schedules.*') ? 'active' : '' }}">
+                            <i class="fa-solid fa-calendar-check sp-nav-icon"></i>
+                            <span>Jadwal Kegiatan</span>
+                        </a>
+                        <a href="{{ route('admin.respondents.index') }}" class="sp-nav-link {{ request()->routeIs('admin.respondents.*') ? 'active' : '' }}">
+                            <i class="fa-solid fa-id-card-clip sp-nav-icon"></i>
+                            <span>Data Responden</span>
+                        </a>
+                        <a href="{{ route('admin.basts.respondents.index') }}" class="sp-nav-link {{ request()->routeIs('admin.basts.respondents.*') ? 'active' : '' }}">
+                            <i class="fa-solid fa-file-contract sp-nav-icon"></i>
+                            <span>BAST Responden</span>
+                        </a>
+                        <a href="{{ route('admin.basts.officers.index') }}" class="sp-nav-link {{ request()->routeIs('admin.basts.officers.*') ? 'active' : '' }}">
+                            <i class="fa-solid fa-folder-open sp-nav-icon"></i>
+                            <span>BAST Petugas</span>
+                        </a>
+                        <a href="{{ route('admin.reports.index') }}" class="sp-nav-link {{ request()->routeIs('admin.reports.*') ? 'active' : '' }}">
+                            <i class="fa-solid fa-clipboard-list sp-nav-icon"></i>
+                            <span>Laporan Petugas</span>
+                        </a>
+                        <a href="{{ route('admin.recapitulation.index') }}" class="sp-nav-link {{ request()->routeIs('admin.recapitulation.*') ? 'active' : '' }}">
+                            <i class="fa-solid fa-chart-pie sp-nav-icon"></i>
+                            <span>Rekapitulasi &amp; Export</span>
+                        </a>
+                    @endif
                 </div>
 
                 <div class="sp-sidebar-footer">
@@ -126,7 +193,7 @@
                         </div>
                         <div class="overflow-hidden">
                             <div class="text-white small fw-bold text-truncate" title="{{ auth()->user()->name }}">{{ auth()->user()->name }}</div>
-                            <div class="text-muted" style="font-size: 0.7rem;">{{ ucfirst(auth()->user()->role) }}</div>
+                            <div class="text-muted" style="font-size: 0.7rem;">{{ auth()->user()->roleLabel() }}</div>
                         </div>
                     </div>
                     <button type="button" class="btn btn-sm btn-outline-light border-0 flex-shrink-0" data-bs-toggle="modal" data-bs-target="#logoutModal" title="Keluar">
@@ -137,10 +204,10 @@
         @endif
 
         <!-- Main Wrapper -->
-        <div class="sp-main {{ !auth()->user()->isAdmin() ? 'sp-main-petugas' : '' }}">
+        <div class="sp-main {{ auth()->user()->isPetugas() ? 'sp-main-petugas' : '' }}">
             <!-- Top Navbar -->
             <header class="sp-navbar">
-                @if(auth()->user()->isAdmin())
+                @if(auth()->user()->canAccessMonitoring())
                     <div class="d-flex align-items-center gap-3">
                         <button class="sp-nav-toggle" id="sidebarToggle" type="button" aria-label="Toggle navigation">
                             <i class="fa-solid fa-bars"></i>
@@ -149,7 +216,7 @@
                             <h1 class="sp-page-title text-truncate">@yield('page_title', 'Halaman')</h1>
                             <nav aria-label="breadcrumb" class="d-none d-sm-block">
                                 <ol class="breadcrumb sp-breadcrumb mb-0">
-                                    <li class="breadcrumb-item"><a href="{{ route('admin.dashboard') }}" class="text-decoration-none">SIMPLE</a></li>
+                                    <li class="breadcrumb-item"><a href="{{ auth()->user()->isAdmin() ? route('admin.dashboard') : route('petugas.dashboard') }}" class="text-decoration-none">SIMPLE</a></li>
                                     @yield('breadcrumb')
                                 </ol>
                             </nav>
@@ -237,9 +304,26 @@
                     @endif
 
                     <!-- Status / Role Badge -->
-                    <span class="badge {{ auth()->user()->isAdmin() ? 'badge-role-admin' : 'badge-role-petugas' }} d-none d-md-inline-block">
-                        <i class="fa-solid {{ auth()->user()->isAdmin() ? 'fa-shield-halved' : 'fa-user-check' }} me-1"></i>
-                        {{ auth()->user()->isAdmin() ? 'Administrator' : 'Petugas Lapangan' }}
+                    @php
+                        $navRoleBadgeClass = match(auth()->user()->role) {
+                            'admin' => 'badge-role-admin',
+                            'pegawai' => 'badge-role-pegawai',
+                            default => 'badge-role-petugas',
+                        };
+                        $navRoleIconClass = match(auth()->user()->role) {
+                            'admin' => 'fa-shield-halved',
+                            'pegawai' => 'fa-user-tie',
+                            default => 'fa-user-check',
+                        };
+                        $navRoleLabel = match(auth()->user()->role) {
+                            'admin' => 'Administrator',
+                            'pegawai' => 'Pegawai / PML',
+                            default => 'Petugas Lapangan',
+                        };
+                    @endphp
+                    <span class="badge {{ $navRoleBadgeClass }} d-none d-md-inline-block">
+                        <i class="fa-solid {{ $navRoleIconClass }} me-1"></i>
+                        {{ $navRoleLabel }}
                     </span>
 
                     <!-- User Menu Dropdown -->
@@ -323,7 +407,7 @@
                     <strong>SIMPLE</strong> &copy; {{ date('Y') }} &mdash; Sistem Informasi Manajemen Pelayanan & Evaluasi Lapangan
                 </div>
                 <div class="d-none d-md-block text-secondary">
-                    BPS Kabupaten &bull; Portal {{ auth()->user()->isAdmin() ? 'Administrator' : 'Petugas Lapangan' }}
+                    BPS Kabupaten &bull; Portal {{ auth()->user()->isAdmin() ? 'Administrator' : (auth()->user()->isPegawai() ? 'Pegawai / PML' : 'Petugas Lapangan') }}
                 </div>
             </footer>
         </div>

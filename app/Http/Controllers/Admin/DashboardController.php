@@ -52,7 +52,7 @@ class DashboardController extends Controller
         $bastPercentage = $bastTargetCount > 0 ? min(100, round(($bastCompletedCount / $bastTargetCount) * 100, 1)) : 0;
 
         // Global Statistics
-        $totalOfficers = User::where('role', 'petugas')->count();
+        $totalOfficers = User::fieldStaff()->count();
         $totalRespondentsAll = Respondent::count();
         $totalAssignments = Assignment::count();
         $totalBastRespondents = RespondentBast::count();
@@ -96,7 +96,7 @@ class DashboardController extends Controller
         usort($districtSummaries, fn($a, $b) => $b['percentage'] <=> $a['percentage']);
 
         // 4. Monitoring Kinerja Petugas & Identifikasi Lambat / Perlu Follow-Up
-        $officersQuery = User::where('role', 'petugas')
+        $officersQuery = User::fieldStaff()
             ->where('status', 'active')
             ->withCount([
                 'respondents' => function ($q) use ($selectedAssignmentId, $selectedDistrict) {
@@ -243,7 +243,7 @@ class DashboardController extends Controller
         // Data dropdown filter
         $assignmentsList = Assignment::orderBy('title')->get();
         $districtsList = Respondent::whereNotNull('district')->where('district', '!=', '')->distinct()->orderBy('district')->pluck('district');
-        $allOfficersDropdown = User::where('role', 'petugas')->where('status', 'active')->orderBy('name')->get();
+        $allOfficersDropdown = User::fieldStaff()->where('status', 'active')->orderBy('name')->get();
 
         // Data aktivitas & laporan terkini
         $recentActivities = ActivityLog::with('user')->latest()->take(6)->get();

@@ -372,9 +372,11 @@ class OfficerReport extends Model
         ];
     }
 
-    public function canBeDownloadedByOfficer(): bool
+    public function canBeDownloadedByOfficer(?User $actor = null): bool
     {
-        return $this->status === 'approved';
+        $owner = $actor ?? $this->user;
+
+        return $this->status === 'approved' || (bool) $owner?->isPegawai();
     }
 
     public static function buildExpenseItems(array $descriptions, array $amounts): array

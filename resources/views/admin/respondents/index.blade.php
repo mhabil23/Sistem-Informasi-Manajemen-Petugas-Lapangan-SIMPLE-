@@ -18,9 +18,11 @@
         <p class="text-muted small mb-0">Kelola master sampel rumah tangga (ruta), nama Kepala Keluarga (KRT), alokasi penugasan ke petugas lapangan, serta histori penerbitan Berita Acara Serah Terima (BAST).</p>
     </div>
     <div class="col-md-5 text-md-end mt-2 mt-md-0">
-        <button type="button" class="btn btn-sm btn-sp-primary" data-bs-toggle="modal" data-bs-target="#createRespondentModal">
-            <i class="fa-solid fa-user-plus me-1"></i> Tambah Responden Baru
-        </button>
+        @if(auth()->user()->isAdmin())
+            <button type="button" class="btn btn-sm btn-sp-primary" data-bs-toggle="modal" data-bs-target="#createRespondentModal">
+                <i class="fa-solid fa-user-plus me-1"></i> Tambah Responden Baru
+            </button>
+        @endif
     </div>
 </div>
 
@@ -215,26 +217,28 @@
                                         <i class="fa-solid fa-eye"></i>
                                     </button>
 
-                                    <!-- Edit -->
-                                    <button type="button" 
-                                            class="btn btn-light border sp-action-btn text-warning" 
-                                            title="Edit Data" 
-                                            data-bs-toggle="tooltip"
-                                            onclick="openEditRespondentModal({{ json_encode($resp) }})">
-                                        <i class="fa-regular fa-pen-to-square"></i>
-                                    </button>
-
-                                    <!-- Hapus -->
-                                    <form method="POST" action="{{ route('admin.respondents.destroy', $resp) }}" class="d-inline" onsubmit="return confirm('Hapus data responden {{ addslashes($resp->name) }}?');">
-                                        @csrf
-                                        @method('DELETE')
-                                        <button type="submit" 
-                                                class="btn btn-light border sp-action-btn text-danger" 
-                                                title="Hapus Responden" 
-                                                data-bs-toggle="tooltip">
-                                            <i class="fa-regular fa-trash-can"></i>
+                                    @if(auth()->user()->isAdmin())
+                                        <!-- Edit -->
+                                        <button type="button" 
+                                                class="btn btn-light border sp-action-btn text-warning" 
+                                                title="Edit Data" 
+                                                data-bs-toggle="tooltip"
+                                                onclick="openEditRespondentModal({{ json_encode($resp) }})">
+                                            <i class="fa-regular fa-pen-to-square"></i>
                                         </button>
-                                    </form>
+
+                                        <!-- Hapus -->
+                                        <form method="POST" action="{{ route('admin.respondents.destroy', $resp) }}" class="d-inline" onsubmit="return confirm('Hapus data responden {{ addslashes($resp->name) }}?');">
+                                            @csrf
+                                            @method('DELETE')
+                                            <button type="submit" 
+                                                    class="btn btn-light border sp-action-btn text-danger" 
+                                                    title="Hapus Responden" 
+                                                    data-bs-toggle="tooltip">
+                                                <i class="fa-regular fa-trash-can"></i>
+                                            </button>
+                                        </form>
+                                    @endif
                                 </div>
                             </td>
                         </tr>
@@ -264,6 +268,7 @@
     @endif
 </div>
 
+@if(auth()->user()->isAdmin())
 <!-- ==============================================================
      MODAL TAMBAH RESPONDEN
      ============================================================== -->
@@ -517,6 +522,7 @@
         </div>
     </div>
 </div>
+@endif
 
 <!-- ==============================================================
      MODAL DETAIL RESPONDEN

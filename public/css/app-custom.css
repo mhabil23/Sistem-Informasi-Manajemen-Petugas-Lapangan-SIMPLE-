@@ -446,6 +446,14 @@ body {
     border-radius: 6px;
 }
 
+.badge-role-pegawai {
+    background: #ecfdf5;
+    color: #047857;
+    font-weight: 600;
+    padding: 0.35rem 0.65rem;
+    border-radius: 6px;
+}
+
 /* ===================================================
    BUTTONS & FORMS
    =================================================== */

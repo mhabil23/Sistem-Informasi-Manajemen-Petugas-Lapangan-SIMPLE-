@@ -18,9 +18,26 @@
             <h5 class="fw-bold text-dark mb-1">{{ $user->name }}</h5>
             <p class="text-muted small mb-3">{{ '@' . $user->username }}</p>
             <div class="mb-3">
-                <span class="badge {{ $user->isAdmin() ? 'badge-role-admin' : 'badge-role-petugas' }} px-3 py-2">
-                    <i class="fa-solid {{ $user->isAdmin() ? 'fa-shield-halved' : 'fa-user-check' }} me-1"></i>
-                    {{ $user->isAdmin() ? 'Administrator SIMPLE' : 'Petugas Lapangan' }}
+                @php
+                    $profileBadgeClass = match($user->role) {
+                        'admin' => 'badge-role-admin',
+                        'pegawai' => 'badge-role-pegawai',
+                        default => 'badge-role-petugas',
+                    };
+                    $profileIconClass = match($user->role) {
+                        'admin' => 'fa-shield-halved',
+                        'pegawai' => 'fa-user-tie',
+                        default => 'fa-user-check',
+                    };
+                    $profileRoleLabel = match($user->role) {
+                        'admin' => 'Administrator SIMPLE',
+                        'pegawai' => 'Pegawai / PML',
+                        default => 'Petugas Lapangan',
+                    };
+                @endphp
+                <span class="badge {{ $profileBadgeClass }} px-3 py-2">
+                    <i class="fa-solid {{ $profileIconClass }} me-1"></i>
+                    {{ $profileRoleLabel }}
                 </span>
             </div>
             <div class="border-top pt-3 text-start small">

@@ -113,14 +113,25 @@
                         Laporan perjalanan dinas lengkap (<strong>{{ $reportsApproved }} telah di-ACC Admin</strong> &amp; siap diunduh PDF).
                     </div>
                 @elseif($reportsSubmitted > 0)
-                    <span class="petugas-notif-bullet bullet-amber"></span>
-                    <div>
-                        Laporan perjalanan dinas: <strong>{{ $reportsSubmitted }} laporan menunggu persetujuan (ACC) Administrator</strong> sebelum file PDF validasi dapat diunduh.
-                    </div>
+                    @if(auth()->user()->isPegawai())
+                        <span class="petugas-notif-bullet bullet-green"></span>
+                        <div>
+                            Laporan perjalanan dinas: <strong>{{ $reportsSubmitted }} laporan telah diajukan</strong> &amp; PDF siap diunduh langsung pada menu Laporan Perjadin.
+                        </div>
+                    @else
+                        <span class="petugas-notif-bullet bullet-amber"></span>
+                        <div>
+                            Laporan perjalanan dinas: <strong>{{ $reportsSubmitted }} laporan menunggu persetujuan (ACC) Administrator</strong> sebelum file PDF validasi dapat diunduh.
+                        </div>
+                    @endif
                 @else
                     <span class="petugas-notif-bullet bullet-amber"></span>
                     <div>
-                        Laporan perjalanan dinas: <strong>{{ $reportsDraft > 0 ? $reportsDraft . ' laporan masih draft' : 'Belum membuat laporan kegiatan lapangan' }}</strong>. Harap ajukan laporan setelah kunjungan selesai untuk proses ACC Admin.
+                        @if(auth()->user()->isPegawai())
+                            Laporan perjalanan dinas: <strong>{{ $reportsDraft > 0 ? $reportsDraft . ' laporan masih draft' : 'Belum membuat laporan kegiatan lapangan' }}</strong>. Silakan lengkapi laporan setelah kunjungan selesai untuk langsung mengunduh PDF.
+                        @else
+                            Laporan perjalanan dinas: <strong>{{ $reportsDraft > 0 ? $reportsDraft . ' laporan masih draft' : 'Belum membuat laporan kegiatan lapangan' }}</strong>. Harap ajukan laporan setelah kunjungan selesai untuk proses ACC Admin.
+                        @endif
                     </div>
                 @endif
             </li>

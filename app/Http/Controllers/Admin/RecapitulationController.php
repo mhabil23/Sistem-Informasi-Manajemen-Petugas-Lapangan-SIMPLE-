@@ -24,7 +24,7 @@ class RecapitulationController extends Controller
         $summary = $this->calculateSummary($filters);
 
         $assignments = Assignment::orderBy('title')->get();
-        $officers = User::where('role', 'petugas')->where('status', 'active')->orderBy('name')->get();
+        $officers = User::fieldStaff()->where('status', 'active')->orderBy('name')->get();
 
         return view('admin.recapitulation.index', compact(
             'summary',
