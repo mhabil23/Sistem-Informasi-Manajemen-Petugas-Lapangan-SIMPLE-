@@ -1,3 +1,21 @@
+                <style>
+                    .preview-a4-sheet {
+                        box-sizing: border-box;
+                        width: 100%;
+                        max-width: 210mm;
+                        font-family: Arial, Helvetica, sans-serif;
+                        color: #000;
+                        line-height: 1.45;
+                        padding: 1.25rem;
+                    }
+                    @media (min-width: 768px) {
+                        .preview-a4-sheet {
+                            min-height: 297mm;
+                            padding: 1.5cm 2cm 1.8cm 2cm;
+                        }
+                    }
+                </style>
+
                 <!-- Catatan Evaluasi Admin jika ada -->
                 <div id="det_admin_notes_box" class="alert alert-warning border-warning p-3 mb-3 d-none">
                     <div class="fw-bold small text-dark mb-1">
@@ -7,7 +25,7 @@
                 </div>
 
                 <!-- Simulation of Official Document Paper -->
-                <div class="bg-white p-4 p-md-5 rounded shadow-sm border mx-auto mb-4" style="max-width: 820px; font-family: Arial, Helvetica, sans-serif; color: #000; line-height: 1.45;">
+                <div class="bg-white preview-a4-sheet rounded shadow-sm border mx-auto mb-4">
                     @include('reports._kop_surat')
 
                     <!-- JUDUL DOKUMEN -->
@@ -87,13 +105,13 @@
                 </div>
 
                 <!-- Simulation of Document Page: Foto Dokumentasi (Lembaran Baru) -->
-                <div id="det_docs_paper" class="bg-white p-4 p-md-5 rounded shadow-sm border mx-auto mb-4 d-none" style="max-width: 820px; font-family: Arial, Helvetica, sans-serif; color: #000; line-height: 1.45;">
+                <div id="det_docs_paper" class="bg-white preview-a4-sheet rounded shadow-sm border mx-auto mb-4 d-none">
                     @include('reports._kop_surat')
                     <div id="det_attachments_container" class="row g-3 justify-content-center pt-2"></div>
                 </div>
 
                 <!-- Simulation of Document 2: Daftar Pengeluaran Riil (Tanpa Kop Surat) -->
-                <div id="det_dpr_paper" class="bg-white p-4 p-md-5 rounded shadow-sm border mx-auto mb-4" style="max-width: 820px; font-family: Arial, Helvetica, sans-serif; color: #000; line-height: 1.45;">
+                <div id="det_dpr_paper" class="bg-white preview-a4-sheet rounded shadow-sm border mx-auto mb-4">
                     <div class="text-center mb-4">
                         <h5 class="fw-bold mb-0 text-dark" style="font-size: 12pt;">Daftar Pengeluaran Riil</h5>
                     </div>
@@ -190,7 +208,7 @@
                 </div>
 
                 <!-- Simulation of Surat Pernyataan Paper -->
-                <div id="det_vehicle_stmt_paper" class="bg-white p-4 p-md-5 rounded shadow-sm border mx-auto d-none" style="max-width: 820px; font-family: Arial, Helvetica, sans-serif; color: #000; line-height: 1.45;">
+                <div id="det_vehicle_stmt_paper" class="bg-white preview-a4-sheet rounded shadow-sm border mx-auto d-none">
                     @include('reports._kop_surat')
 
                     <div class="text-center my-3">
