@@ -1,12 +1,12 @@
 @extends('layouts.app')
 
-@section('title', $currentType === 'kantor_ke_petugas' ? 'BAST Blanko & Perlengkapan' : ($currentType === 'petugas_ke_kantor' ? 'BAST Dokumen Terisi' : 'BAST Petugas Lapangan'))
-@section('page_title', $currentType === 'kantor_ke_petugas' ? 'BAST Blanko & Perlengkapan' : ($currentType === 'petugas_ke_kantor' ? 'BAST Dokumen Terisi' : 'BAST Petugas'))
+@section('title', $currentType === 'kantor_ke_petugas' ? 'Tanda Terima Petugas' : ($currentType === 'petugas_ke_kantor' ? 'BAST Dokumen Terisi' : 'Tanda Terima Petugas'))
+@section('page_title', $currentType === 'kantor_ke_petugas' ? 'Tanda Terima Petugas' : ($currentType === 'petugas_ke_kantor' ? 'BAST Dokumen Terisi' : 'Tanda Terima Petugas'))
 
 @section('breadcrumb')
     <li class="breadcrumb-item"><a href="{{ route('petugas.dashboard') }}">Petugas</a></li>
     <li class="breadcrumb-item active" aria-current="page">
-        {{ $currentType === 'kantor_ke_petugas' ? 'BAST Blanko (Kantor ke Petugas)' : ($currentType === 'petugas_ke_kantor' ? 'BAST Dokumen Terisi (Petugas ke Kantor)' : 'BAST Petugas') }}
+        {{ $currentType === 'kantor_ke_petugas' ? 'Tanda Terima Petugas (ATK / KUES)' : ($currentType === 'petugas_ke_kantor' ? 'BAST Dokumen Terisi (Petugas ke Kantor)' : 'Tanda Terima Petugas') }}
     </li>
 @endsection
 
@@ -25,7 +25,7 @@
             </h3>
             <p class="text-muted small mb-0">Arsip BAST pengembalian berkas dokumen/kuesioner yang telah terisi lengkap hasil pencacahan lapangan kepada Kantor Satker BPS.</p>
         @else
-            <h3 class="fw-bold text-dark mb-1">Tanda Terima Petugas &amp; BAST</h3>
+            <h3 class="fw-bold text-dark mb-1">Tanda Terima Petugas</h3>
             <p class="text-muted small mb-0">Arsip Tanda Terima Petugas (ATK / KUES) serta BAST pengembalian dokumen terisi antara Petugas dan Kantor Satker BPS.</p>
         @endif
     </div>

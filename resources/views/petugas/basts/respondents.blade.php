@@ -1,23 +1,23 @@
 @extends('layouts.app')
 
-@section('title', 'BAST Responden Saya')
-@section('page_title', 'BAST Responden')
+@section('title', 'Tanda Terima Responden')
+@section('page_title', 'Tanda Terima Responden')
 
 @section('breadcrumb')
     <li class="breadcrumb-item"><a href="{{ route('petugas.dashboard') }}">Petugas</a></li>
-    <li class="breadcrumb-item active" aria-current="page">BAST Responden</li>
+    <li class="breadcrumb-item active" aria-current="page">Tanda Terima Responden</li>
 @endsection
 
 @section('content')
 <!-- Header -->
 <div class="row align-items-center mb-3">
     <div class="col-md-7">
-        <h3 class="fw-bold text-dark mb-1">Berita Acara Serah Terima (BAST) Responden</h3>
-        <p class="text-muted small mb-0">Terbitkan dokumen resmi BAST dengan responden atau wakil penerima yang Anda kunjungi, lengkap dengan tanda tangan digital.</p>
+        <h3 class="fw-bold text-dark mb-1">Tanda Terima Responden</h3>
+        <p class="text-muted small mb-0">Terbitkan dokumen resmi tanda terima responden atau wakil penerima yang Anda kunjungi, lengkap dengan tanda tangan digital.</p>
     </div>
     <div class="col-md-5 text-md-end mt-3 mt-md-0">
         <button type="button" class="btn btn-sp-primary" data-bs-toggle="modal" data-bs-target="#createMyBastModal">
-            <i class="fa-solid fa-file-circle-plus me-1"></i> Buat BAST Responden
+            <i class="fa-solid fa-file-circle-plus me-1"></i> Buat Tanda Terima Responden
         </button>
     </div>
 </div>
@@ -30,7 +30,7 @@
                 <i class="fa-solid fa-file-signature"></i>
             </div>
             <div class="sp-stat-info">
-                <div class="sp-stat-label">Total BAST Terbit</div>
+                <div class="sp-stat-label">Total Tanda Terima Terbit</div>
                 <div class="sp-stat-value">{{ number_format($basts->total()) }}</div>
                 <div class="sp-stat-desc">Dokumen selesai</div>
             </div>
@@ -160,8 +160,8 @@
                         <tr>
                             <td colspan="6" class="text-center py-5 text-muted">
                                 <i class="fa-regular fa-folder-open fa-3x mb-3 text-secondary opacity-50"></i>
-                                <div class="fw-semibold">Anda belum menerbitkan BAST Responden.</div>
-                                <div class="small">Klik tombol "Buat BAST Responden" di atas untuk membuat dokumen.</div>
+                                <div class="fw-semibold">Anda belum menerbitkan Tanda Terima Responden.</div>
+                                <div class="small">Klik tombol "Buat Tanda Terima Responden" di atas untuk membuat dokumen.</div>
                             </td>
                         </tr>
                     @endforelse
@@ -257,7 +257,7 @@
             @empty
                 <div class="text-center py-4 text-muted">
                     <i class="fa-regular fa-folder-open fa-2x mb-2 text-secondary opacity-50"></i>
-                    <div class="fw-semibold small">Anda belum menerbitkan BAST Responden</div>
+                    <div class="fw-semibold small">Anda belum menerbitkan Tanda Terima Responden</div>
                 </div>
             @endforelse
         </div>
@@ -276,7 +276,7 @@
 </div>
 
 <!-- ==============================================================
-     MODAL BUAT BAST RESPONDEN (SESUAI ARAHAN CLIENT)
+     MODAL BUAT TANDA TERIMA RESPONDEN (SESUAI ARAHAN CLIENT)
      ============================================================== -->
 <div class="modal fade" id="createMyBastModal" tabindex="-1" aria-labelledby="createMyBastModalLabel" aria-hidden="true">
     <div class="modal-dialog modal-dialog-centered modal-lg modal-dialog-scrollable">
@@ -285,7 +285,7 @@
             <div class="modal-header bg-light border-bottom sticky-top flex-shrink-0">
                 <div>
                     <h5 class="modal-title fw-bold text-dark" id="createMyBastModalLabel">
-                        <i class="fa-solid fa-file-circle-plus text-primary me-2"></i> Buat BAST Responden Baru
+                        <i class="fa-solid fa-file-circle-plus text-primary me-2"></i> Buat Tanda Terima Responden Baru
                     </h5>
                     <div class="small text-muted">Pilih sampel responden, tentukan penerima (KRT vs Wakil), dan bubuhkan tanda tangan digital</div>
                 </div>

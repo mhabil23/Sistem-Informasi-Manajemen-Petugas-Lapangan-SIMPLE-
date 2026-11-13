@@ -748,7 +748,7 @@
                             Laporan Perjalanan Dinas
                         </button>
                         <button type="button" class="btn btn-xs btn-outline-secondary py-0.5 px-1.5" style="font-size: 0.68rem;" onclick="setNoticePreset('bast')">
-                            BAST Responden
+                            Tanda Terima Responden
                         </button>
                         <button type="button" class="btn btn-xs btn-outline-secondary py-0.5 px-1.5" style="font-size: 0.68rem;" onclick="setNoticePreset('deadline')">
                             Batas Waktu (Deadline)
@@ -839,12 +839,12 @@
             messageInput.value = `Halo Rekan ${name},\n\nTercatat di sistem bahwa Anda belum menyerahkan Laporan Kegiatan / Perjalanan Dinas. Mohon untuk segera menyusun dan mengirimkan laporan kegiatan dinas lapangan Anda melalui menu Laporan agar dapat diverifikasi oleh admin. Terima kasih.`;
         } else if (presetType === 'bast') {
             typeInput.value = 'bast_reminder';
-            titleInput.value = 'Pengingat: Penyelesaian BAST Responden';
+            titleInput.value = 'Pengingat: Penyelesaian Tanda Terima Responden';
             let detail = '';
             if (target && completed !== null) {
                 detail = ` (Progres: ${completed}/${target} sampel, ${percentage}%)`;
             }
-            messageInput.value = `Halo Rekan ${name},\n\nMohon dipercepat proses pendataan dan penerbitan Berita Acara Serah Terima (BAST) responden lapangan Anda${detail}. Pastikan sampel responden yang telah dikunjungi dilengkapi dengan tanda tangan digital resmi. Terima kasih.`;
+            messageInput.value = `Halo Rekan ${name},\n\nMohon dipercepat proses pendataan dan penerbitan formulir tanda terima responden lapangan Anda${detail}. Pastikan sampel responden yang telah dikunjungi dilengkapi dengan tanda tangan digital resmi. Terima kasih.`;
         } else if (presetType === 'deadline') {
             typeInput.value = 'general';
             titleInput.value = 'Pemberitahuan: Mendekati Batas Akhir (Deadline)';

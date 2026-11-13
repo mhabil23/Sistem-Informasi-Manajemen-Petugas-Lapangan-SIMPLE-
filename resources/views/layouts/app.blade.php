@@ -69,18 +69,18 @@
                             <span>Jadwal Kegiatan</span>
                         </a>
 
-                        <div class="sp-nav-heading">Pendataan & Dokumen BAST</div>
+                        <div class="sp-nav-heading">Pendataan & Tanda Terima</div>
                         <a href="{{ route('admin.respondents.index') }}" class="sp-nav-link {{ request()->routeIs('admin.respondents.*') ? 'active' : '' }}">
                             <i class="fa-solid fa-id-card-clip sp-nav-icon"></i>
                             <span>Data Responden</span>
                         </a>
                         <a href="{{ route('admin.basts.respondents.index') }}" class="sp-nav-link {{ request()->routeIs('admin.basts.respondents.*') ? 'active' : '' }}">
                             <i class="fa-solid fa-file-contract sp-nav-icon"></i>
-                            <span>BAST Responden</span>
+                            <span>Tanda Terima Responden</span>
                         </a>
                         <a href="{{ route('admin.basts.officers.index') }}" class="sp-nav-link {{ request()->routeIs('admin.basts.officers.*') ? 'active' : '' }}">
                             <i class="fa-solid fa-file-shield sp-nav-icon"></i>
-                            <span>BAST Petugas</span>
+                            <span>Tanda Terima Petugas</span>
                         </a>
 
                         <div class="sp-nav-heading">Laporan & Pelatihan</div>
@@ -139,11 +139,11 @@
                         </a>
                         <a href="{{ route('petugas.basts.respondents.index') }}" class="sp-nav-link {{ request()->routeIs('petugas.basts.respondents.*') ? 'active' : '' }}">
                             <i class="fa-solid fa-file-signature sp-nav-icon"></i>
-                            <span>Tanda Terima Resp</span>
+                            <span>Tanda Terima Responden</span>
                         </a>
                         <a href="{{ route('petugas.basts.officers.index') }}" class="sp-nav-link {{ request()->routeIs('petugas.basts.officers.*') ? 'active' : '' }}">
                             <i class="fa-solid fa-file-shield sp-nav-icon"></i>
-                            <span>Tanda Terima Petugas &amp; BAST</span>
+                            <span>Tanda Terima Petugas</span>
                         </a>
                         <a href="{{ route('petugas.reports.index') }}" class="sp-nav-link {{ request()->routeIs('petugas.reports.*') ? 'active' : '' }}">
                             <i class="fa-solid fa-route sp-nav-icon"></i>

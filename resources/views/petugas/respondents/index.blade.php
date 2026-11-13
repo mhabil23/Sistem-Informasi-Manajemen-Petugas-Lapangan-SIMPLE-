@@ -22,7 +22,7 @@
             <i class="fa-solid fa-database me-1"></i> Alokasi Sampel BPS
         </span>
         <a href="{{ route('petugas.basts.respondents.index') }}" class="btn btn-success shadow-sm">
-            <i class="fa-solid fa-file-signature me-1"></i> Menu BAST Responden
+            <i class="fa-solid fa-file-signature me-1"></i> Menu Tanda Terima Responden
         </a>
     </div>
 </div>
@@ -200,10 +200,10 @@
                                             onclick="openEditMyRespondentModal({{ json_encode($resp) }})">
                                         <i class="fa-regular fa-pen-to-square"></i>
                                     </button>
-                                    <!-- Shortcut BAST Responden -->
+                                    <!-- Shortcut Tanda Terima Responden -->
                                     <a href="{{ route('petugas.basts.respondents.index') }}" 
                                        class="btn btn-light border sp-action-btn text-success" 
-                                       title="Buka / Terbitkan BAST" 
+                                       title="Buka / Terbitkan Tanda Terima" 
                                        data-bs-toggle="tooltip">
                                         <i class="fa-solid fa-file-signature"></i>
                                     </a>

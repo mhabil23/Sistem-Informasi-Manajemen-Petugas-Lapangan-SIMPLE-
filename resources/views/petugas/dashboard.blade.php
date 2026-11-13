@@ -48,7 +48,7 @@
                                     </a>
                                 @elseif(str_contains($notice->type, 'bast'))
                                     <a href="{{ route('petugas.basts.respondents.index') }}" class="btn btn-xs btn-success py-1 px-2.5" style="font-size: 0.72rem;">
-                                        <i class="fa-solid fa-file-signature me-1"></i> Buka BAST Responden
+                                        <i class="fa-solid fa-file-signature me-1"></i> Buka Tanda Terima Responden
                                     </a>
                                 @endif
                             </div>

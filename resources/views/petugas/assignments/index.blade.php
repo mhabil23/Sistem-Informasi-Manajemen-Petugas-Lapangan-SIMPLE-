@@ -132,7 +132,7 @@
                             <i class="fa-solid fa-user-plus me-1"></i> Input Responden untuk Kegiatan Ini
                         </a>
                         <a href="{{ route('petugas.basts.respondents.index') }}" class="btn btn-sm btn-outline-success">
-                            <i class="fa-solid fa-file-contract me-1"></i> Buat BAST Responden
+                            <i class="fa-solid fa-file-contract me-1"></i> Buat Tanda Terima Responden
                         </a>
                         <a href="{{ route('petugas.reports.index') }}" class="btn btn-sm btn-outline-warning text-dark">
                             <i class="fa-solid fa-clipboard-list me-1"></i> Tulis Laporan Kegiatan

@@ -1,24 +1,24 @@
 @extends('layouts.app')
 
-@section('title', 'BAST Petugas')
-@section('page_title', 'BAST Petugas Lapangan')
+@section('title', 'Tanda Terima Petugas')
+@section('page_title', 'Tanda Terima Petugas')
 
 @section('breadcrumb')
     <li class="breadcrumb-item"><a href="{{ route('admin.dashboard') }}">Admin</a></li>
-    <li class="breadcrumb-item active" aria-current="page">BAST Petugas</li>
+    <li class="breadcrumb-item active" aria-current="page">Tanda Terima Petugas</li>
 @endsection
 
 @section('content')
 <!-- Header & Quick Actions -->
 <div class="row align-items-center mb-4">
     <div class="col-md-7">
-        <h3 class="fw-bold text-dark mb-1">Berita Acara Serah Terima (BAST) Petugas</h3>
-        <p class="text-muted small mb-0">Arsip resmi penyerahan hasil tugas dan bundel berkas administrasi dari petugas lapangan kepada koordinator/Administrator.</p>
+        <h3 class="fw-bold text-dark mb-1">Tanda Terima Petugas (ATK &amp; Kuesioner)</h3>
+        <p class="text-muted small mb-0">Arsip resmi penyusunan tanda terima ATK, kuesioner, dan dokumen penugasan untuk verifikasi dan tanda tangan digital petugas lapangan.</p>
     </div>
     <div class="col-md-5 text-md-end mt-3 mt-md-0">
         @if(auth()->user()->isAdmin())
             <button type="button" class="btn btn-sp-primary" onclick="openCreateOfficerBastModal()">
-                <i class="fa-solid fa-file-circle-plus me-1"></i> Terbitkan BAST Petugas
+                <i class="fa-solid fa-file-circle-plus me-1"></i> Terbitkan Tanda Terima Petugas
             </button>
         @endif
     </div>
@@ -43,7 +43,7 @@
                 <i class="fa-solid fa-file-shield"></i>
             </div>
             <div class="sp-stat-info">
-                <div class="sp-stat-label">Total BAST Petugas</div>
+                <div class="sp-stat-label">Total Tanda Terima Petugas</div>
                 <div class="sp-stat-value">{{ number_format($totalBasts) }}</div>
                 <div class="sp-stat-desc">Dokumen sah</div>
             </div>
@@ -69,7 +69,7 @@
     <div class="sp-card-header">
         <h5 class="sp-card-title">
             <i class="fa-solid fa-file-shield text-primary"></i>
-            Daftar Dokumen BAST Petugas ({{ $basts->total() }})
+            Daftar Dokumen Tanda Terima Petugas ({{ $basts->total() }})
         </h5>
     </div>
     <div class="sp-card-body p-0">
@@ -243,8 +243,8 @@
                         <tr>
                             <td colspan="6" class="text-center py-5 text-muted">
                                 <i class="fa-regular fa-folder-open fa-3x mb-3 text-secondary opacity-50"></i>
-                                <div class="fw-semibold">Belum ada dokumen BAST Petugas diterbitkan.</div>
-                                <div class="small">Klik tombol "Terbitkan BAST Petugas" untuk membuat Berita Acara penyerahan berkas atau tanda terima perlengkapan.</div>
+                                <div class="fw-semibold">Belum ada dokumen Tanda Terima Petugas diterbitkan.</div>
+                                <div class="small">Klik tombol "Terbitkan Tanda Terima Petugas" untuk membuat tanda terima perlengkapan/kuesioner atau Berita Acara penyerahan berkas.</div>
                             </td>
                         </tr>
                     @endforelse
@@ -277,7 +277,7 @@
 
             <div class="modal-header bg-light border-bottom sticky-top flex-shrink-0">
                 <h5 class="modal-title fw-bold" id="officerBastFormModalLabel">
-                    <i class="fa-solid fa-file-circle-plus text-primary me-2"></i> Terbitkan BAST Petugas Baru
+                    <i class="fa-solid fa-file-circle-plus text-primary me-2"></i> Terbitkan Tanda Terima Petugas Baru
                 </h5>
                 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
@@ -378,7 +378,7 @@ function openCreateOfficerBastModal() {
     const form = document.getElementById('officerBastForm');
     form.action = @json(route('admin.basts.officers.store'));
     document.getElementById('bastFormMethod').value = 'POST';
-    document.getElementById('officerBastFormModalLabel').innerHTML = '<i class="fa-solid fa-file-circle-plus text-primary me-2"></i> Terbitkan BAST Petugas Baru';
+    document.getElementById('officerBastFormModalLabel').innerHTML = '<i class="fa-solid fa-file-circle-plus text-primary me-2"></i> Terbitkan Tanda Terima Petugas Baru';
     document.getElementById('bastDateDisplay').textContent = ADMIN_TODAY_DISPLAY;
     document.getElementById('bastNumberInput').value = '';
     document.getElementById('bastStatusInput').value = 'finalized';

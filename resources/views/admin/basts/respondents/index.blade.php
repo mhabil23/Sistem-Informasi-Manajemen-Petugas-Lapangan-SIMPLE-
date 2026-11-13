@@ -1,24 +1,24 @@
 @extends('layouts.app')
 
-@section('title', 'BAST Responden')
-@section('page_title', 'BAST Responden')
+@section('title', 'Tanda Terima Responden')
+@section('page_title', 'Tanda Terima Responden')
 
 @section('breadcrumb')
     <li class="breadcrumb-item"><a href="{{ route('admin.dashboard') }}">Admin</a></li>
-    <li class="breadcrumb-item active" aria-current="page">BAST Responden</li>
+    <li class="breadcrumb-item active" aria-current="page">Tanda Terima Responden</li>
 @endsection
 
 @section('content')
 <!-- Header & Quick Actions -->
 <div class="row align-items-center mb-3">
     <div class="col-md-7">
-        <h4 class="fw-bold text-dark mb-1">Berita Acara Serah Terima (BAST) Responden</h4>
-        <p class="text-muted small mb-0">Kelola dokumen resmi serah terima berkas kuesioner, formulir verifikasi, dan arsip legalitas dengan pihak responden.</p>
+        <h4 class="fw-bold text-dark mb-1">Tanda Terima Responden</h4>
+        <p class="text-muted small mb-0">Kelola dokumen resmi tanda terima berkas kuesioner, formulir verifikasi, dan arsip legalitas dengan pihak responden.</p>
     </div>
     <div class="col-md-5 text-md-end mt-2 mt-md-0">
         @if(auth()->user()->isAdmin())
             <button type="button" class="btn btn-sm btn-sp-primary" data-bs-toggle="modal" data-bs-target="#createBastModal">
-                <i class="fa-solid fa-file-circle-plus me-1"></i> Terbitkan BAST Baru
+                <i class="fa-solid fa-file-circle-plus me-1"></i> Terbitkan Tanda Terima Baru
             </button>
         @endif
     </div>
@@ -32,7 +32,7 @@
                 <i class="fa-solid fa-file-contract"></i>
             </div>
             <div class="sp-stat-info">
-                <div class="sp-stat-label">Total BAST Responden</div>
+                <div class="sp-stat-label">Total Tanda Terima Responden</div>
                 <div class="sp-stat-value">{{ number_format($totalBasts) }}</div>
                 <div class="sp-stat-desc">Dokumen sah</div>
             </div>
@@ -58,7 +58,7 @@
     <div class="sp-card-header">
         <h5 class="sp-card-title">
             <i class="fa-solid fa-file-lines text-primary"></i>
-            Daftar Dokumen BAST Responden ({{ $basts->total() }})
+            Daftar Dokumen Tanda Terima Responden ({{ $basts->total() }})
         </h5>
     </div>
     <div class="sp-card-body p-0">
@@ -170,8 +170,8 @@
                         <tr>
                             <td colspan="6" class="text-center py-5 text-muted">
                                 <i class="fa-regular fa-folder-open fa-3x mb-3 text-secondary opacity-50"></i>
-                                <div class="fw-semibold">Belum ada dokumen BAST Responden diterbitkan.</div>
-                                <div class="small">Klik tombol "Terbitkan BAST Baru" untuk membuat Berita Acara resmi.</div>
+                                <div class="fw-semibold">Belum ada dokumen Tanda Terima Responden diterbitkan.</div>
+                                <div class="small">Klik tombol "Terbitkan Tanda Terima Baru" untuk membuat dokumen tanda terima resmi.</div>
                             </td>
                         </tr>
                     @endforelse
@@ -194,7 +194,7 @@
 
 @if(auth()->user()->isAdmin())
 <!-- ==============================================================
-     MODAL TERBITKAN BAST RESPONDEN BARU
+     MODAL TERBITKAN TANDA TERIMA RESPONDEN BARU
      ============================================================== -->
 <div class="modal fade" id="createBastModal" tabindex="-1" aria-labelledby="createBastModalLabel" aria-hidden="true">
     <div class="modal-dialog modal-dialog-centered modal-lg modal-dialog-scrollable">
@@ -202,7 +202,7 @@
             @csrf
             <div class="modal-header bg-light border-bottom sticky-top flex-shrink-0">
                 <h5 class="modal-title fw-bold" id="createBastModalLabel">
-                    <i class="fa-solid fa-file-circle-plus text-primary me-2"></i> Terbitkan BAST Responden Baru
+                    <i class="fa-solid fa-file-circle-plus text-primary me-2"></i> Terbitkan Tanda Terima Responden Baru
                 </h5>
                 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
