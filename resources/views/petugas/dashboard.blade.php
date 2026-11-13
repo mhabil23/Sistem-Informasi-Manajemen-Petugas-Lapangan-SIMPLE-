@@ -93,132 +93,63 @@
 /* Quick Action Bento Cards */
 .bento-action-pill {
     display: flex;
+    align-items: center;
+    gap: 0.95rem;
+    padding: 0.95rem 1.25rem;
+    border-radius: 18px;
     text-decoration: none;
     border: 1px solid transparent;
     transition: all 0.22s cubic-bezier(0.4, 0, 0.2, 1);
     box-shadow: 0 4px 14px rgba(15, 23, 42, 0.02);
+    min-height: 74px;
     height: 100%;
 }
 .bento-action-pill:hover {
     transform: translateY(-2px);
     box-shadow: 0 8px 22px rgba(15, 23, 42, 0.06);
 }
-
-/* Mobile Layout (< 768px): Vertical Bento Tile (No Text Truncation) */
-@media (max-width: 767.98px) {
-    .bento-action-pill {
-        flex-direction: column;
-        align-items: flex-start;
-        justify-content: space-between;
-        padding: 0.85rem 0.85rem;
-        border-radius: 16px;
-        min-height: 122px;
-        gap: 0.55rem;
-    }
-    .bento-action-header-wrap {
-        display: flex;
-        align-items: center;
-        justify-content: space-between;
-        width: 100%;
-    }
-    .bento-action-icon {
-        width: 38px;
-        height: 38px;
-        border-radius: 12px;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        font-size: 1.15rem;
-        flex-shrink: 0;
-    }
-    .bento-action-text {
-        width: 100%;
-        min-width: 0;
-    }
-    .bento-action-title {
-        font-size: 0.82rem;
-        font-weight: 750;
-        color: #0F172A;
-        line-height: 1.25;
-        white-space: normal;
-        word-break: normal;
-        overflow-wrap: break-word;
-        text-wrap: balance;
-        margin-bottom: 0.35rem;
-        display: block;
-    }
-    .bento-action-badge {
-        font-size: 0.65rem;
-        font-weight: 700;
-        padding: 0.2rem 0.55rem;
-        border-radius: 999px;
-        white-space: nowrap;
-        line-height: 1.2;
-        display: inline-block;
-    }
-    .bento-action-arrow-mobile {
-        color: #94A3B8;
-        font-size: 0.82rem;
-    }
+.bento-action-icon {
+    width: 44px;
+    height: 44px;
+    border-radius: 14px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.25rem;
+    flex-shrink: 0;
 }
-
-/* Desktop & Tablet Layout (>= 768px): Horizontal Bento Row */
-@media (min-width: 768px) {
-    .bento-action-pill {
-        flex-direction: row;
-        align-items: center;
-        gap: 0.85rem;
-        padding: 0.95rem 1.15rem;
-        border-radius: 18px;
-        min-height: 76px;
-    }
-    .bento-action-header-wrap {
-        display: block;
-        flex-shrink: 0;
-    }
-    .bento-action-icon {
-        width: 44px;
-        height: 44px;
-        border-radius: 14px;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        font-size: 1.25rem;
-        flex-shrink: 0;
-    }
-    .bento-action-text {
-        flex-grow: 1;
-        min-width: 0;
-    }
-    .bento-action-title {
-        font-size: 0.88rem;
-        font-weight: 700;
-        color: #0F172A;
-        line-height: 1.25;
-        white-space: normal;
-        word-break: normal;
-        display: block;
-    }
-    .bento-action-badge {
-        font-size: 0.65rem;
-        font-weight: 700;
-        padding: 0.2rem 0.6rem;
-        border-radius: 999px;
-        white-space: nowrap;
-        line-height: 1.2;
-        display: inline-block;
-    }
-    .bento-action-arrow-desktop {
-        color: #94A3B8;
-        font-size: 0.9rem;
-        margin-left: auto;
-        flex-shrink: 0;
-        transition: transform 0.2s ease, color 0.2s ease;
-    }
-    .bento-action-pill:hover .bento-action-arrow-desktop {
-        transform: translateX(3px);
-        color: var(--bps-orange);
-    }
+.bento-action-text {
+    flex-grow: 1;
+    min-width: 0;
+}
+.bento-action-title {
+    font-size: 0.92rem;
+    font-weight: 750;
+    color: #0F172A;
+    line-height: 1.25;
+    white-space: normal;
+    word-break: normal;
+    display: block;
+}
+.bento-action-badge {
+    font-size: 0.65rem;
+    font-weight: 700;
+    padding: 0.2rem 0.6rem;
+    border-radius: 999px;
+    white-space: nowrap;
+    line-height: 1.2;
+    display: inline-block;
+}
+.bento-action-arrow {
+    color: #94A3B8;
+    font-size: 0.9rem;
+    margin-left: auto;
+    flex-shrink: 0;
+    transition: transform 0.2s ease, color 0.2s ease;
+}
+.bento-action-pill:hover .bento-action-arrow {
+    transform: translateX(3px);
+    color: var(--bps-orange);
 }
 
 /* Specific Action Color Tints */
@@ -382,40 +313,34 @@
             </h5>
         </div>
 
-        <div class="row g-2 g-md-3">
+        <div class="row g-2.5 g-lg-3">
             <!-- 1. Tanda Terima Responden -->
-            <div class="col-6 col-lg-3">
+            <div class="col-12 col-lg-3">
                 <a href="{{ route('petugas.basts.respondents.index') }}" class="bento-action-pill bento-pill-green">
-                    <div class="bento-action-header-wrap">
-                        <div class="bento-action-icon">
-                            <i class="bi bi-file-earmark-check-fill"></i>
-                        </div>
-                        <i class="bi bi-chevron-right bento-action-arrow-mobile d-md-none"></i>
+                    <div class="bento-action-icon">
+                        <i class="bi bi-file-earmark-check-fill"></i>
                     </div>
                     <div class="bento-action-text">
                         <span class="bento-action-title">Tanda Terima Responden</span>
-                        <div>
+                        <div class="mt-0.5">
                             <span class="badge bg-success-subtle text-success border border-success-subtle bento-action-badge">
                                 {{ $totalRespondentBasts }} Terbit
                             </span>
                         </div>
                     </div>
-                    <i class="bi bi-chevron-right bento-action-arrow-desktop d-none d-md-block"></i>
+                    <i class="bi bi-chevron-right bento-action-arrow"></i>
                 </a>
             </div>
 
             <!-- 2. Tanda Terima Petugas -->
-            <div class="col-6 col-lg-3">
+            <div class="col-12 col-lg-3">
                 <a href="{{ route('petugas.basts.officers.index', ['type' => 'kantor_ke_petugas']) }}" class="bento-action-pill bento-pill-blue">
-                    <div class="bento-action-header-wrap">
-                        <div class="bento-action-icon">
-                            <i class="bi bi-box-seam-fill"></i>
-                        </div>
-                        <i class="bi bi-chevron-right bento-action-arrow-mobile d-md-none"></i>
+                    <div class="bento-action-icon">
+                        <i class="bi bi-box-seam-fill"></i>
                     </div>
                     <div class="bento-action-text">
                         <span class="bento-action-title">Tanda Terima Petugas</span>
-                        <div>
+                        <div class="mt-0.5">
                             @if(($pendingSignBlankoBastsCount ?? 0) > 0)
                                 <span class="badge bg-danger text-white border bento-action-badge">
                                     <i class="bi bi-pen me-1"></i> {{ $pendingSignBlankoBastsCount }} TTD
@@ -427,49 +352,43 @@
                             @endif
                         </div>
                     </div>
-                    <i class="bi bi-chevron-right bento-action-arrow-desktop d-none d-md-block"></i>
+                    <i class="bi bi-chevron-right bento-action-arrow"></i>
                 </a>
             </div>
 
             <!-- 3. Laporan Perjadin -->
-            <div class="col-6 col-lg-3">
+            <div class="col-12 col-lg-3">
                 <a href="{{ route('petugas.reports.index') }}" class="bento-action-pill bento-pill-purple">
-                    <div class="bento-action-header-wrap">
-                        <div class="bento-action-icon">
-                            <i class="bi bi-clipboard2-check-fill"></i>
-                        </div>
-                        <i class="bi bi-chevron-right bento-action-arrow-mobile d-md-none"></i>
+                    <div class="bento-action-icon">
+                        <i class="bi bi-clipboard2-check-fill"></i>
                     </div>
                     <div class="bento-action-text">
                         <span class="bento-action-title">Laporan Perjadin</span>
-                        <div>
+                        <div class="mt-0.5">
                             <span class="badge {{ $reportsRevision > 0 ? 'bg-danger text-white' : ($reportsApproved > 0 ? 'bg-success-subtle text-success border' : 'bg-secondary-subtle text-secondary border') }} bento-action-badge">
                                 {{ $reportsRevision > 0 ? $reportsRevision . ' Revisi' : ($reportsApproved > 0 ? $reportsApproved . ' ACC' : ($reportsSubmitted > 0 ? $reportsSubmitted . ' Menunggu' : 'Draft')) }}
                             </span>
                         </div>
                     </div>
-                    <i class="bi bi-chevron-right bento-action-arrow-desktop d-none d-md-block"></i>
+                    <i class="bi bi-chevron-right bento-action-arrow"></i>
                 </a>
             </div>
 
             <!-- 4. BAST Dokumen Terisi -->
-            <div class="col-6 col-lg-3">
+            <div class="col-12 col-lg-3">
                 <a href="{{ route('petugas.basts.officers.index', ['type' => 'petugas_ke_kantor']) }}" class="bento-action-pill bento-pill-amber">
-                    <div class="bento-action-header-wrap">
-                        <div class="bento-action-icon">
-                            <i class="bi bi-file-earmark-arrow-up-fill"></i>
-                        </div>
-                        <i class="bi bi-chevron-right bento-action-arrow-mobile d-md-none"></i>
+                    <div class="bento-action-icon">
+                        <i class="bi bi-file-earmark-arrow-up-fill"></i>
                     </div>
                     <div class="bento-action-text">
                         <span class="bento-action-title">BAST Dokumen Terisi</span>
-                        <div>
+                        <div class="mt-0.5">
                             <span class="badge bg-warning-subtle text-warning-emphasis border border-warning-subtle bento-action-badge">
                                 {{ $totalTerisiBasts ?? 0 }} Sah
                             </span>
                         </div>
                     </div>
-                    <i class="bi bi-chevron-right bento-action-arrow-desktop d-none d-md-block"></i>
+                    <i class="bi bi-chevron-right bento-action-arrow"></i>
                 </a>
             </div>
         </div>
