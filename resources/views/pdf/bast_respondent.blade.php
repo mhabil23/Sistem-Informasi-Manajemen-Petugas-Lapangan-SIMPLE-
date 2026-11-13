@@ -2,263 +2,167 @@
 <html lang="id">
 <head>
     <meta charset="UTF-8">
-    <title>{{ $bast->bast_number }} - BAST Responden SIMPLE</title>
+    <title>{{ $bast->bast_number }} - Tanda Terima Responden</title>
     <style>
         @page {
-            margin: 1.2cm 1.5cm 1.2cm 1.5cm;
             size: A4 portrait;
+            margin: 12mm 14mm 12mm 14mm;
         }
-
+        * {
+            box-sizing: border-box;
+        }
         body {
-            font-family: 'Times New Roman', Times, serif;
-            font-size: 10pt;
-            line-height: 1.35;
-            color: #000;
-        }
-
-        .header-table {
-            width: 100%;
-            border-bottom: 2px double #000;
-            padding-bottom: 4px;
-            margin-bottom: 10px;
-        }
-
-        .header-title {
-            text-align: center;
-        }
-
-        .instansi-utama {
-            font-size: 11.5pt;
-            font-weight: bold;
-            text-transform: uppercase;
-            letter-spacing: 0.5px;
-        }
-
-        .instansi-sub {
-            font-size: 13.5pt;
-            font-weight: bold;
-            text-transform: uppercase;
-            color: #0d2142;
-        }
-
-        .instansi-detail {
+            font-family: Arial, Helvetica, sans-serif;
             font-size: 8.5pt;
-            font-style: italic;
-            color: #333;
+            color: #000000;
+            line-height: 1.25;
+            margin: 0;
+            padding: 0;
         }
-
-        .doc-title {
+        .doc-header {
             text-align: center;
-            margin-top: 8px;
+            font-weight: bold;
+            font-size: 9.5pt;
+            line-height: 1.35;
             margin-bottom: 10px;
         }
-
-        .doc-title h3 {
-            font-size: 11.5pt;
-            text-decoration: underline;
-            margin: 0;
-            text-transform: uppercase;
-        }
-
-        .doc-title p {
-            margin: 2px 0 0;
-            font-size: 9.5pt;
-        }
-
-        .content-table {
+        table.receipt-table {
             width: 100%;
-            margin-bottom: 6px;
+            border-collapse: collapse;
+            table-layout: fixed;
+            border: 1px solid #000000;
         }
-
-        .content-table td {
-            vertical-align: top;
-            padding: 1.5px 0;
+        table.receipt-table thead {
+            display: table-header-group;
         }
-
-        .label-col {
-            width: 25%;
+        table.receipt-table thead th {
+            background-color: #a6dde8;
+            border: 1px solid #000000;
+            text-align: center;
+            vertical-align: middle;
+            font-weight: bold;
+            font-size: 8.5pt;
+            padding: 5px 4px;
         }
-
-        .sep-col {
-            width: 3%;
+        table.receipt-table thead tr.col-numbers th {
+            font-style: italic;
+            font-weight: normal;
+            font-size: 7.8pt;
+            padding: 2px 4px;
+            border-bottom: 1.2px solid #000000;
         }
-
-        .val-col {
-            width: 72%;
-        }
-
-        .items-box {
-            background-color: #fdfdfd;
-            border: 1px solid #777;
-            padding: 6px 12px;
-            margin: 8px 0;
-            font-size: 9.5pt;
-            white-space: pre-line;
-        }
-
-        .signature-table {
-            width: 100%;
-            margin-top: 15px;
+        table.receipt-table tbody tr {
             page-break-inside: avoid;
         }
-
-        .signature-col {
-            width: 50%;
+        table.receipt-table tbody td {
+            border-left: 1px solid #000000;
+            border-right: 1px solid #000000;
+            border-top: 1px solid #a0a0a0;
+            border-bottom: 1px solid #a0a0a0;
             text-align: center;
+            vertical-align: middle;
+            padding: 5px 5px;
+            font-size: 8.3pt;
+            word-wrap: break-word;
+        }
+        table.receipt-table tbody tr:last-child td {
+            border-bottom: 1px solid #000000;
+        }
+        table.sign-inner {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 0;
+        }
+        table.sign-inner td {
+            border: none !important;
+            padding: 0 3px !important;
+            text-align: left !important;
+            vertical-align: middle !important;
+            white-space: nowrap;
+            font-size: 8.3pt;
+        }
+        table.footer-grid {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 14px;
+            page-break-inside: avoid;
+        }
+        table.footer-grid td {
+            border: none;
             vertical-align: top;
+            font-size: 8.5pt;
         }
-
-        .sign-space {
-            height: 78px;
+        .item-line {
+            line-height: 1.45;
+        }
+        .maker-box {
             text-align: center;
-            margin: 3px 0;
+            line-height: 1.3;
         }
-
-        .signer-name {
+        .maker-space {
+            height: 48px;
+        }
+        .maker-name {
             font-weight: bold;
-            text-decoration: underline;
-        }
-
-        .signer-title {
-            font-size: 9pt;
         }
     </style>
 </head>
 <body>
-    <!-- KOP SURAT RESMI -->
-    <table class="header-table">
-        <tr>
-            <td class="header-title">
-                <div class="instansi-utama">PEMERINTAH REPUBLIK INDONESIA</div>
-                <div class="instansi-sub">SISTEM INFORMASI MANAJEMEN PETUGAS LAPANGAN (SIMPLE)</div>
-                <div class="instansi-detail">Sistem Administrasi Terpadu, Dokumen BAST & Manajemen Pelaporan Lapangan</div>
-            </td>
-        </tr>
-    </table>
-
     @php
-        $handoverCategory = strtoupper($bast->handover_category ?: 'KUES');
-        $handoverCategoryLabel = $handoverCategory === 'ATK'
-            ? 'ATK / Perlengkapan'
-            : 'KUES (Kuesioner / Dokumen)';
-    @endphp
-    <!-- JUDUL DOKUMEN -->
-    <div class="doc-title">
-        <h3>TANDA TERIMA &amp; BAST DOKUMEN RESPONDEN ({{ $handoverCategory }})</h3>
-        <p>
-            Nomor: <strong>{{ $bast->bast_number }}</strong>
-            @if(!empty($bast->respondent_number))
-                &nbsp;|&nbsp; No. Responden: <strong>{{ $bast->respondent_number }}</strong>
-            @endif
-        </p>
-    </div>
+        $officer = $bast->officer;
+        $assignment = $bast->assignment;
+        $category = strtoupper($bast->handover_category ?: 'KUES');
 
-    <p style="text-align: justify;">
-        Pada hari ini, <strong>{{ $bast->bast_date->translatedFormat('l') }}</strong> tanggal <strong>{{ $bast->bast_date->translatedFormat('d F Y') }}</strong>, bertempat di <strong>{{ $bast->respondent->address ?? 'Lokasi Responden' }}</strong>, kami yang bertanda tangan di bawah ini:
-    </p>
+        // Mengambil seluruh BAST responden dalam penugasan petugas ini jika ada, agar tabel tampil kolektif (1..10)
+        if ($bast->assignment_id && $bast->officer_id) {
+            $allBastsInBatch = \App\Models\RespondentBast::with(['respondent', 'officer', 'assignment'])
+                ->where('assignment_id', $bast->assignment_id)
+                ->where('officer_id', $bast->officer_id)
+                ->where('handover_category', $category)
+                ->orderBy('respondent_number')
+                ->orderBy('id')
+                ->get();
 
-    <!-- PIHAK PERTAMA -->
-    <table class="content-table">
-        <tr>
-            <td class="label-col"><strong>Nama Petugas</strong></td>
-            <td class="sep-col">:</td>
-            <td class="val-col"><strong>{{ $bast->officer->name }}</strong></td>
-        </tr>
-        <tr>
-            <td class="label-col">Username / ID</td>
-            <td class="sep-col">:</td>
-            <td class="val-col">{{ $bast->officer->username }}</td>
-        </tr>
-        <tr>
-            <td class="label-col">Nomor Kontak / HP</td>
-            <td class="sep-col">:</td>
-            <td class="val-col">{{ $bast->officer->phone ?? '-' }}</td>
-        </tr>
-        <tr>
-            <td class="label-col">Jabatan / Peran</td>
-            <td class="sep-col">:</td>
-            <td class="val-col">Petugas Lapangan SIMPLE</td>
-        </tr>
-    </table>
-    <p style="margin: 0 0 10px 0; font-size: 10pt; font-style: italic;">
-        Selanjutnya disebut sebagai <strong>PIHAK PERTAMA (Yang Menyerahkan / Memverifikasi)</strong>.
-    </p>
+            $rows = $allBastsInBatch->isNotEmpty() ? $allBastsInBatch : collect([$bast]);
+        } else {
+            $rows = collect([$bast]);
+        }
 
-    <!-- PIHAK KEDUA -->
-    <table class="content-table">
-        @if($bast->recipient_type === 'representative' && !empty($bast->recipient_name))
-            <tr>
-                <td class="label-col"><strong>Nama Penerima</strong></td>
-                <td class="sep-col">:</td>
-                <td class="val-col"><strong>{{ $bast->recipient_name }}</strong></td>
-            </tr>
-            <tr>
-                <td class="label-col">Status / Hubungan</td>
-                <td class="sep-col">:</td>
-                <td class="val-col">{{ $bast->recipient_relation ?? 'Wakil / Anggota Keluarga' }} (Mewakili Kepala Rumah Tangga)</td>
-            </tr>
-            <tr>
-                <td class="label-col">Kepala Rumah Tangga</td>
-                <td class="sep-col">:</td>
-                <td class="val-col">{{ $bast->respondent->name }}</td>
-            </tr>
-        @else
-            <tr>
-                <td class="label-col"><strong>Nama Responden</strong></td>
-                <td class="sep-col">:</td>
-                <td class="val-col"><strong>{{ $bast->respondent->name }}</strong> (Kepala Rumah Tangga Langsung)</td>
-            </tr>
-        @endif
-        <tr>
-            <td class="label-col">Instansi / Lembaga</td>
-            <td class="sep-col">:</td>
-            <td class="val-col">{{ $bast->respondent->agency }}</td>
-        </tr>
-        <tr>
-            <td class="label-col">Alamat Lengkap</td>
-            <td class="sep-col">:</td>
-            <td class="val-col">{{ $bast->respondent->address }}</td>
-        </tr>
-        <tr>
-            <td class="label-col">Nomor Telepon / HP</td>
-            <td class="sep-col">:</td>
-            <td class="val-col">{{ $bast->respondent->phone ?? '-' }}</td>
-        </tr>
-    </table>
-    <p style="margin: 0 0 10px 0; font-size: 10pt; font-style: italic;">
-        Selanjutnya disebut sebagai <strong>PIHAK KEDUA (Yang Menerima / Menyerahkan Berkas)</strong>.
-    </p>
+        $yearStr = $bast->bast_date ? $bast->bast_date->format('Y') : now()->format('Y');
+        $docTitle = $category === 'ATK' ? 'Tanda Terima ATK Responden' : 'Tanda Terima Kuesioner Responden';
+        $activitySubtitle = trim((string) ($assignment->title ?? '')) !== '' ? $assignment->title : 'Pendataan Lapangan Terpadu BPS';
+        $institutionName = "BPS Kabupaten Kolaka Utara Tahun {$yearStr}";
 
-    <!-- ISI SERAH TERIMA -->
-    <p style="text-align: justify; margin-top: 15px;">
-        Bahwa PIHAK PERTAMA dan PIHAK KEDUA telah melaksanakan serah terima <strong>{{ $handoverCategoryLabel }}</strong> untuk kegiatan <strong>{{ $bast->assignment ? $bast->assignment->title : 'Pendataan Lapangan Terpadu' }}</strong>@if(!empty($bast->respondent_number)) (Sampel No. Responden: <strong>{{ $bast->respondent_number }}</strong>)@endif dengan rincian sebagai berikut:
-    </p>
+        $loc = $bast->respondent?->district ? 'Kec. ' . $bast->respondent->district : ($assignment?->location ?: 'Lasusua');
+        $dateStr = $bast->bast_date ? $bast->bast_date->translatedFormat('j F Y') : now()->translatedFormat('j F Y');
+        $placeDateLine = $loc ? "{$loc}, {$dateStr}" : $dateStr;
 
-    <div class="items-box">
-{{ $bast->handover_items }}
-    </div>
+        // Parse rincian barang/dokumen
+        $rawLines = preg_split('/\r\n|\r|\n/', (string) $bast->handover_items) ?: [];
+        $items = [];
+        foreach ($rawLines as $line) {
+            $clean = trim($line);
+            if ($clean === '') continue;
+            $clean = preg_replace('/^(?:(?:\d+[\.\)]\s*)|(?:[-*•]\s*))/', '', $clean);
+            $clean = trim((string) $clean);
+            if ($clean !== '') $items[] = $clean;
+        }
+        if (empty($items)) {
+            $items = $category === 'ATK' 
+                ? ['Map / Perlengkapan Pencacahan Responden (1 Set)', 'Bolpoin / Alat Tulis Lapangan (1 Buah)', 'Bukti Tanda Terima Perlengkapan Responden']
+                : ['Formulir Kuesioner Pendataan Lapangan (1 Berkas)', 'Bukti Kelengkapan Berkas Administrasi Responden'];
+        }
 
-    @if($bast->notes)
-        <p style="font-size: 10pt; margin: 8px 0;">
-            <strong>Catatan Tambahan:</strong> {{ $bast->notes }}
-        </p>
-    @endif
+        // Auto-crop area transparan canvas agar goresan tanda tangan tampil besar, tebal & proporsional
+        $getTrimmedSignBase64 = function (?string $path): ?string {
+            if (empty($path)) return null;
 
-    <p style="text-align: justify;">
-        Demikian Berita Acara Serah Terima ini dibuat dengan sebenarnya dalam keadaan sadar dan tanpa paksaan dari pihak manapun untuk dipergunakan sebagaimana mestinya.
-    </p>
-
-    <!-- TANDA TANGAN -->
-    @php
-        $getTrimmedSignatureBase64 = function($path) {
-            if (empty($path)) return '';
-            
             $p = storage_path('app/public/' . $path);
-            if (!file_exists($p)) $p = storage_path('app/' . $path);
-            if (!file_exists($p)) $p = public_path('storage/' . $path);
-            if (!file_exists($p)) return '';
+            if (!file_exists($p)) {
+                $p = public_path('storage/' . $path);
+            }
+            if (!file_exists($p)) return null;
 
-            // Auto-crop area transparan canvas agar goresan tanda tangan tampak besar & proporsional
             if (function_exists('imagecreatefrompng') && function_exists('imagecrop')) {
                 $im = @imagecreatefrompng($p);
                 if ($im) {
@@ -271,11 +175,7 @@
                         for ($y = 0; $y < $h; $y++) {
                             $rgba = imagecolorat($im, $x, $y);
                             $alpha = ($rgba & 0x7F000000) >> 24;
-                            $r = ($rgba >> 16) & 0xFF;
-                            $g = ($rgba >> 8) & 0xFF;
-                            $b = $rgba & 0xFF;
-
-                            if ($alpha < 120 && ($r < 240 || $g < 240 || $b < 240)) {
+                            if ($alpha < 120) {
                                 $found = true;
                                 if ($x < $minX) $minX = $x;
                                 if ($x > $maxX) $maxX = $x;
@@ -286,7 +186,7 @@
                     }
 
                     if ($found) {
-                        $pad = 10;
+                        $pad = 6;
                         $cropX = max(0, $minX - $pad);
                         $cropY = max(0, $minY - $pad);
                         $cropW = min($w - $cropX, ($maxX - $minX + 1) + ($pad * 2));
@@ -311,48 +211,124 @@
 
             return base64_encode(file_get_contents($p));
         };
-
-        $recipientSignData = $getTrimmedSignatureBase64($bast->signature_path);
-        $officerSignData = $getTrimmedSignatureBase64($bast->officer_signature_path);
     @endphp
-    <table class="signature-table">
+
+    <div class="doc-header">
+        <div>{{ $docTitle }}</div>
+        <div>{{ $activitySubtitle }}</div>
+        <div>{{ $institutionName }}</div>
+        <div>{{ $placeDateLine }}</div>
+    </div>
+
+    <table class="receipt-table">
+        <thead>
+            <tr>
+                <th style="width: 5%;">No.</th>
+                <th style="width: 25%;">Nama</th>
+                <th style="width: 20%;">Jabatan dan Unit Kerja</th>
+                <th style="width: 20%;">Domisili</th>
+                <th style="width: 30%;">Tanda Tangan</th>
+            </tr>
+            <tr class="col-numbers">
+                <th>(1)</th>
+                <th>(2)</th>
+                <th>(3)</th>
+                <th>(4)</th>
+                <th>(5)</th>
+            </tr>
+        </thead>
+        <tbody>
+            @forelse($rows as $idx => $row)
+                @php
+                    $rowNum = $row->respondent_number ?: ($idx + 1);
+                    $isOdd = ($rowNum % 2) === 1;
+
+                    // Nama penerima
+                    $isRepresentative = ($row->recipient_type === 'representative');
+                    $krtName = $row->respondent?->family_head_name ?: ($row->respondent?->name ?: $row->recipient_name);
+                    $displayName = ($isRepresentative && !empty($row->recipient_name)) ? $row->recipient_name : $krtName;
+
+                    // Jabatan / Status Hubungan
+                    $jobPosition = $isRepresentative
+                        ? ($row->recipient_relation ?: 'Wakil KRT')
+                        : ($row->respondent?->respondent_status ?: ($row->respondent?->agency ?: 'Kepala Keluarga (KRT)'));
+
+                    // Kolom 4: Domisili (Alamat responden / Desa / RT / Kecamatan)
+                    $domisili = $row->respondent?->address ?: ($row->respondent?->district ? 'Kec. ' . $row->respondent->district : ($assignment?->location ?: 'Lasusua'));
+
+                    // Tanda tangan
+                    $signBase64 = $getTrimmedSignBase64($row->signature_path);
+                @endphp
+                <tr>
+                    <td>{{ $rowNum }}</td>
+                    <td style="text-align: left; padding-left: 6px;">
+                        <span style="font-weight: 500;">{{ $displayName }}</span>
+                        @if($isRepresentative && $displayName !== $krtName)
+                            <div style="font-size: 7.2pt; color: #555555;">(Wakil dari: {{ $krtName }})</div>
+                        @endif
+                    </td>
+                    <td>{{ $jobPosition }}</td>
+                    <td>{{ $domisili }}</td>
+                    <td style="padding: 1px 3px; vertical-align: middle;">
+                        <table class="sign-inner">
+                            <tr>
+                                <td style="width: 50%; vertical-align: middle;">
+                                    @if($isOdd)
+                                        <span style="font-weight: 500; font-size: 8.5pt;">{{ $rowNum }}.</span>
+                                        @if($signBase64)
+                                            <img src="data:image/png;base64,{{ $signBase64 }}" style="max-height: 28px; max-width: 88px; vertical-align: middle; display: inline-block; margin-left: 2px;">
+                                        @else
+                                            <span>...........</span>
+                                        @endif
+                                    @else
+                                        &nbsp;
+                                    @endif
+                                </td>
+                                <td style="width: 50%; padding-left: 6px !important; vertical-align: middle;">
+                                    @if(!$isOdd)
+                                        <span style="font-weight: 500; font-size: 8.5pt;">{{ $rowNum }}.</span>
+                                        @if($signBase64)
+                                            <img src="data:image/png;base64,{{ $signBase64 }}" style="max-height: 28px; max-width: 88px; vertical-align: middle; display: inline-block; margin-left: 2px;">
+                                        @else
+                                            <span>...........</span>
+                                        @endif
+                                    @else
+                                        &nbsp;
+                                    @endif
+                                </td>
+                            </tr>
+                        </table>
+                    </td>
+                </tr>
+            @empty
+                <tr>
+                    <td colspan="5" style="padding: 12px; color: #555555;">Belum ada data responden yang tercatat.</td>
+                </tr>
+            @endforelse
+        </tbody>
+    </table>
+
+    <table class="footer-grid">
         <tr>
-            <td class="signature-col">
-                <div>PIHAK KEDUA,</div>
-                <div style="font-size: 9.5pt;">
-                    @if($bast->recipient_type === 'representative')
-                        Wakil Responden / Penerima
-                    @else
-                        Kepala Rumah Tangga / Responden
-                    @endif
-                </div>
-                <div class="sign-space">
-                    @if($recipientSignData)
-                        <img src="data:image/png;base64,{{ $recipientSignData }}" style="height: 72px; max-height: 75px; max-width: 220px; width: auto; display: inline-block; vertical-align: middle;" alt="Tanda Tangan Penerima">
-                    @endif
-                </div>
-                <div class="signer-name">{{ $bast->recipient_type === 'representative' ? $bast->recipient_name : $bast->respondent->name }}</div>
-                <div class="signer-title">
-                    @if($bast->recipient_type === 'representative')
-                        Status: {{ $bast->recipient_relation ?? 'Wakil' }}
-                    @else
-                        {{ $bast->respondent->agency }}
-                    @endif
-                </div>
+            <td style="width: 60%; padding-left: 12px;">
+                @foreach($items as $idx => $itemText)
+                    <div class="item-line">{{ $idx + 1 }}. {{ $itemText }}</div>
+                @endforeach
+                @if($bast->notes)
+                    <div style="margin-top: 8px; font-size: 7.8pt; color: #333333;">Catatan: {{ $bast->notes }}</div>
+                @endif
             </td>
-            <td class="signature-col">
-                <div>PIHAK PERTAMA,</div>
-                <div style="font-size: 9.5pt;">Petugas Lapangan SIMPLE</div>
-                <div class="sign-space">
-                    @if($officerSignData)
-                        <img src="data:image/png;base64,{{ $officerSignData }}" style="height: 72px; max-height: 75px; max-width: 220px; width: auto; display: inline-block; vertical-align: middle;" alt="Tanda Tangan Petugas">
-                    @endif
-                </div>
-                <div class="signer-name">{{ $bast->officer->name }}</div>
-                <div class="signer-title">NIP/ID: {{ $bast->officer->username }}</div>
+            <td style="width: 40%;" class="maker-box">
+                <div>Pembuat Daftar</div>
+                <div class="maker-space"></div>
+                <div class="maker-name">{{ $officer?->name ?: 'Petugas Pencacah Lapangan' }}</div>
+                @if($officer?->nip)
+                    <div>NIP. {{ preg_replace('/^NIP\.?\s*/i', '', $officer->nip) }}</div>
+                @else
+                    <div>{{ $officer?->isPegawai() ? 'Pegawai BPS' : 'Mitra BPS' }}</div>
+                @endif
             </td>
         </tr>
     </table>
 </body>
 </html>
-
