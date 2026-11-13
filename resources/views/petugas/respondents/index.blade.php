@@ -377,7 +377,7 @@
                                     <i class="fa-solid fa-copy me-1"></i> Sama dg KRT
                                 </button>
                             </div>
-                            <input type="text" id="create_informant_name" name="informant_name" class="form-control" placeholder="Contoh: Siti Rogayah (atau nama KRT jika ditemui langsung)" required>
+                            <input type="text" id="create_informant_name" name="informant_name" class="form-control" placeholder="Contoh: Nama Keluarga (atau nama KRT jika ditemui langsung)" required>
                             <div class="form-text small">Orang yang diwawancarai / memberikan data di lapangan.</div>
                         </div>
                         <div class="col-md-5">

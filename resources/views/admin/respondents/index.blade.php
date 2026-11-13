@@ -109,7 +109,7 @@
 
             <div class="col-md-3">
                 <select name="officer_id" class="form-select form-select-sm">
-                    <option value="">-- Semua Petugas --</option>
+                    <option value="">-- Semua Petugas / PPL --</option>
                     @foreach($officers as $officer)
                         <option value="{{ $officer->id }}" {{ request('officer_id') == $officer->id ? 'selected' : '' }}>{{ $officer->name }}</option>
                     @endforeach
@@ -147,7 +147,7 @@
                         <th style="width: 15%;">Instansi / Lembaga</th>
                         <th style="width: 20%;">Alamat &amp; Wilayah</th>
                         <th style="width: 15%;">Kegiatan Terkait</th>
-                        <th style="width: 13%;">Petugas Penginput</th>
+                        <th style="width: 13%;">Petugas Lapangan / PPL</th>
                         <th class="text-center" style="width: 7%;">Status BAST</th>
                         <th class="text-end" style="width: 6%;">Aksi</th>
                     </tr>
@@ -306,20 +306,20 @@
                         <div class="col-md-7">
                             <div class="d-flex justify-content-between align-items-center mb-1">
                                 <label class="form-label small fw-semibold text-secondary mb-0">
-                                    <i class="fa-solid fa-user-check text-success me-1"></i> NAMA PEMBERI INFORMASI <span class="text-danger">*</span>
+                                    <i class="fa-solid fa-user-check text-success me-1"></i> NAMA PEMBERI INFORMASI (OPSIONAL)
                                 </label>
                                 <button type="button" class="btn btn-sm btn-outline-primary py-0 px-2" style="font-size: 0.72rem;" onclick="copyHeadNameToInformant('admin_create_resp_name', 'admin_create_informant_name', 'admin_create_status_select')">
                                     <i class="fa-solid fa-copy me-1"></i> Sama dg KRT
                                 </button>
                             </div>
-                            <input type="text" id="admin_create_informant_name" name="informant_name" class="form-control" placeholder="Contoh: Siti Rogayah (atau nama KRT jika ditemui langsung)" required>
-                            <div class="form-text small">Orang yang diwawancarai / memberikan data di lapangan.</div>
+                            <input type="text" id="admin_create_informant_name" name="informant_name" class="form-control" placeholder="Otomatis nama KRT jika belum diketahui">
+                            <div class="form-text small">Otomatis sama dengan KRT. Penerima aktual dapat ditentukan saat kunjungan lapangan.</div>
                         </div>
                         <div class="col-md-5">
                             <label class="form-label small fw-semibold text-secondary">
-                                <i class="fa-solid fa-users text-primary me-1"></i> STATUS RESPONDEN / HUBUNGAN <span class="text-danger">*</span>
+                                <i class="fa-solid fa-users text-primary me-1"></i> STATUS RESPONDEN / HUBUNGAN
                             </label>
-                            <select id="admin_create_status_select" name="respondent_status" class="form-select" required>
+                            <select id="admin_create_status_select" name="respondent_status" class="form-select">
                                 <option value="Kepala Keluarga (KRT)">Kepala Keluarga (KRT)</option>
                                 <option value="Istri / Suami (Pasangan)">Istri / Suami (Pasangan)</option>
                                 <option value="Anak Kandung">Anak Kandung</option>
@@ -333,19 +333,26 @@
                     <!-- Baris 3: Instansi & Kegiatan Terkait -->
                     <div class="row g-3 mb-3">
                         <div class="col-md-6">
-                            <label class="form-label small fw-semibold text-secondary">
-                                <i class="fa-solid fa-building text-muted me-1"></i> INSTANSI / ASAL LEMBAGA <span class="text-danger">*</span>
-                            </label>
-                            <input type="text" name="agency" class="form-control" placeholder="Contoh: Rumah Tangga / Pelaku Usaha Agribisnis" required>
+                            <div class="d-flex justify-content-between align-items-center mb-1">
+                                <label class="form-label small fw-semibold text-secondary mb-0">
+                                    <i class="fa-solid fa-building text-muted me-1"></i> INSTANSI / ASAL LEMBAGA
+                                </label>
+                                <div class="d-flex gap-1">
+                                    <button type="button" class="btn btn-sm btn-outline-secondary py-0 px-1.5" style="font-size: 0.68rem;" onclick="setAgencyValue('admin_create_agency', 'Rumah Tangga')">Ruta</button>
+                                    <button type="button" class="btn btn-sm btn-outline-secondary py-0 px-1.5" style="font-size: 0.68rem;" onclick="setAgencyValue('admin_create_agency', 'Pelaku Usaha')">Usaha</button>
+                                    <button type="button" class="btn btn-sm btn-outline-secondary py-0 px-1.5" style="font-size: 0.68rem;" onclick="setAgencyValue('admin_create_agency', 'Instansi')">Instansi</button>
+                                </div>
+                            </div>
+                            <input type="text" id="admin_create_agency" name="agency" class="form-control" value="Rumah Tangga" placeholder="Contoh: Rumah Tangga / Pelaku Usaha Agribisnis">
                         </div>
                         <div class="col-md-6">
                             <label class="form-label small fw-semibold text-secondary">
                                 <i class="fa-solid fa-briefcase text-muted me-1"></i> KEGIATAN TERKAIT
                             </label>
-                            <select name="assignment_id" class="form-select">
+                            <select id="admin_create_assignment" name="assignment_id" class="form-select" onchange="autoFillPurpose(this, 'admin_create_purpose')">
                                 <option value="">-- Pilih Kegiatan --</option>
                                 @foreach($assignments as $assignment)
-                                    <option value="{{ $assignment->id }}">{{ $assignment->title }}</option>
+                                    <option value="{{ $assignment->id }}" data-title="{{ $assignment->title }}">{{ $assignment->title }}</option>
                                 @endforeach
                             </select>
                         </div>
@@ -360,27 +367,39 @@
                             <textarea name="address" class="form-control" rows="2" placeholder="Nama jalan, RT/RW, Dusun/Desa..." required></textarea>
                         </div>
                         <div class="col-md-5">
-                            <label class="form-label small fw-semibold text-secondary">KECAMATAN / WILAYAH</label>
-                            <input type="text" name="district" class="form-control" placeholder="Contoh: Kecamatan Sukamaju">
+                            <label class="form-label small fw-semibold text-secondary">
+                                <i class="fa-solid fa-map-pin text-primary me-1"></i> KECAMATAN / WILAYAH
+                            </label>
+                            <select name="district" id="admin_create_district" class="form-select">
+                                <option value="">-- Pilih Kecamatan (Kolaka Utara) --</option>
+                                @foreach(\App\Models\Respondent::DISTRICTS as $dist)
+                                    <option value="{{ $dist }}">{{ $dist }}</option>
+                                @endforeach
+                            </select>
+                            <div class="form-text small">Masuk ke kolom Domisili di cetak Tanda Terima.</div>
                         </div>
                     </div>
 
                     <div class="mb-3">
-                        <label class="form-label small fw-semibold text-secondary">TUJUAN KEGIATAN <span class="text-danger">*</span></label>
-                        <input type="text" name="purpose" class="form-control" placeholder="Contoh: Pendataan Sarana Prasarana Pertanian Terpadu 2026" required>
+                        <label class="form-label small fw-semibold text-secondary">TUJUAN KEGIATAN</label>
+                        <input type="text" id="admin_create_purpose" name="purpose" class="form-control" placeholder="Contoh: Pendataan Sarana Prasarana Pertanian Terpadu 2026">
+                        <div class="form-text small">Otomatis terisi saat Kegiatan Terkait dipilih (dapat diedit bila perlu).</div>
                     </div>
 
                     <div class="row g-3">
-                        <div class="col-md-6">
-                            <label class="form-label small fw-semibold text-secondary">PETUGAS PENGINPUT <span class="text-danger">*</span></label>
+                        <div class="col-md-7">
+                            <label class="form-label small fw-semibold text-secondary">
+                                <i class="fa-solid fa-user-gear text-primary me-1"></i> PETUGAS LAPANGAN / PPL (ALOKASI SAMPEL) <span class="text-danger">*</span>
+                            </label>
                             <select name="officer_id" class="form-select" required>
-                                <option value="">-- Pilih Petugas --</option>
+                                <option value="">-- Pilih Petugas Lapangan / PPL --</option>
                                 @foreach($officers as $officer)
                                     <option value="{{ $officer->id }}" {{ $officer->id === auth()->id() ? 'selected' : '' }}>{{ $officer->name }}</option>
                                 @endforeach
                             </select>
+                            <div class="form-text small">Petugas lapangan yang ditugaskan mencacah responden ini.</div>
                         </div>
-                        <div class="col-md-6">
+                        <div class="col-md-5">
                             <label class="form-label small fw-semibold text-secondary">TANGGAL INPUT <span class="text-danger">*</span></label>
                             <input type="date" name="input_date" class="form-control" value="{{ now()->toDateString() }}" required>
                         </div>
@@ -434,19 +453,20 @@
                         <div class="col-md-7">
                             <div class="d-flex justify-content-between align-items-center mb-1">
                                 <label class="form-label small fw-semibold text-secondary mb-0">
-                                    <i class="fa-solid fa-user-check text-success me-1"></i> NAMA PEMBERI INFORMASI <span class="text-danger">*</span>
+                                    <i class="fa-solid fa-user-check text-success me-1"></i> NAMA PEMBERI INFORMASI (OPSIONAL)
                                 </label>
                                 <button type="button" class="btn btn-sm btn-outline-primary py-0 px-2" style="font-size: 0.72rem;" onclick="copyHeadNameToInformant('edit_resp_name', 'edit_resp_informant_name', 'edit_resp_status')">
                                     <i class="fa-solid fa-copy me-1"></i> Sama dg KRT
                                 </button>
                             </div>
-                            <input type="text" id="edit_resp_informant_name" name="informant_name" class="form-control" required>
+                            <input type="text" id="edit_resp_informant_name" name="informant_name" class="form-control">
+                            <div class="form-text small">Otomatis sama dengan KRT jika dikosongkan.</div>
                         </div>
                         <div class="col-md-5">
                             <label class="form-label small fw-semibold text-secondary">
-                                <i class="fa-solid fa-users text-primary me-1"></i> STATUS RESPONDEN / HUBUNGAN <span class="text-danger">*</span>
+                                <i class="fa-solid fa-users text-primary me-1"></i> STATUS RESPONDEN / HUBUNGAN
                             </label>
-                            <select id="edit_resp_status" name="respondent_status" class="form-select" required>
+                            <select id="edit_resp_status" name="respondent_status" class="form-select">
                                 <option value="Kepala Keluarga (KRT)">Kepala Keluarga (KRT)</option>
                                 <option value="Istri / Suami (Pasangan)">Istri / Suami (Pasangan)</option>
                                 <option value="Anak Kandung">Anak Kandung</option>
@@ -460,19 +480,26 @@
                     <!-- Baris 3: Instansi & Kegiatan Terkait -->
                     <div class="row g-3 mb-3">
                         <div class="col-md-6">
-                            <label class="form-label small fw-semibold text-secondary">
-                                <i class="fa-solid fa-building text-muted me-1"></i> INSTANSI / ASAL LEMBAGA <span class="text-danger">*</span>
-                            </label>
-                            <input type="text" id="edit_resp_agency" name="agency" class="form-control" required>
+                            <div class="d-flex justify-content-between align-items-center mb-1">
+                                <label class="form-label small fw-semibold text-secondary mb-0">
+                                    <i class="fa-solid fa-building text-muted me-1"></i> INSTANSI / ASAL LEMBAGA
+                                </label>
+                                <div class="d-flex gap-1">
+                                    <button type="button" class="btn btn-sm btn-outline-secondary py-0 px-1.5" style="font-size: 0.68rem;" onclick="setAgencyValue('edit_resp_agency', 'Rumah Tangga')">Ruta</button>
+                                    <button type="button" class="btn btn-sm btn-outline-secondary py-0 px-1.5" style="font-size: 0.68rem;" onclick="setAgencyValue('edit_resp_agency', 'Pelaku Usaha')">Usaha</button>
+                                    <button type="button" class="btn btn-sm btn-outline-secondary py-0 px-1.5" style="font-size: 0.68rem;" onclick="setAgencyValue('edit_resp_agency', 'Instansi')">Instansi</button>
+                                </div>
+                            </div>
+                            <input type="text" id="edit_resp_agency" name="agency" class="form-control">
                         </div>
                         <div class="col-md-6">
                             <label class="form-label small fw-semibold text-secondary">
                                 <i class="fa-solid fa-briefcase text-muted me-1"></i> KEGIATAN TERKAIT
                             </label>
-                            <select id="edit_resp_assignment" name="assignment_id" class="form-select">
+                            <select id="edit_resp_assignment" name="assignment_id" class="form-select" onchange="autoFillPurpose(this, 'edit_resp_purpose')">
                                 <option value="">-- Tidak Terikat Kegiatan Tertentu --</option>
                                 @foreach($assignments as $assignment)
-                                    <option value="{{ $assignment->id }}">{{ $assignment->title }}</option>
+                                    <option value="{{ $assignment->id }}" data-title="{{ $assignment->title }}">{{ $assignment->title }}</option>
                                 @endforeach
                             </select>
                         </div>
@@ -487,26 +514,37 @@
                             <textarea id="edit_resp_address" name="address" class="form-control" rows="2" required></textarea>
                         </div>
                         <div class="col-md-5">
-                            <label class="form-label small fw-semibold text-secondary">KECAMATAN / WILAYAH</label>
-                            <input type="text" id="edit_resp_district" name="district" class="form-control" placeholder="Contoh: Kecamatan Sukamaju">
+                            <label class="form-label small fw-semibold text-secondary">
+                                <i class="fa-solid fa-map-pin text-primary me-1"></i> KECAMATAN / WILAYAH
+                            </label>
+                            <select name="district" id="edit_resp_district" class="form-select">
+                                <option value="">-- Pilih Kecamatan (Kolaka Utara) --</option>
+                                @foreach(\App\Models\Respondent::DISTRICTS as $dist)
+                                    <option value="{{ $dist }}">{{ $dist }}</option>
+                                @endforeach
+                            </select>
+                            <div class="form-text small">Masuk ke kolom Domisili di cetak Tanda Terima.</div>
                         </div>
                     </div>
 
                     <div class="mb-3">
-                        <label class="form-label small fw-semibold text-secondary">TUJUAN KEGIATAN <span class="text-danger">*</span></label>
-                        <input type="text" id="edit_resp_purpose" name="purpose" class="form-control" required>
+                        <label class="form-label small fw-semibold text-secondary">TUJUAN KEGIATAN</label>
+                        <input type="text" id="edit_resp_purpose" name="purpose" class="form-control">
                     </div>
 
                     <div class="row g-3">
-                        <div class="col-md-6">
-                            <label class="form-label small fw-semibold text-secondary">PETUGAS PENGINPUT <span class="text-danger">*</span></label>
+                        <div class="col-md-7">
+                            <label class="form-label small fw-semibold text-secondary">
+                                <i class="fa-solid fa-user-gear text-primary me-1"></i> PETUGAS LAPANGAN / PPL (ALOKASI SAMPEL) <span class="text-danger">*</span>
+                            </label>
                             <select id="edit_resp_officer" name="officer_id" class="form-select" required>
+                                <option value="">-- Pilih Petugas Lapangan / PPL --</option>
                                 @foreach($officers as $officer)
                                     <option value="{{ $officer->id }}">{{ $officer->name }}</option>
                                 @endforeach
                             </select>
                         </div>
-                        <div class="col-md-6">
+                        <div class="col-md-5">
                             <label class="form-label small fw-semibold text-secondary">TANGGAL INPUT <span class="text-danger">*</span></label>
                             <input type="date" id="edit_resp_date" name="input_date" class="form-control" required>
                         </div>
@@ -562,7 +600,7 @@
                         <div class="fw-semibold text-dark" id="det_date"></div>
                     </div>
                     <div class="col-sm-6">
-                        <div class="text-muted small">Petugas Penginput:</div>
+                        <div class="text-muted small">Petugas Lapangan / PPL:</div>
                         <div class="fw-semibold text-dark" id="det_officer">-</div>
                     </div>
                     <div class="col-12">
@@ -609,17 +647,49 @@
         }
     }
 
+    function setAgencyValue(inputId, value) {
+        const el = document.getElementById(inputId);
+        if (el) {
+            el.value = value;
+        }
+    }
+
+    function autoFillPurpose(selectEl, purposeInputId) {
+        const purposeInput = document.getElementById(purposeInputId);
+        if (!purposeInput) return;
+        const selectedOption = selectEl.options[selectEl.selectedIndex];
+        if (selectedOption && selectedOption.dataset.title) {
+            purposeInput.value = selectedOption.dataset.title;
+        }
+    }
+
+    // Auto-sinkronisasi nama KRT ke nama Pemberi Informasi saat diketik jika belum diisi manual
+    document.addEventListener('DOMContentLoaded', function() {
+        const createNameInput = document.getElementById('admin_create_resp_name');
+        const createInformantInput = document.getElementById('admin_create_informant_name');
+        if (createNameInput && createInformantInput) {
+            createNameInput.addEventListener('input', function() {
+                if (!createInformantInput.dataset.manualEdited) {
+                    createInformantInput.value = this.value;
+                }
+            });
+            createInformantInput.addEventListener('input', function() {
+                this.dataset.manualEdited = this.value.trim() !== '' ? 'true' : '';
+            });
+        }
+    });
+
     function openEditRespondentModal(resp) {
         document.getElementById('editRespondentForm').action = '/admin/respondents/' + resp.id;
         document.getElementById('edit_resp_name').value = resp.family_head_name || resp.name || '';
         document.getElementById('edit_resp_informant_name').value = resp.informant_name || resp.name || '';
         document.getElementById('edit_resp_status').value = resp.respondent_status || 'Kepala Keluarga (KRT)';
         document.getElementById('edit_resp_phone').value = resp.phone || '';
-        document.getElementById('edit_resp_agency').value = resp.agency;
+        document.getElementById('edit_resp_agency').value = resp.agency || 'Rumah Tangga';
         document.getElementById('edit_resp_assignment').value = resp.assignment_id || '';
         document.getElementById('edit_resp_address').value = resp.address;
         document.getElementById('edit_resp_district').value = resp.district || '';
-        document.getElementById('edit_resp_purpose').value = resp.purpose;
+        document.getElementById('edit_resp_purpose').value = resp.purpose || '';
         document.getElementById('edit_resp_officer').value = resp.officer_id;
         document.getElementById('edit_resp_date').value = resp.input_date ? resp.input_date.substring(0, 10) : '';
 

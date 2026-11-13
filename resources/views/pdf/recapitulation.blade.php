@@ -185,7 +185,7 @@
                 <th>Instansi / Lembaga</th>
                 <th>Alamat</th>
                 <th>Kegiatan Terkait</th>
-                <th>Petugas Penginput</th>
+                <th>Petugas Lapangan / PPL</th>
                 <th style="width: 80px;">Tanggal Input</th>
             </tr>
         </thead>

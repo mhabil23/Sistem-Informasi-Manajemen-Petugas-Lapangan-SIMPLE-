@@ -214,7 +214,7 @@ class RespondentAndBastTest extends TestCase
             'respondent_id' => $respondent->id,
             'bast_date' => now()->toDateString(),
             'recipient_type' => 'representative',
-            'recipient_name' => 'Siti Rogayah',
+            'recipient_name' => 'Nama Keluarga',
             'recipient_relation' => 'Istri / Pasangan',
             'handover_items' => '1. Kuesioner Sensus Lapangan',
             'notes' => 'Diterima oleh istri karena KRT sedang di kebun',
@@ -224,7 +224,7 @@ class RespondentAndBastTest extends TestCase
         $this->assertDatabaseHas('respondent_basts', [
             'respondent_id' => $respondent->id,
             'recipient_type' => 'representative',
-            'recipient_name' => 'Siti Rogayah',
+            'recipient_name' => 'Nama Keluarga',
             'recipient_relation' => 'Istri / Pasangan',
         ]);
     }

@@ -12,6 +12,24 @@ class Respondent extends Model
 {
     use HasFactory, SoftDeletes;
 
+    public const DISTRICTS = [
+        'Batu Putih',
+        'Katoi',
+        'Kodeoha',
+        'Lambai',
+        'Lasusua',
+        'Ngapa',
+        'Pakue',
+        'Pakue Tengah',
+        'Pakue Utara',
+        'Porehu',
+        'Ranteangin',
+        'Tiwu',
+        'Tolala',
+        'Wawo',
+        'Watunohu',
+    ];
+
     protected $fillable = [
         'name',
         'family_head_name',

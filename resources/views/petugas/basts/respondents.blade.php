@@ -466,7 +466,7 @@
                         <div class="row g-3">
                             <div class="col-md-6">
                                 <label class="form-label small fw-semibold text-secondary">NAMA PENERIMA YANG MENANDATANGANI <span class="text-danger">*</span></label>
-                                <input type="text" name="recipient_name" id="recipientNameInput" class="form-control" placeholder="Contoh: Siti Rogayah">
+                                <input type="text" name="recipient_name" id="recipientNameInput" class="form-control" placeholder="Contoh: Nama Keluarga">
                             </div>
                             <div class="col-md-6">
                                 <label class="form-label small fw-semibold text-secondary">STATUS / HUBUNGAN DENGAN KRT <span class="text-danger">*</span></label>

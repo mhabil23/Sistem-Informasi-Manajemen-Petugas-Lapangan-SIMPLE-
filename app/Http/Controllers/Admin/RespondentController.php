@@ -90,16 +90,14 @@ class RespondentController extends Controller
             'address' => ['required', 'string'],
             'district' => ['nullable', 'string', 'max:100'],
             'phone' => ['nullable', 'string', 'max:25'],
-            'agency' => ['required', 'string', 'max:255'],
-            'purpose' => ['required', 'string', 'max:500'],
+            'agency' => ['nullable', 'string', 'max:255'],
+            'purpose' => ['nullable', 'string', 'max:500'],
             'assignment_id' => ['nullable', 'exists:assignments,id'],
             'officer_id' => ['required', 'exists:users,id'],
             'input_date' => ['required', 'date'],
         ], [
             'address.required' => 'Alamat responden wajib diisi.',
-            'agency.required' => 'Instansi / lembaga responden wajib diisi.',
-            'purpose.required' => 'Tujuan kegiatan wajib diisi.',
-            'officer_id.required' => 'Petugas penginput wajib dipilih.',
+            'officer_id.required' => 'Petugas Lapangan / PPL wajib dipilih.',
             'input_date.required' => 'Tanggal input data wajib diisi.',
         ]);
 
@@ -112,6 +110,16 @@ class RespondentController extends Controller
         $validated['family_head_name'] = $headName;
         $validated['informant_name'] = trim($request->input('informant_name') ?: $headName);
         $validated['respondent_status'] = trim($request->input('respondent_status') ?: 'Kepala Keluarga (KRT)');
+        $validated['agency'] = trim($request->input('agency') ?: 'Rumah Tangga');
+
+        if (empty($validated['purpose'])) {
+            if (!empty($validated['assignment_id'])) {
+                $assignment = Assignment::find($validated['assignment_id']);
+                $validated['purpose'] = $assignment ? $assignment->title : 'Pendataan Lapangan';
+            } else {
+                $validated['purpose'] = 'Pendataan Lapangan';
+            }
+        }
 
         $respondent = Respondent::create($validated);
 
@@ -163,11 +171,15 @@ class RespondentController extends Controller
             'address' => ['required', 'string'],
             'district' => ['nullable', 'string', 'max:100'],
             'phone' => ['nullable', 'string', 'max:25'],
-            'agency' => ['required', 'string', 'max:255'],
-            'purpose' => ['required', 'string', 'max:500'],
+            'agency' => ['nullable', 'string', 'max:255'],
+            'purpose' => ['nullable', 'string', 'max:500'],
             'assignment_id' => ['nullable', 'exists:assignments,id'],
             'officer_id' => ['required', 'exists:users,id'],
             'input_date' => ['required', 'date'],
+        ], [
+            'address.required' => 'Alamat responden wajib diisi.',
+            'officer_id.required' => 'Petugas Lapangan / PPL wajib dipilih.',
+            'input_date.required' => 'Tanggal input data wajib diisi.',
         ]);
 
         $headName = trim($request->input('family_head_name') ?: $request->input('name', ''));
@@ -179,6 +191,16 @@ class RespondentController extends Controller
         $validated['family_head_name'] = $headName;
         $validated['informant_name'] = trim($request->input('informant_name') ?: $headName);
         $validated['respondent_status'] = trim($request->input('respondent_status') ?: 'Kepala Keluarga (KRT)');
+        $validated['agency'] = trim($request->input('agency') ?: 'Rumah Tangga');
+
+        if (empty($validated['purpose'])) {
+            if (!empty($validated['assignment_id'])) {
+                $assignment = Assignment::find($validated['assignment_id']);
+                $validated['purpose'] = $assignment ? $assignment->title : 'Pendataan Lapangan';
+            } else {
+                $validated['purpose'] = 'Pendataan Lapangan';
+            }
+        }
 
         $respondent->update($validated);
 
