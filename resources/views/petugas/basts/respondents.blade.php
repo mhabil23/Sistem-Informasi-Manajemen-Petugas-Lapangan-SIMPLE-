@@ -285,9 +285,11 @@
             <div class="modal-header bg-light border-bottom sticky-top flex-shrink-0">
                 <div>
                     <h5 class="modal-title fw-bold text-dark" id="createMyBastModalLabel">
-                        <i class="fa-solid fa-file-circle-plus text-primary me-2"></i> Buat Tanda Terima Responden Baru
+                        <i class="fa-solid fa-file-circle-plus text-primary me-2"></i> Tanda Terima Responden Lapangan
                     </h5>
-                    <div class="small text-muted">Pilih sampel responden, tentukan penerima (KRT vs Wakil), dan bubuhkan tanda tangan digital</div>
+                    <div class="small text-muted">
+                        <i class="fa-solid fa-lock text-secondary me-1"></i> Rincian berkas &amp; kategori dibakukan oleh Admin. Petugas hanya menentukan penerima (KRT / Wakil) dan mengambil tanda tangan digital responden saat kunjungan.
+                    </div>
                 </div>
                 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
@@ -388,21 +390,31 @@
                         </div>
                     </div>
 
-                    <!-- 1b. Nomor Responden & Kategori ATK / KUES -->
+                    <!-- 1b. Nomor Responden & Kategori ATK / KUES (Standar Baku Admin) -->
                     <div class="row g-3 mb-3">
                         <div class="col-md-4">
-                            <label class="form-label small fw-semibold text-secondary">NO. RESP (1, 2, ... 10)</label>
-                            <input type="number" name="respondent_number" id="respondentNumberInput" class="form-control fw-semibold" min="1" placeholder="Otomatis / isi manual">
+                            <label class="form-label small fw-semibold text-secondary d-flex justify-content-between align-items-center">
+                                <span>NO. RESP (1, 2, ... 10)</span>
+                                <span class="badge bg-secondary-subtle text-secondary border" style="font-size: 0.65rem;">
+                                    <i class="fa-solid fa-lock me-1"></i> Otomatis
+                                </span>
+                            </label>
+                            <input type="number" name="respondent_number" id="respondentNumberInput" class="form-control fw-semibold" min="1" placeholder="Pilih responden" readonly style="background-color: #f8fafc; cursor: not-allowed;">
                         </div>
                         <div class="col-md-8">
-                            <label class="form-label small fw-semibold text-secondary">KATEGORI TANDA TERIMA <span class="text-danger">*</span></label>
+                            <label class="form-label small fw-semibold text-secondary d-flex justify-content-between align-items-center">
+                                <span>KATEGORI TANDA TERIMA <span class="text-danger">*</span></span>
+                                <span class="badge bg-secondary-subtle text-secondary border" style="font-size: 0.65rem;">
+                                    <i class="fa-solid fa-lock me-1"></i> Standar Baku Admin
+                                </span>
+                            </label>
                             <div class="row g-2">
                                 <div class="col-6">
                                     <label class="border rounded-3 p-2.5 d-flex align-items-start gap-2 cursor-pointer bg-light h-100" id="respCatAtkLabel">
                                         <input type="radio" name="handover_category" id="respCatAtk" value="ATK" class="form-check-input mt-1" onchange="onRespCategoryChanged('ATK')">
                                         <div>
                                             <div class="fw-bold text-dark small"><i class="fa-solid fa-pen-ruler text-success me-1"></i> ATK</div>
-                                            <small class="text-muted d-block" style="font-size: 0.72rem;">Alat tulis &amp; perlengkapan responden.</small>
+                                            <small class="text-muted d-block" style="font-size: 0.72rem;">Paket perlengkapan responden.</small>
                                         </div>
                                     </label>
                                 </div>
@@ -411,7 +423,7 @@
                                         <input type="radio" name="handover_category" id="respCatKues" value="KUES" class="form-check-input mt-1" checked onchange="onRespCategoryChanged('KUES')">
                                         <div>
                                             <div class="fw-bold text-dark small"><i class="fa-solid fa-file-lines text-primary me-1"></i> KUES</div>
-                                            <small class="text-muted d-block" style="font-size: 0.72rem;">Kuesioner / formulir pendataan.</small>
+                                            <small class="text-muted d-block" style="font-size: 0.72rem;">Paket kuesioner pendataan.</small>
                                         </div>
                                     </label>
                                 </div>
@@ -463,11 +475,21 @@
                         </div>
                     </div>
 
-                    <!-- 3. Rincian Dokumen / Barang Serah Terima -->
+                    <!-- 3. Rincian Dokumen / Barang Serah Terima (Terkunci dari Admin) -->
                     <div class="mb-3">
-                        <label class="form-label small fw-semibold text-secondary">RINCIAN DOKUMEN / BARANG YANG DISERAHKAN <span class="text-danger">*</span></label>
-                        <textarea name="handover_items" id="respHandoverItemsInput" class="form-control" rows="3" placeholder="Contoh:&#10;1. Kuesioner Formulir Pendataan Lapangan Terpadu (1 Rangkap)&#10;2. Salinan KTP & KK Penanggung Jawab Usaha&#10;3. Surat Keterangan Domisili Usaha" required oninput="handoverItemsDirty = true">1. Formulir Kuesioner Pendataan Lapangan (1 Berkas)
+                        <div class="d-flex justify-content-between align-items-center mb-1">
+                            <label class="form-label small fw-semibold text-secondary mb-0">
+                                RINCIAN DOKUMEN / BARANG YANG DISERAHKAN <span class="text-danger">*</span>
+                            </label>
+                            <span class="badge bg-secondary-subtle text-secondary border" style="font-size: 0.65rem;">
+                                <i class="fa-solid fa-lock me-1"></i> Terkunci dari Admin
+                            </span>
+                        </div>
+                        <textarea name="handover_items" id="respHandoverItemsInput" class="form-control" rows="3" readonly style="background-color: #f8fafc; cursor: not-allowed; border-color: #cbd5e1; font-size: 0.85rem;" required>1. Formulir Kuesioner Pendataan Lapangan (1 Berkas)
 2. Bukti Kelengkapan Berkas Administrasi Responden</textarea>
+                        <div class="form-text text-muted" style="font-size: 0.72rem;">
+                            <i class="fa-solid fa-shield-halved text-primary me-1"></i> Rincian paket serah terima responden dibakukan secara resmi oleh Administrator BPS. Petugas tidak perlu mengetik rincian berkas.
+                        </div>
                     </div>
 
                     <!-- 4. Tanda Tangan Digital Touch Canvas -->
@@ -573,7 +595,7 @@
             kuesLabel.classList.toggle('bg-light', normalized !== 'KUES');
         }
         const textarea = document.getElementById('respHandoverItemsInput');
-        if (textarea && !handoverItemsDirty) {
+        if (textarea) {
             textarea.value = RESP_CATEGORY_TEMPLATES[normalized] || RESP_CATEGORY_TEMPLATES.KUES;
         }
     }

@@ -120,15 +120,23 @@ class BastController extends Controller
             $respNumber = $foundIdx !== false ? ($foundIdx + 1) : 1;
         }
 
+        // Kategori & rincian barang serah terima dibakukan oleh Admin
+        $handoverCategory = strtoupper($validated['handover_category'] ?? 'KUES');
+        $adminStandardTemplates = [
+            'ATK' => "1. Map / Perlengkapan Pencacahan Responden (1 Set)\n2. Bolpoin / Alat Tulis Lapangan (1 Buah)\n3. Bukti Tanda Terima Perlengkapan Responden",
+            'KUES' => "1. Formulir Kuesioner Pendataan Lapangan (1 Berkas)\n2. Bukti Kelengkapan Berkas Administrasi Responden",
+        ];
+        $lockedHandoverItems = $adminStandardTemplates[$handoverCategory] ?? $validated['handover_items'];
+
         $bast = RespondentBast::create([
             'bast_number' => $bastNumber,
             'bast_date' => $validated['bast_date'],
             'respondent_id' => $respondent->id,
             'respondent_number' => (int) $respNumber,
-            'handover_category' => strtoupper($validated['handover_category']),
+            'handover_category' => $handoverCategory,
             'assignment_id' => $respondent->assignment_id,
             'officer_id' => Auth::id(),
-            'handover_items' => $validated['handover_items'],
+            'handover_items' => $lockedHandoverItems,
             'recipient_type' => $validated['recipient_type'],
             'recipient_name' => $validated['recipient_type'] === 'representative' ? trim($validated['recipient_name']) : $respondent->name,
             'recipient_relation' => $validated['recipient_type'] === 'representative' ? trim($validated['recipient_relation']) : 'Kepala Rumah Tangga (KRT)',

@@ -267,8 +267,19 @@
                     </div>
 
                     <div class="mb-3">
-                        <label class="form-label small fw-semibold text-secondary">RINCIAN DOKUMEN / BARANG YANG DISERAHKAN <span class="text-danger">*</span></label>
-                        <textarea name="handover_items" class="form-control" rows="4" placeholder="Contoh:&#10;1. Kuesioner Formulir Pendataan Lapangan Terpadu (1 Rangkap)&#10;2. Salinan KTP & KK Penanggung Jawab Usaha&#10;3. Surat Keterangan Domisili Usaha" required></textarea>
+                        <div class="d-flex justify-content-between align-items-center mb-1">
+                            <label class="form-label small fw-semibold text-secondary mb-0">RINCIAN DOKUMEN / BARANG YANG DISERAHKAN <span class="text-danger">*</span></label>
+                            <div class="d-flex gap-1">
+                                <button type="button" class="btn btn-xs btn-outline-secondary py-0.5 px-1.5" style="font-size: 0.68rem;" onclick="setAdminHandoverPreset('KUES')">
+                                    <i class="fa-solid fa-file-lines me-1 text-primary"></i> Preset Kuesioner
+                                </button>
+                                <button type="button" class="btn btn-xs btn-outline-secondary py-0.5 px-1.5" style="font-size: 0.68rem;" onclick="setAdminHandoverPreset('ATK')">
+                                    <i class="fa-solid fa-pen-ruler me-1 text-success"></i> Preset ATK
+                                </button>
+                            </div>
+                        </div>
+                        <textarea name="handover_items" id="adminHandoverItemsInput" class="form-control" rows="4" placeholder="Contoh:&#10;1. Kuesioner Formulir Pendataan Lapangan Terpadu (1 Rangkap)&#10;2. Salinan KTP & KK Penanggung Jawab Usaha&#10;3. Surat Keterangan Domisili Usaha" required>1. Formulir Kuesioner Pendataan Lapangan (1 Berkas)
+2. Bukti Kelengkapan Berkas Administrasi Responden</textarea>
                     </div>
 
                     <div class="mb-0">
@@ -317,6 +328,20 @@
         document.getElementById('sigModalName').innerText = name;
         const modal = new bootstrap.Modal(document.getElementById('sigPreviewModal'));
         modal.show();
+    }
+
+    function setAdminHandoverPreset(cat) {
+        const textarea = document.getElementById('adminHandoverItemsInput');
+        if (!textarea) return;
+        if (cat === 'ATK') {
+            textarea.value = "1. Map / Perlengkapan Pencacahan Responden (1 Set)\n2. Bolpoin / Alat Tulis Lapangan (1 Buah)\n3. Bukti Tanda Terima Perlengkapan Responden";
+            const atkRadio = document.querySelector('input[name="handover_category"][value="ATK"]');
+            if (atkRadio) atkRadio.checked = true;
+        } else {
+            textarea.value = "1. Formulir Kuesioner Pendataan Lapangan (1 Berkas)\n2. Bukti Kelengkapan Berkas Administrasi Responden";
+            const kuesRadio = document.querySelector('input[name="handover_category"][value="KUES"]');
+            if (kuesRadio) kuesRadio.checked = true;
+        }
     }
 </script>
 @endpush
