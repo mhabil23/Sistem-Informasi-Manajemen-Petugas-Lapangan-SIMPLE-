@@ -91,26 +91,17 @@
 }
 
 /* Quick Action Bento Cards */
-.bento-actions-row {
-    row-gap: 0.85rem;
-}
-@media (min-width: 992px) {
-    .bento-actions-row {
-        row-gap: 0;
-    }
-}
-
 .bento-action-pill {
     display: flex;
     align-items: center;
-    gap: 1rem;
-    padding: 1rem 1.25rem;
-    border-radius: 18px;
+    gap: 0.85rem;
+    padding: 0.75rem 1.1rem;
+    border-radius: 16px;
     text-decoration: none;
     border: 1px solid transparent;
     transition: all 0.22s cubic-bezier(0.4, 0, 0.2, 1);
     box-shadow: 0 4px 14px rgba(15, 23, 42, 0.02);
-    min-height: 76px;
+    min-height: 64px;
     height: 100%;
 }
 .bento-action-pill:hover {
@@ -118,13 +109,13 @@
     box-shadow: 0 8px 22px rgba(15, 23, 42, 0.06);
 }
 .bento-action-icon {
-    width: 44px;
-    height: 44px;
-    border-radius: 14px;
+    width: 40px;
+    height: 40px;
+    border-radius: 12px;
     display: flex;
     align-items: center;
     justify-content: center;
-    font-size: 1.25rem;
+    font-size: 1.15rem;
     flex-shrink: 0;
 }
 .bento-action-text {
@@ -132,7 +123,7 @@
     min-width: 0;
 }
 .bento-action-title {
-    font-size: 0.92rem;
+    font-size: 0.88rem;
     font-weight: 750;
     color: #0F172A;
     line-height: 1.25;
@@ -143,7 +134,7 @@
 .bento-action-badge {
     font-size: 0.65rem;
     font-weight: 700;
-    padding: 0.2rem 0.6rem;
+    padding: 0.18rem 0.55rem;
     border-radius: 999px;
     white-space: nowrap;
     line-height: 1.2;
@@ -151,7 +142,7 @@
 }
 .bento-action-arrow {
     color: #94A3B8;
-    font-size: 0.9rem;
+    font-size: 0.88rem;
     margin-left: auto;
     flex-shrink: 0;
     transition: transform 0.2s ease, color 0.2s ease;
@@ -316,13 +307,13 @@
          3. MENU AKSI LAPANGAN (4 TOMBOL UTAMA)
          ============================================================== -->
     <div class="mb-4">
-        <div class="d-flex justify-content-between align-items-center mb-3">
+        <div class="d-flex justify-content-between align-items-center mb-2">
             <h5 class="bento-card-title-sm mb-0">
                 <i class="bi bi-lightning-charge-fill me-1.5" style="color: var(--bps-orange);"></i> Menu Aksi Lapangan
             </h5>
         </div>
 
-        <div class="row g-3 bento-actions-row">
+        <div class="row g-2 g-lg-3">
             <!-- 1. Tanda Terima Responden -->
             <div class="col-12 col-lg-3">
                 <a href="{{ route('petugas.basts.respondents.index') }}" class="bento-action-pill bento-pill-green">
@@ -331,7 +322,7 @@
                     </div>
                     <div class="bento-action-text">
                         <span class="bento-action-title">Tanda Terima Responden</span>
-                        <div class="mt-1.5">
+                        <div class="mt-1">
                             <span class="badge bg-success-subtle text-success border border-success-subtle bento-action-badge">
                                 {{ $totalRespondentBasts }} Terbit
                             </span>
@@ -349,7 +340,7 @@
                     </div>
                     <div class="bento-action-text">
                         <span class="bento-action-title">Tanda Terima Petugas</span>
-                        <div class="mt-1.5">
+                        <div class="mt-1">
                             @if(($pendingSignBlankoBastsCount ?? 0) > 0)
                                 <span class="badge bg-danger text-white border bento-action-badge">
                                     <i class="bi bi-pen me-1"></i> {{ $pendingSignBlankoBastsCount }} TTD
@@ -373,7 +364,7 @@
                     </div>
                     <div class="bento-action-text">
                         <span class="bento-action-title">Laporan Perjadin</span>
-                        <div class="mt-1.5">
+                        <div class="mt-1">
                             <span class="badge {{ $reportsRevision > 0 ? 'bg-danger text-white' : ($reportsApproved > 0 ? 'bg-success-subtle text-success border' : 'bg-secondary-subtle text-secondary border') }} bento-action-badge">
                                 {{ $reportsRevision > 0 ? $reportsRevision . ' Revisi' : ($reportsApproved > 0 ? $reportsApproved . ' ACC' : ($reportsSubmitted > 0 ? $reportsSubmitted . ' Menunggu' : 'Draft')) }}
                             </span>
@@ -391,7 +382,7 @@
                     </div>
                     <div class="bento-action-text">
                         <span class="bento-action-title">BAST Dokumen Terisi</span>
-                        <div class="mt-1.5">
+                        <div class="mt-1">
                             <span class="badge bg-warning-subtle text-warning-emphasis border border-warning-subtle bento-action-badge">
                                 {{ $totalTerisiBasts ?? 0 }} Sah
                             </span>
