@@ -232,81 +232,32 @@
 }
 
 /* Stat Bento Cards (4 Mini Cards) */
-.bento-stat-card {
-    background: #FFFFFF;
-    border-radius: var(--bps-radius-pill);
-    border: 1px solid #E2E8F0;
-    padding: 1.15rem;
-    box-shadow: 0 4px 14px rgba(15, 23, 42, 0.03);
-    transition: all 0.22s ease;
-    display: flex;
-    flex-direction: column;
-    justify-content: space-between;
-    height: 100%;
-}
-.bento-stat-card:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 8px 22px rgba(15, 23, 42, 0.06);
-}
-.bento-stat-icon-wrap {
-    width: 42px;
-    height: 42px;
-    border-radius: 12px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-size: 1.1rem;
-    margin-bottom: 0.85rem;
-}
-.bento-stat-val {
-    font-size: 1.5rem;
-    font-weight: 800;
-    color: #0F172A;
-    line-height: 1.1;
-    margin-bottom: 0.2rem;
-}
-.bento-stat-lbl {
-    font-size: 0.76rem;
-    font-weight: 600;
-    color: #64748B;
-    margin-bottom: 0.75rem;
-}
-.bento-mini-bar-track {
-    height: 5px;
-    background: #F1F5F9;
-    border-radius: 999px;
-    overflow: hidden;
-    position: relative;
-}
-.bento-mini-bar-fill {
-    height: 100%;
-    border-radius: 999px;
-}
-
-/* Quick Action Pills (2x2 Grid) */
+/* Quick Action Bento Cards (4 in a Row) */
 .bento-action-pill {
     display: flex;
     align-items: center;
     gap: 0.85rem;
     padding: 0.95rem 1.15rem;
-    border-radius: var(--bps-radius-pill);
+    border-radius: 18px;
     text-decoration: none;
     border: 1px solid transparent;
-    transition: all 0.22s ease;
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.02);
+    transition: all 0.22s cubic-bezier(0.4, 0, 0.2, 1);
+    box-shadow: 0 4px 14px rgba(15, 23, 42, 0.02);
+    min-height: 72px;
+    height: 100%;
 }
 .bento-action-pill:hover {
     transform: translateY(-2px);
-    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.05);
+    box-shadow: 0 8px 22px rgba(15, 23, 42, 0.06);
 }
 .bento-action-icon {
-    width: 40px;
-    height: 40px;
-    border-radius: 12px;
+    width: 44px;
+    height: 44px;
+    border-radius: 14px;
     display: flex;
     align-items: center;
     justify-content: center;
-    font-size: 1.1rem;
+    font-size: 1.25rem;
     flex-shrink: 0;
 }
 .bento-action-text {
@@ -314,26 +265,26 @@
     min-width: 0;
 }
 .bento-action-title {
-    font-size: 0.86rem;
+    font-size: 0.88rem;
     font-weight: 700;
     color: #0F172A;
     line-height: 1.2;
     display: block;
 }
-.bento-action-sub {
-    font-size: 0.7rem;
-    color: #64748B;
-    line-height: 1.2;
-    margin-top: 2px;
-    display: block;
+.bento-action-badge {
+    font-size: 0.65rem;
+    font-weight: 700;
+    padding: 0.2rem 0.6rem;
+    border-radius: 999px;
     white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
+    line-height: 1.2;
+    display: inline-block;
 }
 .bento-action-arrow {
     color: #94A3B8;
-    font-size: 0.8rem;
-    transition: transform 0.2s ease;
+    font-size: 0.9rem;
+    transition: transform 0.2s ease, color 0.2s ease;
+    flex-shrink: 0;
 }
 .bento-action-pill:hover .bento-action-arrow {
     transform: translateX(3px);
@@ -599,185 +550,92 @@
     </div>
 
     <!-- ==============================================================
-         4. MIDDLE ROW: 4 STAT BENTO CARDS + 4 QUICK ACTION PILLS
+         3. MENU AKSI LAPANGAN (4 TOMBOL UTAMA)
          ============================================================== -->
-    <div class="row g-4 mb-4">
-        <!-- Sisi Kiri: 4 Kartu Metrik Kinerja (col-lg-7) -->
-        <div class="col-lg-7">
-            <div class="d-flex justify-content-between align-items-center mb-2">
-                <h5 class="bento-card-title-sm">
-                    <i class="fa-solid fa-chart-line me-1.5" style="color: var(--bps-orange);"></i> Metrik Kinerja Lapangan
-                </h5>
-                <span class="small text-muted" style="font-size: 0.76rem;">Status Real-time</span>
-            </div>
-
-            <div class="row g-3">
-                <!-- Card 1: Target Kuota Responden -->
-                <div class="col-6 col-md-3">
-                    <div class="bento-stat-card">
-                        <div>
-                            <div class="bento-stat-icon-wrap" style="background: var(--bps-orange-soft); color: var(--bps-orange);">
-                                <i class="fa-solid fa-house-chimney-user"></i>
-                            </div>
-                            <div class="bento-stat-val">{{ number_format($targetRespondents) }}</div>
-                            <div class="bento-stat-lbl">Target Kuota</div>
-                        </div>
-                        <div>
-                            <div class="bento-mini-bar-track">
-                                <div class="bento-mini-bar-fill" style="width: 100%; background: var(--bps-orange);"></div>
-                            </div>
-                            <span class="text-muted mt-1 d-block" style="font-size: 0.65rem;">Sampel Alokasi</span>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Card 2: Tanda Terima Responden Terbit -->
-                <div class="col-6 col-md-3">
-                    <div class="bento-stat-card">
-                        <div>
-                            <div class="bento-stat-icon-wrap" style="background: var(--bps-green-soft); color: var(--bps-green);">
-                                <i class="fa-solid fa-file-signature"></i>
-                            </div>
-                            <div class="bento-stat-val" style="color: var(--bps-green);">{{ number_format($totalRespondentBasts) }}</div>
-                            <div class="bento-stat-lbl">BAST Terbit</div>
-                        </div>
-                        <div>
-                            <div class="bento-mini-bar-track">
-                                <div class="bento-mini-bar-fill" style="width: {{ $progressPercentage }}%; background: var(--bps-green);"></div>
-                            </div>
-                            <span class="text-success mt-1 d-block fw-semibold" style="font-size: 0.65rem;">{{ $progressPercentage }}% Selesai</span>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Card 3: Sisa Sampel Belum BAST -->
-                <div class="col-6 col-md-3">
-                    <div class="bento-stat-card">
-                        <div>
-                            <div class="bento-stat-icon-wrap" style="background: var(--bps-amber-soft); color: var(--bps-amber);">
-                                <i class="fa-solid fa-hourglass-half"></i>
-                            </div>
-                            <div class="bento-stat-val" style="color: var(--bps-amber);">{{ number_format($remainingRespondents) }}</div>
-                            <div class="bento-stat-lbl">Sisa Lapangan</div>
-                        </div>
-                        <div>
-                            <div class="bento-mini-bar-track">
-                                <div class="bento-mini-bar-fill" style="width: {{ max(0, 100 - $progressPercentage) }}%; background: var(--bps-amber);"></div>
-                            </div>
-                            <span class="text-muted mt-1 d-block" style="font-size: 0.65rem;">Perlu Kunjungan</span>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Card 4: Laporan Perjadin ACC -->
-                <div class="col-6 col-md-3">
-                    <div class="bento-stat-card">
-                        <div>
-                            <div class="bento-stat-icon-wrap" style="background: var(--bps-purple-soft); color: var(--bps-purple);">
-                                <i class="fa-solid fa-clipboard-user"></i>
-                            </div>
-                            <div class="bento-stat-val" style="color: var(--bps-purple);">{{ number_format($reportsApproved) }}</div>
-                            <div class="bento-stat-lbl">Laporan ACC</div>
-                        </div>
-                        <div>
-                            @if($reportsRevision > 0)
-                                <span class="badge bg-danger text-white w-100 py-1" style="font-size: 0.65rem;">{{ $reportsRevision }} Revisi</span>
-                            @elseif($reportsApproved > 0)
-                                <span class="badge bg-success-subtle text-success border border-success-subtle w-100 py-1" style="font-size: 0.65rem;">ACC Admin</span>
-                            @elseif($reportsSubmitted > 0)
-                                <span class="badge bg-info-subtle text-info-emphasis border border-info-subtle w-100 py-1" style="font-size: 0.65rem;">Menunggu ACC</span>
-                            @else
-                                <span class="badge bg-secondary-subtle text-secondary border w-100 py-1" style="font-size: 0.65rem;">Belum Buat</span>
-                            @endif
-                        </div>
-                    </div>
-                </div>
-            </div>
+    <div class="mb-4">
+        <div class="d-flex justify-content-between align-items-center mb-2.5">
+            <h5 class="bento-card-title-sm mb-0">
+                <i class="bi bi-lightning-charge-fill me-1.5" style="color: var(--bps-orange);"></i> Menu Aksi Lapangan
+            </h5>
         </div>
 
-        <!-- Sisi Kanan: 4 Menu Tombol Cepat Lapangan (col-lg-5) -->
-        <div class="col-lg-5">
-            <div class="d-flex justify-content-between align-items-center mb-2">
-                <h5 class="bento-card-title-sm">
-                    <i class="fa-solid fa-wand-magic-sparkles me-1.5" style="color: var(--bps-orange);"></i> Menu Aksi Lapangan
-                </h5>
-                <span class="small text-muted" style="font-size: 0.76rem;">Akses Langsung</span>
-            </div>
-
-            <div class="row g-2.5">
-                <!-- 1. Tanda Terima Resp -->
-                <div class="col-sm-6">
-                    <a href="{{ route('petugas.basts.respondents.index') }}" class="bento-action-pill bento-pill-green">
-                        <div class="bento-action-icon">
-                            <i class="fa-solid fa-file-signature"></i>
-                        </div>
-                        <div class="bento-action-text">
-                            <span class="bento-action-title">Tanda Terima Resp</span>
-                            <span class="bento-action-sub">KRT &bull; TTD Digital</span>
-                            <span class="badge bg-success-subtle text-success border border-success-subtle px-1.5 py-0.5 mt-1" style="font-size: 0.65rem;">
+        <div class="row g-3">
+            <!-- 1. Tanda Terima Responden -->
+            <div class="col-6 col-lg-3">
+                <a href="{{ route('petugas.basts.respondents.index') }}" class="bento-action-pill bento-pill-green">
+                    <div class="bento-action-icon">
+                        <i class="bi bi-file-earmark-check-fill"></i>
+                    </div>
+                    <div class="bento-action-text overflow-hidden">
+                        <span class="bento-action-title text-truncate">Tanda Terima Responden</span>
+                        <div class="mt-1">
+                            <span class="badge bg-success-subtle text-success border border-success-subtle bento-action-badge">
                                 {{ $totalRespondentBasts }} Terbit
                             </span>
                         </div>
-                        <i class="fa-solid fa-chevron-right bento-action-arrow"></i>
-                    </a>
-                </div>
+                    </div>
+                    <i class="bi bi-chevron-right bento-action-arrow ms-auto"></i>
+                </a>
+            </div>
 
-                <!-- 2. Tanda Terima Petugas (ATK / KUES) -->
-                <div class="col-sm-6">
-                    <a href="{{ route('petugas.basts.officers.index', ['type' => 'kantor_ke_petugas']) }}" class="bento-action-pill bento-pill-blue">
-                        <div class="bento-action-icon">
-                            <i class="fa-solid fa-boxes-packing"></i>
-                        </div>
-                        <div class="bento-action-text">
-                            <span class="bento-action-title">Tanda Terima Petugas</span>
-                            <span class="bento-action-sub">ATK, Kues &amp; Timbangan</span>
+            <!-- 2. Tanda Terima Petugas -->
+            <div class="col-6 col-lg-3">
+                <a href="{{ route('petugas.basts.officers.index', ['type' => 'kantor_ke_petugas']) }}" class="bento-action-pill bento-pill-blue">
+                    <div class="bento-action-icon">
+                        <i class="bi bi-box-seam-fill"></i>
+                    </div>
+                    <div class="bento-action-text overflow-hidden">
+                        <span class="bento-action-title text-truncate">Tanda Terima Petugas</span>
+                        <div class="mt-1">
                             @if(($pendingSignBlankoBastsCount ?? 0) > 0)
-                                <span class="badge bg-danger text-white border px-1.5 py-0.5 mt-1" style="font-size: 0.65rem;">
-                                    <i class="fa-solid fa-pen-nib me-1"></i> {{ $pendingSignBlankoBastsCount }} TTD
+                                <span class="badge bg-danger text-white border bento-action-badge">
+                                    <i class="bi bi-pen me-1"></i> {{ $pendingSignBlankoBastsCount }} TTD
                                 </span>
                             @else
-                                <span class="badge bg-primary-subtle text-primary border border-primary-subtle px-1.5 py-0.5 mt-1" style="font-size: 0.65rem;">
+                                <span class="badge bg-primary-subtle text-primary border border-primary-subtle bento-action-badge">
                                     {{ $totalBlankoBasts }} Sah
                                 </span>
                             @endif
                         </div>
-                        <i class="fa-solid fa-chevron-right bento-action-arrow"></i>
-                    </a>
-                </div>
+                    </div>
+                    <i class="bi bi-chevron-right bento-action-arrow ms-auto"></i>
+                </a>
+            </div>
 
-                <!-- 3. Laporan Perjadin -->
-                <div class="col-sm-6">
-                    <a href="{{ route('petugas.reports.index') }}" class="bento-action-pill bento-pill-purple">
-                        <div class="bento-action-icon">
-                            <i class="fa-solid fa-clipboard-user"></i>
-                        </div>
-                        <div class="bento-action-text">
-                            <span class="bento-action-title">Laporan Perjadin</span>
-                            <span class="bento-action-sub">Perjalanan Dinas &amp; Riil</span>
-                            <span class="badge {{ $reportsRevision > 0 ? 'bg-danger text-white' : ($reportsApproved > 0 ? 'bg-success-subtle text-success border' : 'bg-secondary-subtle text-secondary border') }} px-1.5 py-0.5 mt-1" style="font-size: 0.65rem;">
+            <!-- 3. Laporan Perjadin -->
+            <div class="col-6 col-lg-3">
+                <a href="{{ route('petugas.reports.index') }}" class="bento-action-pill bento-pill-purple">
+                    <div class="bento-action-icon">
+                        <i class="bi bi-clipboard2-check-fill"></i>
+                    </div>
+                    <div class="bento-action-text overflow-hidden">
+                        <span class="bento-action-title text-truncate">Laporan Perjadin</span>
+                        <div class="mt-1">
+                            <span class="badge {{ $reportsRevision > 0 ? 'bg-danger text-white' : ($reportsApproved > 0 ? 'bg-success-subtle text-success border' : 'bg-secondary-subtle text-secondary border') }} bento-action-badge">
                                 {{ $reportsRevision > 0 ? $reportsRevision . ' Revisi' : ($reportsApproved > 0 ? $reportsApproved . ' ACC' : ($reportsSubmitted > 0 ? $reportsSubmitted . ' Menunggu' : 'Draft')) }}
                             </span>
                         </div>
-                        <i class="fa-solid fa-chevron-right bento-action-arrow"></i>
-                    </a>
-                </div>
+                    </div>
+                    <i class="bi bi-chevron-right bento-action-arrow ms-auto"></i>
+                </a>
+            </div>
 
-                <!-- 4. BAST Dokumen Terisi -->
-                <div class="col-sm-6">
-                    <a href="{{ route('petugas.basts.officers.index', ['type' => 'petugas_ke_kantor']) }}" class="bento-action-pill bento-pill-amber">
-                        <div class="bento-action-icon">
-                            <i class="fa-solid fa-file-circle-check"></i>
-                        </div>
-                        <div class="bento-action-text">
-                            <span class="bento-action-title">BAST Dokumen Terisi</span>
-                            <span class="bento-action-sub">Petugas &rarr; Kantor BPS</span>
-                            <span class="badge bg-warning-subtle text-warning-emphasis border border-warning-subtle px-1.5 py-0.5 mt-1" style="font-size: 0.65rem;">
-                                {{ $totalTerisiBasts }} Sah
+            <!-- 4. BAST Dokumen Terisi -->
+            <div class="col-6 col-lg-3">
+                <a href="{{ route('petugas.basts.officers.index', ['type' => 'petugas_ke_kantor']) }}" class="bento-action-pill bento-pill-amber">
+                    <div class="bento-action-icon">
+                        <i class="bi bi-file-earmark-arrow-up-fill"></i>
+                    </div>
+                    <div class="bento-action-text overflow-hidden">
+                        <span class="bento-action-title text-truncate">BAST Dokumen Terisi</span>
+                        <div class="mt-1">
+                            <span class="badge bg-warning-subtle text-warning-emphasis border border-warning-subtle bento-action-badge">
+                                {{ $totalTerisiBasts ?? 0 }} Sah
                             </span>
                         </div>
-                        <i class="fa-solid fa-chevron-right bento-action-arrow"></i>
-                    </a>
-                </div>
+                    </div>
+                    <i class="bi bi-chevron-right bento-action-arrow ms-auto"></i>
+                </a>
             </div>
         </div>
     </div>
