@@ -356,16 +356,15 @@
      ============================================================== -->
 <div class="modal fade" id="officerBastFormModal" tabindex="-1" aria-labelledby="officerBastFormModalLabel" aria-hidden="true">
     <div class="modal-dialog modal-dialog-centered modal-xl modal-dialog-scrollable">
-        <div class="modal-content border-0 shadow">
-            <div class="modal-header bg-light border-bottom">
+        <form id="officerBastForm" method="POST" action="{{ route('petugas.basts.officers.store') }}" class="modal-content border-0 shadow" style="max-height: 90vh; display: flex; flex-direction: column;">
+            @csrf
+            <div class="modal-header bg-light border-bottom sticky-top flex-shrink-0">
                 <h5 class="modal-title fw-bold" id="officerBastFormModalLabel">
                     <i class="fa-solid fa-file-circle-plus text-primary me-2"></i> Buat Dokumen BAST
                 </h5>
                 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
-            <form id="officerBastForm" method="POST" action="{{ route('petugas.basts.officers.store') }}">
-                @csrf
-                <div class="modal-body p-4">
+            <div class="modal-body p-4" style="flex: 1 1 auto; overflow-y: auto;">
                     <div class="row g-3 mb-3">
                         <div class="col-md-5">
                             <label class="form-label small fw-semibold text-secondary">JENIS ALUR SERAH TERIMA BAST <span class="text-danger">*</span></label>
@@ -410,7 +409,7 @@
                         </div>
                     </div>
                 </div>
-                <div class="modal-footer bg-light border-top">
+                <div class="modal-footer bg-light border-top sticky-bottom flex-shrink-0">
                     <button type="button" class="btn btn-light" data-bs-dismiss="modal">Batal</button>
                     <button type="submit" class="btn btn-sp-primary">
                         <i class="fa-solid fa-file-circle-check me-1"></i> Terbitkan &amp; Buat PDF
@@ -419,7 +418,6 @@
             </form>
         </div>
     </div>
-</div>
 
 @php
     $currentUser = auth()->user();
@@ -637,9 +635,12 @@ document.addEventListener('DOMContentLoaded', function() {
      MODAL VERIFIKASI PENERIMAAN BARANG & TANDA TANGAN PETUGAS
      ============================================================== -->
 <div class="modal fade" id="officerSignModal" tabindex="-1" aria-labelledby="officerSignModalLabel" aria-hidden="true">
-    <div class="modal-dialog modal-dialog-centered modal-lg">
-        <div class="modal-content border-0 shadow">
-            <div class="modal-header bg-light border-bottom">
+    <div class="modal-dialog modal-dialog-centered modal-lg modal-dialog-scrollable">
+        <form id="officerSignForm" method="POST" action="" class="modal-content border-0 shadow" style="max-height: 90vh; display: flex; flex-direction: column;">
+            @csrf
+            <input type="hidden" name="signature_data" id="officerSignatureData">
+
+            <div class="modal-header bg-light border-bottom sticky-top flex-shrink-0">
                 <div>
                     <h5 class="modal-title fw-bold text-dark mb-0" id="officerSignModalLabel">
                         <i class="fa-solid fa-pen-nib text-primary me-2"></i> Verifikasi Barang &amp; Tanda Tangan
@@ -648,11 +649,8 @@ document.addEventListener('DOMContentLoaded', function() {
                 </div>
                 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
-            <form id="officerSignForm" method="POST" action="">
-                @csrf
-                <input type="hidden" name="signature_data" id="officerSignatureData">
 
-                <div class="modal-body p-3 p-md-4">
+            <div class="modal-body p-3 p-md-4" style="flex: 1 1 auto; overflow-y: auto;">
                     <!-- Info Dokumen -->
                     <div class="p-3 rounded-3 bg-light border mb-3">
                         <div class="d-flex justify-content-between align-items-start mb-2">
@@ -727,7 +725,7 @@ document.addEventListener('DOMContentLoaded', function() {
                     </div>
                 </div>
 
-                <div class="modal-footer bg-light border-top">
+                <div class="modal-footer bg-light border-top sticky-bottom flex-shrink-0">
                     <button type="button" class="btn btn-light" data-bs-dismiss="modal">Batal</button>
                     <button type="submit" id="btnSubmitOfficerSign" class="btn btn-sp-primary" disabled>
                         <i class="fa-solid fa-file-signature me-1"></i> Simpan Tanda Tangan &amp; Verifikasi
@@ -736,7 +734,6 @@ document.addEventListener('DOMContentLoaded', function() {
             </form>
         </div>
     </div>
-</div>
 @endsection
 
 

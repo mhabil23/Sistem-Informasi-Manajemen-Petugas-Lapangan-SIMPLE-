@@ -197,17 +197,16 @@
      MODAL TERBITKAN BAST RESPONDEN BARU
      ============================================================== -->
 <div class="modal fade" id="createBastModal" tabindex="-1" aria-labelledby="createBastModalLabel" aria-hidden="true">
-    <div class="modal-dialog modal-dialog-centered modal-lg">
-        <div class="modal-content border-0 shadow">
-            <div class="modal-header bg-light border-bottom">
+    <div class="modal-dialog modal-dialog-centered modal-lg modal-dialog-scrollable">
+        <form method="POST" action="{{ route('admin.basts.respondents.store') }}" class="modal-content border-0 shadow" style="max-height: 90vh; display: flex; flex-direction: column;">
+            @csrf
+            <div class="modal-header bg-light border-bottom sticky-top flex-shrink-0">
                 <h5 class="modal-title fw-bold" id="createBastModalLabel">
                     <i class="fa-solid fa-file-circle-plus text-primary me-2"></i> Terbitkan BAST Responden Baru
                 </h5>
                 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
-            <form method="POST" action="{{ route('admin.basts.respondents.store') }}">
-                @csrf
-                <div class="modal-body p-4">
+            <div class="modal-body p-4" style="flex: 1 1 auto; overflow-y: auto;">
                     <div class="row g-3 mb-3">
                         <div class="col-md-7">
                             <label class="form-label small fw-semibold text-secondary">PILIH RESPONDEN <span class="text-danger">*</span></label>
@@ -277,7 +276,7 @@
                         <textarea name="notes" class="form-control" rows="2" placeholder="Catatan kondisi serah terima..."></textarea>
                     </div>
                 </div>
-                <div class="modal-footer bg-light border-top">
+                <div class="modal-footer bg-light border-top sticky-bottom flex-shrink-0">
                     <button type="button" class="btn btn-light" data-bs-dismiss="modal">Batal</button>
                     <button type="submit" class="btn btn-sp-primary">
                         <i class="fa-solid fa-file-pdf me-1"></i> Terbitkan & Buat Dokumen PDF
@@ -286,7 +285,6 @@
             </form>
         </div>
     </div>
-</div>
 @endif
 
 <!-- Modal Pratinjau Tanda Tangan Digital -->

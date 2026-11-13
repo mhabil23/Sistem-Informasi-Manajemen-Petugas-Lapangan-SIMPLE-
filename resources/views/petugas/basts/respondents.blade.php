@@ -279,9 +279,10 @@
      MODAL BUAT BAST RESPONDEN (SESUAI ARAHAN CLIENT)
      ============================================================== -->
 <div class="modal fade" id="createMyBastModal" tabindex="-1" aria-labelledby="createMyBastModalLabel" aria-hidden="true">
-    <div class="modal-dialog modal-dialog-centered modal-lg">
-        <div class="modal-content border-0 shadow">
-            <div class="modal-header bg-light border-bottom">
+    <div class="modal-dialog modal-dialog-centered modal-lg modal-dialog-scrollable">
+        <form method="POST" action="{{ route('petugas.basts.respondents.store') }}" id="bastCreateForm" class="modal-content border-0 shadow" style="max-height: 90vh; display: flex; flex-direction: column;">
+            @csrf
+            <div class="modal-header bg-light border-bottom sticky-top flex-shrink-0">
                 <div>
                     <h5 class="modal-title fw-bold text-dark" id="createMyBastModalLabel">
                         <i class="fa-solid fa-file-circle-plus text-primary me-2"></i> Buat BAST Responden Baru
@@ -290,9 +291,7 @@
                 </div>
                 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
-            <form method="POST" action="{{ route('petugas.basts.respondents.store') }}" id="bastCreateForm">
-                @csrf
-                <div class="modal-body p-4">
+            <div class="modal-body p-4" style="flex: 1 1 auto; overflow-y: auto;">
                     @php
                         $orderedRespondents = $myRespondents->values();
                         $sampleNumberById = $orderedRespondents->mapWithKeys(fn($r, $idx) => [$r->id => $idx + 1]);
@@ -496,7 +495,7 @@
                         <input type="text" name="notes" class="form-control" placeholder="Catatan kondisi berkas serah terima...">
                     </div>
                 </div>
-                <div class="modal-footer bg-light border-top">
+                <div class="modal-footer bg-light border-top sticky-bottom flex-shrink-0">
                     <button type="button" class="btn btn-light" data-bs-dismiss="modal">Batal</button>
                     <button type="submit" class="btn btn-sp-primary">
                         <i class="fa-solid fa-paper-plane me-1"></i> Kirim & Terbitkan BAST
@@ -505,7 +504,6 @@
             </form>
         </div>
     </div>
-</div>
 @endsection
 
 @push('scripts')

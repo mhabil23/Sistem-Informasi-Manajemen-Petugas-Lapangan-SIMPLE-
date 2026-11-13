@@ -271,18 +271,18 @@
      ============================================================== -->
 <div class="modal fade" id="officerBastFormModal" tabindex="-1" aria-labelledby="officerBastFormModalLabel" aria-hidden="true">
     <div class="modal-dialog modal-dialog-centered modal-xl modal-dialog-scrollable">
-        <div class="modal-content border-0 shadow">
-            <div class="modal-header bg-light border-bottom">
+        <form id="officerBastForm" method="POST" action="{{ route('admin.basts.officers.store') }}" class="modal-content border-0 shadow" style="max-height: 90vh; display: flex; flex-direction: column;">
+            @csrf
+            <input type="hidden" name="_method" id="bastFormMethod" value="POST">
+
+            <div class="modal-header bg-light border-bottom sticky-top flex-shrink-0">
                 <h5 class="modal-title fw-bold" id="officerBastFormModalLabel">
                     <i class="fa-solid fa-file-circle-plus text-primary me-2"></i> Terbitkan BAST Petugas Baru
                 </h5>
                 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
-            <form id="officerBastForm" method="POST" action="{{ route('admin.basts.officers.store') }}">
-                @csrf
-                <input type="hidden" name="_method" id="bastFormMethod" value="POST">
 
-                <div class="modal-body p-4">
+            <div class="modal-body p-4" style="flex: 1 1 auto; overflow-y: auto;">
                     <div class="row g-3 mb-3">
                         <div class="col-md-5">
                             <label class="form-label small fw-semibold text-secondary">JENIS ALUR SERAH TERIMA BAST <span class="text-danger">*</span></label>
@@ -350,7 +350,7 @@
                     </div>
                 </div>
 
-                <div class="modal-footer bg-light border-top">
+                <div class="modal-footer bg-light border-top sticky-bottom flex-shrink-0">
                     <button type="button" class="btn btn-light" data-bs-dismiss="modal">Batal</button>
                     <button type="submit" class="btn btn-sp-primary" id="bastFormSubmitBtn">
                         <i class="fa-solid fa-file-pdf me-1"></i> Simpan &amp; Buat Dokumen PDF
@@ -359,7 +359,6 @@
             </form>
         </div>
     </div>
-</div>
 
 @include('basts.partials._blanko_scripts', [
     'assignments' => $assignments,
