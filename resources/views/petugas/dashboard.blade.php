@@ -35,26 +35,7 @@
     padding-bottom: 2rem;
 }
 
-/* Greeting Header */
-.bento-greeting-wrap {
-    margin-bottom: 1.5rem;
-}
-.bento-greeting-title {
-    font-size: 1.75rem;
-    font-weight: 800;
-    color: #0F172A;
-    letter-spacing: -0.02em;
-    display: flex;
-    align-items: center;
-    gap: 0.5rem;
-    flex-wrap: wrap;
-}
-.bento-greeting-sub {
-    color: #64748B;
-    font-size: 0.9rem;
-    margin-top: 0.25rem;
-    font-weight: 500;
-}
+
 
 
 /* Base Card Style */
@@ -447,24 +428,7 @@
 <div class="bento-dashboard-wrapper">
 
     <!-- ==============================================================
-         1. TOP GREETING HEADER
-         ============================================================== -->
-    <div class="bento-greeting-wrap mb-4">
-        @php
-            $hour = (int) now()->format('H');
-            $greetingTime = $hour < 11 ? 'Selamat Pagi' : ($hour < 15 ? 'Selamat Siang' : ($hour < 18 ? 'Selamat Sore' : 'Selamat Malam'));
-            $firstName = explode(' ', trim($user->name))[0];
-        @endphp
-        <h1 class="bento-greeting-title mb-1">
-            {{ $greetingTime }}, {{ $firstName }} ☀️
-        </h1>
-        <p class="bento-greeting-sub mb-0">
-            Tetap teliti dan bersemangat dalam pendataan lapangan. Setiap data yang Anda kumpulkan berharga untuk bangsa!
-        </p>
-    </div>
-
-    <!-- ==============================================================
-         2. NOTIFIKASI / PESAN KHUSUS DARI ADMINISTRATOR (JIKA ADA)
+         1. NOTIFIKASI / PESAN KHUSUS DARI ADMINISTRATOR (JIKA ADA)
          ============================================================== -->
     @if(isset($officerNotices) && $officerNotices->isNotEmpty())
         <div class="mb-3">
