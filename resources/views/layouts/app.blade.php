@@ -192,11 +192,11 @@
                             {{ strtoupper(substr(auth()->user()->name, 0, 1)) }}
                         </div>
                         <div class="overflow-hidden">
-                            <div class="text-white small fw-bold text-truncate" title="{{ auth()->user()->name }}">{{ auth()->user()->name }}</div>
-                            <div class="text-muted" style="font-size: 0.7rem;">{{ auth()->user()->roleLabel() }}</div>
+                            <div class="text-dark small fw-bold text-truncate" title="{{ auth()->user()->name }}">{{ auth()->user()->name }}</div>
+                            <div class="text-muted" style="font-size: 0.72rem; font-weight: 500;">{{ auth()->user()->roleLabel() }}</div>
                         </div>
                     </div>
-                    <button type="button" class="btn btn-sm btn-outline-light border-0 flex-shrink-0" data-bs-toggle="modal" data-bs-target="#logoutModal" title="Keluar">
+                    <button type="button" class="btn btn-sm text-danger border-0 flex-shrink-0 rounded-circle" style="width: 34px; height: 34px; display: inline-flex; align-items: center; justify-content: center; background: #fee2e2; transition: all 0.2s;" data-bs-toggle="modal" data-bs-target="#logoutModal" title="Keluar">
                         <i class="fa-solid fa-arrow-right-from-bracket"></i>
                     </button>
                 </div>
