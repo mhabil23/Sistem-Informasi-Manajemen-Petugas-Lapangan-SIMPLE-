@@ -91,17 +91,26 @@
 }
 
 /* Quick Action Bento Cards */
+.bento-actions-row {
+    row-gap: 0.85rem;
+}
+@media (min-width: 992px) {
+    .bento-actions-row {
+        row-gap: 0;
+    }
+}
+
 .bento-action-pill {
     display: flex;
     align-items: center;
-    gap: 0.95rem;
-    padding: 0.95rem 1.25rem;
+    gap: 1rem;
+    padding: 1rem 1.25rem;
     border-radius: 18px;
     text-decoration: none;
     border: 1px solid transparent;
     transition: all 0.22s cubic-bezier(0.4, 0, 0.2, 1);
     box-shadow: 0 4px 14px rgba(15, 23, 42, 0.02);
-    min-height: 74px;
+    min-height: 76px;
     height: 100%;
 }
 .bento-action-pill:hover {
@@ -307,13 +316,13 @@
          3. MENU AKSI LAPANGAN (4 TOMBOL UTAMA)
          ============================================================== -->
     <div class="mb-4">
-        <div class="d-flex justify-content-between align-items-center mb-2.5">
+        <div class="d-flex justify-content-between align-items-center mb-3">
             <h5 class="bento-card-title-sm mb-0">
                 <i class="bi bi-lightning-charge-fill me-1.5" style="color: var(--bps-orange);"></i> Menu Aksi Lapangan
             </h5>
         </div>
 
-        <div class="row g-2.5 g-lg-3">
+        <div class="row g-3 bento-actions-row">
             <!-- 1. Tanda Terima Responden -->
             <div class="col-12 col-lg-3">
                 <a href="{{ route('petugas.basts.respondents.index') }}" class="bento-action-pill bento-pill-green">
@@ -322,7 +331,7 @@
                     </div>
                     <div class="bento-action-text">
                         <span class="bento-action-title">Tanda Terima Responden</span>
-                        <div class="mt-0.5">
+                        <div class="mt-1.5">
                             <span class="badge bg-success-subtle text-success border border-success-subtle bento-action-badge">
                                 {{ $totalRespondentBasts }} Terbit
                             </span>
@@ -340,7 +349,7 @@
                     </div>
                     <div class="bento-action-text">
                         <span class="bento-action-title">Tanda Terima Petugas</span>
-                        <div class="mt-0.5">
+                        <div class="mt-1.5">
                             @if(($pendingSignBlankoBastsCount ?? 0) > 0)
                                 <span class="badge bg-danger text-white border bento-action-badge">
                                     <i class="bi bi-pen me-1"></i> {{ $pendingSignBlankoBastsCount }} TTD
@@ -364,7 +373,7 @@
                     </div>
                     <div class="bento-action-text">
                         <span class="bento-action-title">Laporan Perjadin</span>
-                        <div class="mt-0.5">
+                        <div class="mt-1.5">
                             <span class="badge {{ $reportsRevision > 0 ? 'bg-danger text-white' : ($reportsApproved > 0 ? 'bg-success-subtle text-success border' : 'bg-secondary-subtle text-secondary border') }} bento-action-badge">
                                 {{ $reportsRevision > 0 ? $reportsRevision . ' Revisi' : ($reportsApproved > 0 ? $reportsApproved . ' ACC' : ($reportsSubmitted > 0 ? $reportsSubmitted . ' Menunggu' : 'Draft')) }}
                             </span>
@@ -382,7 +391,7 @@
                     </div>
                     <div class="bento-action-text">
                         <span class="bento-action-title">BAST Dokumen Terisi</span>
-                        <div class="mt-0.5">
+                        <div class="mt-1.5">
                             <span class="badge bg-warning-subtle text-warning-emphasis border border-warning-subtle bento-action-badge">
                                 {{ $totalTerisiBasts ?? 0 }} Sah
                             </span>
