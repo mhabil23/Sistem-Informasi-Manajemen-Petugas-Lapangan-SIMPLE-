@@ -55,19 +55,7 @@
     margin-top: 0.25rem;
     font-weight: 500;
 }
-.bento-role-pill {
-    background: #FFFFFF;
-    border: 1px solid #E2E8F0;
-    padding: 0.45rem 0.9rem;
-    border-radius: 999px;
-    font-size: 0.78rem;
-    font-weight: 600;
-    color: #334155;
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.03);
-    display: inline-flex;
-    align-items: center;
-    gap: 0.5rem;
-}
+
 
 /* Base Card Style */
 .bento-card {
@@ -461,26 +449,18 @@
     <!-- ==============================================================
          1. TOP GREETING HEADER
          ============================================================== -->
-    <div class="bento-greeting-wrap d-flex flex-wrap align-items-center justify-content-between gap-3">
-        <div>
-            @php
-                $hour = (int) now()->format('H');
-                $greetingTime = $hour < 11 ? 'Selamat Pagi' : ($hour < 15 ? 'Selamat Siang' : ($hour < 18 ? 'Selamat Sore' : 'Selamat Malam'));
-                $firstName = explode(' ', trim($user->name))[0];
-            @endphp
-            <h1 class="bento-greeting-title mb-0">
-                {{ $greetingTime }}, {{ $firstName }} ☀️
-            </h1>
-            <p class="bento-greeting-sub mb-0">
-                Tetap teliti dan bersemangat dalam pendataan lapangan. Setiap data yang Anda kumpulkan berharga untuk bangsa!
-            </p>
-        </div>
-        <div class="d-flex align-items-center gap-2">
-            <span class="bento-role-pill">
-                <span class="badge rounded-circle p-1" style="background: var(--bps-orange);"><i class="fa-solid fa-check text-white" style="font-size: 0.6rem;"></i></span>
-                <span>{{ $user->position ?: 'Mitra Statistik / PPL' }} &bull; BPS Kab. Kolaka Utara</span>
-            </span>
-        </div>
+    <div class="bento-greeting-wrap mb-4">
+        @php
+            $hour = (int) now()->format('H');
+            $greetingTime = $hour < 11 ? 'Selamat Pagi' : ($hour < 15 ? 'Selamat Siang' : ($hour < 18 ? 'Selamat Sore' : 'Selamat Malam'));
+            $firstName = explode(' ', trim($user->name))[0];
+        @endphp
+        <h1 class="bento-greeting-title mb-1">
+            {{ $greetingTime }}, {{ $firstName }} ☀️
+        </h1>
+        <p class="bento-greeting-sub mb-0">
+            Tetap teliti dan bersemangat dalam pendataan lapangan. Setiap data yang Anda kumpulkan berharga untuk bangsa!
+        </p>
     </div>
 
     <!-- ==============================================================
