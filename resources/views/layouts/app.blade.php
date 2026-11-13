@@ -15,7 +15,10 @@
     <!-- Bootstrap 5.3 CSS -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
 
-    <!-- Font Awesome 6 -->
+    <!-- Bootstrap Icons -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+
+    <!-- Font Awesome 6 (Fallback & Extended Icons) -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
 
     <!-- Custom CSS -->
@@ -42,7 +45,7 @@
                         </div>
                     </div>
                     <button class="sp-sidebar-close" id="sidebarCloseBtn" type="button" aria-label="Tutup menu">
-                        <i class="fa-solid fa-xmark"></i>
+                        <i class="bi bi-x-lg"></i>
                     </button>
                 </div>
 
@@ -51,41 +54,41 @@
                         <!-- ADMIN MENU -->
                         <div class="sp-nav-heading">Utama</div>
                         <a href="{{ route('admin.dashboard') }}" class="sp-nav-link {{ request()->routeIs('admin.dashboard') ? 'active' : '' }}">
-                            <i class="fa-solid fa-gauge-high sp-nav-icon"></i>
+                            <i class="bi bi-speedometer2 sp-nav-icon"></i>
                             <span>Dashboard</span>
                         </a>
 
-                        <div class="sp-nav-heading">Administrasi & Penugasan</div>
+                        <div class="sp-nav-heading">Administrasi &amp; Penugasan</div>
                         <a href="{{ route('admin.users.index') }}" class="sp-nav-link {{ request()->routeIs('admin.users.*') ? 'active' : '' }}">
-                            <i class="fa-solid fa-users-gear sp-nav-icon"></i>
+                            <i class="bi bi-people-fill sp-nav-icon"></i>
                             <span>Manajemen Pengguna</span>
                         </a>
                         <a href="{{ route('admin.assignments.index') }}" class="sp-nav-link {{ request()->routeIs('admin.assignments.*') ? 'active' : '' }}">
-                            <i class="fa-solid fa-list-check sp-nav-icon"></i>
-                            <span>Kegiatan & Tugas</span>
+                            <i class="bi bi-check2-square sp-nav-icon"></i>
+                            <span>Kegiatan &amp; Tugas</span>
                         </a>
                         <a href="{{ route('admin.schedules.index') }}" class="sp-nav-link {{ request()->routeIs('admin.schedules.*') ? 'active' : '' }}">
-                            <i class="fa-regular fa-calendar-days sp-nav-icon"></i>
+                            <i class="bi bi-calendar3 sp-nav-icon"></i>
                             <span>Jadwal Kegiatan</span>
                         </a>
 
-                        <div class="sp-nav-heading">Pendataan & Tanda Terima</div>
+                        <div class="sp-nav-heading">Pendataan &amp; Tanda Terima</div>
                         <a href="{{ route('admin.respondents.index') }}" class="sp-nav-link {{ request()->routeIs('admin.respondents.*') ? 'active' : '' }}">
-                            <i class="fa-solid fa-id-card-clip sp-nav-icon"></i>
+                            <i class="bi bi-person-vcard sp-nav-icon"></i>
                             <span>Data Responden</span>
                         </a>
                         <a href="{{ route('admin.basts.respondents.index') }}" class="sp-nav-link {{ request()->routeIs('admin.basts.respondents.*') ? 'active' : '' }}">
-                            <i class="fa-solid fa-file-contract sp-nav-icon"></i>
+                            <i class="bi bi-file-earmark-check sp-nav-icon"></i>
                             <span>Tanda Terima Responden</span>
                         </a>
                         <a href="{{ route('admin.basts.officers.index') }}" class="sp-nav-link {{ request()->routeIs('admin.basts.officers.*') ? 'active' : '' }}">
-                            <i class="fa-solid fa-file-shield sp-nav-icon"></i>
+                            <i class="bi bi-shield-check sp-nav-icon"></i>
                             <span>Tanda Terima Petugas</span>
                         </a>
 
-                        <div class="sp-nav-heading">Laporan & Pelatihan</div>
+                        <div class="sp-nav-heading">Laporan &amp; Pelatihan</div>
                         <a href="{{ route('admin.reports.index') }}" class="sp-nav-link {{ request()->routeIs('admin.reports.*') ? 'active' : '' }}">
-                            <i class="fa-solid fa-clipboard-check sp-nav-icon"></i>
+                            <i class="bi bi-clipboard2-data sp-nav-icon"></i>
                             <span>Laporan Petugas</span>
                             @php
                                 $sidebarReportBadge = max((int) ($adminPendingReportsCount ?? 0), (int) ($adminUnreadNotifCount ?? 0));
@@ -97,90 +100,90 @@
                             @endif
                         </a>
                         <a href="{{ route('admin.trainings.index') }}" class="sp-nav-link {{ request()->routeIs('admin.trainings.*') ? 'active' : '' }}">
-                            <i class="fa-solid fa-graduation-cap sp-nav-icon"></i>
+                            <i class="bi bi-mortarboard sp-nav-icon"></i>
                             <span>Administrasi Pelatihan</span>
                         </a>
                         <a href="{{ route('admin.recapitulation.index') }}" class="sp-nav-link {{ request()->routeIs('admin.recapitulation.*') ? 'active' : '' }}">
-                            <i class="fa-solid fa-chart-pie sp-nav-icon"></i>
-                            <span>Rekapitulasi & Export</span>
+                            <i class="bi bi-pie-chart sp-nav-icon"></i>
+                            <span>Rekapitulasi &amp; Export</span>
                         </a>
 
-                        <div class="sp-nav-heading">Sistem & Audit</div>
+                        <div class="sp-nav-heading">Sistem &amp; Audit</div>
                         <a href="{{ route('admin.spreadsheet.index') }}" class="sp-nav-link {{ request()->routeIs('admin.spreadsheet.*') ? 'active' : '' }}">
-                            <i class="fa-solid fa-table-cells sp-nav-icon text-success"></i>
+                            <i class="bi bi-table sp-nav-icon text-success"></i>
                             <span>Database Spreadsheet</span>
                         </a>
                         <a href="{{ route('admin.templates.index') }}" class="sp-nav-link {{ request()->routeIs('admin.templates.*') ? 'active' : '' }}">
-                            <i class="fa-solid fa-file-lines sp-nav-icon"></i>
+                            <i class="bi bi-file-earmark-richtext sp-nav-icon"></i>
                             <span>Template Dokumen</span>
                         </a>
                         <a href="{{ route('admin.logs.index') }}" class="sp-nav-link {{ request()->routeIs('admin.logs.*') ? 'active' : '' }}">
-                            <i class="fa-solid fa-clock-rotate-left sp-nav-icon"></i>
+                            <i class="bi bi-clock-history sp-nav-icon"></i>
                             <span>Audit Log Aktivitas</span>
                         </a>
                     @else
                         <!-- PEGAWAI / PML MENU -->
                         <div class="sp-nav-heading">Portal Pegawai / PML</div>
                         <a href="{{ route('petugas.dashboard') }}" class="sp-nav-link {{ request()->routeIs('petugas.dashboard') ? 'active' : '' }}">
-                            <i class="fa-solid fa-house sp-nav-icon"></i>
+                            <i class="bi bi-house-door sp-nav-icon"></i>
                             <span>Beranda Saya</span>
                         </a>
                         <a href="{{ route('petugas.assignments.index') }}" class="sp-nav-link {{ request()->routeIs('petugas.assignments.*') ? 'active' : '' }}">
-                            <i class="fa-solid fa-list-check sp-nav-icon"></i>
+                            <i class="bi bi-check2-square sp-nav-icon"></i>
                             <span>Tugas Saya</span>
                         </a>
                         <a href="{{ route('petugas.schedules.index') }}" class="sp-nav-link {{ request()->routeIs('petugas.schedules.*') ? 'active' : '' }}">
-                            <i class="fa-regular fa-calendar-days sp-nav-icon"></i>
+                            <i class="bi bi-calendar3 sp-nav-icon"></i>
                             <span>Jadwal Saya</span>
                         </a>
                         <a href="{{ route('petugas.respondents.index') }}" class="sp-nav-link {{ request()->routeIs('petugas.respondents.*') ? 'active' : '' }}">
-                            <i class="fa-solid fa-users sp-nav-icon"></i>
+                            <i class="bi bi-people sp-nav-icon"></i>
                             <span>Responden Saya</span>
                         </a>
                         <a href="{{ route('petugas.basts.respondents.index') }}" class="sp-nav-link {{ request()->routeIs('petugas.basts.respondents.*') ? 'active' : '' }}">
-                            <i class="fa-solid fa-file-signature sp-nav-icon"></i>
+                            <i class="bi bi-pen sp-nav-icon"></i>
                             <span>Tanda Terima Responden</span>
                         </a>
                         <a href="{{ route('petugas.basts.officers.index') }}" class="sp-nav-link {{ request()->routeIs('petugas.basts.officers.*') ? 'active' : '' }}">
-                            <i class="fa-solid fa-file-shield sp-nav-icon"></i>
+                            <i class="bi bi-shield-check sp-nav-icon"></i>
                             <span>Tanda Terima Petugas</span>
                         </a>
                         <a href="{{ route('petugas.reports.index') }}" class="sp-nav-link {{ request()->routeIs('petugas.reports.*') ? 'active' : '' }}">
-                            <i class="fa-solid fa-route sp-nav-icon"></i>
+                            <i class="bi bi-signpost-2 sp-nav-icon"></i>
                             <span>Perjadin Saya</span>
                         </a>
 
                         <div class="sp-nav-heading">Monitoring Lapangan</div>
                         <a href="{{ route('admin.dashboard') }}" class="sp-nav-link {{ request()->routeIs('admin.dashboard') ? 'active' : '' }}">
-                            <i class="fa-solid fa-gauge-high sp-nav-icon"></i>
+                            <i class="bi bi-speedometer2 sp-nav-icon"></i>
                             <span>Dashboard Monitoring</span>
                         </a>
                         <a href="{{ route('admin.assignments.index') }}" class="sp-nav-link {{ request()->routeIs('admin.assignments.*') ? 'active' : '' }}">
-                            <i class="fa-solid fa-briefcase sp-nav-icon"></i>
+                            <i class="bi bi-briefcase sp-nav-icon"></i>
                             <span>Kegiatan &amp; Tugas</span>
                         </a>
                         <a href="{{ route('admin.schedules.index') }}" class="sp-nav-link {{ request()->routeIs('admin.schedules.*') ? 'active' : '' }}">
-                            <i class="fa-solid fa-calendar-check sp-nav-icon"></i>
+                            <i class="bi bi-calendar3 sp-nav-icon"></i>
                             <span>Jadwal Kegiatan</span>
                         </a>
                         <a href="{{ route('admin.respondents.index') }}" class="sp-nav-link {{ request()->routeIs('admin.respondents.*') ? 'active' : '' }}">
-                            <i class="fa-solid fa-id-card-clip sp-nav-icon"></i>
+                            <i class="bi bi-person-vcard sp-nav-icon"></i>
                             <span>Data Responden</span>
                         </a>
                         <a href="{{ route('admin.basts.respondents.index') }}" class="sp-nav-link {{ request()->routeIs('admin.basts.respondents.*') ? 'active' : '' }}">
-                            <i class="fa-solid fa-file-contract sp-nav-icon"></i>
+                            <i class="bi bi-file-earmark-check sp-nav-icon"></i>
                             <span>BAST Responden</span>
                         </a>
                         <a href="{{ route('admin.basts.officers.index') }}" class="sp-nav-link {{ request()->routeIs('admin.basts.officers.*') ? 'active' : '' }}">
-                            <i class="fa-solid fa-folder-open sp-nav-icon"></i>
+                            <i class="bi bi-folder2-open sp-nav-icon"></i>
                             <span>BAST Petugas</span>
                         </a>
                         <a href="{{ route('admin.reports.index') }}" class="sp-nav-link {{ request()->routeIs('admin.reports.*') ? 'active' : '' }}">
-                            <i class="fa-solid fa-clipboard-list sp-nav-icon"></i>
+                            <i class="bi bi-clipboard2-data sp-nav-icon"></i>
                             <span>Laporan Petugas</span>
                         </a>
                         <a href="{{ route('admin.recapitulation.index') }}" class="sp-nav-link {{ request()->routeIs('admin.recapitulation.*') ? 'active' : '' }}">
-                            <i class="fa-solid fa-chart-pie sp-nav-icon"></i>
+                            <i class="bi bi-pie-chart sp-nav-icon"></i>
                             <span>Rekapitulasi &amp; Export</span>
                         </a>
                     @endif
@@ -197,7 +200,7 @@
                         </div>
                     </div>
                     <button type="button" class="btn btn-sm text-danger border-0 flex-shrink-0 rounded-circle" style="width: 34px; height: 34px; display: inline-flex; align-items: center; justify-content: center; background: #fee2e2; transition: all 0.2s;" data-bs-toggle="modal" data-bs-target="#logoutModal" title="Keluar">
-                        <i class="fa-solid fa-arrow-right-from-bracket"></i>
+                        <i class="bi bi-box-arrow-right"></i>
                     </button>
                 </div>
             </aside>
@@ -210,7 +213,7 @@
                 @if(auth()->user()->canAccessMonitoring())
                     <div class="d-flex align-items-center gap-3">
                         <button class="sp-nav-toggle" id="sidebarToggle" type="button" aria-label="Toggle navigation">
-                            <i class="fa-solid fa-bars"></i>
+                            <i class="bi bi-list fs-5"></i>
                         </button>
                         <div class="sp-breadcrumb-container overflow-hidden">
                             <h1 class="sp-page-title text-truncate">@yield('page_title', 'Halaman')</h1>
@@ -246,7 +249,7 @@
                                     data-bs-toggle="dropdown"
                                     aria-expanded="false"
                                     title="Informasi Laporan Perjadin Petugas">
-                                <i class="fa-solid fa-bell text-secondary"></i>
+                                <i class="bi bi-bell text-secondary"></i>
                                 @php $unreadBadge = (int) ($adminUnreadNotifCount ?? 0); @endphp
                                 <span id="adminNotifBadge"
                                       class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger {{ $unreadBadge > 0 ? '' : 'd-none' }}"
@@ -259,7 +262,7 @@
                                     <div>
                                         <div class="fw-bold small text-dark">Notifikasi Laporan Perjadin</div>
                                         <div class="text-muted" style="font-size: 0.7rem;">
-                                            <span id="adminPendingSubtitle">{{ (int) ($adminPendingReportsCount ?? 0) }} menunggu ACC</span>
+                                             <span id="adminPendingSubtitle">{{ (int) ($adminPendingReportsCount ?? 0) }} menunggu ACC</span>
                                         </div>
                                     </div>
                                     <form method="POST" action="{{ route('admin.notifications.mark-all-read') }}" class="m-0">
@@ -289,7 +292,7 @@
                                         @endforeach
                                     @else
                                         <div class="text-center py-4 px-3 text-muted small">
-                                            <i class="fa-regular fa-bell-slash d-block mb-1 fs-5 opacity-50"></i>
+                                            <i class="bi bi-bell-slash d-block mb-1 fs-5 opacity-50"></i>
                                             Belum ada pemberitahuan laporan perjadin baru.
                                         </div>
                                     @endif
@@ -311,9 +314,9 @@
                             default => 'badge-role-petugas',
                         };
                         $navRoleIconClass = match(auth()->user()->role) {
-                            'admin' => 'fa-shield-halved',
-                            'pegawai' => 'fa-user-tie',
-                            default => 'fa-user-check',
+                            'admin' => 'bi-shield-check',
+                            'pegawai' => 'bi-person-badge',
+                            default => 'bi-person-check',
                         };
                         $navRoleLabel = match(auth()->user()->role) {
                             'admin' => 'Administrator',
@@ -322,7 +325,7 @@
                         };
                     @endphp
                     <span class="badge {{ $navRoleBadgeClass }} d-none d-md-inline-block">
-                        <i class="fa-solid {{ $navRoleIconClass }} me-1"></i>
+                        <i class="bi {{ $navRoleIconClass }} me-1"></i>
                         {{ $navRoleLabel }}
                     </span>
 
@@ -336,7 +339,7 @@
                                 <span class="fw-semibold small d-block text-dark">{{ auth()->user()->name }}</span>
                                 <span class="text-muted" style="font-size: 0.72rem;">{{ auth()->user()->email }}</span>
                             </div>
-                            <i class="fa-solid fa-chevron-down text-muted small ms-1"></i>
+                            <i class="bi bi-chevron-down text-muted small ms-1"></i>
                         </div>
                         <ul class="dropdown-menu dropdown-menu-end shadow-sm border-0 mt-2">
                             <li class="px-3 py-2 border-bottom">
@@ -345,13 +348,13 @@
                             </li>
                             <li>
                                 <a class="dropdown-item py-2 small" href="{{ route('profile.edit') }}">
-                                    <i class="fa-regular fa-user text-muted me-2"></i> Profil & Ganti Password
+                                    <i class="bi bi-person text-muted me-2"></i> Profil &amp; Ganti Password
                                 </a>
                             </li>
                             <li><hr class="dropdown-divider my-1"></li>
                             <li>
                                 <button type="button" class="dropdown-item py-2 small text-danger" data-bs-toggle="modal" data-bs-target="#logoutModal">
-                                    <i class="fa-solid fa-arrow-right-from-bracket me-2"></i> Keluar
+                                    <i class="bi bi-box-arrow-right me-2"></i> Keluar
                                 </button>
                             </li>
                         </ul>
