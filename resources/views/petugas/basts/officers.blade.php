@@ -16,9 +16,9 @@
     <div class="col-md-7">
         @if($currentType === 'kantor_ke_petugas')
             <h3 class="fw-bold text-dark mb-1">
-                <i class="fa-solid fa-boxes-packing text-primary me-2"></i>Tanda Terima Petugas (ATK / KUES)
+                <i class="fa-solid fa-boxes-packing text-primary me-2"></i>Tanda Terima Petugas
             </h3>
-            <p class="text-muted small mb-0">Daftar tanda terima ATK dan Kuesioner yang disusun oleh Administrator. Silakan periksa kelengkapan fisik barang yang Anda terima, lalu bubuhkan tanda tangan digital Anda pada dokumen penugasan.</p>
+            <p class="text-muted small mb-0">Daftar tanda terima perlengkapan pelatihan, ATK, kuesioner, dan timbangan yang disusun oleh Administrator. Silakan periksa kelengkapan fisik barang yang Anda terima, lalu bubuhkan tanda tangan digital Anda pada dokumen penugasan.</p>
         @elseif($currentType === 'petugas_ke_kantor')
             <h3 class="fw-bold text-dark mb-1">
                 <i class="fa-solid fa-file-circle-check text-warning me-2"></i>BAST Dokumen Terisi
@@ -62,7 +62,7 @@
         </a>
         <a href="{{ route('petugas.basts.officers.index', ['type' => 'kantor_ke_petugas']) }}" 
            class="btn btn-sm {{ $currentType === 'kantor_ke_petugas' ? 'btn-sp-primary' : 'btn-outline-primary' }} rounded-pill px-3 py-1.5 fw-semibold">
-            <i class="fa-solid fa-boxes-packing me-1"></i> Tanda Terima Petugas (ATK / KUES)
+            <i class="fa-solid fa-boxes-packing me-1"></i> Tanda Terima Petugas
             <span class="badge bg-primary-subtle text-primary border border-primary-subtle ms-1 font-monospace">{{ $countBlanko }}</span>
         </a>
         <a href="{{ route('petugas.basts.officers.index', ['type' => 'petugas_ke_kantor']) }}" 
@@ -126,14 +126,32 @@
                             </td>
                             <td>
                                 @if($item->bast_type === 'kantor_ke_petugas' || empty($item->bast_type))
-                                    @php $cat = strtoupper($item->receipt_category ?: 'ATK'); @endphp
+                                    @php $cat = strtoupper($item->receipt_category ?: 'PELATIHAN'); @endphp
                                     <span class="badge bg-info-subtle text-info-emphasis border border-info-subtle py-1 px-2" style="font-size: 0.72rem;">
                                         <i class="fa-solid fa-boxes-packing me-1 text-primary"></i> Tanda Terima Petugas
                                     </span>
                                     <div class="mt-1">
-                                        <span class="badge {{ $cat === 'KUES' ? 'bg-primary-subtle text-primary-emphasis border border-primary-subtle' : 'bg-success-subtle text-success-emphasis border border-success-subtle' }}" style="font-size: 0.68rem;">
-                                            {{ $cat }}
-                                        </span>
+                                        @if($cat === 'PELATIHAN')
+                                            <span class="badge border" style="font-size: 0.68rem; background: #faf5ff; color: #7e22ce; border-color: #e9d5ff !important;">
+                                                <i class="fa-solid fa-graduation-cap me-1"></i> 1. Perlengkapan Pelatihan
+                                            </span>
+                                        @elseif($cat === 'ATK')
+                                            <span class="badge bg-primary-subtle text-primary border border-primary-subtle" style="font-size: 0.68rem;">
+                                                <i class="fa-solid fa-pen-ruler me-1"></i> 2. ATK Pendataan
+                                            </span>
+                                        @elseif($cat === 'KUES')
+                                            <span class="badge bg-success-subtle text-success border border-success-subtle" style="font-size: 0.68rem;">
+                                                <i class="fa-solid fa-file-lines me-1"></i> 3. Kuesioner Pendataan
+                                            </span>
+                                        @elseif($cat === 'TIMBANGAN')
+                                            <span class="badge bg-warning-subtle text-warning-emphasis border border-warning-subtle" style="font-size: 0.68rem;">
+                                                <i class="fa-solid fa-scale-balanced me-1"></i> 4. Timbangan
+                                            </span>
+                                        @else
+                                            <span class="badge bg-secondary-subtle text-secondary border" style="font-size: 0.68rem;">
+                                                {{ $cat }}
+                                            </span>
+                                        @endif
                                     </div>
                                 @else
                                     <span class="badge bg-warning-subtle text-warning-emphasis border border-warning-subtle py-1 px-2" style="font-size: 0.72rem;">
@@ -246,14 +264,32 @@
                                     {{ $item->bast_number }}
                                 </span>
                                 @if($item->bast_type === 'kantor_ke_petugas' || empty($item->bast_type))
-                                    @php $cat = strtoupper($item->receipt_category ?: 'ATK'); @endphp
+                                    @php $cat = strtoupper($item->receipt_category ?: 'PELATIHAN'); @endphp
                                     <div class="d-flex flex-wrap gap-1">
                                         <span class="badge bg-info-subtle text-info-emphasis border border-info-subtle px-1.5 py-0.5" style="font-size: 0.65rem;">
                                             <i class="fa-solid fa-boxes-packing me-1"></i> Tanda Terima Petugas
                                         </span>
-                                        <span class="badge {{ $cat === 'KUES' ? 'bg-primary-subtle text-primary-emphasis border border-primary-subtle' : 'bg-success-subtle text-success-emphasis border border-success-subtle' }} px-1.5 py-0.5" style="font-size: 0.65rem;">
-                                            {{ $cat }}
-                                        </span>
+                                        @if($cat === 'PELATIHAN')
+                                            <span class="badge border px-1.5 py-0.5" style="font-size: 0.65rem; background: #faf5ff; color: #7e22ce; border-color: #e9d5ff !important;">
+                                                <i class="fa-solid fa-graduation-cap me-1"></i> 1. Pelatihan
+                                            </span>
+                                        @elseif($cat === 'ATK')
+                                            <span class="badge bg-primary-subtle text-primary border border-primary-subtle px-1.5 py-0.5" style="font-size: 0.65rem;">
+                                                <i class="fa-solid fa-pen-ruler me-1"></i> 2. ATK
+                                            </span>
+                                        @elseif($cat === 'KUES')
+                                            <span class="badge bg-success-subtle text-success border border-success-subtle px-1.5 py-0.5" style="font-size: 0.65rem;">
+                                                <i class="fa-solid fa-file-lines me-1"></i> 3. Kuesioner
+                                            </span>
+                                        @elseif($cat === 'TIMBANGAN')
+                                            <span class="badge bg-warning-subtle text-warning-emphasis border border-warning-subtle px-1.5 py-0.5" style="font-size: 0.65rem;">
+                                                <i class="fa-solid fa-scale-balanced me-1"></i> 4. Timbangan
+                                            </span>
+                                        @else
+                                            <span class="badge bg-secondary-subtle text-secondary border px-1.5 py-0.5" style="font-size: 0.65rem;">
+                                                {{ $cat }}
+                                            </span>
+                                        @endif
                                     </div>
                                 @else
                                     <div>

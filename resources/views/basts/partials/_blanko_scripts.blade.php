@@ -247,21 +247,87 @@ function applyMultiPickerSelection() {
     document.getElementById('multiOfficerPickerPanel').classList.add('d-none');
 }
 
+const BAST_CATEGORY_DEFAULTS = {
+    PELATIHAN: {
+        title: 'Tanda Terima Perlengkapan Pelatihan',
+        items: ['Buku Panduan / Modul Pelatihan', 'Tas Pelatihan', 'Tanda Pengenal / ID Card Peserta', 'Bloknote & Pulpen Pelatihan'],
+        placeholders: ['Contoh: Buku Panduan / Modul Pelatihan', 'Contoh: Tas Pelatihan', 'Contoh: ID Card Peserta', 'Contoh: Bloknote & Pulpen'],
+        genericPlaceholder: 'Nama perlengkapan pelatihan',
+    },
+    ATK: {
+        title: 'Tanda Terima ATK Pendataan',
+        items: ['Map Zipper / Papan Ujian', 'Pensil 2B & Penghapus', 'Rautan Pensil', 'Balpoin / Spidol', 'Tas Lapangan Petugas'],
+        placeholders: ['Contoh: Map Zipper / Papan Ujian', 'Contoh: Pensil 2B & Penghapus', 'Contoh: Balpoin / Spidol', 'Contoh: Tas Lapangan'],
+        genericPlaceholder: 'Nama barang / ATK pendataan',
+    },
+    KUES: {
+        title: 'Tanda Terima Kuesioner Pendataan',
+        items: ['Kuesioner Utama Pencacahan (Set)', 'Daftar Sampel Ruta / Peta WB', 'Buku Pedoman Pencacah'],
+        placeholders: ['Contoh: Kuesioner Pencacahan (Set)', 'Contoh: Daftar Sampel Ruta / Peta WB', 'Contoh: Buku Pedoman Pencacah'],
+        genericPlaceholder: 'Nama dokumen kuesioner',
+    },
+    TIMBANGAN: {
+        title: 'Tanda Terima Timbangan Petugas',
+        items: ['Timbangan Digital Portable', 'Baterai Cadangan Timbangan', 'Tas / Box Pelindung Timbangan'],
+        placeholders: ['Contoh: Timbangan Digital Portable', 'Contoh: Baterai Cadangan', 'Contoh: Box Pelindung Timbangan'],
+        genericPlaceholder: 'Rincian unit timbangan / aksesoris',
+    },
+};
+
 function getSelectedReceiptCategory() {
-    return document.getElementById('receiptCatKues')?.checked ? 'KUES' : 'ATK';
+    if (document.getElementById('receiptCatPelatihan')?.checked) return 'PELATIHAN';
+    if (document.getElementById('receiptCatKues')?.checked) return 'KUES';
+    if (document.getElementById('receiptCatTimbangan')?.checked) return 'TIMBANGAN';
+    return 'ATK';
 }
 
 function setReceiptCategory(cat) {
-    const normalized = (String(cat || 'ATK').toUpperCase() === 'KUES') ? 'KUES' : 'ATK';
-    const atkRadio = document.getElementById('receiptCatAtk');
-    const kuesRadio = document.getElementById('receiptCatKues');
-    if (atkRadio) atkRadio.checked = (normalized === 'ATK');
-    if (kuesRadio) kuesRadio.checked = (normalized === 'KUES');
+    let normalized = String(cat || 'PELATIHAN').toUpperCase();
+    if (!['PELATIHAN', 'ATK', 'KUES', 'TIMBANGAN'].includes(normalized)) {
+        normalized = 'PELATIHAN';
+    }
 
-    const atkLbl = document.getElementById('receiptCatAtkLabel');
-    const kuesLbl = document.getElementById('receiptCatKuesLabel');
-    if (atkLbl) atkLbl.classList.toggle('border-primary', normalized === 'ATK');
-    if (kuesLbl) kuesLbl.classList.toggle('border-info', normalized === 'KUES');
+    const radios = {
+        PELATIHAN: document.getElementById('receiptCatPelatihan'),
+        ATK: document.getElementById('receiptCatAtk'),
+        KUES: document.getElementById('receiptCatKues'),
+        TIMBANGAN: document.getElementById('receiptCatTimbangan'),
+    };
+    const labels = {
+        PELATIHAN: document.getElementById('receiptCatPelatihanLabel'),
+        ATK: document.getElementById('receiptCatAtkLabel'),
+        KUES: document.getElementById('receiptCatKuesLabel'),
+        TIMBANGAN: document.getElementById('receiptCatTimbanganLabel'),
+    };
+
+    Object.keys(radios).forEach(key => {
+        if (radios[key]) {
+            radios[key].checked = (normalized === key);
+        }
+        if (labels[key]) {
+            labels[key].classList.remove('border-primary', 'border-success', 'border-warning', 'border-info', 'border-purple', 'shadow-sm');
+            labels[key].style.borderColor = '';
+            labels[key].style.backgroundColor = '#ffffff';
+        }
+    });
+
+    const activeLbl = labels[normalized];
+    if (activeLbl) {
+        activeLbl.classList.add('shadow-sm');
+        if (normalized === 'PELATIHAN') {
+            activeLbl.style.borderColor = '#7e22ce';
+            activeLbl.style.backgroundColor = '#faf5ff';
+        } else if (normalized === 'ATK') {
+            activeLbl.style.borderColor = '#0284c7';
+            activeLbl.style.backgroundColor = '#f0f9ff';
+        } else if (normalized === 'KUES') {
+            activeLbl.style.borderColor = '#16a34a';
+            activeLbl.style.backgroundColor = '#f0fdf4';
+        } else if (normalized === 'TIMBANGAN') {
+            activeLbl.style.borderColor = '#d97706';
+            activeLbl.style.backgroundColor = '#fffbeb';
+        }
+    }
 
     return normalized;
 }
@@ -269,22 +335,39 @@ function setReceiptCategory(cat) {
 function onReceiptCategoryChanged(cat) {
     const normalized = setReceiptCategory(cat);
     const titleEl = document.getElementById('bastDocTitleInput');
-    const defaults = ['', 'Tanda Terima Blanko & Perlengkapan', 'Tanda Terima ATK Peserta', 'Tanda Terima Kuesioner & Dokumen'];
-    if (!isEditModalMode && titleEl && defaults.includes(titleEl.value.trim())) {
-        titleEl.value = normalized === 'KUES'
-            ? 'Tanda Terima Kuesioner & Dokumen'
-            : 'Tanda Terima ATK Peserta';
+    const knownTitles = [
+        '',
+        'Tanda Terima Blanko & Perlengkapan',
+        'Tanda Terima ATK Peserta',
+        'Tanda Terima Perlengkapan Pelatihan',
+        'Tanda Terima ATK Pendataan',
+        'Tanda Terima Kuesioner Pendataan',
+        'Tanda Terima Kuesioner & Dokumen',
+        'Tanda Terima Timbangan Petugas',
+    ];
+
+    if (!isEditModalMode && titleEl && knownTitles.includes(titleEl.value.trim())) {
+        titleEl.value = BAST_CATEGORY_DEFAULTS[normalized]?.title || 'Tanda Terima Petugas';
     }
-    updateBastItemPlaceholders();
+
+    // Bila item masih kosong atau cuma 1 baris kosong, auto-isi dengan rekomendasi template
+    const currentInputs = Array.from(document.querySelectorAll('#bastItemsContainer .bast-item-input'));
+    const filledValues = currentInputs.map(i => i.value.trim()).filter(Boolean);
+    if (!isEditModalMode && filledValues.length <= 1) {
+        const defaultItems = BAST_CATEGORY_DEFAULTS[normalized]?.items || [''];
+        const container = document.getElementById('bastItemsContainer');
+        container.innerHTML = '';
+        defaultItems.forEach(item => addBastItemRow(item));
+    } else {
+        updateBastItemPlaceholders();
+    }
 }
 
 function updateBastItemPlaceholders() {
-    const isKues = getSelectedReceiptCategory() === 'KUES';
-    const placeholders = isKues
-        ? ['Contoh: Kuesioner Pencacahan (Set)', 'Contoh: Daftar Sampel / Peta WB', 'Contoh: Buku Pedoman Petugas']
-        : ['Contoh: Map Zipper', 'Contoh: Blocknote', 'Contoh: Bolpoin'];
+    const cat = getSelectedReceiptCategory();
+    const config = BAST_CATEGORY_DEFAULTS[cat] || BAST_CATEGORY_DEFAULTS.PELATIHAN;
     document.querySelectorAll('#bastItemsContainer .bast-item-input').forEach((input, idx) => {
-        input.placeholder = placeholders[idx] || (isKues ? 'Nama kuesioner / dokumen' : 'Nama barang / ATK');
+        input.placeholder = config.placeholders[idx] || config.genericPlaceholder;
     });
 }
 
@@ -333,8 +416,8 @@ function initBlankoDefaultFields(defaultBastType) {
     document.getElementById('bastAssignmentInput').value = '';
     document.getElementById('bastNotesInput').value = '';
 
-    document.getElementById('bastDocTitleInput').value = 'Tanda Terima ATK Peserta';
-    setReceiptCategory('ATK');
+    document.getElementById('bastDocTitleInput').value = BAST_CATEGORY_DEFAULTS.PELATIHAN.title;
+    setReceiptCategory('PELATIHAN');
     document.getElementById('bastActivitySubtitleInput').value = '';
     document.getElementById('bastInstitutionInput').value = @json('BPS Kabupaten Kolaka Utara Tahun ' . now()->format('Y'));
     document.getElementById('bastDocPlaceInput').value = 'Lasusua';
@@ -349,7 +432,9 @@ function initBlankoDefaultFields(defaultBastType) {
     if (BAST_DEFAULT_RECIPIENT) {
         addRecipientRow(BAST_DEFAULT_RECIPIENT);
     }
-    addBastItemRow('');
+    const container = document.getElementById('bastItemsContainer');
+    container.innerHTML = '';
+    BAST_CATEGORY_DEFAULTS.PELATIHAN.items.forEach(item => addBastItemRow(item));
     renumberRecipientRows();
     toggleBastTypeSections();
 }

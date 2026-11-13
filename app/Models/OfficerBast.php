@@ -22,7 +22,7 @@ class OfficerBast extends Model
         'assignment_id',
         'officer_id',
         'bast_type', // 'kantor_ke_petugas' (Tanda Terima Petugas) atau 'petugas_ke_kantor' (BAST Dokumen Terisi)
-        'receipt_category', // 'ATK' | 'KUES'
+        'receipt_category', // 'PELATIHAN' | 'ATK' | 'KUES' | 'TIMBANGAN'
         'description',
         'document_title',
         'activity_subtitle',
@@ -40,6 +40,17 @@ class OfficerBast extends Model
         return $this->bast_type === 'petugas_ke_kantor'
             ? 'Dokumen Terisi (Petugas ke Kantor)'
             : 'Blanko & Perlengkapan (Kantor ke Petugas)';
+    }
+
+    public function getReceiptCategoryLabelAttribute(): string
+    {
+        return match (strtoupper($this->receipt_category ?? '')) {
+            'PELATIHAN' => 'Perlengkapan Pelatihan',
+            'ATK' => 'ATK Pendataan',
+            'KUES' => 'Kuesioner Pendataan',
+            'TIMBANGAN' => 'Timbangan',
+            default => 'Tanda Terima Petugas',
+        };
     }
 
     public function isKantorKePetugas(): bool
@@ -316,14 +327,18 @@ class OfficerBast extends Model
         }
 
         $year = date('Y', strtotime($bastDate));
-        $category = strtoupper(trim((string) $request->input('receipt_category', 'ATK')));
-        if (!in_array($category, ['ATK', 'KUES'], true)) {
-            $category = 'ATK';
+        $category = strtoupper(trim((string) $request->input('receipt_category', 'PELATIHAN')));
+        if (!in_array($category, ['PELATIHAN', 'ATK', 'KUES', 'TIMBANGAN'], true)) {
+            $category = 'PELATIHAN';
         }
 
-        $defaultTitle = $category === 'KUES'
-            ? 'Tanda Terima Kuesioner & Dokumen'
-            : 'Tanda Terima ATK Peserta';
+        $defaultTitle = match ($category) {
+            'PELATIHAN' => 'Tanda Terima Perlengkapan Pelatihan',
+            'ATK' => 'Tanda Terima ATK Pendataan',
+            'KUES' => 'Tanda Terima Kuesioner Pendataan',
+            'TIMBANGAN' => 'Tanda Terima Timbangan Petugas',
+            default => 'Tanda Terima Petugas',
+        };
 
         $bastAttributes = [
             'assignment_id' => $assignment->id,

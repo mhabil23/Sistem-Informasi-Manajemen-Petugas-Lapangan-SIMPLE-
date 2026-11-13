@@ -1,24 +1,74 @@
 <div id="blankoCollectiveSection">
     <div class="mb-3">
-        <label class="form-label small fw-semibold text-secondary d-block">
-            JENIS TANDA TERIMA PETUGAS <span class="text-danger">*</span>
-        </label>
+        <div class="d-flex justify-content-between align-items-center mb-1">
+            <label class="form-label small fw-semibold text-secondary mb-0">
+                JENIS LEMBAR TANDA TERIMA PETUGAS <span class="text-danger">*</span>
+            </label>
+            <span class="text-muted" style="font-size: 0.72rem;">
+                <i class="fa-solid fa-circle-info me-1"></i> Masing-masing jenis dicetak terpisah per lembar dokumen
+            </span>
+        </div>
         <div class="row g-2">
-            <div class="col-6">
-                <label class="border rounded-3 p-2.5 d-flex align-items-center gap-2 bg-white w-100" style="cursor: pointer;" id="receiptCatAtkLabel">
-                    <input type="radio" name="receipt_category" id="receiptCatAtk" value="ATK" class="form-check-input mt-0" checked onchange="onReceiptCategoryChanged('ATK')">
-                    <div>
-                        <div class="fw-bold small text-dark"><i class="fa-solid fa-pen-ruler text-primary me-1"></i> ATK</div>
-                        <div class="text-muted" style="font-size: 0.72rem;">Alat Tulis Kantor &amp; Perlengkapan</div>
+            <!-- 1. Perlengkapan Pelatihan -->
+            <div class="col-md-3 col-6">
+                <label class="border rounded-3 p-2.5 d-flex align-items-start gap-2 bg-white w-100 h-100 position-relative" style="cursor: pointer;" id="receiptCatPelatihanLabel">
+                    <input type="radio" name="receipt_category" id="receiptCatPelatihan" value="PELATIHAN" class="form-check-input mt-0.5" checked onchange="onReceiptCategoryChanged('PELATIHAN')">
+                    <div class="lh-sm">
+                        <div class="fw-bold small text-dark d-flex align-items-center gap-1">
+                            <i class="fa-solid fa-graduation-cap" style="color: #7e22ce;"></i>
+                            <span>1. Pelatihan</span>
+                        </div>
+                        <div class="text-muted mt-1" style="font-size: 0.7rem; line-height: 1.25;">
+                            Perlengkapan pelatihan (sekalian ujicoba langsung petugas)
+                        </div>
                     </div>
                 </label>
             </div>
-            <div class="col-6">
-                <label class="border rounded-3 p-2.5 d-flex align-items-center gap-2 bg-white w-100" style="cursor: pointer;" id="receiptCatKuesLabel">
-                    <input type="radio" name="receipt_category" id="receiptCatKues" value="KUES" class="form-check-input mt-0" onchange="onReceiptCategoryChanged('KUES')">
-                    <div>
-                        <div class="fw-bold small text-dark"><i class="fa-solid fa-file-lines text-info me-1"></i> KUES</div>
-                        <div class="text-muted" style="font-size: 0.72rem;">Kuesioner / Blanko Pendataan</div>
+
+            <!-- 2. ATK Pendataan -->
+            <div class="col-md-3 col-6">
+                <label class="border rounded-3 p-2.5 d-flex align-items-start gap-2 bg-white w-100 h-100 position-relative" style="cursor: pointer;" id="receiptCatAtkLabel">
+                    <input type="radio" name="receipt_category" id="receiptCatAtk" value="ATK" class="form-check-input mt-0.5" onchange="onReceiptCategoryChanged('ATK')">
+                    <div class="lh-sm">
+                        <div class="fw-bold small text-dark d-flex align-items-center gap-1">
+                            <i class="fa-solid fa-pen-ruler text-primary"></i>
+                            <span>2. ATK Pendataan</span>
+                        </div>
+                        <div class="text-muted mt-1" style="font-size: 0.7rem; line-height: 1.25;">
+                            Alat tulis &amp; perlengkapan pencacahan lapangan
+                        </div>
+                    </div>
+                </label>
+            </div>
+
+            <!-- 3. Kuesioner Pendataan -->
+            <div class="col-md-3 col-6">
+                <label class="border rounded-3 p-2.5 d-flex align-items-start gap-2 bg-white w-100 h-100 position-relative" style="cursor: pointer;" id="receiptCatKuesLabel">
+                    <input type="radio" name="receipt_category" id="receiptCatKues" value="KUES" class="form-check-input mt-0.5" onchange="onReceiptCategoryChanged('KUES')">
+                    <div class="lh-sm">
+                        <div class="fw-bold small text-dark d-flex align-items-center gap-1">
+                            <i class="fa-solid fa-file-lines text-success"></i>
+                            <span>3. Kuesioner</span>
+                        </div>
+                        <div class="text-muted mt-1" style="font-size: 0.7rem; line-height: 1.25;">
+                            Blanko &amp; dokumen kuesioner pendataan
+                        </div>
+                    </div>
+                </label>
+            </div>
+
+            <!-- 4. Timbangan -->
+            <div class="col-md-3 col-6">
+                <label class="border rounded-3 p-2.5 d-flex align-items-start gap-2 bg-white w-100 h-100 position-relative" style="cursor: pointer;" id="receiptCatTimbanganLabel">
+                    <input type="radio" name="receipt_category" id="receiptCatTimbangan" value="TIMBANGAN" class="form-check-input mt-0.5" onchange="onReceiptCategoryChanged('TIMBANGAN')">
+                    <div class="lh-sm">
+                        <div class="fw-bold small text-dark d-flex align-items-center gap-1">
+                            <i class="fa-solid fa-scale-balanced text-warning"></i>
+                            <span>4. Timbangan</span>
+                        </div>
+                        <div class="text-muted mt-1" style="font-size: 0.7rem; line-height: 1.25;">
+                            Alat ukur timbangan (hanya beberapa petugas)
+                        </div>
                     </div>
                 </label>
             </div>

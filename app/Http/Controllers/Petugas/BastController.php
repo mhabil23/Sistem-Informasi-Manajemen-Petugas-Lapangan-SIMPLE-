@@ -255,7 +255,7 @@ class BastController extends Controller
         if ($bastType === 'petugas_ke_kantor') {
             $rules['description'] = ['required', 'string'];
         } else {
-            $rules['receipt_category'] = ['nullable', Rule::in(['ATK', 'KUES'])];
+            $rules['receipt_category'] = ['nullable', Rule::in(['PELATIHAN', 'ATK', 'KUES', 'TIMBANGAN'])];
             $rules['description'] = ['nullable', 'string'];
             $rules['document_title'] = ['nullable', 'string', 'max:255'];
             $rules['activity_subtitle'] = ['nullable', 'string', 'max:255'];

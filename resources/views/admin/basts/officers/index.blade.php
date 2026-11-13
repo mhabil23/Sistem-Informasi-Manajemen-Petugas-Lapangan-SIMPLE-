@@ -97,11 +97,29 @@
                                     <span class="badge bg-info-subtle text-info-emphasis border border-info-subtle py-1 px-2" style="font-size: 0.72rem;">
                                         <i class="fa-solid fa-boxes-packing me-1 text-primary"></i> Tanda Terima Petugas
                                     </span>
-                                    @php $cat = strtoupper($item->receipt_category ?: 'ATK'); @endphp
+                                    @php $cat = strtoupper($item->receipt_category ?: 'PELATIHAN'); @endphp
                                     <div class="mt-1">
-                                        <span class="badge {{ $cat === 'KUES' ? 'bg-primary-subtle text-primary-emphasis border border-primary-subtle' : 'bg-success-subtle text-success-emphasis border border-success-subtle' }}" style="font-size: 0.68rem;">
-                                            {{ $cat }}
-                                        </span>
+                                        @if($cat === 'PELATIHAN')
+                                            <span class="badge border" style="font-size: 0.68rem; background: #faf5ff; color: #7e22ce; border-color: #e9d5ff !important;">
+                                                <i class="fa-solid fa-graduation-cap me-1"></i> 1. Perlengkapan Pelatihan
+                                            </span>
+                                        @elseif($cat === 'ATK')
+                                            <span class="badge bg-primary-subtle text-primary border border-primary-subtle" style="font-size: 0.68rem;">
+                                                <i class="fa-solid fa-pen-ruler me-1"></i> 2. ATK Pendataan
+                                            </span>
+                                        @elseif($cat === 'KUES')
+                                            <span class="badge bg-success-subtle text-success border border-success-subtle" style="font-size: 0.68rem;">
+                                                <i class="fa-solid fa-file-lines me-1"></i> 3. Kuesioner Pendataan
+                                            </span>
+                                        @elseif($cat === 'TIMBANGAN')
+                                            <span class="badge bg-warning-subtle text-warning-emphasis border border-warning-subtle" style="font-size: 0.68rem;">
+                                                <i class="fa-solid fa-scale-balanced me-1"></i> 4. Timbangan
+                                            </span>
+                                        @else
+                                            <span class="badge bg-secondary-subtle text-secondary border" style="font-size: 0.68rem;">
+                                                {{ $cat }}
+                                            </span>
+                                        @endif
                                     </div>
                                 @else
                                     <span class="badge bg-warning-subtle text-warning-emphasis border border-warning-subtle py-1 px-2" style="font-size: 0.72rem;">
@@ -403,7 +421,7 @@ function openEditOfficerBastModal(data) {
     document.getElementById('bastNotesInput').value = data.notes || '';
     document.getElementById('bastStatusInput').value = data.status || 'finalized';
 
-    setReceiptCategory(data.receipt_category || 'ATK');
+    setReceiptCategory(data.receipt_category || 'PELATIHAN');
     document.getElementById('bastDocTitleInput').value = data.document_title || 'Tanda Terima Blanko & Perlengkapan';
     document.getElementById('bastActivitySubtitleInput').value = data.activity_subtitle || '';
     document.getElementById('bastInstitutionInput').value = data.institution_name || '';

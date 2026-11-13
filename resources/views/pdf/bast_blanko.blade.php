@@ -114,7 +114,7 @@
         $yearStr = $bast->bast_date ? $bast->bast_date->format('Y') : now()->format('Y');
         $docTitle = trim((string) $bast->document_title) !== ''
             ? $bast->document_title
-            : 'Tanda Terima Blanko & Perlengkapan';
+            : ($bast->receipt_category_label ?? 'Tanda Terima Petugas');
         $activitySubtitle = trim((string) $bast->activity_subtitle) !== ''
             ? $bast->activity_subtitle
             : ($bast->assignment->title ?? '-');
