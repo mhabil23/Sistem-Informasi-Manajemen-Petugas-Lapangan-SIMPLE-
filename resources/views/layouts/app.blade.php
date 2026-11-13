@@ -147,7 +147,7 @@
                         </a>
                         <a href="{{ route('petugas.reports.index') }}" class="sp-nav-link {{ request()->routeIs('petugas.reports.*') ? 'active' : '' }}">
                             <i class="fa-solid fa-route sp-nav-icon"></i>
-                            <span>LPerjadin Saya</span>
+                            <span>Perjadin Saya</span>
                         </a>
 
                         <div class="sp-nav-heading">Monitoring Lapangan</div>

@@ -175,7 +175,7 @@
             </a>
         </div>
 
-        <!-- 2. LPerjadin -->
+        <!-- 2. Perjadin (Perjalanan Dinas) -->
         <div class="col-xl-3 col-sm-6">
             <a href="{{ route('petugas.reports.index') }}" class="petugas-sketch-btn btn-report">
                 <div class="sketch-btn-content">
@@ -184,9 +184,9 @@
                     </div>
                     <div class="sketch-btn-text">
                         <div class="d-flex align-items-center gap-1.5">
-                            <span class="sketch-btn-title">LPerjadin</span>
+                            <span class="sketch-btn-title">Perjadin</span>
                         </div>
-                        <div class="sketch-btn-sub">Laporan Perjadin &amp; Pengeluaran Riil</div>
+                        <div class="sketch-btn-sub">Perjalanan Dinas &amp; Pengeluaran Riil</div>
                         <span class="badge {{ $reportsRevision > 0 ? 'bg-danger text-white' : ($reportsApproved > 0 ? 'bg-success-subtle text-success border border-success-subtle' : ($reportsSubmitted > 0 ? 'bg-info-subtle text-info-emphasis border border-info-subtle' : 'bg-secondary-subtle text-secondary border')) }} mt-1" style="font-size: 0.68rem;">
                             {{ $reportsRevision > 0 ? $reportsRevision . ' Perlu Revisi' : ($reportsApproved > 0 ? $reportsApproved . ' ACC' : ($reportsSubmitted > 0 ? $reportsSubmitted . ' Menunggu ACC' : 'Draft / Buat')) }}
                         </span>
