@@ -121,6 +121,65 @@
         $institutionName = trim((string) $bast->institution_name) !== ''
             ? $bast->institution_name
             : "BPS Kabupaten Kolaka Utara Tahun {$yearStr}";
+
+        // Auto-crop area transparan canvas agar goresan tanda tangan tampil besar, tebal & proporsional
+        $getTrimmedSignBase64 = function (?string $path): ?string {
+            if (empty($path)) return null;
+
+            $p = storage_path('app/public/' . $path);
+            if (!file_exists($p)) {
+                $p = public_path('storage/' . $path);
+            }
+            if (!file_exists($p)) return null;
+
+            if (function_exists('imagecreatefrompng') && function_exists('imagecrop')) {
+                $im = @imagecreatefrompng($p);
+                if ($im) {
+                    $w = imagesx($im);
+                    $h = imagesy($im);
+                    $minX = $w; $minY = $h; $maxX = 0; $maxY = 0;
+                    $found = false;
+
+                    for ($x = 0; $x < $w; $x++) {
+                        for ($y = 0; $y < $h; $y++) {
+                            $rgba = imagecolorat($im, $x, $y);
+                            $alpha = ($rgba & 0x7F000000) >> 24;
+                            if ($alpha < 120) {
+                                $found = true;
+                                if ($x < $minX) $minX = $x;
+                                if ($x > $maxX) $maxX = $x;
+                                if ($y < $minY) $minY = $y;
+                                if ($y > $maxY) $maxY = $y;
+                            }
+                        }
+                    }
+
+                    if ($found) {
+                        $pad = 6;
+                        $cropX = max(0, $minX - $pad);
+                        $cropY = max(0, $minY - $pad);
+                        $cropW = min($w - $cropX, ($maxX - $minX + 1) + ($pad * 2));
+                        $cropH = min($h - $cropY, ($maxY - $minY + 1) + ($pad * 2));
+
+                        $cropped = @imagecrop($im, ['x' => $cropX, 'y' => $cropY, 'width' => $cropW, 'height' => $cropH]);
+                        if ($cropped) {
+                            imagesavealpha($cropped, true);
+                            ob_start();
+                            imagepng($cropped);
+                            $data = ob_get_clean();
+                            imagedestroy($cropped);
+                            imagedestroy($im);
+                            if (!empty($data)) {
+                                return base64_encode($data);
+                            }
+                        }
+                    }
+                    imagedestroy($im);
+                }
+            }
+
+            return base64_encode(file_get_contents($p));
+        };
     @endphp
 
     <div class="doc-header">
@@ -134,10 +193,10 @@
         <thead>
             <tr>
                 <th style="width: 5%;">No.</th>
-                <th style="width: 27%;">Nama</th>
+                <th style="width: 25%;">Nama</th>
                 <th style="width: 20%;">Jabatan dan Unit Kerja</th>
-                <th style="width: 22%;">Asal / Bertugas Sebagai</th>
-                <th style="width: 26%;">Tanda Tangan</th>
+                <th style="width: 20%;">Asal / Bertugas Sebagai</th>
+                <th style="width: 30%;">Tanda Tangan</th>
             </tr>
             <tr class="col-numbers">
                 <th>(1)</th>
@@ -152,33 +211,21 @@
                 @php
                     $rowNum = $idx + 1;
                     $isOdd = ($rowNum % 2) === 1;
+                    $signBase64 = $getTrimmedSignBase64($recipient->signature_path);
                 @endphp
                 <tr>
                     <td>{{ $rowNum }}</td>
                     <td>{{ $recipient->recipient_name }}</td>
                     <td>{{ $recipient->position_unit ?: 'Mitra' }}</td>
                     <td>{{ $recipient->origin_role ?: '-' }}</td>
-                    <td style="padding: 2px 4px;">
-                        @php
-                            $hasSign = !empty($recipient->signature_path);
-                            $signBase64 = null;
-                            if ($hasSign) {
-                                $fullPath = storage_path('app/public/' . $recipient->signature_path);
-                                if (!file_exists($fullPath)) {
-                                    $fullPath = public_path('storage/' . $recipient->signature_path);
-                                }
-                                if (file_exists($fullPath)) {
-                                    $signBase64 = base64_encode(file_get_contents($fullPath));
-                                }
-                            }
-                        @endphp
+                    <td style="padding: 1px 3px; vertical-align: middle;">
                         <table class="sign-inner">
                             <tr>
-                                <td style="width: 50%;">
+                                <td style="width: 50%; vertical-align: middle;">
                                     @if($isOdd)
-                                        <span style="font-weight: 500;">{{ $rowNum }}.</span>
+                                        <span style="font-weight: 500; font-size: 8.5pt;">{{ $rowNum }}.</span>
                                         @if($signBase64)
-                                            <img src="data:image/png;base64,{{ $signBase64 }}" style="max-height: 22px; max-width: 58px; vertical-align: middle; display: inline-block;">
+                                            <img src="data:image/png;base64,{{ $signBase64 }}" style="max-height: 28px; max-width: 88px; vertical-align: middle; display: inline-block; margin-left: 2px;">
                                         @else
                                             <span>...........</span>
                                         @endif
@@ -186,11 +233,11 @@
                                         &nbsp;
                                     @endif
                                 </td>
-                                <td style="width: 50%; padding-left: 6px !important;">
+                                <td style="width: 50%; padding-left: 6px !important; vertical-align: middle;">
                                     @if(!$isOdd)
-                                        <span style="font-weight: 500;">{{ $rowNum }}.</span>
+                                        <span style="font-weight: 500; font-size: 8.5pt;">{{ $rowNum }}.</span>
                                         @if($signBase64)
-                                            <img src="data:image/png;base64,{{ $signBase64 }}" style="max-height: 22px; max-width: 58px; vertical-align: middle; display: inline-block;">
+                                            <img src="data:image/png;base64,{{ $signBase64 }}" style="max-height: 28px; max-width: 88px; vertical-align: middle; display: inline-block; margin-left: 2px;">
                                         @else
                                             <span>...........</span>
                                         @endif

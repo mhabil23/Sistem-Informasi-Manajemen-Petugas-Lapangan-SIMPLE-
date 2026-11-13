@@ -109,7 +109,7 @@
         }
 
         .sign-space {
-            height: 70px;
+            height: 78px;
             text-align: center;
             margin: 3px 0;
         }
@@ -328,7 +328,7 @@
                 </div>
                 <div class="sign-space">
                     @if($recipientSignData)
-                        <img src="data:image/png;base64,{{ $recipientSignData }}" style="height: 60px; max-height: 65px; max-width: 190px; width: auto; display: inline-block; vertical-align: middle;" alt="Tanda Tangan Penerima">
+                        <img src="data:image/png;base64,{{ $recipientSignData }}" style="height: 72px; max-height: 75px; max-width: 220px; width: auto; display: inline-block; vertical-align: middle;" alt="Tanda Tangan Penerima">
                     @endif
                 </div>
                 <div class="signer-name">{{ $bast->recipient_type === 'representative' ? $bast->recipient_name : $bast->respondent->name }}</div>
@@ -345,7 +345,7 @@
                 <div style="font-size: 9.5pt;">Petugas Lapangan SIMPLE</div>
                 <div class="sign-space">
                     @if($officerSignData)
-                        <img src="data:image/png;base64,{{ $officerSignData }}" style="height: 60px; max-height: 65px; max-width: 190px; width: auto; display: inline-block; vertical-align: middle;" alt="Tanda Tangan Petugas">
+                        <img src="data:image/png;base64,{{ $officerSignData }}" style="height: 72px; max-height: 75px; max-width: 220px; width: auto; display: inline-block; vertical-align: middle;" alt="Tanda Tangan Petugas">
                     @endif
                 </div>
                 <div class="signer-name">{{ $bast->officer->name }}</div>

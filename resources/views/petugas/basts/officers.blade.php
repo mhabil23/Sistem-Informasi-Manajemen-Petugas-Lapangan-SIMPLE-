@@ -463,19 +463,21 @@ function setupOfficerSignaturePad(canvasId, inputId) {
         if (rect.width > 0 && rect.width !== canvas.width) {
             const temp = officerHasDrawn ? canvas.toDataURL() : null;
             canvas.width = rect.width;
-            canvas.height = 150;
-            ctx.lineWidth = 2.5;
+            canvas.height = 175;
+            ctx.lineWidth = 3.5;
             ctx.lineCap = 'round';
-            ctx.strokeStyle = '#0d2142';
+            ctx.lineJoin = 'round';
+            ctx.strokeStyle = '#02182b';
             if (temp) {
                 const img = new Image();
                 img.onload = () => ctx.drawImage(img, 0, 0);
                 img.src = temp;
             }
         } else {
-            ctx.lineWidth = 2.5;
+            ctx.lineWidth = 3.5;
             ctx.lineCap = 'round';
-            ctx.strokeStyle = '#0d2142';
+            ctx.lineJoin = 'round';
+            ctx.strokeStyle = '#02182b';
         }
     }
 
@@ -710,7 +712,7 @@ document.addEventListener('DOMContentLoaded', function() {
                             </button>
                         </div>
                         <div class="card-body p-3 text-center">
-                            <div class="border rounded-2 bg-light mb-2 position-relative" style="height: 150px; overflow: hidden;">
+                            <div class="border rounded-2 bg-light mb-2 position-relative" style="height: 175px; overflow: hidden;">
                                 <canvas id="officerSignatureCanvas" class="w-100 h-100" style="cursor: crosshair; touch-action: none;"></canvas>
                                 <div id="signCanvasPlaceholder" class="position-absolute top-50 start-50 translate-middle text-muted small user-select-none pointer-events-none">
                                     <i class="fa-solid fa-pen-fancy mb-1 d-block opacity-50 fa-2x"></i>

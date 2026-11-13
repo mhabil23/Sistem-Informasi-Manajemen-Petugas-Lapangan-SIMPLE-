@@ -368,6 +368,53 @@ class BastController extends Controller
         $data = $validated['signature_data'];
         $data = substr($data, strpos($data, ',') + 1);
         $data = base64_decode($data);
+
+        // Auto-crop area transparan canvas agar goresan tanda tangan padat, tebal & tampak besar
+        if (function_exists('imagecreatefromstring') && function_exists('imagecrop')) {
+            $im = @imagecreatefromstring($data);
+            if ($im) {
+                $w = imagesx($im);
+                $h = imagesy($im);
+                $minX = $w; $minY = $h; $maxX = 0; $maxY = 0;
+                $found = false;
+
+                for ($x = 0; $x < $w; $x++) {
+                    for ($y = 0; $y < $h; $y++) {
+                        $rgba = imagecolorat($im, $x, $y);
+                        $alpha = ($rgba & 0x7F000000) >> 24;
+                        if ($alpha < 120) {
+                            $found = true;
+                            if ($x < $minX) $minX = $x;
+                            if ($x > $maxX) $maxX = $x;
+                            if ($y < $minY) $minY = $y;
+                            if ($y > $maxY) $maxY = $y;
+                        }
+                    }
+                }
+
+                if ($found) {
+                    $pad = 6;
+                    $cropX = max(0, $minX - $pad);
+                    $cropY = max(0, $minY - $pad);
+                    $cropW = min($w - $cropX, ($maxX - $minX + 1) + ($pad * 2));
+                    $cropH = min($h - $cropY, ($maxY - $minY + 1) + ($pad * 2));
+
+                    $cropped = @imagecrop($im, ['x' => $cropX, 'y' => $cropY, 'width' => $cropW, 'height' => $cropH]);
+                    if ($cropped) {
+                        imagesavealpha($cropped, true);
+                        ob_start();
+                        imagepng($cropped);
+                        $croppedData = ob_get_clean();
+                        imagedestroy($cropped);
+                        if (!empty($croppedData)) {
+                            $data = $croppedData;
+                        }
+                    }
+                }
+                imagedestroy($im);
+            }
+        }
+
         $fileName = 'signatures/' . uniqid('sign_blanko_' . $user->id . '_') . '.png';
         Storage::disk('public')->put($fileName, $data);
 
