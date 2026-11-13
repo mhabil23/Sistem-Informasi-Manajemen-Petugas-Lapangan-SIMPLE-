@@ -289,6 +289,7 @@ class DashboardController extends Controller
             'unreadAdminNotifsCount',
             'incomingApprovalReports',
             'assignmentsList',
+            'selectedAssignment',
             'districtsList',
             'allOfficersDropdown',
             'selectedAssignmentId',

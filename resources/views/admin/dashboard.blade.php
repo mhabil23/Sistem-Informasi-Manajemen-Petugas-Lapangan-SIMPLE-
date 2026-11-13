@@ -558,8 +558,9 @@
                     </div>
 
                     @php
-                        $activeTitle = $selectedAssignment ? $selectedAssignment->title : 'Capaian Sensus & Survei BPS Kab. Kolaka Utara';
-                        $activeLoc = $selectedDistrict ? "Kecamatan $selectedDistrict" : ($selectedAssignment ? $selectedAssignment->location : 'Wilayah Kabupaten Kolaka Utara');
+                        $activeAssignment = ($selectedAssignment ?? null) ?: ($selectedAssignmentId ? ($assignmentsList->firstWhere('id', $selectedAssignmentId) ?? null) : null);
+                        $activeTitle = $activeAssignment ? $activeAssignment->title : 'Capaian Sensus & Survei BPS Kab. Kolaka Utara';
+                        $activeLoc = $selectedDistrict ? "Kecamatan $selectedDistrict" : ($activeAssignment ? $activeAssignment->location : 'Wilayah Kabupaten Kolaka Utara');
                     @endphp
 
                     <h2 class="bento-hero-title">
