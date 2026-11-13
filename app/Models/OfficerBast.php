@@ -102,6 +102,45 @@ class OfficerBast extends Model
         return $this->recipients()->where('user_id', $userId)->exists();
     }
 
+    public function recipientForUser(?int $userId, ?string $userName = null): ?OfficerBastRecipient
+    {
+        $recipients = $this->relationLoaded('recipients')
+            ? $this->recipients
+            : $this->recipients()->get();
+
+        if ($userId) {
+            $found = $recipients->first(fn ($r) => (int) $r->user_id === $userId);
+            if ($found) {
+                return $found;
+            }
+        }
+
+        if (!empty($userName)) {
+            $normalized = strtolower(trim($userName));
+            $found = $recipients->first(fn ($r) => strtolower(trim($r->recipient_name)) === $normalized);
+            if ($found) {
+                return $found;
+            }
+        }
+
+        return null;
+    }
+
+    public function isSignedByOfficer(int $userId, ?string $userName = null): bool
+    {
+        $rec = $this->recipientForUser($userId, $userName);
+        return $rec && !empty($rec->signature_path);
+    }
+
+    public function signedRecipientsCount(): int
+    {
+        $recipients = $this->relationLoaded('recipients')
+            ? $this->recipients
+            : $this->recipients()->get();
+
+        return $recipients->filter(fn ($r) => !empty($r->signature_path))->count();
+    }
+
     public static function generateBastNumber(string $bastType): string
     {
         $year = now()->format('Y');

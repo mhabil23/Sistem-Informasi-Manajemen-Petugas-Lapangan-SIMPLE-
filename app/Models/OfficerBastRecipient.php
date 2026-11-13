@@ -16,6 +16,11 @@ class OfficerBastRecipient extends Model
         'recipient_name',
         'position_unit',
         'origin_role',
+        'signature_path',
+        'signed_at',
+        'goods_received',
+        'goods_received_at',
+        'verification_note',
         'sort_order',
     ];
 
@@ -23,7 +28,20 @@ class OfficerBastRecipient extends Model
     {
         return [
             'sort_order' => 'integer',
+            'signed_at' => 'datetime',
+            'goods_received' => 'boolean',
+            'goods_received_at' => 'datetime',
         ];
+    }
+
+    public function isSigned(): bool
+    {
+        return !empty($this->signature_path);
+    }
+
+    public function isGoodsReceived(): bool
+    {
+        return (bool) $this->goods_received;
     }
 
     public function officerBast(): BelongsTo

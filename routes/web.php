@@ -181,6 +181,7 @@ Route::middleware(['auth', 'role:petugas,pegawai'])->prefix('petugas')->as('petu
     // BAST Petugas (Petugas Lapangan)
     Route::get('/basts/officers', [\App\Http\Controllers\Petugas\BastController::class, 'officers'])->name('basts.officers.index');
     Route::post('/basts/officers', [\App\Http\Controllers\Petugas\BastController::class, 'storeOfficer'])->name('basts.officers.store');
+    Route::post('/basts/officers/{bast}/sign', [\App\Http\Controllers\Petugas\BastController::class, 'signOfficerReceipt'])->name('basts.officers.sign');
     Route::get('/basts/officers/{bast}/download', [\App\Http\Controllers\Petugas\BastController::class, 'downloadOfficerPdf'])->name('basts.officers.download');
     Route::get('/basts/officers/{bast}/preview', [\App\Http\Controllers\Petugas\BastController::class, 'previewOfficerPdf'])->name('basts.officers.preview');
 

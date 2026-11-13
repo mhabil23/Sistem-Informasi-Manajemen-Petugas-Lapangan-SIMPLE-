@@ -210,9 +210,15 @@
                             <span class="sketch-btn-title">Tanda Terima Petugas</span>
                         </div>
                         <div class="sketch-btn-sub">ATK / KUES &bull; Tgl Dikunci</div>
-                        <span class="badge bg-primary-subtle text-primary border border-primary-subtle mt-1 font-monospace" style="font-size: 0.68rem;">
-                            {{ $totalBlankoBasts }} Dokumen Sah
-                        </span>
+                        @if(($pendingSignBlankoBastsCount ?? 0) > 0)
+                            <span class="badge bg-danger text-white border mt-1" style="font-size: 0.68rem;">
+                                <i class="fa-solid fa-pen-nib me-1"></i> {{ $pendingSignBlankoBastsCount }} Perlu TTD
+                            </span>
+                        @else
+                            <span class="badge bg-primary-subtle text-primary border border-primary-subtle mt-1 font-monospace" style="font-size: 0.68rem;">
+                                {{ $totalBlankoBasts }} Dokumen Sah
+                            </span>
+                        @endif
                     </div>
                 </div>
                 <div class="sketch-btn-arrow">

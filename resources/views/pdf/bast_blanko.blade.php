@@ -158,11 +158,46 @@
                     <td>{{ $recipient->recipient_name }}</td>
                     <td>{{ $recipient->position_unit ?: 'Mitra' }}</td>
                     <td>{{ $recipient->origin_role ?: '-' }}</td>
-                    <td style="padding: 4px 6px;">
+                    <td style="padding: 2px 4px;">
+                        @php
+                            $hasSign = !empty($recipient->signature_path);
+                            $signBase64 = null;
+                            if ($hasSign) {
+                                $fullPath = storage_path('app/public/' . $recipient->signature_path);
+                                if (!file_exists($fullPath)) {
+                                    $fullPath = public_path('storage/' . $recipient->signature_path);
+                                }
+                                if (file_exists($fullPath)) {
+                                    $signBase64 = base64_encode(file_get_contents($fullPath));
+                                }
+                            }
+                        @endphp
                         <table class="sign-inner">
                             <tr>
-                                <td style="width: 50%;">{!! $isOdd ? e($rowNum) . '. ...........' : '&nbsp;' !!}</td>
-                                <td style="width: 50%; padding-left: 8px !important;">{!! !$isOdd ? e($rowNum) . '. ...........' : '&nbsp;' !!}</td>
+                                <td style="width: 50%;">
+                                    @if($isOdd)
+                                        <span style="font-weight: 500;">{{ $rowNum }}.</span>
+                                        @if($signBase64)
+                                            <img src="data:image/png;base64,{{ $signBase64 }}" style="max-height: 22px; max-width: 58px; vertical-align: middle; display: inline-block;">
+                                        @else
+                                            <span>...........</span>
+                                        @endif
+                                    @else
+                                        &nbsp;
+                                    @endif
+                                </td>
+                                <td style="width: 50%; padding-left: 6px !important;">
+                                    @if(!$isOdd)
+                                        <span style="font-weight: 500;">{{ $rowNum }}.</span>
+                                        @if($signBase64)
+                                            <img src="data:image/png;base64,{{ $signBase64 }}" style="max-height: 22px; max-width: 58px; vertical-align: middle; display: inline-block;">
+                                        @else
+                                            <span>...........</span>
+                                        @endif
+                                    @else
+                                        &nbsp;
+                                    @endif
+                                </td>
                             </tr>
                         </table>
                     </td>

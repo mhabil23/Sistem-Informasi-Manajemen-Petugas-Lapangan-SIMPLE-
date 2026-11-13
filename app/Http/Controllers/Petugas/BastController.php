@@ -344,6 +344,64 @@ class BastController extends Controller
             ->with('success', "{$typeText} '{$bast->bast_number}' berhasil dibuat!");
     }
 
+    public function signOfficerReceipt(Request $request, OfficerBast $bast)
+    {
+        $user = Auth::user();
+
+        if (!$bast->includesOfficer($user->id)) {
+            abort(403, 'Anda tidak terdaftar sebagai penerima pada dokumen ini.');
+        }
+
+        $validated = $request->validate([
+            'verify_goods' => ['required', 'accepted'],
+            'signature_data' => ['required', 'string'],
+            'verification_note' => ['nullable', 'string', 'max:500'],
+        ], [
+            'verify_goods.accepted' => 'Anda wajib mencentang persetujuan verifikasi bahwa barang/perlengkapan telah diperiksa dan diterima secara lengkap.',
+            'signature_data.required' => 'Goresan tanda tangan digital wajib dibubuhkan.',
+        ]);
+
+        if (!str_starts_with($validated['signature_data'], 'data:image')) {
+            return back()->with('error', 'Format tanda tangan digital tidak valid.');
+        }
+
+        $data = $validated['signature_data'];
+        $data = substr($data, strpos($data, ',') + 1);
+        $data = base64_decode($data);
+        $fileName = 'signatures/' . uniqid('sign_blanko_' . $user->id . '_') . '.png';
+        Storage::disk('public')->put($fileName, $data);
+
+        $recipient = $bast->recipientForUser($user->id, $user->name);
+
+        if (!$recipient) {
+            $recipient = $bast->recipients()->create([
+                'user_id' => $user->id,
+                'recipient_name' => $user->name,
+                'position_unit' => $user->position ?: ($user->isPegawai() ? 'Pegawai BPS' : 'Mitra'),
+                'origin_role' => $user->roleLabel(),
+                'sort_order' => $bast->recipients()->count() + 1,
+            ]);
+        }
+
+        $recipient->update([
+            'user_id' => $user->id,
+            'signature_path' => $fileName,
+            'signed_at' => now(),
+            'goods_received' => true,
+            'goods_received_at' => now(),
+            'verification_note' => $validated['verification_note'] ?? null,
+        ]);
+
+        $title = $bast->document_title ?: 'Tanda Terima Petugas';
+        ActivityLog::log(
+            'update',
+            'basts',
+            "Petugas {$user->name} memverifikasi penerimaan barang dan menandatangani {$title} ({$bast->bast_number})."
+        );
+
+        return back()->with('success', "Penerimaan barang telah diverifikasi dan tanda tangan digital Anda untuk '{$bast->bast_number}' berhasil disimpan!");
+    }
+
     public function downloadOfficerPdf(OfficerBast $bast)
     {
         if (!$bast->includesOfficer(Auth::id())) {

@@ -122,11 +122,32 @@
                                     <div class="small text-muted">
                                         <i class="fa-solid fa-users me-1"></i> Kolektif ({{ $recCount }} penerima)
                                     </div>
+                                    @if($item->isKantorKePetugas())
+                                        @php $signedCount = $item->signedRecipientsCount(); @endphp
+                                        <div class="mt-1">
+                                            <span class="badge {{ $signedCount === $recCount && $recCount > 0 ? 'bg-success-subtle text-success border border-success-subtle' : 'bg-warning-subtle text-warning-emphasis border border-warning-subtle' }}" style="font-size: 0.68rem;">
+                                                <i class="fa-solid fa-signature me-1"></i> {{ $signedCount }}/{{ $recCount }} TTD
+                                            </span>
+                                        </div>
+                                    @endif
                                 @elseif($recCount === 1)
                                     <div class="fw-bold text-dark">{{ $firstRec->recipient_name }}</div>
                                     <div class="small text-muted">
                                         <i class="fa-solid fa-id-badge me-1"></i> {{ $firstRec->origin_role ?: ($firstRec->position_unit ?: '-') }}
                                     </div>
+                                    @if($item->isKantorKePetugas())
+                                        <div class="mt-1">
+                                            @if($firstRec && $firstRec->isSigned())
+                                                <span class="badge bg-success-subtle text-success border border-success-subtle" style="font-size: 0.68rem;">
+                                                    <i class="fa-solid fa-circle-check me-1"></i> Sudah TTD
+                                                </span>
+                                            @else
+                                                <span class="badge bg-secondary-subtle text-secondary border" style="font-size: 0.68rem;">
+                                                    <i class="fa-solid fa-clock me-1"></i> Belum TTD
+                                                </span>
+                                            @endif
+                                        </div>
+                                    @endif
                                 @else
                                     <div class="fw-bold text-dark">{{ $item->officer ? $item->officer->name : '-' }}</div>
                                     <div class="small text-muted"><i class="fa-solid fa-phone me-1"></i> {{ $item->officer ? ($item->officer->phone ?? $item->officer->username) : '-' }}</div>

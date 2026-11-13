@@ -64,6 +64,23 @@ class DashboardController extends Controller
                 $q->where('bast_type', 'kantor_ke_petugas')
                   ->orWhereNull('bast_type');
             })->count();
+        $pendingSignBlankoBastsCount = OfficerBast::forOfficer($user->id)
+            ->where(function ($q) {
+                $q->where('bast_type', 'kantor_ke_petugas')
+                  ->orWhereNull('bast_type');
+            })
+            ->where(function ($q) use ($user) {
+                $q->whereHas('recipients', function ($rq) use ($user) {
+                    $rq->where(function ($sq) use ($user) {
+                        $sq->where('user_id', $user->id)
+                           ->orWhere('recipient_name', $user->name);
+                    })->whereNull('signature_path');
+                })->orWhere(function ($oq) use ($user) {
+                    $oq->where('officer_id', $user->id)
+                       ->whereDoesntHave('recipients');
+                });
+            })
+            ->count();
         $totalTerisiBasts = OfficerBast::forOfficer($user->id)
             ->where('bast_type', 'petugas_ke_kantor')
             ->count();
@@ -124,6 +141,7 @@ class DashboardController extends Controller
             'totalRespondentBasts',
             'totalOfficerBasts',
             'totalBlankoBasts',
+            'pendingSignBlankoBastsCount',
             'totalTerisiBasts',
             'reportsDraft',
             'reportsSubmitted',
