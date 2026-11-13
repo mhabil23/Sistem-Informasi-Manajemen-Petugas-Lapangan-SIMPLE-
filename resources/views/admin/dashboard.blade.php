@@ -255,58 +255,6 @@
     margin: 0;
 }
 
-/* Stat Bento Cards (4 Mini Cards) */
-.bento-stat-card {
-    background: #FFFFFF;
-    border-radius: var(--bps-radius-pill);
-    border: 1px solid #E2E8F0;
-    padding: 1.15rem;
-    box-shadow: 0 4px 14px rgba(15, 23, 42, 0.03);
-    transition: all 0.22s ease;
-    display: flex;
-    flex-direction: column;
-    justify-content: space-between;
-    height: 100%;
-}
-.bento-stat-card:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 8px 22px rgba(15, 23, 42, 0.06);
-}
-.bento-stat-icon-wrap {
-    width: 42px;
-    height: 42px;
-    border-radius: 12px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-size: 1.1rem;
-    margin-bottom: 0.85rem;
-}
-.bento-stat-val {
-    font-size: 1.5rem;
-    font-weight: 800;
-    color: #0F172A;
-    line-height: 1.1;
-    margin-bottom: 0.2rem;
-}
-.bento-stat-lbl {
-    font-size: 0.76rem;
-    font-weight: 600;
-    color: #64748B;
-    margin-bottom: 0.75rem;
-}
-.bento-mini-bar-track {
-    height: 5px;
-    background: #F1F5F9;
-    border-radius: 999px;
-    overflow: hidden;
-    position: relative;
-}
-.bento-mini-bar-fill {
-    height: 100%;
-    border-radius: 999px;
-}
-
 /* Filter Toolbar Bento Style */
 .bento-filter-card {
     background: #FFFFFF;
@@ -645,86 +593,7 @@
         </div>
     </div>
 
-    <!-- ==============================================================
-         5. 4 STAT BENTO CARDS (METRIK UTAMA)
-         ============================================================== -->
-    <div class="row g-3 mb-4">
-        <!-- 1. Target Responden -->
-        <div class="col-6 col-lg-3">
-            <div class="bento-stat-card">
-                <div>
-                    <div class="bento-stat-icon-wrap" style="background: var(--bps-orange-soft); color: var(--bps-orange);">
-                        <i class="fa-solid fa-crosshairs"></i>
-                    </div>
-                    <div class="bento-stat-val">{{ number_format($bastTargetCount) }}</div>
-                    <div class="bento-stat-lbl">Target Sasaran</div>
-                </div>
-                <div>
-                    <div class="bento-mini-bar-track">
-                        <div class="bento-mini-bar-fill" style="width: 100%; background: var(--bps-orange);"></div>
-                    </div>
-                    <span class="text-muted mt-1 d-block" style="font-size: 0.65rem;">Total Kuota BAST</span>
-                </div>
-            </div>
-        </div>
 
-        <!-- 2. BAST Selesai (Respon) -->
-        <div class="col-6 col-lg-3">
-            <div class="bento-stat-card">
-                <div>
-                    <div class="bento-stat-icon-wrap" style="background: var(--bps-green-soft); color: var(--bps-green);">
-                        <i class="fa-solid fa-file-circle-check"></i>
-                    </div>
-                    <div class="bento-stat-val" style="color: var(--bps-green);">{{ number_format($bastCompletedCount) }}</div>
-                    <div class="bento-stat-lbl">BAST Masuk (Selesai)</div>
-                </div>
-                <div>
-                    <div class="bento-mini-bar-track">
-                        <div class="bento-mini-bar-fill" style="width: {{ $bastPercentage }}%; background: var(--bps-green);"></div>
-                    </div>
-                    <span class="text-success mt-1 d-block fw-semibold" style="font-size: 0.65rem;">{{ $bastPercentage }}% dari Sasaran</span>
-                </div>
-            </div>
-        </div>
-
-        <!-- 3. Belum Selesai (Sisa) -->
-        <div class="col-6 col-lg-3">
-            <div class="bento-stat-card">
-                <div>
-                    <div class="bento-stat-icon-wrap" style="background: var(--bps-amber-soft); color: var(--bps-amber);">
-                        <i class="fa-solid fa-hourglass-half"></i>
-                    </div>
-                    <div class="bento-stat-val" style="color: var(--bps-amber);">{{ number_format($bastPendingCount) }}</div>
-                    <div class="bento-stat-lbl">Sisa Responden</div>
-                </div>
-                <div>
-                    <div class="bento-mini-bar-track">
-                        <div class="bento-mini-bar-fill" style="width: {{ max(0, 100 - $bastPercentage) }}%; background: var(--bps-amber);"></div>
-                    </div>
-                    <span class="text-muted mt-1 d-block" style="font-size: 0.65rem;">Belum TTD Digital</span>
-                </div>
-            </div>
-        </div>
-
-        <!-- 4. Kepatuhan Laporan Petugas -->
-        <div class="col-6 col-lg-3">
-            <div class="bento-stat-card">
-                <div>
-                    <div class="bento-stat-icon-wrap" style="background: var(--bps-blue-soft); color: var(--bps-blue);">
-                        <i class="fa-solid fa-clipboard-user"></i>
-                    </div>
-                    <div class="bento-stat-val" style="color: var(--bps-blue);">{{ $reportSubmissionRate }}%</div>
-                    <div class="bento-stat-lbl">Kepatuhan Laporan</div>
-                </div>
-                <div>
-                    <div class="bento-mini-bar-track">
-                        <div class="bento-mini-bar-fill" style="width: {{ $reportSubmissionRate }}%; background: var(--bps-blue);"></div>
-                    </div>
-                    <span class="text-muted mt-1 d-block" style="font-size: 0.65rem;">{{ $officersWithReportCount }} dari {{ $totalOfficersCount }} Petugas Lapor</span>
-                </div>
-            </div>
-        </div>
-    </div>
 
     <!-- ==============================================================
          6. TWO COLUMNS BENTO: REKAP KECAMATAN (LEFT) & KEPATUHAN LAPORAN (RIGHT)
