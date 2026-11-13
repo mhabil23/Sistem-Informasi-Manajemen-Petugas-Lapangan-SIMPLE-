@@ -59,19 +59,7 @@
     margin-top: 0.25rem;
     font-weight: 500;
 }
-.bento-role-pill {
-    background: #FFFFFF;
-    border: 1px solid #E2E8F0;
-    padding: 0.45rem 0.9rem;
-    border-radius: 999px;
-    font-size: 0.78rem;
-    font-weight: 600;
-    color: #334155;
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.03);
-    display: inline-flex;
-    align-items: center;
-    gap: 0.5rem;
-}
+
 
 /* Base Bento Card */
 .bento-card {
@@ -271,36 +259,19 @@
 <div class="bento-dashboard-wrapper">
 
     <!-- ==============================================================
-         1. TOP GREETING HEADER & QUICK LINKS
+         1. TOP GREETING HEADER
          ============================================================== -->
-    <div class="bento-greeting-wrap d-flex flex-wrap align-items-center justify-content-between gap-3">
-        <div>
-            @php
-                $hour = (int) now()->format('H');
-                $greetingTime = $hour < 11 ? 'Selamat Pagi' : ($hour < 15 ? 'Selamat Siang' : ($hour < 18 ? 'Selamat Sore' : 'Selamat Malam'));
-            @endphp
-            <h1 class="bento-greeting-title mb-0">
-                {{ $greetingTime }}, Administrator BPS 📊
-            </h1>
-            <p class="bento-greeting-sub mb-0">
-                Monitoring Evaluasi Lapangan, Kepatuhan Petugas, &amp; Rekapitulasi Realisasi per {{ now()->translatedFormat('d F Y') }}.
-            </p>
-        </div>
-        <div class="d-flex flex-wrap gap-2 align-items-center">
-            <span class="bento-role-pill d-none d-md-inline-flex">
-                <span class="badge rounded-circle p-1" style="background: var(--bps-orange);"><i class="fa-solid fa-shield-halved text-white" style="font-size: 0.6rem;"></i></span>
-                <span>BPS Kab. Kolaka Utara &bull; Portal Monitoring</span>
-            </span>
-            <a href="{{ route('admin.recapitulation.pdf') }}" target="_blank" class="btn btn-sm btn-outline-danger rounded-pill px-3 py-1.5" title="Unduh Rekapitulasi PDF">
-                <i class="fa-solid fa-file-pdf me-1"></i> Cetak PDF
-            </a>
-            <a href="{{ route('admin.reports.index', ['status' => 'submitted']) }}" class="btn btn-sm rounded-pill px-3 py-1.5 text-white" style="background: var(--bps-orange); font-weight: 600;">
-                <i class="fa-solid fa-clipboard-check me-1"></i> Verifikasi Laporan
-                @if(($reportsPending ?? 0) > 0)
-                    <span class="badge bg-white text-dark ms-1">{{ $reportsPending }}</span>
-                @endif
-            </a>
-        </div>
+    <div class="bento-greeting-wrap mb-4">
+        @php
+            $hour = (int) now()->format('H');
+            $greetingTime = $hour < 11 ? 'Selamat Pagi' : ($hour < 15 ? 'Selamat Siang' : ($hour < 18 ? 'Selamat Sore' : 'Selamat Malam'));
+        @endphp
+        <h1 class="bento-greeting-title mb-1">
+            {{ $greetingTime }}, Administrator BPS 📊
+        </h1>
+        <p class="bento-greeting-sub mb-0">
+            Monitoring Evaluasi Lapangan, Kepatuhan Petugas, &amp; Rekapitulasi Realisasi per {{ now()->translatedFormat('d F Y') }}.
+        </p>
     </div>
 
     <!-- ==============================================================
