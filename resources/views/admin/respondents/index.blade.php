@@ -4,261 +4,374 @@
 @section('page_title', 'Manajemen Data Responden')
 
 @section('breadcrumb')
-    <li class="breadcrumb-item"><a href="{{ route('admin.dashboard') }}">Admin</a></li>
+    <li class="breadcrumb-item"><a href="{{ route('admin.dashboard') }}" class="text-decoration-none">Admin</a></li>
     <li class="breadcrumb-item active" aria-current="page">Data Responden</li>
 @endsection
 
+@push('styles')
+<style>
+/* Bento Grid Layout & Cards */
+.bento-card-clean {
+    background: #FFFFFF;
+    border-radius: 20px;
+    border: 1px solid #E2E8F0;
+    box-shadow: 0 4px 16px rgba(15, 23, 42, 0.03);
+    transition: all 0.22s ease;
+}
+
+/* Action Buttons */
+.btn-bps-orange {
+    background: #F37021;
+    color: #FFFFFF !important;
+    border: none;
+    font-weight: 700;
+    border-radius: 999px;
+    padding: 0.55rem 1.25rem;
+    box-shadow: 0 4px 14px rgba(243, 112, 33, 0.25);
+    transition: all 0.2s ease;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.4rem;
+    text-decoration: none;
+}
+.btn-bps-orange:hover {
+    background: #E05D0E;
+    color: #FFFFFF !important;
+    transform: translateY(-1px);
+    box-shadow: 0 6px 18px rgba(243, 112, 33, 0.35);
+}
+
+/* Fixed Bento Table Card (Compact / Zoom-out & Anti-Geser) */
+.bento-table-card {
+    background: #FFFFFF;
+    border-radius: 20px;
+    border: 1px solid #E2E8F0;
+    box-shadow: 0 4px 18px rgba(15, 23, 42, 0.03);
+    overflow: hidden;
+    width: 100%;
+}
+.bento-table-header {
+    padding: 0.9rem 1.25rem;
+    border-bottom: 1px solid #E2E8F0;
+    background: #FAFAFA;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 0.75rem;
+}
+.bento-table-container-fixed {
+    width: 100%;
+    overflow: hidden;
+}
+.bento-table-fixed {
+    table-layout: fixed;
+    width: 100%;
+    margin-bottom: 0;
+    font-size: 0.8rem;
+}
+.bento-table-fixed th {
+    background: #F8FAFC;
+    color: #475569;
+    font-weight: 700;
+    font-size: 0.68rem;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    padding: 0.75rem 0.5rem;
+    border-bottom: 1px solid #E2E8F0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+.bento-table-fixed td {
+    padding: 0.75rem 0.5rem;
+    vertical-align: middle;
+    border-bottom: 1px solid #F1F5F9;
+    font-size: 0.8rem;
+    overflow: hidden;
+}
+.bento-table-fixed tbody tr:hover {
+    background-color: #F8FAFC;
+}
+
+/* Action buttons in table */
+.bento-action-btn {
+    width: 28px;
+    height: 28px;
+    border-radius: 8px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    border: 1px solid #E2E8F0;
+    background: #FFFFFF;
+    transition: all 0.15s ease;
+    text-decoration: none;
+    font-size: 0.78rem;
+    flex-shrink: 0;
+}
+.bento-action-btn:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 2px 8px rgba(15, 23, 42, 0.08);
+}
+.bento-action-btn.btn-view {
+    color: #2563EB;
+}
+.bento-action-btn.btn-view:hover {
+    background: #EFF6FF;
+    border-color: #BFDBFE;
+}
+.bento-action-btn.btn-edit {
+    color: #D97706;
+}
+.bento-action-btn.btn-edit:hover {
+    background: #FFFBEB;
+    border-color: #FDE68A;
+}
+.bento-action-btn.btn-delete {
+    color: #DC2626;
+}
+.bento-action-btn.btn-delete:hover {
+    background: #FEF2F2;
+    border-color: #FECACA;
+}
+
+/* Mobile Responsive: Stack without scroll */
+@media (max-width: 767.98px) {
+    .bento-table-card .bento-table-fixed thead {
+        display: none;
+    }
+    .bento-table-card .bento-table-fixed,
+    .bento-table-card .bento-table-fixed tbody,
+    .bento-table-card .bento-table-fixed tr,
+    .bento-table-card .bento-table-fixed td {
+        display: block;
+        width: 100% !important;
+        text-align: left !important;
+    }
+    .bento-table-card .bento-table-fixed tr {
+        background: #FFFFFF;
+        border: 1px solid #E2E8F0;
+        border-radius: 14px;
+        margin: 0.75rem;
+        padding: 0.85rem;
+        box-shadow: 0 2px 8px rgba(15, 23, 42, 0.02);
+    }
+    .bento-table-card .bento-table-fixed td {
+        border: none;
+        padding: 0.25rem 0;
+    }
+    .bento-table-card .bento-table-fixed td:last-child {
+        border-top: 1px dashed #E2E8F0;
+        margin-top: 0.5rem;
+        padding-top: 0.5rem;
+        display: flex;
+        justify-content: flex-end;
+    }
+}
+</style>
+@endpush
+
 @section('content')
-<!-- Header & Quick Actions -->
-<div class="row align-items-center mb-3">
-    <div class="col-md-7">
-        <h4 class="fw-bold text-dark mb-1">
-            <i class="fa-solid fa-house-chimney-user text-primary me-2"></i>Data Sampel Ruta (Responden)
-        </h4>
-        <p class="text-muted small mb-0">Kelola master sampel rumah tangga (ruta), nama Kepala Keluarga (KRT), alokasi penugasan ke petugas lapangan, serta histori penerbitan Berita Acara Serah Terima (BAST).</p>
-    </div>
-    <div class="col-md-5 text-md-end mt-2 mt-md-0">
-        @if(auth()->user()->isAdmin())
-            <button type="button" class="btn btn-sm btn-sp-primary" data-bs-toggle="modal" data-bs-target="#createRespondentModal">
-                <i class="fa-solid fa-user-plus me-1"></i> Tambah Responden Baru
+<!-- Bento Search & Filter Card -->
+<div class="bento-card-clean p-3 mb-3">
+    <form method="GET" action="{{ route('admin.respondents.index') }}" class="row g-2 align-items-center">
+        <div class="col-lg-4 col-md-4">
+            <div class="input-group">
+                <span class="input-group-text bg-white border-end-0 text-muted">
+                    <i class="bi bi-search"></i>
+                </span>
+                <input type="text" 
+                       name="search" 
+                       class="form-control border-start-0 ps-1" 
+                       value="{{ request('search') }}" 
+                       placeholder="Cari nama, instansi, alamat, nomor HP...">
+            </div>
+        </div>
+
+        <div class="col-lg-3 col-md-3">
+            <select name="assignment_id" class="form-select">
+                <option value="">-- Semua Kegiatan --</option>
+                @foreach($assignments as $assignment)
+                    <option value="{{ $assignment->id }}" {{ request('assignment_id') == $assignment->id ? 'selected' : '' }}>{{ $assignment->title }}</option>
+                @endforeach
+            </select>
+        </div>
+
+        <div class="col-lg-3 col-md-3">
+            <select name="officer_id" class="form-select">
+                <option value="">-- Semua Petugas / PPL --</option>
+                @foreach($officers as $officer)
+                    <option value="{{ $officer->id }}" {{ request('officer_id') == $officer->id ? 'selected' : '' }}>{{ $officer->name }}</option>
+                @endforeach
+            </select>
+        </div>
+
+        <div class="col-lg-2 col-md-2 d-flex gap-2">
+            <button type="submit" class="btn btn-bps-orange flex-fill justify-content-center py-2">
+                <i class="bi bi-funnel-fill"></i> Filter
             </button>
-        @endif
-    </div>
+            @if(request()->hasAny(['search', 'assignment_id', 'officer_id']))
+                <a href="{{ route('admin.respondents.index') }}" class="btn btn-outline-secondary rounded-pill px-3 d-flex align-items-center justify-content-center" title="Reset Filter">
+                    <i class="bi bi-arrow-clockwise"></i>
+                </a>
+            @endif
+        </div>
+    </form>
 </div>
 
-<!-- Stat Cards -->
-<div class="row g-2 mb-3">
-    <div class="col-xl-3 col-sm-6">
-        <div class="sp-stat-card">
-            <div class="sp-stat-icon-wrap" style="background: #e0f2fe; color: #0284c7;">
-                <i class="fa-solid fa-users"></i>
+<!-- Bento Table Card (Compact, Zoom-out, Anti-Geser) -->
+<div class="bento-table-card mb-4">
+    <div class="bento-table-header">
+        <div class="d-flex align-items-center gap-2">
+            <div class="rounded-3 p-1.5 text-white d-flex align-items-center justify-content-center" style="background: var(--bps-orange, #F37021); width: 34px; height: 34px;">
+                <i class="bi bi-person-vcard-fill"></i>
             </div>
-            <div class="sp-stat-info">
-                <div class="sp-stat-label">Total Responden</div>
-                <div class="sp-stat-value">{{ number_format($totalRespondents) }}</div>
-                <div class="sp-stat-desc">Terdata di sistem</div>
-            </div>
-        </div>
-    </div>
-
-    <div class="col-xl-3 col-sm-6">
-        <div class="sp-stat-card">
-            <div class="sp-stat-icon-wrap" style="background: #e0e7ff; color: #4338ca;">
-                <i class="fa-regular fa-calendar-check"></i>
-            </div>
-            <div class="sp-stat-info">
-                <div class="sp-stat-label">Bulan Ini</div>
-                <div class="sp-stat-value text-primary">{{ number_format($thisMonthCount) }}</div>
-                <div class="sp-stat-desc">Input terbaru</div>
+            <div>
+                <h6 class="fw-bold text-dark mb-0" style="font-size: 0.92rem;">
+                    Daftar Responden Lapangan
+                </h6>
+                <span class="text-muted" style="font-size: 0.7rem;">Total {{ $respondents->total() }} responden terdaftar dalam sistem</span>
             </div>
         </div>
-    </div>
-
-    <div class="col-xl-3 col-sm-6">
-        <div class="sp-stat-card">
-            <div class="sp-stat-icon-wrap" style="background: #fef3c7; color: #d97706;">
-                <i class="fa-solid fa-building-flag"></i>
-            </div>
-            <div class="sp-stat-info">
-                <div class="sp-stat-label">Lembaga / Instansi</div>
-                <div class="sp-stat-value text-warning">{{ number_format($uniqueAgencies) }}</div>
-                <div class="sp-stat-desc">Kelompok & instansi</div>
-            </div>
-        </div>
-    </div>
-
-    <div class="col-xl-3 col-sm-6">
-        <div class="sp-stat-card">
-            <div class="sp-stat-icon-wrap" style="background: #dcfce7; color: #16a34a;">
-                <i class="fa-solid fa-file-signature"></i>
-            </div>
-            <div class="sp-stat-info">
-                <div class="sp-stat-label">Telah Terbit BAST</div>
-                <div class="sp-stat-value text-success">{{ number_format($withBastCount) }}</div>
-                <div class="sp-stat-desc">Dokumen sah</div>
-            </div>
-        </div>
-    </div>
-</div>
-
-<!-- Search & Filter Card -->
-<div class="sp-card mb-3">
-    <div class="sp-card-body p-2.5">
-        <form method="GET" action="{{ route('admin.respondents.index') }}" class="row g-2 align-items-center">
-            <div class="col-md-4">
-                <div class="input-group input-group-sm">
-                    <span class="input-group-text bg-white border-end-0 text-muted">
-                        <i class="fa-solid fa-magnifying-glass"></i>
-                    </span>
-                    <input type="text" 
-                           name="search" 
-                           class="form-control form-control-sm border-start-0 ps-0" 
-                           value="{{ request('search') }}" 
-                           placeholder="Cari nama, instansi, alamat, nomor HP...">
-                </div>
-            </div>
-
-            <div class="col-md-3">
-                <select name="assignment_id" class="form-select form-select-sm">
-                    <option value="">-- Semua Kegiatan --</option>
-                    @foreach($assignments as $assignment)
-                        <option value="{{ $assignment->id }}" {{ request('assignment_id') == $assignment->id ? 'selected' : '' }}>{{ $assignment->title }}</option>
-                    @endforeach
-                </select>
-            </div>
-
-            <div class="col-md-3">
-                <select name="officer_id" class="form-select form-select-sm">
-                    <option value="">-- Semua Petugas / PPL --</option>
-                    @foreach($officers as $officer)
-                        <option value="{{ $officer->id }}" {{ request('officer_id') == $officer->id ? 'selected' : '' }}>{{ $officer->name }}</option>
-                    @endforeach
-                </select>
-            </div>
-
-            <div class="col-md-2 d-flex gap-2">
-                <button type="submit" class="btn btn-sm btn-sp-primary flex-fill">
-                    <i class="fa-solid fa-filter me-1"></i> Filter
+        <div class="d-flex align-items-center gap-2">
+            <span class="badge bg-light text-secondary border px-2.5 py-1.5 rounded-pill" style="font-size: 0.7rem;">
+                Halaman {{ $respondents->currentPage() }} dari {{ max(1, $respondents->lastPage()) }}
+            </span>
+            @if(auth()->user()->isAdmin())
+                <button type="button" class="btn-bps-orange shadow-sm py-1.5 px-3" style="font-size: 0.8rem;" data-bs-toggle="modal" data-bs-target="#createRespondentModal">
+                    <i class="bi bi-person-plus-fill me-1"></i> Tambah Responden Baru
                 </button>
-                @if(request()->hasAny(['search', 'assignment_id', 'officer_id']))
-                    <a href="{{ route('admin.respondents.index') }}" class="btn btn-sm btn-outline-secondary" title="Reset Filter">
-                        <i class="fa-solid fa-rotate-left"></i>
-                    </a>
-                @endif
-            </div>
-        </form>
+            @endif
+        </div>
     </div>
-</div>
 
-<!-- Table Card -->
-<div class="sp-card mb-3">
-    <div class="sp-card-header">
-        <h5 class="sp-card-title">
-            <i class="fa-solid fa-id-card-clip text-primary"></i>
-            Daftar Responden Lapangan ({{ $respondents->total() }})
-        </h5>
-    </div>
-    <div class="sp-card-body p-0">
-        <div class="table-responsive">
-            <table class="table sp-table align-middle">
-                <thead>
+    <div class="bento-table-container-fixed">
+        <table class="table bento-table-fixed align-middle mb-0">
+            <thead>
+                <tr>
+                    <th style="width: 22%;"><i class="bi bi-person-fill me-1 text-primary"></i> Kepala Keluarga &amp; Responden</th>
+                    <th style="width: 13%;"><i class="bi bi-building me-1 text-muted"></i> Instansi</th>
+                    <th style="width: 18%;"><i class="bi bi-geo-alt-fill me-1 text-danger"></i> Alamat &amp; Wilayah</th>
+                    <th style="width: 15%;"><i class="bi bi-briefcase me-1 text-muted"></i> Kegiatan Terkait</th>
+                    <th style="width: 13%;"><i class="bi bi-person-gear me-1 text-primary"></i> Petugas / PPL</th>
+                    <th class="text-center" style="width: 7%;"><i class="bi bi-patch-check me-1 text-success"></i> BAST</th>
+                    <th class="text-end pe-2" style="width: 12%;">Aksi</th>
+                </tr>
+            </thead>
+            <tbody>
+                @forelse($respondents as $resp)
                     <tr>
-                        <th style="width: 24%;">Kepala Keluarga &amp; Responden</th>
-                        <th style="width: 15%;">Instansi / Lembaga</th>
-                        <th style="width: 20%;">Alamat &amp; Wilayah</th>
-                        <th style="width: 15%;">Kegiatan Terkait</th>
-                        <th style="width: 13%;">Petugas Lapangan / PPL</th>
-                        <th class="text-center" style="width: 7%;">Status BAST</th>
-                        <th class="text-end" style="width: 6%;">Aksi</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    @forelse($respondents as $resp)
-                        <tr>
-                            <td>
-                                <div class="fw-bold text-dark text-truncate" style="max-width: 210px;" title="{{ $resp->family_head_name ?? $resp->name }}">
-                                    {{ $resp->family_head_name ?? $resp->name }}
-                                </div>
-                                <div class="small my-1">
-                                    <span class="badge bg-light text-dark border me-1">
-                                        <i class="fa-solid fa-user me-1 text-primary"></i> {{ $resp->informant_name ?? $resp->name }}
-                                    </span>
-                                    <span class="badge bg-secondary-subtle text-secondary border">
-                                        {{ $resp->respondent_status ?? 'KRT' }}
-                                    </span>
-                                </div>
-                                <small class="text-muted"><i class="fa-solid fa-phone me-1"></i> {{ $resp->phone ?? '-' }}</small>
-                            </td>
-                            <td>
-                                <span class="badge bg-light text-primary border text-truncate d-inline-block text-start" style="max-width: 140px; font-size: 0.72rem;" title="{{ $resp->agency }}">
-                                    {{ $resp->agency }}
+                        <td>
+                            <div class="fw-bold text-dark text-truncate mb-0.5" style="font-size: 0.82rem;" title="{{ $resp->family_head_name ?? $resp->name }}">
+                                {{ $resp->family_head_name ?? $resp->name }}
+                            </div>
+                            <div class="d-flex align-items-center gap-1 text-truncate mb-0.5">
+                                <span class="badge bg-light text-dark border text-truncate" style="font-size: 0.68rem; max-width: 120px;" title="{{ $resp->informant_name ?? $resp->name }}">
+                                    <i class="bi bi-person me-0.5 text-primary"></i> {{ $resp->informant_name ?? $resp->name }}
                                 </span>
-                            </td>
-                            <td>
-                                <div class="small text-secondary text-truncate" style="max-width: 175px;" title="{{ $resp->address }}">
-                                    <i class="fa-solid fa-location-dot me-1 text-danger"></i> {{ $resp->address }}
-                                </div>
-                                @if($resp->district)
-                                    <span class="badge bg-light text-secondary border mt-1" style="font-size: 0.65rem;">
-                                        <i class="fa-solid fa-map-pin text-primary me-1"></i> {{ $resp->district }}
-                                    </span>
-                                @endif
-                            </td>
-                            <td>
-                                <span class="small fw-semibold text-dark text-truncate d-block" style="max-width: 140px;" title="{{ $resp->assignment ? $resp->assignment->title : '-' }}">
-                                    {{ $resp->assignment ? $resp->assignment->title : '-' }}
+                                <span class="badge bg-secondary-subtle text-secondary border" style="font-size: 0.65rem;">
+                                    {{ $resp->respondent_status ?? 'KRT' }}
                                 </span>
-                            </td>
-                            <td>
-                                <div class="small fw-bold text-dark text-truncate" style="max-width: 120px;" title="{{ $resp->officer ? $resp->officer->name : '-' }}">
-                                    {{ $resp->officer ? $resp->officer->name : '-' }}
+                            </div>
+                            <div class="text-muted text-truncate d-flex align-items-center gap-1" style="font-size: 0.7rem;">
+                                <i class="bi bi-telephone text-secondary flex-shrink-0"></i>
+                                <span class="text-truncate">{{ $resp->phone ?? '-' }}</span>
+                            </div>
+                        </td>
+                        <td>
+                            <span class="badge bg-light text-primary border text-truncate d-inline-block text-start w-100" style="font-size: 0.72rem;" title="{{ $resp->agency }}">
+                                {{ $resp->agency }}
+                            </span>
+                        </td>
+                        <td>
+                            <div class="small text-secondary text-truncate d-flex align-items-center gap-1" style="font-size: 0.76rem;" title="{{ $resp->address }}">
+                                <i class="bi bi-geo-alt-fill text-danger flex-shrink-0"></i>
+                                <span class="text-truncate">{{ $resp->address }}</span>
+                            </div>
+                            @if($resp->district)
+                                <div class="mt-0.5">
+                                    <span class="badge bg-light text-secondary border text-truncate" style="font-size: 0.65rem; max-width: 100%;">
+                                        <i class="bi bi-pin-map-fill text-primary me-0.5"></i> {{ $resp->district }}
+                                    </span>
                                 </div>
-                                <div class="text-muted" style="font-size: 0.7rem;">{{ $resp->input_date->format('d/m/Y') }}</div>
-                            </td>
-                            <td class="text-center">
-                                @if($resp->basts->isNotEmpty())
-                                    <span class="badge bg-success-subtle text-success border border-success-subtle px-1.5 py-0.5" style="font-size: 0.7rem;" title="Sudah terbit BAST">
-                                        <i class="fa-solid fa-check me-0.5"></i> {{ $resp->basts->count() }} BAST
-                                    </span>
-                                @else
-                                    <span class="badge bg-secondary-subtle text-secondary border border-secondary-subtle px-1.5 py-0.5" style="font-size: 0.7rem;">
-                                        Belum Ada
-                                    </span>
-                                @endif
-                            </td>
-                            <td class="text-end text-nowrap">
-                                <div class="sp-action-btn-group">
-                                    <!-- Detail Modal Trigger -->
+                            @endif
+                        </td>
+                        <td>
+                            <span class="small fw-semibold text-dark text-truncate d-block" style="font-size: 0.76rem;" title="{{ $resp->assignment ? $resp->assignment->title : '-' }}">
+                                {{ $resp->assignment ? $resp->assignment->title : '-' }}
+                            </span>
+                        </td>
+                        <td>
+                            <div class="small fw-bold text-dark text-truncate" style="font-size: 0.76rem;" title="{{ $resp->officer ? $resp->officer->name : '-' }}">
+                                {{ $resp->officer ? $resp->officer->name : '-' }}
+                            </div>
+                            <div class="text-muted" style="font-size: 0.68rem;">{{ $resp->input_date->format('d/m/Y') }}</div>
+                        </td>
+                        <td class="text-center">
+                            @if($resp->basts->isNotEmpty())
+                                <span class="badge bg-success-subtle text-success border border-success-subtle rounded-pill px-1.5 py-0.5" style="font-size: 0.68rem;" title="Sudah terbit BAST">
+                                    <i class="bi bi-check-circle-fill me-0.5"></i> {{ $resp->basts->count() }} BAST
+                                </span>
+                            @else
+                                <span class="badge bg-secondary-subtle text-secondary border border-secondary-subtle rounded-pill px-1.5 py-0.5" style="font-size: 0.68rem;">
+                                    Belum Ada
+                                </span>
+                            @endif
+                        </td>
+                        <td class="text-end pe-2">
+                            <div class="d-flex align-items-center justify-content-end gap-1">
+                                <!-- Detail Modal Trigger -->
+                                <button type="button" 
+                                        class="bento-action-btn btn-view" 
+                                        title="Lihat Detail Responden" 
+                                        data-bs-toggle="tooltip"
+                                        onclick="openDetailRespondentModal({{ json_encode($resp) }})">
+                                    <i class="bi bi-eye"></i>
+                                </button>
+
+                                @if(auth()->user()->isAdmin())
+                                    <!-- Edit -->
                                     <button type="button" 
-                                            class="btn btn-light border sp-action-btn text-info" 
-                                            title="Lihat Detail Responden" 
+                                            class="bento-action-btn btn-edit" 
+                                            title="Edit Data" 
                                             data-bs-toggle="tooltip"
-                                            onclick="openDetailRespondentModal({{ json_encode($resp) }})">
-                                        <i class="fa-solid fa-eye"></i>
+                                            onclick="openEditRespondentModal({{ json_encode($resp) }})">
+                                        <i class="bi bi-pencil-square"></i>
                                     </button>
 
-                                    @if(auth()->user()->isAdmin())
-                                        <!-- Edit -->
-                                        <button type="button" 
-                                                class="btn btn-light border sp-action-btn text-warning" 
-                                                title="Edit Data" 
-                                                data-bs-toggle="tooltip"
-                                                onclick="openEditRespondentModal({{ json_encode($resp) }})">
-                                            <i class="fa-regular fa-pen-to-square"></i>
+                                    <!-- Hapus -->
+                                    <form method="POST" action="{{ route('admin.respondents.destroy', $resp) }}" class="d-inline" onsubmit="return confirm('Hapus data responden {{ addslashes($resp->name) }}?');">
+                                        @csrf
+                                        @method('DELETE')
+                                        <button type="submit" 
+                                                class="bento-action-btn btn-delete" 
+                                                title="Hapus Responden" 
+                                                data-bs-toggle="tooltip">
+                                            <i class="bi bi-trash3"></i>
                                         </button>
-
-                                        <!-- Hapus -->
-                                        <form method="POST" action="{{ route('admin.respondents.destroy', $resp) }}" class="d-inline" onsubmit="return confirm('Hapus data responden {{ addslashes($resp->name) }}?');">
-                                            @csrf
-                                            @method('DELETE')
-                                            <button type="submit" 
-                                                    class="btn btn-light border sp-action-btn text-danger" 
-                                                    title="Hapus Responden" 
-                                                    data-bs-toggle="tooltip">
-                                                <i class="fa-regular fa-trash-can"></i>
-                                            </button>
-                                        </form>
-                                    @endif
-                                </div>
-                            </td>
-                        </tr>
-                    @empty
-                        <tr>
-                            <td colspan="7" class="text-center py-5 text-muted">
-                                <i class="fa-solid fa-users-slash fa-3x mb-3 text-secondary opacity-50"></i>
-                                <div class="fw-semibold">Belum ada data responden ditemukan.</div>
-                                <div class="small">Klik tombol "Tambah Responden Baru" untuk menginput data responden.</div>
-                            </td>
-                        </tr>
-                    @endforelse
-                </tbody>
-            </table>
-        </div>
+                                    </form>
+                                @endif
+                            </div>
+                        </td>
+                    </tr>
+                @empty
+                    <tr>
+                        <td colspan="7" class="text-center py-5 text-muted">
+                            <div class="d-inline-flex p-3 rounded-circle bg-light text-secondary mb-2">
+                                <i class="bi bi-people fs-1 opacity-50"></i>
+                            </div>
+                            <div class="fw-semibold text-dark">Belum ada data responden ditemukan.</div>
+                            <div class="small text-muted">Klik tombol "Tambah Responden Baru" untuk menginput data responden.</div>
+                        </td>
+                    </tr>
+                @endforelse
+            </tbody>
+        </table>
     </div>
 
     @if($respondents->hasPages())
-        <div class="sp-card-footer bg-white border-top p-3 d-flex justify-content-between align-items-center">
-            <div class="small text-muted">
+        <div class="p-3 bg-white border-top d-flex justify-content-between align-items-center flex-wrap gap-2">
+            <div class="small text-muted" style="font-size: 0.75rem;">
                 Menampilkan {{ $respondents->firstItem() }} sampai {{ $respondents->lastItem() }} dari {{ $respondents->total() }} responden
             </div>
             <div>
@@ -274,11 +387,16 @@
      ============================================================== -->
 <div class="modal fade" id="createRespondentModal" tabindex="-1" aria-labelledby="createRespondentModalLabel" aria-hidden="true">
     <div class="modal-dialog modal-dialog-centered modal-lg">
-        <div class="modal-content border-0 shadow">
-            <div class="modal-header bg-light border-bottom">
-                <h5 class="modal-title fw-bold" id="createRespondentModalLabel">
-                    <i class="fa-solid fa-user-plus text-primary me-2"></i> Tambah Data Responden Baru
-                </h5>
+        <div class="modal-content border-0 shadow" style="border-radius: 20px; overflow: hidden;">
+            <div class="modal-header border-bottom py-3 px-4 bg-light">
+                <div class="d-flex align-items-center gap-2">
+                    <div class="rounded-3 p-1.5 text-white d-flex align-items-center justify-content-center" style="background: var(--bps-orange, #F37021); width: 32px; height: 32px;">
+                        <i class="bi bi-person-plus-fill"></i>
+                    </div>
+                    <h6 class="modal-title fw-bold text-dark mb-0" id="createRespondentModalLabel">
+                        Tambah Data Responden Baru
+                    </h6>
+                </div>
                 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
             <form method="POST" action="{{ route('admin.respondents.store') }}">
@@ -288,14 +406,14 @@
                     <div class="row g-3 mb-3">
                         <div class="col-md-7">
                             <label class="form-label small fw-semibold text-secondary">
-                                <i class="fa-solid fa-house-user text-primary me-1"></i> NAMA KEPALA KELUARGA (KRT) <span class="text-danger">*</span>
+                                <i class="bi bi-house-door-fill text-primary me-1"></i> NAMA KEPALA KELUARGA (KRT) <span class="text-danger">*</span>
                             </label>
                             <input type="text" id="admin_create_resp_name" name="name" class="form-control" placeholder="Contoh: Jamaluddin Ali" required>
                             <div class="form-text small">Nama kepala keluarga sesuai daftar sampel sensus/survei.</div>
                         </div>
                         <div class="col-md-5">
                             <label class="form-label small fw-semibold text-secondary">
-                                <i class="fa-solid fa-phone text-muted me-1"></i> NOMOR HP / WHATSAPP
+                                <i class="bi bi-telephone text-muted me-1"></i> NOMOR HP / WHATSAPP
                             </label>
                             <input type="text" name="phone" class="form-control" placeholder="Contoh: 081234567890">
                         </div>
@@ -306,10 +424,10 @@
                         <div class="col-md-7">
                             <div class="d-flex justify-content-between align-items-center mb-1">
                                 <label class="form-label small fw-semibold text-secondary mb-0">
-                                    <i class="fa-solid fa-user-check text-success me-1"></i> NAMA PEMBERI INFORMASI (OPSIONAL)
+                                    <i class="bi bi-person-check-fill text-success me-1"></i> NAMA PEMBERI INFORMASI (OPSIONAL)
                                 </label>
-                                <button type="button" class="btn btn-sm btn-outline-primary py-0 px-2" style="font-size: 0.72rem;" onclick="copyHeadNameToInformant('admin_create_resp_name', 'admin_create_informant_name', 'admin_create_status_select')">
-                                    <i class="fa-solid fa-copy me-1"></i> Sama dg KRT
+                                <button type="button" class="btn btn-sm btn-outline-primary py-0 px-2 rounded-pill" style="font-size: 0.72rem;" onclick="copyHeadNameToInformant('admin_create_resp_name', 'admin_create_informant_name', 'admin_create_status_select')">
+                                    <i class="bi bi-copy me-1"></i> Sama dg KRT
                                 </button>
                             </div>
                             <input type="text" id="admin_create_informant_name" name="informant_name" class="form-control" placeholder="Otomatis nama KRT jika belum diketahui">
@@ -317,7 +435,7 @@
                         </div>
                         <div class="col-md-5">
                             <label class="form-label small fw-semibold text-secondary">
-                                <i class="fa-solid fa-users text-primary me-1"></i> STATUS RESPONDEN / HUBUNGAN
+                                <i class="bi bi-people-fill text-primary me-1"></i> STATUS RESPONDEN / HUBUNGAN
                             </label>
                             <select id="admin_create_status_select" name="respondent_status" class="form-select">
                                 <option value="Kepala Keluarga (KRT)">Kepala Keluarga (KRT)</option>
@@ -335,19 +453,19 @@
                         <div class="col-md-6">
                             <div class="d-flex justify-content-between align-items-center mb-1">
                                 <label class="form-label small fw-semibold text-secondary mb-0">
-                                    <i class="fa-solid fa-building text-muted me-1"></i> INSTANSI / ASAL LEMBAGA
+                                    <i class="bi bi-building text-muted me-1"></i> INSTANSI / ASAL LEMBAGA
                                 </label>
                                 <div class="d-flex gap-1">
-                                    <button type="button" class="btn btn-sm btn-outline-secondary py-0 px-1.5" style="font-size: 0.68rem;" onclick="setAgencyValue('admin_create_agency', 'Rumah Tangga')">Ruta</button>
-                                    <button type="button" class="btn btn-sm btn-outline-secondary py-0 px-1.5" style="font-size: 0.68rem;" onclick="setAgencyValue('admin_create_agency', 'Pelaku Usaha')">Usaha</button>
-                                    <button type="button" class="btn btn-sm btn-outline-secondary py-0 px-1.5" style="font-size: 0.68rem;" onclick="setAgencyValue('admin_create_agency', 'Instansi')">Instansi</button>
+                                    <button type="button" class="btn btn-sm btn-outline-secondary py-0 px-1.5 rounded-pill" style="font-size: 0.68rem;" onclick="setAgencyValue('admin_create_agency', 'Rumah Tangga')">Ruta</button>
+                                    <button type="button" class="btn btn-sm btn-outline-secondary py-0 px-1.5 rounded-pill" style="font-size: 0.68rem;" onclick="setAgencyValue('admin_create_agency', 'Pelaku Usaha')">Usaha</button>
+                                    <button type="button" class="btn btn-sm btn-outline-secondary py-0 px-1.5 rounded-pill" style="font-size: 0.68rem;" onclick="setAgencyValue('admin_create_agency', 'Instansi')">Instansi</button>
                                 </div>
                             </div>
                             <input type="text" id="admin_create_agency" name="agency" class="form-control" value="Rumah Tangga" placeholder="Contoh: Rumah Tangga / Pelaku Usaha Agribisnis">
                         </div>
                         <div class="col-md-6">
                             <label class="form-label small fw-semibold text-secondary">
-                                <i class="fa-solid fa-briefcase text-muted me-1"></i> KEGIATAN TERKAIT
+                                <i class="bi bi-briefcase text-muted me-1"></i> KEGIATAN TERKAIT
                             </label>
                             <select id="admin_create_assignment" name="assignment_id" class="form-select" onchange="autoFillPurpose(this, 'admin_create_purpose')">
                                 <option value="">-- Pilih Kegiatan --</option>
@@ -362,13 +480,13 @@
                     <div class="row g-3 mb-3">
                         <div class="col-md-7">
                             <label class="form-label small fw-semibold text-secondary">
-                                <i class="fa-solid fa-location-dot text-danger me-1"></i> ALAMAT LENGKAP <span class="text-danger">*</span>
+                                <i class="bi bi-geo-alt-fill text-danger me-1"></i> ALAMAT LENGKAP <span class="text-danger">*</span>
                             </label>
                             <textarea name="address" class="form-control" rows="2" placeholder="Nama jalan, RT/RW, Dusun/Desa..." required></textarea>
                         </div>
                         <div class="col-md-5">
                             <label class="form-label small fw-semibold text-secondary">
-                                <i class="fa-solid fa-map-pin text-primary me-1"></i> KECAMATAN / WILAYAH
+                                <i class="bi bi-pin-map-fill text-primary me-1"></i> KECAMATAN / WILAYAH
                             </label>
                             <select name="district" id="admin_create_district" class="form-select">
                                 <option value="">-- Pilih Kecamatan (Kolaka Utara) --</option>
@@ -389,7 +507,7 @@
                     <div class="row g-3">
                         <div class="col-md-7">
                             <label class="form-label small fw-semibold text-secondary">
-                                <i class="fa-solid fa-user-gear text-primary me-1"></i> PETUGAS LAPANGAN / PPL (ALOKASI SAMPEL) <span class="text-danger">*</span>
+                                <i class="bi bi-person-gear text-primary me-1"></i> PETUGAS LAPANGAN / PPL (ALOKASI SAMPEL) <span class="text-danger">*</span>
                             </label>
                             <select name="officer_id" class="form-select" required>
                                 <option value="">-- Pilih Petugas Lapangan / PPL --</option>
@@ -405,10 +523,10 @@
                         </div>
                     </div>
                 </div>
-                <div class="modal-footer bg-light border-top">
-                    <button type="button" class="btn btn-light" data-bs-dismiss="modal">Batal</button>
-                    <button type="submit" class="btn btn-sp-primary">
-                        <i class="fa-solid fa-floppy-disk me-1"></i> Simpan Responden
+                <div class="modal-footer bg-light border-top py-2.5 px-4 d-flex justify-content-end gap-2">
+                    <button type="button" class="btn btn-outline-secondary rounded-pill px-3 py-1.5" data-bs-dismiss="modal" style="font-size: 0.82rem;">Batal</button>
+                    <button type="submit" class="btn-bps-orange py-1.5 px-3" style="font-size: 0.82rem;">
+                        <i class="bi bi-check-lg me-1"></i> Simpan Responden
                     </button>
                 </div>
             </form>
@@ -421,11 +539,16 @@
      ============================================================== -->
 <div class="modal fade" id="editRespondentModal" tabindex="-1" aria-labelledby="editRespondentModalLabel" aria-hidden="true">
     <div class="modal-dialog modal-dialog-centered modal-lg">
-        <div class="modal-content border-0 shadow">
-            <div class="modal-header bg-light border-bottom">
-                <h5 class="modal-title fw-bold" id="editRespondentModalLabel">
-                    <i class="fa-regular fa-pen-to-square text-warning me-2"></i> Edit Data Responden
-                </h5>
+        <div class="modal-content border-0 shadow" style="border-radius: 20px; overflow: hidden;">
+            <div class="modal-header border-bottom py-3 px-4 bg-light">
+                <div class="d-flex align-items-center gap-2">
+                    <div class="rounded-3 p-1.5 text-white d-flex align-items-center justify-content-center bg-warning" style="width: 32px; height: 32px;">
+                        <i class="bi bi-pencil-square"></i>
+                    </div>
+                    <h6 class="modal-title fw-bold text-dark mb-0" id="editRespondentModalLabel">
+                        Edit Data Responden
+                    </h6>
+                </div>
                 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
             <form id="editRespondentForm" method="POST">
@@ -436,13 +559,13 @@
                     <div class="row g-3 mb-3">
                         <div class="col-md-7">
                             <label class="form-label small fw-semibold text-secondary">
-                                <i class="fa-solid fa-house-user text-primary me-1"></i> NAMA KEPALA KELUARGA (KRT) <span class="text-danger">*</span>
+                                <i class="bi bi-house-door-fill text-primary me-1"></i> NAMA KEPALA KELUARGA (KRT) <span class="text-danger">*</span>
                             </label>
                             <input type="text" id="edit_resp_name" name="name" class="form-control" required>
                         </div>
                         <div class="col-md-5">
                             <label class="form-label small fw-semibold text-secondary">
-                                <i class="fa-solid fa-phone text-muted me-1"></i> NOMOR HP / WHATSAPP
+                                <i class="bi bi-telephone text-muted me-1"></i> NOMOR HP / WHATSAPP
                             </label>
                             <input type="text" id="edit_resp_phone" name="phone" class="form-control">
                         </div>
@@ -453,10 +576,10 @@
                         <div class="col-md-7">
                             <div class="d-flex justify-content-between align-items-center mb-1">
                                 <label class="form-label small fw-semibold text-secondary mb-0">
-                                    <i class="fa-solid fa-user-check text-success me-1"></i> NAMA PEMBERI INFORMASI (OPSIONAL)
+                                    <i class="bi bi-person-check-fill text-success me-1"></i> NAMA PEMBERI INFORMASI (OPSIONAL)
                                 </label>
-                                <button type="button" class="btn btn-sm btn-outline-primary py-0 px-2" style="font-size: 0.72rem;" onclick="copyHeadNameToInformant('edit_resp_name', 'edit_resp_informant_name', 'edit_resp_status')">
-                                    <i class="fa-solid fa-copy me-1"></i> Sama dg KRT
+                                <button type="button" class="btn btn-sm btn-outline-primary py-0 px-2 rounded-pill" style="font-size: 0.72rem;" onclick="copyHeadNameToInformant('edit_resp_name', 'edit_resp_informant_name', 'edit_resp_status')">
+                                    <i class="bi bi-copy me-1"></i> Sama dg KRT
                                 </button>
                             </div>
                             <input type="text" id="edit_resp_informant_name" name="informant_name" class="form-control">
@@ -464,7 +587,7 @@
                         </div>
                         <div class="col-md-5">
                             <label class="form-label small fw-semibold text-secondary">
-                                <i class="fa-solid fa-users text-primary me-1"></i> STATUS RESPONDEN / HUBUNGAN
+                                <i class="bi bi-people-fill text-primary me-1"></i> STATUS RESPONDEN / HUBUNGAN
                             </label>
                             <select id="edit_resp_status" name="respondent_status" class="form-select">
                                 <option value="Kepala Keluarga (KRT)">Kepala Keluarga (KRT)</option>
@@ -482,19 +605,19 @@
                         <div class="col-md-6">
                             <div class="d-flex justify-content-between align-items-center mb-1">
                                 <label class="form-label small fw-semibold text-secondary mb-0">
-                                    <i class="fa-solid fa-building text-muted me-1"></i> INSTANSI / ASAL LEMBAGA
+                                    <i class="bi bi-building text-muted me-1"></i> INSTANSI / ASAL LEMBAGA
                                 </label>
                                 <div class="d-flex gap-1">
-                                    <button type="button" class="btn btn-sm btn-outline-secondary py-0 px-1.5" style="font-size: 0.68rem;" onclick="setAgencyValue('edit_resp_agency', 'Rumah Tangga')">Ruta</button>
-                                    <button type="button" class="btn btn-sm btn-outline-secondary py-0 px-1.5" style="font-size: 0.68rem;" onclick="setAgencyValue('edit_resp_agency', 'Pelaku Usaha')">Usaha</button>
-                                    <button type="button" class="btn btn-sm btn-outline-secondary py-0 px-1.5" style="font-size: 0.68rem;" onclick="setAgencyValue('edit_resp_agency', 'Instansi')">Instansi</button>
+                                    <button type="button" class="btn btn-sm btn-outline-secondary py-0 px-1.5 rounded-pill" style="font-size: 0.68rem;" onclick="setAgencyValue('edit_resp_agency', 'Rumah Tangga')">Ruta</button>
+                                    <button type="button" class="btn btn-sm btn-outline-secondary py-0 px-1.5 rounded-pill" style="font-size: 0.68rem;" onclick="setAgencyValue('edit_resp_agency', 'Pelaku Usaha')">Usaha</button>
+                                    <button type="button" class="btn btn-sm btn-outline-secondary py-0 px-1.5 rounded-pill" style="font-size: 0.68rem;" onclick="setAgencyValue('edit_resp_agency', 'Instansi')">Instansi</button>
                                 </div>
                             </div>
                             <input type="text" id="edit_resp_agency" name="agency" class="form-control">
                         </div>
                         <div class="col-md-6">
                             <label class="form-label small fw-semibold text-secondary">
-                                <i class="fa-solid fa-briefcase text-muted me-1"></i> KEGIATAN TERKAIT
+                                <i class="bi bi-briefcase text-muted me-1"></i> KEGIATAN TERKAIT
                             </label>
                             <select id="edit_resp_assignment" name="assignment_id" class="form-select" onchange="autoFillPurpose(this, 'edit_resp_purpose')">
                                 <option value="">-- Tidak Terikat Kegiatan Tertentu --</option>
@@ -509,13 +632,13 @@
                     <div class="row g-3 mb-3">
                         <div class="col-md-7">
                             <label class="form-label small fw-semibold text-secondary">
-                                <i class="fa-solid fa-location-dot text-danger me-1"></i> ALAMAT LENGKAP <span class="text-danger">*</span>
+                                <i class="bi bi-geo-alt-fill text-danger me-1"></i> ALAMAT LENGKAP <span class="text-danger">*</span>
                             </label>
                             <textarea id="edit_resp_address" name="address" class="form-control" rows="2" required></textarea>
                         </div>
                         <div class="col-md-5">
                             <label class="form-label small fw-semibold text-secondary">
-                                <i class="fa-solid fa-map-pin text-primary me-1"></i> KECAMATAN / WILAYAH
+                                <i class="bi bi-pin-map-fill text-primary me-1"></i> KECAMATAN / WILAYAH
                             </label>
                             <select name="district" id="edit_resp_district" class="form-select">
                                 <option value="">-- Pilih Kecamatan (Kolaka Utara) --</option>
@@ -535,7 +658,7 @@
                     <div class="row g-3">
                         <div class="col-md-7">
                             <label class="form-label small fw-semibold text-secondary">
-                                <i class="fa-solid fa-user-gear text-primary me-1"></i> PETUGAS LAPANGAN / PPL (ALOKASI SAMPEL) <span class="text-danger">*</span>
+                                <i class="bi bi-person-gear text-primary me-1"></i> PETUGAS LAPANGAN / PPL (ALOKASI SAMPEL) <span class="text-danger">*</span>
                             </label>
                             <select id="edit_resp_officer" name="officer_id" class="form-select" required>
                                 <option value="">-- Pilih Petugas Lapangan / PPL --</option>
@@ -550,10 +673,10 @@
                         </div>
                     </div>
                 </div>
-                <div class="modal-footer bg-light border-top">
-                    <button type="button" class="btn btn-light" data-bs-dismiss="modal">Batal</button>
-                    <button type="submit" class="btn btn-sp-primary">
-                        <i class="fa-solid fa-floppy-disk me-1"></i> Simpan Perubahan
+                <div class="modal-footer bg-light border-top py-2.5 px-4 d-flex justify-content-end gap-2">
+                    <button type="button" class="btn btn-outline-secondary rounded-pill px-3 py-1.5" data-bs-dismiss="modal" style="font-size: 0.82rem;">Batal</button>
+                    <button type="submit" class="btn-bps-orange py-1.5 px-3" style="font-size: 0.82rem;">
+                        <i class="bi bi-check-lg me-1"></i> Simpan Perubahan
                     </button>
                 </div>
             </form>
@@ -567,11 +690,16 @@
      ============================================================== -->
 <div class="modal fade" id="detailRespondentModal" tabindex="-1" aria-labelledby="detailRespondentModalLabel" aria-hidden="true">
     <div class="modal-dialog modal-dialog-centered modal-lg">
-        <div class="modal-content border-0 shadow">
-            <div class="modal-header bg-light border-bottom">
-                <h5 class="modal-title fw-bold" id="detailRespondentModalLabel">
-                    <i class="fa-solid fa-address-card text-info me-2"></i> Rincian Profil Responden
-                </h5>
+        <div class="modal-content border-0 shadow" style="border-radius: 20px; overflow: hidden;">
+            <div class="modal-header border-bottom py-3 px-4 bg-light">
+                <div class="d-flex align-items-center gap-2">
+                    <div class="rounded-3 p-1.5 text-white d-flex align-items-center justify-content-center bg-primary" style="width: 32px; height: 32px;">
+                        <i class="bi bi-person-vcard-fill"></i>
+                    </div>
+                    <h6 class="modal-title fw-bold text-dark mb-0" id="detailRespondentModalLabel">
+                        Rincian Profil Responden
+                    </h6>
+                </div>
                 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
             <div class="modal-body p-4">
@@ -581,7 +709,7 @@
                         <h5 class="fw-bold text-dark mb-0" id="det_name"></h5>
                     </div>
                     <div class="col-sm-6">
-                        <div class="text-muted small">Pemberi Informasi & Status:</div>
+                        <div class="text-muted small">Pemberi Informasi &amp; Status:</div>
                         <div class="fw-bold text-primary">
                             <span id="det_informant_name">-</span>
                             <span class="badge bg-secondary-subtle text-secondary border ms-1" id="det_status">-</span>
@@ -605,7 +733,7 @@
                     </div>
                     <div class="col-12">
                         <div class="text-muted small">Alamat Lengkap:</div>
-                        <div class="text-dark bg-light p-2 rounded border small" id="det_address"></div>
+                        <div class="text-dark bg-light p-2.5 rounded-3 border small" id="det_address"></div>
                         <div class="mt-1" id="det_district_badge"></div>
                     </div>
                     <div class="col-12">
@@ -616,9 +744,9 @@
 
                 <div class="border-top pt-3">
                     <div class="d-flex justify-content-between align-items-center mb-2">
-                        <span class="fw-bold small text-dark"><i class="fa-solid fa-file-contract text-primary me-1"></i> Histori Dokumen BAST:</span>
-                        <a href="{{ route('admin.basts.respondents.index') }}" class="btn btn-sm btn-outline-primary">
-                            <i class="fa-solid fa-plus me-1"></i> Terbitkan BAST Baru
+                        <span class="fw-bold small text-dark"><i class="bi bi-file-earmark-text text-primary me-1"></i> Histori Dokumen BAST:</span>
+                        <a href="{{ route('admin.basts.respondents.index') }}" class="btn btn-sm btn-bps-orange py-1 px-2.5" style="font-size: 0.75rem;">
+                            <i class="bi bi-plus-lg me-1"></i> Terbitkan BAST Baru
                         </a>
                     </div>
                     <div id="det_basts_container" class="small text-muted">
@@ -626,8 +754,8 @@
                     </div>
                 </div>
             </div>
-            <div class="modal-footer bg-light border-top">
-                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Tutup</button>
+            <div class="modal-footer bg-light border-top py-2.5 px-4 d-flex justify-content-end">
+                <button type="button" class="btn btn-outline-secondary rounded-pill px-3 py-1.5" data-bs-dismiss="modal" style="font-size: 0.82rem;">Tutup</button>
             </div>
         </div>
     </div>
@@ -708,7 +836,7 @@
         document.getElementById('det_address').innerText = resp.address;
         const distBadge = document.getElementById('det_district_badge');
         if (resp.district) {
-            distBadge.innerHTML = `<span class="badge bg-light text-secondary border"><i class="fa-solid fa-map-pin text-primary me-1"></i> ${resp.district}</span>`;
+            distBadge.innerHTML = `<span class="badge bg-light text-secondary border"><i class="bi bi-pin-map-fill text-primary me-1"></i> ${resp.district}</span>`;
         } else {
             distBadge.innerHTML = '';
         }
@@ -723,8 +851,8 @@
                                 <strong>${b.bast_number}</strong>
                                 <span class="text-muted ms-2">(${b.bast_date.substring(0, 10)})</span>
                             </div>
-                            <a href="/admin/basts/respondents/${b.id}/download" class="btn btn-sm btn-outline-success">
-                                <i class="fa-solid fa-download me-1"></i> Unduh PDF
+                            <a href="/admin/basts/respondents/${b.id}/download" class="btn btn-sm btn-outline-success rounded-pill px-2.5">
+                                <i class="bi bi-download me-1"></i> Unduh PDF
                             </a>
                          </li>`;
             });
