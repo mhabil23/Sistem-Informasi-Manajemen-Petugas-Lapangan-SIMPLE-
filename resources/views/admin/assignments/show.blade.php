@@ -4,24 +4,145 @@
 @section('page_title', 'Detail Kegiatan & Penugasan')
 
 @section('breadcrumb')
-    <li class="breadcrumb-item"><a href="{{ route('admin.dashboard') }}">Admin</a></li>
-    <li class="breadcrumb-item"><a href="{{ route('admin.assignments.index') }}">Kegiatan</a></li>
-    <li class="breadcrumb-item active" aria-current="page">Detail & Pembagian Tugas</li>
+    <li class="breadcrumb-item"><a href="{{ route('admin.dashboard') }}" class="text-decoration-none">SIMPLE</a></li>
+    <li class="breadcrumb-item"><a href="{{ route('admin.assignments.index') }}" class="text-decoration-none">Kegiatan</a></li>
+    <li class="breadcrumb-item active" aria-current="page">Detail &amp; Pembagian Tugas</li>
 @endsection
+
+@push('styles')
+<style>
+/* Bento Grid Layout & Cards */
+.bento-card-clean {
+    background: #FFFFFF;
+    border-radius: 20px;
+    border: 1px solid #E2E8F0;
+    box-shadow: 0 4px 16px rgba(15, 23, 42, 0.03);
+    transition: all 0.22s ease;
+}
+
+/* Action Buttons */
+.btn-bps-orange {
+    background: #F37021;
+    color: #FFFFFF !important;
+    border: none;
+    font-weight: 700;
+    border-radius: 999px;
+    padding: 0.55rem 1.25rem;
+    box-shadow: 0 4px 14px rgba(243, 112, 33, 0.25);
+    transition: all 0.2s ease;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.4rem;
+    text-decoration: none;
+}
+.btn-bps-orange:hover {
+    background: #E05D0E;
+    color: #FFFFFF !important;
+    transform: translateY(-1px);
+    box-shadow: 0 6px 18px rgba(243, 112, 33, 0.35);
+}
+
+/* Bento Table Card */
+.bento-table-card {
+    background: #FFFFFF;
+    border-radius: 20px;
+    border: 1px solid #E2E8F0;
+    box-shadow: 0 4px 18px rgba(15, 23, 42, 0.03);
+    overflow: hidden;
+}
+.bento-table-header {
+    padding: 1.15rem 1.35rem;
+    border-bottom: 1px solid #E2E8F0;
+    background: #FAFAFA;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 0.75rem;
+}
+.bento-table th {
+    background: #F8FAFC;
+    color: #475569;
+    font-weight: 700;
+    font-size: 0.72rem;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    padding: 0.95rem 1.15rem;
+    border-bottom: 1px solid #E2E8F0;
+}
+.bento-table td {
+    padding: 1rem 1.15rem;
+    vertical-align: middle;
+    border-bottom: 1px solid #F1F5F9;
+    font-size: 0.84rem;
+}
+.bento-table tbody tr:hover {
+    background-color: #F8FAFC;
+}
+
+/* Action buttons in table */
+.bento-action-btn {
+    width: 32px;
+    height: 32px;
+    border-radius: 10px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    border: 1px solid #E2E8F0;
+    background: #FFFFFF;
+    transition: all 0.15s ease;
+    text-decoration: none;
+    font-size: 0.85rem;
+}
+.bento-action-btn:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 2px 8px rgba(15, 23, 42, 0.08);
+}
+.bento-action-btn.btn-edit {
+    color: #D97706;
+}
+.bento-action-btn.btn-edit:hover {
+    background: #FFFBEB;
+    border-color: #FDE68A;
+}
+.bento-action-btn.btn-delete {
+    color: #DC2626;
+}
+.bento-action-btn.btn-delete:hover {
+    background: #FEF2F2;
+    border-color: #FECACA;
+}
+
+.user-avatar-circle {
+    width: 38px;
+    height: 38px;
+    border-radius: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 700;
+    font-size: 0.95rem;
+    background: #FFF4ED;
+    color: #F37021;
+    border: 1px solid rgba(243, 112, 33, 0.2);
+    flex-shrink: 0;
+}
+</style>
+@endpush
 
 @section('content')
 <!-- Back Button & Header -->
-<div class="d-flex align-items-center justify-content-between mb-4">
+<div class="d-flex flex-wrap align-items-center justify-content-between gap-3 mb-4">
     <div>
-        <a href="{{ route('admin.assignments.index') }}" class="btn btn-sm btn-outline-secondary mb-2">
-            <i class="fa-solid fa-arrow-left me-1"></i> Kembali ke Daftar Kegiatan
+        <a href="{{ route('admin.assignments.index') }}" class="btn btn-outline-secondary btn-sm rounded-pill px-3 py-1 mb-2 d-inline-flex align-items-center gap-1.5" style="font-size: 0.78rem;">
+            <i class="bi bi-arrow-left"></i> Kembali ke Daftar Kegiatan
         </a>
-        <h3 class="fw-bold text-dark mb-0">{{ $assignment->title }}</h3>
+        <h4 class="fw-bold text-dark mb-0" style="letter-spacing: -0.015em;">{{ $assignment->title }}</h4>
     </div>
     <div class="d-flex gap-2">
         @if(auth()->user()->isAdmin())
-            <button type="button" class="btn btn-sp-primary" data-bs-toggle="modal" data-bs-target="#assignOfficerModal">
-                <i class="fa-solid fa-user-plus me-1"></i> Tugaskan Petugas Baru
+            <button type="button" class="btn-bps-orange shadow-sm" data-bs-toggle="modal" data-bs-target="#assignOfficerModal">
+                <i class="bi bi-person-plus-fill me-1"></i> Tugaskan Petugas Baru
             </button>
         @endif
     </div>
@@ -29,117 +150,137 @@
 
 <!-- Overview Cards Row -->
 <div class="row g-3 mb-4">
+    <!-- Informasi Kegiatan -->
     <div class="col-lg-8">
-        <div class="sp-card h-100 mb-0">
-            <div class="sp-card-header">
-                <h5 class="sp-card-title">
-                    <i class="fa-solid fa-circle-info text-primary"></i>
-                    Informasi Kegiatan
-                </h5>
-                @if($assignment->status === 'ongoing')
-                    <span class="badge bg-warning-subtle text-warning border border-warning-subtle px-3 py-1">
-                        <i class="fa-solid fa-spinner fa-spin me-1"></i> Sedang Berjalan
-                    </span>
-                @elseif($assignment->status === 'completed')
-                    <span class="badge bg-success-subtle text-success border border-success-subtle px-3 py-1">
-                        <i class="fa-solid fa-check me-1"></i> Selesai
-                    </span>
-                @else
-                    <span class="badge bg-secondary-subtle text-secondary border border-secondary-subtle px-3 py-1">
-                        {{ ucfirst($assignment->status) }}
-                    </span>
-                @endif
+        <div class="bento-card-clean h-100 p-4">
+            <div class="d-flex align-items-center justify-content-between pb-3 mb-3 border-bottom">
+                <div class="d-flex align-items-center gap-2">
+                    <div class="rounded-3 p-1.5 text-white d-flex align-items-center justify-content-center" style="background: #F37021; width: 34px; height: 34px;">
+                        <i class="bi bi-info-circle-fill"></i>
+                    </div>
+                    <div>
+                        <h6 class="fw-bold text-dark mb-0">Informasi Rinci Kegiatan</h6>
+                        <span class="text-muted" style="font-size: 0.72rem;">Detail jadwal, cakupan wilayah, dan dasar pelaksanaan</span>
+                    </div>
+                </div>
+                <div>
+                    @if($assignment->status === 'ongoing')
+                        <span class="badge bg-warning-subtle text-warning-emphasis border border-warning-subtle px-3 py-1.5 rounded-pill" style="font-size: 0.74rem;">
+                            <i class="bi bi-play-circle-fill me-1"></i> Sedang Berjalan
+                        </span>
+                    @elseif($assignment->status === 'completed')
+                        <span class="badge bg-success-subtle text-success border border-success-subtle px-3 py-1.5 rounded-pill" style="font-size: 0.74rem;">
+                            <i class="bi bi-check-circle-fill me-1"></i> Selesai
+                        </span>
+                    @elseif($assignment->status === 'draft')
+                        <span class="badge bg-secondary-subtle text-secondary border border-secondary-subtle px-3 py-1.5 rounded-pill" style="font-size: 0.74rem;">
+                            <i class="bi bi-pencil-square me-1"></i> Draft
+                        </span>
+                    @else
+                        <span class="badge bg-danger-subtle text-danger border border-danger-subtle px-3 py-1.5 rounded-pill" style="font-size: 0.74rem;">
+                            {{ ucfirst($assignment->status) }}
+                        </span>
+                    @endif
+                </div>
             </div>
-            <div class="sp-card-body">
-                <div class="row g-3 mb-3">
-                    <div class="col-sm-4">
-                        <div class="text-muted small">Waktu Pelaksanaan:</div>
-                        <div class="fw-bold text-dark">
-                            <i class="fa-regular fa-calendar-days text-primary me-1"></i>
-                            {{ $assignment->start_date->translatedFormat('d F Y') }} s/d {{ $assignment->end_date->translatedFormat('d F Y') }}
-                        </div>
+
+            <div class="row g-3 mb-3">
+                <div class="col-sm-4">
+                    <div class="text-muted small mb-1"><i class="bi bi-calendar3 me-1 text-primary"></i> Waktu Pelaksanaan</div>
+                    <div class="fw-bold text-dark small">
+                        {{ $assignment->start_date->translatedFormat('d F Y') }} &ndash; {{ $assignment->end_date->translatedFormat('d F Y') }}
                     </div>
-                    <div class="col-sm-4">
-                        <div class="text-muted small">Lokasi Wilayah:</div>
-                        <div class="fw-bold text-dark">
-                            <i class="fa-solid fa-location-dot text-danger me-1"></i>
-                            {{ $assignment->location }}
-                        </div>
-                    </div>
-                    <div class="col-sm-4">
-                        <div class="text-muted small">Target Kuota Responden:</div>
-                        <div class="fw-bold text-dark">
-                            <i class="fa-solid fa-bullseye text-primary me-1"></i>
-                            @if($assignment->target_respondents > 0)
-                                <span class="badge bg-primary-subtle text-primary border border-primary-subtle fs-7">{{ number_format($assignment->target_respondents) }} Sampel</span>
-                            @else
-                                <span class="text-muted">Belum Ditentukan</span>
-                            @endif
-                        </div>
+                    <span class="badge bg-light text-secondary border rounded-pill px-2 py-0.5 mt-1" style="font-size: 0.68rem;">
+                        {{ $assignment->start_date->diffInDays($assignment->end_date) + 1 }} Hari Kerja
+                    </span>
+                </div>
+                <div class="col-sm-4">
+                    <div class="text-muted small mb-1"><i class="bi bi-geo-alt-fill me-1 text-danger"></i> Lokasi Wilayah</div>
+                    <div class="fw-bold text-dark small">
+                        {{ $assignment->location }}
                     </div>
                 </div>
-
-                @if($assignment->basis_dipa || $assignment->st_number || $assignment->basis_st)
-                    <div class="border-top pt-3 mb-3">
-                        <div class="text-muted small fw-semibold mb-1">
-                            <i class="fa-solid fa-scale-balanced text-primary me-1"></i> B. Dasar Pelaksanaan (Laporan &amp; Pengeluaran Riil):
-                        </div>
-                        <div class="small text-dark mb-1"><strong>1. DIPA:</strong> {{ $assignment->basis_dipa ?? '-' }}</div>
-                        <div class="small text-dark">
-                            <strong>2. Surat Tugas:</strong> {{ $assignment->basis_st ?: ($assignment->st_number ?? '-') }}
-                        </div>
+                <div class="col-sm-4">
+                    <div class="text-muted small mb-1"><i class="bi bi-pie-chart-fill me-1 text-success"></i> Target Kuota Responden</div>
+                    <div class="fw-bold text-dark">
+                        @if($assignment->target_respondents > 0)
+                            <span class="badge bg-primary-subtle text-primary border border-primary-subtle px-2.5 py-1 rounded-pill" style="font-size: 0.78rem;">
+                                {{ number_format($assignment->target_respondents) }} Sampel
+                            </span>
+                        @else
+                            <span class="text-muted small">Belum Ditentukan</span>
+                        @endif
                     </div>
-                @endif
-
-                <div class="border-top pt-3">
-                    <div class="text-muted small mb-1">Deskripsi & Petunjuk Teknis:</div>
-                    <p class="text-secondary small mb-0" style="white-space: pre-line;">
-                        {{ $assignment->description ?? 'Tidak ada uraian deskripsi tambahan.' }}
-                    </p>
                 </div>
+            </div>
+
+            @if($assignment->basis_dipa || $assignment->st_number || $assignment->basis_st)
+                <div class="border-top pt-3 mb-3">
+                    <div class="text-muted small fw-bold mb-2">
+                        <i class="bi bi-journal-check text-primary me-1"></i> Dasar Pelaksanaan (Laporan &amp; Pengeluaran Riil):
+                    </div>
+                    <div class="small text-dark mb-1">
+                        <span class="text-muted">1. DIPA:</span> <strong>{{ $assignment->basis_dipa ?? '-' }}</strong>
+                    </div>
+                    <div class="small text-dark">
+                        <span class="text-muted">2. Surat Tugas:</span> <strong>{{ $assignment->basis_st ?: ($assignment->st_number ?? '-') }}</strong>
+                    </div>
+                </div>
+            @endif
+
+            <div class="border-top pt-3">
+                <div class="text-muted small mb-1 fw-bold">Uraian / Deskripsi Petunjuk Teknis:</div>
+                <p class="text-secondary small mb-0" style="white-space: pre-line; line-height: 1.6;">
+                    {{ $assignment->description ?? 'Tidak ada uraian deskripsi tambahan.' }}
+                </p>
             </div>
         </div>
     </div>
 
+    <!-- Ringkasan Progres -->
     <div class="col-lg-4">
-        <div class="sp-card h-100 mb-0">
-            <div class="sp-card-header">
-                <h5 class="sp-card-title">
-                    <i class="fa-solid fa-chart-pie text-success"></i>
-                    Ringkasan Progres
-                </h5>
-            </div>
-            <div class="sp-card-body">
+        <div class="bento-card-clean h-100 p-4 d-flex flex-column justify-content-between">
+            <div>
+                <div class="d-flex align-items-center gap-2 pb-3 mb-3 border-bottom">
+                    <div class="rounded-3 p-1.5 text-white d-flex align-items-center justify-content-center" style="background: #16A34A; width: 34px; height: 34px;">
+                        <i class="bi bi-bar-chart-fill"></i>
+                    </div>
+                    <div>
+                        <h6 class="fw-bold text-dark mb-0">Ringkasan Progres</h6>
+                        <span class="text-muted" style="font-size: 0.72rem;">Statistik capaian real-time</span>
+                    </div>
+                </div>
+
                 <div class="d-flex justify-content-between align-items-center mb-3">
-                    <span class="text-muted small">Petugas Ditugaskan:</span>
-                    <strong class="text-dark fs-5">{{ $assignment->assignmentOfficers->count() }} Orang</strong>
+                    <span class="text-muted small"><i class="bi bi-people me-1 text-primary"></i> Petugas Ditugaskan:</span>
+                    <strong class="text-dark fs-6">{{ $assignment->assignmentOfficers->count() }} Orang</strong>
                 </div>
                 <div class="d-flex justify-content-between align-items-center mb-3">
-                    <span class="text-muted small">Responden Terdata:</span>
+                    <span class="text-muted small"><i class="bi bi-file-earmark-person me-1 text-info"></i> Responden Terdata:</span>
                     <div>
-                        <strong class="text-primary fs-5">{{ $assignment->respondents->count() }}</strong>
+                        <strong class="text-primary fs-6">{{ $assignment->respondents->count() }}</strong>
                         @if($assignment->target_respondents > 0)
-                            <span class="text-muted small">/ {{ number_format($assignment->target_respondents) }} Kuota</span>
+                            <span class="text-muted small">/ {{ number_format($assignment->target_respondents) }}</span>
                         @else
                             <span class="text-muted small">Responden</span>
                         @endif
                     </div>
                 </div>
                 <div class="d-flex justify-content-between align-items-center mb-3">
-                    <span class="text-muted small">BAST Diterbitkan:</span>
-                    <strong class="text-success fs-5">{{ $assignment->respondentBasts->count() + $assignment->officerBasts->count() }} Dokumen</strong>
+                    <span class="text-muted small"><i class="bi bi-file-earmark-check me-1 text-success"></i> BAST Diterbitkan:</span>
+                    <strong class="text-success fs-6">{{ $assignment->respondentBasts->count() + $assignment->officerBasts->count() }} Dokumen</strong>
                 </div>
 
                 @if($assignment->target_respondents > 0)
                     @php
                         $respPercent = round(($assignment->respondents->count() / $assignment->target_respondents) * 100);
                     @endphp
-                    <div class="border-top pt-2 mb-2">
-                        <div class="d-flex justify-content-between small text-muted mb-1">
-                            <span>Pencapaian Kuota Responden:</span>
+                    <div class="border-top pt-3 mb-3">
+                        <div class="d-flex justify-content-between small text-muted mb-1.5">
+                            <span style="font-size: 0.76rem;">Pencapaian Kuota Responden:</span>
                             <strong class="{{ $respPercent >= 100 ? 'text-success' : 'text-primary' }}">{{ $respPercent }}%</strong>
                         </div>
-                        <div class="progress" style="height: 6px;">
+                        <div class="progress" style="height: 6px; border-radius: 999px;">
                             <div class="progress-bar {{ $respPercent >= 100 ? 'bg-success' : ($respPercent >= 50 ? 'bg-primary' : 'bg-warning') }}" role="progressbar" style="width: {{ min(100, $respPercent) }}%;"></div>
                         </div>
                     </div>
@@ -151,14 +292,18 @@
                     $percent = $totalOfficers > 0 ? round(($completedOfficers / $totalOfficers) * 100) : 0;
                 @endphp
                 <div class="{{ $assignment->target_respondents > 0 ? '' : 'border-top pt-3' }}">
-                    <div class="d-flex justify-content-between small text-muted mb-1">
-                        <span>Penyelesaian Tugas Petugas:</span>
+                    <div class="d-flex justify-content-between small text-muted mb-1.5">
+                        <span style="font-size: 0.76rem;">Penyelesaian Tugas Petugas:</span>
                         <strong class="text-dark">{{ $percent }}%</strong>
                     </div>
-                    <div class="progress" style="height: 6px;">
+                    <div class="progress" style="height: 6px; border-radius: 999px;">
                         <div class="progress-bar bg-success" role="progressbar" style="width: {{ $percent }}%;" aria-valuenow="{{ $percent }}" aria-valuemin="0" aria-valuemax="100"></div>
                     </div>
                 </div>
+            </div>
+            
+            <div class="mt-3 pt-3 border-top text-center text-muted" style="font-size: 0.72rem;">
+                <i class="bi bi-clock-history me-1"></i> Data diperbarui otomatis secara real-time
             </div>
         </div>
     </div>
@@ -167,159 +312,175 @@
 <!-- ==============================================================
      BAGIAN 1: PEMBAGIAN TUGAS PETUGAS LAPANGAN
      ============================================================== -->
-<div class="sp-card mb-4">
-    <div class="sp-card-header">
-        <h5 class="sp-card-title">
-            <i class="fa-solid fa-user-gear text-primary"></i>
-            Daftar Petugas & Pembagian Tugas ({{ $assignment->assignmentOfficers->count() }})
-        </h5>
+<div class="bento-table-card mb-4">
+    <div class="bento-table-header">
+        <div class="d-flex align-items-center gap-2">
+            <div class="rounded-3 p-1.5 text-white d-flex align-items-center justify-content-center" style="background: #2563EB; width: 34px; height: 34px;">
+                <i class="bi bi-people-fill"></i>
+            </div>
+            <div>
+                <h6 class="fw-bold text-dark mb-0">Daftar Petugas &amp; Rincian Tugas</h6>
+                <span class="text-muted" style="font-size: 0.72rem;">Total {{ $assignment->assignmentOfficers->count() }} petugas ditugaskan pada kegiatan ini</span>
+            </div>
+        </div>
         @if(auth()->user()->isAdmin())
-            <button type="button" class="btn btn-sm btn-sp-primary" data-bs-toggle="modal" data-bs-target="#assignOfficerModal">
-                <i class="fa-solid fa-plus me-1"></i> Tambah Petugas
+            <button type="button" class="btn btn-outline-primary btn-sm rounded-pill px-3 py-1" data-bs-toggle="modal" data-bs-target="#assignOfficerModal">
+                <i class="bi bi-plus-lg me-1"></i> Tambah Petugas
             </button>
         @endif
     </div>
-    <div class="sp-card-body p-0">
-        <div class="table-responsive">
-            <table class="table sp-table align-middle">
-                <thead>
+
+    <div class="table-responsive">
+        <table class="table bento-table align-middle mb-0">
+            <thead>
+                <tr>
+                    <th style="min-width: 220px;">Petugas Lapangan</th>
+                    <th style="min-width: 260px;">Tugas Spesifik yang Diberikan</th>
+                    <th class="text-center" style="min-width: 120px;">Status Tugas</th>
+                    <th style="min-width: 200px;">Catatan Progres Petugas</th>
+                    @if(auth()->user()->isAdmin())
+                        <th class="text-end pe-3" style="min-width: 90px;">Aksi</th>
+                    @endif
+                </tr>
+            </thead>
+            <tbody>
+                @forelse($assignment->assignmentOfficers as $officerAssigned)
                     <tr>
-                        <th style="min-width: 220px;">Petugas Lapangan</th>
-                        <th style="min-width: 260px;">Tugas Spesifik yang Diberikan</th>
-                        <th>Status Tugas</th>
-                        <th style="min-width: 200px;">Catatan Progres Petugas</th>
+                        <td>
+                            <div class="d-flex align-items-center gap-2.5">
+                                <div class="user-avatar-circle">
+                                    {{ strtoupper(substr($officerAssigned->user->name, 0, 1)) }}
+                                </div>
+                                <div>
+                                    <div class="fw-bold text-dark" style="font-size: 0.88rem;">{{ $officerAssigned->user->name }}</div>
+                                    <div class="small text-muted"><i class="bi bi-telephone me-1"></i> {{ $officerAssigned->user->phone ?? '-' }}</div>
+                                </div>
+                            </div>
+                        </td>
+                        <td>
+                            <div class="small text-dark fw-medium" style="line-height: 1.5;">
+                                {{ $officerAssigned->specific_task ?? 'Pelaksana pendataan dan verifikasi lapangan.' }}
+                            </div>
+                        </td>
+                        <td class="text-center">
+                            @if($officerAssigned->status === 'completed')
+                                <span class="badge bg-success-subtle text-success border border-success-subtle px-2.5 py-1 rounded-pill" style="font-size: 0.72rem;">
+                                    <i class="bi bi-check-circle-fill me-1"></i> Selesai
+                                </span>
+                            @elseif($officerAssigned->status === 'in_progress')
+                                <span class="badge bg-warning-subtle text-warning-emphasis border border-warning-subtle px-2.5 py-1 rounded-pill" style="font-size: 0.72rem;">
+                                    <i class="bi bi-play-circle-fill me-1"></i> Berjalan
+                                </span>
+                            @else
+                                <span class="badge bg-secondary-subtle text-secondary border border-secondary-subtle px-2.5 py-1 rounded-pill" style="font-size: 0.72rem;">
+                                    <i class="bi bi-clock me-1"></i> Menunggu
+                                </span>
+                            @endif
+                        </td>
+                        <td>
+                            <div class="small text-muted fst-italic">
+                                {{ $officerAssigned->progress_notes ?? 'Belum ada catatan progres.' }}
+                            </div>
+                        </td>
                         @if(auth()->user()->isAdmin())
-                            <th class="text-end" style="min-width: 100px;">Aksi</th>
+                            <td class="text-end pe-3 text-nowrap">
+                                <div class="d-inline-flex gap-1.5 align-items-center">
+                                    <!-- Edit Rincian Tugas -->
+                                    <button type="button" 
+                                            class="bento-action-btn btn-edit" 
+                                            title="Edit Rincian Tugas" 
+                                            data-bs-toggle="tooltip"
+                                            onclick="openEditOfficerModal({{ json_encode($officerAssigned) }})">
+                                        <i class="bi bi-pencil-square"></i>
+                                    </button>
+
+                                    <!-- Batalkan / Hapus Penugasan -->
+                                    <form method="POST" 
+                                          action="{{ route('admin.assignments.officers.remove', [$assignment, $officerAssigned]) }}" 
+                                          class="d-inline" 
+                                          onsubmit="return confirm('Batalkan penugasan untuk {{ addslashes($officerAssigned->user->name) }}?');">
+                                        @csrf
+                                        @method('DELETE')
+                                        <button type="submit" 
+                                                class="bento-action-btn btn-delete" 
+                                                title="Batalkan Penugasan" 
+                                                data-bs-toggle="tooltip">
+                                            <i class="bi bi-trash3"></i>
+                                        </button>
+                                    </form>
+                                </div>
+                            </td>
                         @endif
                     </tr>
-                </thead>
-                <tbody>
-                    @forelse($assignment->assignmentOfficers as $officerAssigned)
-                        <tr>
-                            <td>
-                                <div class="d-flex align-items-center gap-2">
-                                    <div class="sp-user-avatar" style="width: 36px; height: 36px; font-size: 0.9rem;">
-                                        {{ strtoupper(substr($officerAssigned->user->name, 0, 1)) }}
-                                    </div>
-                                    <div>
-                                        <div class="fw-bold text-dark">{{ $officerAssigned->user->name }}</div>
-                                        <div class="small text-muted"><i class="fa-solid fa-phone me-1"></i> {{ $officerAssigned->user->phone ?? '-' }}</div>
-                                    </div>
-                                </div>
-                            </td>
-                            <td>
-                                <div class="small text-dark fw-medium">
-                                    {{ $officerAssigned->specific_task ?? 'Pelaksana pendataan dan verifikasi lapangan.' }}
-                                </div>
-                            </td>
-                            <td>
-                                @if($officerAssigned->status === 'completed')
-                                    <span class="badge bg-success-subtle text-success border border-success-subtle px-2 py-1">
-                                        <i class="fa-solid fa-circle-check me-1"></i> Selesai
-                                    </span>
-                                @elseif($officerAssigned->status === 'in_progress')
-                                    <span class="badge bg-warning-subtle text-warning border border-warning-subtle px-2 py-1">
-                                        <i class="fa-solid fa-spinner fa-spin me-1"></i> Berjalan
-                                    </span>
-                                @else
-                                    <span class="badge bg-secondary-subtle text-secondary border border-secondary-subtle px-2 py-1">
-                                        <i class="fa-solid fa-clock me-1"></i> Menunggu
-                                    </span>
-                                @endif
-                            </td>
-                            <td>
-                                <div class="small text-muted fst-italic">
-                                    {{ $officerAssigned->progress_notes ?? 'Belum ada catatan progres.' }}
-                                </div>
-                            </td>
-                            @if(auth()->user()->isAdmin())
-                                <td class="text-end text-nowrap">
-                                    <div class="sp-action-btn-group">
-                                        <!-- Edit Rincian Tugas -->
-                                        <button type="button" 
-                                                class="btn btn-light border sp-action-btn text-warning" 
-                                                title="Edit Rincian Tugas" 
-                                                data-bs-toggle="tooltip"
-                                                onclick="openEditOfficerModal({{ json_encode($officerAssigned) }})">
-                                            <i class="fa-regular fa-pen-to-square"></i>
-                                        </button>
-
-                                        <!-- Batalkan / Hapus Penugasan -->
-                                        <form method="POST" 
-                                              action="{{ route('admin.assignments.officers.remove', [$assignment, $officerAssigned]) }}" 
-                                              class="d-inline" 
-                                              onsubmit="return confirm('Batalkan penugasan untuk {{ addslashes($officerAssigned->user->name) }}?');">
-                                            @csrf
-                                            @method('DELETE')
-                                            <button type="submit" 
-                                                    class="btn btn-light border sp-action-btn text-danger" 
-                                                    title="Batalkan Penugasan" 
-                                                    data-bs-toggle="tooltip">
-                                                <i class="fa-regular fa-trash-can"></i>
-                                            </button>
-                                        </form>
-                                    </div>
-                                </td>
-                            @endif
-                        </tr>
-                    @empty
-                        <tr>
-                            <td colspan="5" class="text-center py-5 text-muted">
-                                <i class="fa-solid fa-user-xmark fa-3x mb-3 text-secondary opacity-50"></i>
-                                <div class="fw-semibold">Belum ada petugas yang ditugaskan pada kegiatan ini.</div>
-                                <div class="small">Klik tombol "Tugaskan Petugas Baru" di atas untuk menambahkan petugas penanggung jawab.</div>
-                            </td>
-                        </tr>
-                    @endforelse
-                </tbody>
-            </table>
-        </div>
+                @empty
+                    <tr>
+                        <td colspan="{{ auth()->user()->isAdmin() ? '5' : '4' }}" class="text-center py-5 text-muted">
+                            <i class="bi bi-person-x display-5 text-secondary opacity-50 d-block mb-2"></i>
+                            <div class="fw-bold text-dark">Belum ada petugas yang ditugaskan pada kegiatan ini.</div>
+                            <div class="small">Klik tombol "Tugaskan Petugas Baru" di atas untuk menambahkan petugas penanggung jawab.</div>
+                        </td>
+                    </tr>
+                @endforelse
+            </tbody>
+        </table>
     </div>
 </div>
 
 <!-- ==============================================================
      BAGIAN 2: RESPONDEN TERKAIT KEGIATAN INI
      ============================================================== -->
-<div class="sp-card mb-4">
-    <div class="sp-card-header">
-        <h5 class="sp-card-title">
-            <i class="fa-solid fa-id-card text-info"></i>
-            Responden yang Terdata pada Kegiatan Ini ({{ $assignment->respondents->count() }})
-        </h5>
-    </div>
-    <div class="sp-card-body p-0">
-        <div class="table-responsive">
-            <table class="table sp-table align-middle">
-                <thead>
-                    <tr>
-                        <th>Nama Responden</th>
-                        <th>Instansi / Lembaga</th>
-                        <th>Alamat</th>
-                        <th>Petugas Penginput</th>
-                        <th>Tanggal Input</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    @forelse($assignment->respondents as $resp)
-                        <tr>
-                            <td class="fw-bold text-dark">{{ $resp->name }}</td>
-                            <td><span class="badge bg-light text-primary border">{{ $resp->agency }}</span></td>
-                            <td class="small text-secondary">{{ Str::limit($resp->address, 45) }}</td>
-                            <td>
-                                <span class="small fw-semibold text-dark">{{ $resp->officer->name }}</span>
-                            </td>
-                            <td class="small text-muted">{{ $resp->input_date->format('d/m/Y') }}</td>
-                        </tr>
-                    @empty
-                        <tr>
-                            <td colspan="5" class="text-center py-4 text-muted small">
-                                Belum ada responden yang diinput untuk kegiatan ini.
-                            </td>
-                        </tr>
-                    @endforelse
-                </tbody>
-            </table>
+<div class="bento-table-card mb-4">
+    <div class="bento-table-header">
+        <div class="d-flex align-items-center gap-2">
+            <div class="rounded-3 p-1.5 text-white d-flex align-items-center justify-content-center" style="background: #0D9488; width: 34px; height: 34px;">
+                <i class="bi bi-file-earmark-person-fill"></i>
+            </div>
+            <div>
+                <h6 class="fw-bold text-dark mb-0">Responden yang Terdata pada Kegiatan Ini</h6>
+                <span class="text-muted" style="font-size: 0.72rem;">Total {{ $assignment->respondents->count() }} responden terdaftar</span>
+            </div>
         </div>
+    </div>
+
+    <div class="table-responsive">
+        <table class="table bento-table align-middle mb-0">
+            <thead>
+                <tr>
+                    <th style="min-width: 200px;">Nama Responden</th>
+                    <th style="min-width: 180px;">Instansi / Lembaga</th>
+                    <th style="min-width: 240px;">Alamat</th>
+                    <th style="min-width: 180px;">Petugas Penginput</th>
+                    <th style="min-width: 120px;">Tanggal Input</th>
+                </tr>
+            </thead>
+            <tbody>
+                @forelse($assignment->respondents as $resp)
+                    <tr>
+                        <td class="fw-bold text-dark">{{ $resp->name }}</td>
+                        <td>
+                            <span class="badge bg-light text-primary border rounded-pill px-2.5 py-1">
+                                {{ $resp->agency }}
+                            </span>
+                        </td>
+                        <td class="small text-secondary">{{ Str::limit($resp->address, 50) }}</td>
+                        <td>
+                            <div class="small fw-semibold text-dark d-flex align-items-center gap-1.5">
+                                <i class="bi bi-person text-secondary"></i>
+                                <span>{{ $resp->officer->name }}</span>
+                            </div>
+                        </td>
+                        <td class="small text-muted">{{ $resp->input_date->format('d/m/Y') }}</td>
+                    </tr>
+                @empty
+                    <tr>
+                        <td colspan="5" class="text-center py-4 text-muted small">
+                            <i class="bi bi-inbox text-secondary opacity-50 d-block mb-1" style="font-size: 1.5rem;"></i>
+                            Belum ada responden yang diinput untuk kegiatan ini.
+                        </td>
+                    </tr>
+                @endforelse
+            </tbody>
+        </table>
     </div>
 </div>
 
@@ -329,18 +490,23 @@
      ============================================================== -->
 <div class="modal fade" id="assignOfficerModal" tabindex="-1" aria-labelledby="assignOfficerModalLabel" aria-hidden="true">
     <div class="modal-dialog modal-dialog-centered">
-        <div class="modal-content border-0 shadow">
-            <div class="modal-header bg-light border-bottom">
-                <h5 class="modal-title fw-bold" id="assignOfficerModalLabel">
-                    <i class="fa-solid fa-user-plus text-primary me-2"></i> Tugaskan Petugas
-                </h5>
+        <div class="modal-content border-0 shadow" style="border-radius: 20px; overflow: hidden;">
+            <div class="modal-header bg-light border-bottom px-4 py-3">
+                <div class="d-flex align-items-center gap-2">
+                    <div class="rounded-3 p-1.5 text-white d-flex align-items-center justify-content-center" style="background: #F37021; width: 32px; height: 32px;">
+                        <i class="bi bi-person-plus-fill"></i>
+                    </div>
+                    <h5 class="modal-title fw-bold text-dark mb-0" id="assignOfficerModalLabel" style="font-size: 1rem;">
+                        Tugaskan Petugas Baru
+                    </h5>
+                </div>
                 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
             <form method="POST" action="{{ route('admin.assignments.officers.assign', $assignment) }}">
                 @csrf
                 <div class="modal-body p-4">
                     <div class="mb-3">
-                        <label class="form-label small fw-semibold text-secondary">PILIH PETUGAS LAPANGAN <span class="text-danger">*</span></label>
+                        <label class="form-label small fw-bold text-dark mb-1">PILIH PETUGAS LAPANGAN <span class="text-danger">*</span></label>
                         <select name="user_id" class="form-select" required>
                             <option value="">-- Pilih Petugas --</option>
                             @foreach($availableOfficers as $officer)
@@ -348,24 +514,24 @@
                             @endforeach
                         </select>
                         @if($availableOfficers->isEmpty())
-                            <small class="text-danger" style="font-size: 0.72rem;">Semua petugas aktif telah ditugaskan pada kegiatan ini.</small>
+                            <small class="text-danger mt-1 d-block" style="font-size: 0.72rem;">Semua petugas aktif telah ditugaskan pada kegiatan ini.</small>
                         @endif
                     </div>
 
                     <div class="mb-3">
-                        <label class="form-label small fw-semibold text-secondary">DESKRIPSI TUGAS SPESIFIK <span class="text-danger">*</span></label>
+                        <label class="form-label small fw-bold text-dark mb-1">DESKRIPSI TUGAS SPESIFIK <span class="text-danger">*</span></label>
                         <textarea name="specific_task" class="form-control" rows="3" placeholder="Contoh: Pendataan responden wilayah Dusun Timur, target: 25 responden." required></textarea>
                     </div>
 
                     <div class="mb-0">
-                        <label class="form-label small fw-semibold text-secondary">CATATAN AWAL (OPSIONAL)</label>
+                        <label class="form-label small fw-bold text-dark mb-1">CATATAN AWAL (OPSIONAL)</label>
                         <input type="text" name="progress_notes" class="form-control" placeholder="Contoh: Telah berkoordinasi dengan kepala desa setempat.">
                     </div>
                 </div>
-                <div class="modal-footer bg-light border-top">
-                    <button type="button" class="btn btn-light" data-bs-dismiss="modal">Batal</button>
-                    <button type="submit" class="btn btn-sp-primary" {{ $availableOfficers->isEmpty() ? 'disabled' : '' }}>
-                        <i class="fa-solid fa-check me-1"></i> Simpan Penugasan
+                <div class="modal-footer bg-light border-top px-4 py-3">
+                    <button type="button" class="btn btn-light rounded-pill px-3.5" data-bs-dismiss="modal">Batal</button>
+                    <button type="submit" class="btn-bps-orange" {{ $availableOfficers->isEmpty() ? 'disabled' : '' }}>
+                        <i class="bi bi-check2-circle me-1"></i> Simpan Penugasan
                     </button>
                 </div>
             </form>
@@ -378,11 +544,16 @@
      ============================================================== -->
 <div class="modal fade" id="editOfficerTaskModal" tabindex="-1" aria-labelledby="editOfficerTaskModalLabel" aria-hidden="true">
     <div class="modal-dialog modal-dialog-centered">
-        <div class="modal-content border-0 shadow">
-            <div class="modal-header bg-light border-bottom">
-                <h5 class="modal-title fw-bold" id="editOfficerTaskModalLabel">
-                    <i class="fa-solid fa-pen-to-square text-warning me-2"></i> Perbarui Tugas Petugas
-                </h5>
+        <div class="modal-content border-0 shadow" style="border-radius: 20px; overflow: hidden;">
+            <div class="modal-header bg-light border-bottom px-4 py-3">
+                <div class="d-flex align-items-center gap-2">
+                    <div class="rounded-3 p-1.5 text-white d-flex align-items-center justify-content-center" style="background: #D97706; width: 32px; height: 32px;">
+                        <i class="bi bi-pencil-square"></i>
+                    </div>
+                    <h5 class="modal-title fw-bold text-dark mb-0" id="editOfficerTaskModalLabel" style="font-size: 1rem;">
+                        Perbarui Tugas Petugas
+                    </h5>
+                </div>
                 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
             <form id="editOfficerTaskForm" method="POST">
@@ -390,18 +561,18 @@
                 @method('PUT')
                 <div class="modal-body p-4">
                     <div class="mb-3">
-                        <label class="form-label small fw-semibold text-secondary">NAMA PETUGAS</label>
+                        <label class="form-label small fw-bold text-dark mb-1">NAMA PETUGAS</label>
                         <input type="text" id="edit_officer_name" class="form-control bg-light" readonly disabled>
                     </div>
 
                     <div class="mb-3">
-                        <label class="form-label small fw-semibold text-secondary">TUGAS SPESIFIK <span class="text-danger">*</span></label>
+                        <label class="form-label small fw-bold text-dark mb-1">TUGAS SPESIFIK <span class="text-danger">*</span></label>
                         <textarea id="edit_officer_task" name="specific_task" class="form-control" rows="3" required></textarea>
                     </div>
 
                     <div class="row g-2 mb-3">
                         <div class="col-12">
-                            <label class="form-label small fw-semibold text-secondary">STATUS PENYELESAIAN <span class="text-danger">*</span></label>
+                            <label class="form-label small fw-bold text-dark mb-1">STATUS PENYELESAIAN <span class="text-danger">*</span></label>
                             <select id="edit_officer_status" name="status" class="form-select" required>
                                 <option value="pending">Menunggu (Pending)</option>
                                 <option value="in_progress">Sedang Berjalan (In Progress)</option>
@@ -411,14 +582,14 @@
                     </div>
 
                     <div class="mb-0">
-                        <label class="form-label small fw-semibold text-secondary">CATATAN PROGRES</label>
+                        <label class="form-label small fw-bold text-dark mb-1">CATATAN PROGRES</label>
                         <textarea id="edit_officer_notes" name="progress_notes" class="form-control" rows="2" placeholder="Catatan perkembangan tugas..."></textarea>
                     </div>
                 </div>
-                <div class="modal-footer bg-light border-top">
-                    <button type="button" class="btn btn-light" data-bs-dismiss="modal">Batal</button>
-                    <button type="submit" class="btn btn-sp-primary">
-                        <i class="fa-solid fa-floppy-disk me-1"></i> Simpan Perubahan
+                <div class="modal-footer bg-light border-top px-4 py-3">
+                    <button type="button" class="btn btn-light rounded-pill px-3.5" data-bs-dismiss="modal">Batal</button>
+                    <button type="submit" class="btn-bps-orange">
+                        <i class="bi bi-check2-circle me-1"></i> Simpan Perubahan
                     </button>
                 </div>
             </form>
@@ -442,4 +613,3 @@
     }
 </script>
 @endpush
-
