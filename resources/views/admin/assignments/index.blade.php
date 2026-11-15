@@ -4,7 +4,6 @@
 @section('page_title', 'Kegiatan & Penugasan')
 
 @section('breadcrumb')
-    <li class="breadcrumb-item"><a href="{{ route('admin.dashboard') }}" class="text-decoration-none">SIMPLE</a></li>
     <li class="breadcrumb-item"><a href="{{ route('admin.dashboard') }}" class="text-decoration-none">Admin</a></li>
     <li class="breadcrumb-item active" aria-current="page">Kegiatan &amp; Penugasan</li>
 @endsection
@@ -173,23 +172,8 @@
 @endpush
 
 @section('content')
-<!-- Header & Quick Actions -->
-<div class="d-flex flex-wrap justify-content-between align-items-center gap-3 mb-4">
-    <div>
-        <h4 class="fw-bold text-dark mb-1" style="letter-spacing: -0.015em;">Kegiatan &amp; Pembagian Tugas</h4>
-        <p class="text-muted small mb-0">Kelola kegiatan administrasi resmi, tentukan jadwal &amp; lokasi, serta bagikan tugas kepada masing-masing petugas lapangan.</p>
-    </div>
-    <div>
-        @if(auth()->user()->isAdmin())
-            <button type="button" class="btn-bps-orange shadow-sm" data-bs-toggle="modal" data-bs-target="#createAssignmentModal">
-                <i class="bi bi-calendar-plus-fill me-1"></i> Buat Kegiatan Baru
-            </button>
-        @endif
-    </div>
-</div>
-
 <!-- Bento Search & Filter Card -->
-<div class="bento-card-clean p-3 mb-4">
+<div class="bento-card-clean p-3 mb-3">
     <form method="GET" action="{{ route('admin.assignments.index') }}" class="row g-2 align-items-center">
         <div class="col-lg-7 col-md-6">
             <div class="input-group">
@@ -231,7 +215,7 @@
 <div class="bento-table-card mb-4">
     <div class="bento-table-header">
         <div class="d-flex align-items-center gap-2">
-            <div class="rounded-3 p-1.5 text-white d-flex align-items-center justify-content-center" style="background: var(--bps-orange, #F37021); width: 32px; height: 32px;">
+            <div class="rounded-3 p-1.5 text-white d-flex align-items-center justify-content-center" style="background: var(--bps-orange, #F37021); width: 34px; height: 34px;">
                 <i class="bi bi-briefcase-fill"></i>
             </div>
             <div>
@@ -241,9 +225,16 @@
                 <span class="text-muted" style="font-size: 0.7rem;">Total {{ $assignments->total() }} kegiatan terdaftar dalam sistem</span>
             </div>
         </div>
-        <span class="badge bg-light text-secondary border px-2.5 py-1 rounded-pill" style="font-size: 0.7rem;">
-            Halaman {{ $assignments->currentPage() }} dari {{ max(1, $assignments->lastPage()) }}
-        </span>
+        <div class="d-flex align-items-center gap-2">
+            <span class="badge bg-light text-secondary border px-2.5 py-1.5 rounded-pill" style="font-size: 0.7rem;">
+                Halaman {{ $assignments->currentPage() }} dari {{ max(1, $assignments->lastPage()) }}
+            </span>
+            @if(auth()->user()->isAdmin())
+                <button type="button" class="btn-bps-orange shadow-sm py-1.5 px-3" style="font-size: 0.8rem;" data-bs-toggle="modal" data-bs-target="#createAssignmentModal">
+                    <i class="bi bi-calendar-plus-fill me-1"></i> Buat Kegiatan Baru
+                </button>
+            @endif
+        </div>
     </div>
 
     <div class="bento-table-container-fixed">
