@@ -1,117 +1,254 @@
 @extends('layouts.auth')
 
-@section('title', 'Masuk ke Sistem')
+@section('title', 'Masuk ke Sistem - SIMPLE BPS Kolaka Utara')
 
 @section('content')
-<div class="auth-header">
-    <div class="auth-logo">
-        <img src="{{ asset('images/logo.png') }}" alt="Logo BPS SIMPLE">
+<div class="auth-bento-card">
+
+    <!-- ==============================================================
+         LEFT HERO SHOWCASE PANE (IDENTITY, SIMPLE HIGHLIGHT & ACRONYM)
+         ============================================================== -->
+    <div class="auth-hero-pane">
+        <!-- Background Art Accent -->
+        <div class="hero-bg-accent"></div>
+
+        <!-- Top: Logo & Header BPS Kolaka Utara -->
+        <div>
+            <div class="d-flex align-items-center gap-3 mb-4">
+                <div class="p-2 bg-white rounded-4 shadow-sm border d-flex align-items-center justify-content-center" 
+                     style="width: 58px; height: 58px; border-color: rgba(243, 112, 33, 0.25) !important;">
+                    <img src="{{ asset('images/logo.png') }}" alt="Logo BPS Kolaka Utara" style="width: 100%; height: 100%; object-fit: contain;">
+                </div>
+                <div>
+                    <span class="d-block text-muted fw-bold text-uppercase" style="font-size: 0.68rem; letter-spacing: 0.08em;">
+                        Badan Pusat Statistik
+                    </span>
+                    <span class="d-block fw-extrabold text-dark" style="font-size: 1.05rem; font-weight: 800; line-height: 1.25;">
+                        Kabupaten Kolaka Utara
+                    </span>
+                </div>
+            </div>
+
+            <!-- Pill Badge -->
+            <div class="mb-2">
+                <span class="badge text-white px-2.5 py-1 rounded-pill" style="background: #F37021; font-size: 0.72rem; font-weight: 700;">
+                    <i class="bi bi-patch-check-fill me-1"></i> Portal Resmi Lapangan
+                </span>
+            </div>
+
+            <!-- Prominent SIMPLE Title Highlight -->
+            <div class="mb-3">
+                <h1 class="display-5 fw-extrabold mb-1" style="color: #0F172A; font-weight: 850; letter-spacing: -0.025em; line-height: 1.15;">
+                    SIMPLE<span style="color: var(--bps-orange);">.</span>
+                </h1>
+            </div>
+
+            <!-- ACRONYM HIGHLIGHT CARD (S-I-M-P-E-L) -->
+            <div class="p-3 mb-3" style="background: rgba(255, 255, 255, 0.9); border: 1.5px solid rgba(243, 112, 33, 0.3); border-radius: 18px; box-shadow: 0 4px 18px rgba(243, 112, 33, 0.06); backdrop-filter: blur(8px);">
+                <div class="d-flex align-items-center justify-content-between mb-1.5">
+                    <span class="text-uppercase fw-bold text-muted" style="font-size: 0.65rem; letter-spacing: 0.08em;">
+                        Kepanjangan Singkatan
+                    </span>
+                    <span class="badge bg-warning-subtle text-warning-emphasis border border-warning-subtle rounded-pill" style="font-size: 0.65rem; font-weight: 700;">
+                        Nama Resmi
+                    </span>
+                </div>
+                <div class="fw-bold" style="font-size: 0.94rem; line-height: 1.5; color: #1E293B;">
+                    <span class="text-bps-orange fw-bolder" style="font-size: 1.12rem;">S</span>istem 
+                    <span class="text-bps-orange fw-bolder" style="font-size: 1.12rem;">I</span>nformasi 
+                    <span class="text-bps-orange fw-bolder" style="font-size: 1.12rem;">M</span>anajemen 
+                    <span class="text-bps-orange fw-bolder" style="font-size: 1.12rem;">P</span>elayanan &amp; 
+                    <span class="text-bps-orange fw-bolder" style="font-size: 1.12rem;">E</span>valuasi 
+                    <span class="text-bps-orange fw-bolder" style="font-size: 1.12rem;">L</span>apangan
+                </div>
+            </div>
+
+            <!-- Brief Tagline -->
+            <p class="text-secondary small mb-4" style="line-height: 1.55; font-size: 0.84rem;">
+                Aplikasi terintegrasi untuk pendataan sensus dan survei, administrasi tanda terima BAST digital, pelaporan perjalanan dinas, serta pemantauan progres real-time.
+            </p>
+
+            <!-- 3 Feature Highlight Pills (Desktop only) -->
+            <div class="d-none d-lg-flex flex-column gap-2 mb-4">
+                <div class="d-flex align-items-center gap-2.5 p-2 rounded-3 bg-white bg-opacity-75 border" style="border-color: rgba(243, 112, 33, 0.16) !important;">
+                    <div class="rounded-3 d-flex align-items-center justify-content-center text-white" style="width: 32px; height: 32px; background: #16A34A; flex-shrink: 0; font-size: 0.9rem;">
+                        <i class="bi bi-pen-fill"></i>
+                    </div>
+                    <span class="small fw-semibold text-dark" style="font-size: 0.78rem;">
+                        Tanda Terima BAST Digital Responden &amp; Petugas (TTD Canvas)
+                    </span>
+                </div>
+                <div class="d-flex align-items-center gap-2.5 p-2 rounded-3 bg-white bg-opacity-75 border" style="border-color: rgba(243, 112, 33, 0.16) !important;">
+                    <div class="rounded-3 d-flex align-items-center justify-content-center text-white" style="width: 32px; height: 32px; background: #7C3AED; flex-shrink: 0; font-size: 0.9rem;">
+                        <i class="bi bi-file-earmark-pdf-fill"></i>
+                    </div>
+                    <span class="small fw-semibold text-dark" style="font-size: 0.78rem;">
+                        Laporan Perjalanan Dinas &amp; Auto-Generate Berkas PDF
+                    </span>
+                </div>
+                <div class="d-flex align-items-center gap-2.5 p-2 rounded-3 bg-white bg-opacity-75 border" style="border-color: rgba(243, 112, 33, 0.16) !important;">
+                    <div class="rounded-3 d-flex align-items-center justify-content-center text-white" style="width: 32px; height: 32px; background: #0284C7; flex-shrink: 0; font-size: 0.9rem;">
+                        <i class="bi bi-speedometer2"></i>
+                    </div>
+                    <span class="small fw-semibold text-dark" style="font-size: 0.78rem;">
+                        Dashboard Monitoring Capaian &amp; Rekapitulasi Progres Wilayah
+                    </span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Bottom Quote Box (Desktop) -->
+        <div class="d-none d-lg-block pt-3 border-top" style="border-color: rgba(243, 112, 33, 0.18) !important;">
+            <div class="d-flex align-items-start gap-2 text-muted" style="font-size: 0.76rem; font-style: italic;">
+                <i class="bi bi-quote text-bps-orange fs-5 lh-1 flex-shrink-0"></i>
+                <div>
+                    Kualitas data statistik berawal dari ketelitian dan integritas di setiap kunjungan lapangan.
+                    <span class="d-block fw-bold text-dark not-italic mt-0.5" style="font-style: normal; font-size: 0.72rem;">
+                        &mdash; BPS Kabupaten Kolaka Utara
+                    </span>
+                </div>
+            </div>
+        </div>
     </div>
-    <h3 class="fw-bold mb-1 tracking-wide">SIMPLE</h3>
-    <p class="text-white-50 small mb-0">Sistem Informasi Manajemen Petugas Lapangan</p>
-</div>
 
-<div class="auth-body">
-    @if(session('success'))
-        <div class="alert alert-success alert-dismissible fade show d-flex align-items-center" role="alert">
-            <i class="fa-solid fa-circle-check me-2 fs-5"></i>
-            <div>{{ session('success') }}</div>
-            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+    <!-- ==============================================================
+         RIGHT FORM PANE (LOGIN FORM & DEMO CREDENTIALS)
+         ============================================================== -->
+    <div class="auth-form-pane">
+        <!-- Form Header -->
+        <div class="mb-4">
+            <h2 class="fw-bold mb-1" style="font-size: 1.45rem; color: #0F172A; letter-spacing: -0.015em;">
+                Masuk ke Portal
+            </h2>
+            <p class="text-muted small mb-0">
+                Silakan masukkan username atau email dan kata sandi akun Anda.
+            </p>
         </div>
-    @endif
 
-    @if(session('error'))
-        <div class="alert alert-danger alert-dismissible fade show d-flex align-items-center" role="alert">
-            <i class="fa-solid fa-circle-exclamation me-2 fs-5"></i>
-            <div>{{ session('error') }}</div>
-            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-        </div>
-    @endif
-
-    @if($errors->has('login'))
-        <div class="alert alert-danger alert-dismissible fade show d-flex align-items-center" role="alert">
-            <i class="fa-solid fa-triangle-exclamation me-2 fs-5"></i>
-            <div>{{ $errors->first('login') }}</div>
-            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-        </div>
-    @endif
-
-    <form method="POST" action="{{ route('login.post') }}" class="needs-validation">
-        @csrf
-
-        <div class="mb-3">
-            <label for="login" class="form-label fw-semibold text-secondary small">USERNAME ATAU EMAIL</label>
-            <div class="input-group">
-                <span class="input-group-text bg-light border-end-0 text-muted">
-                    <i class="fa-regular fa-user"></i>
-                </span>
-                <input type="text" 
-                       class="form-control border-start-0 ps-0 @error('login') is-invalid @enderror" 
-                       id="login" 
-                       name="login" 
-                       value="{{ old('login') }}" 
-                       placeholder="Masukkan username atau email" 
-                       required 
-                       autofocus>
+        <!-- Feedback & Error Alerts -->
+        @if(session('success'))
+            <div class="alert alert-success alert-dismissible fade show d-flex align-items-center py-2 px-3 mb-3 rounded-3" role="alert" style="font-size: 0.82rem;">
+                <i class="bi bi-check-circle-fill me-2 fs-6 flex-shrink-0"></i>
+                <div class="flex-grow-1">{{ session('success') }}</div>
+                <button type="button" class="btn-close py-2" data-bs-dismiss="alert" aria-label="Close"></button>
             </div>
-        </div>
+        @endif
 
-        <div class="mb-3">
-            <div class="d-flex justify-content-between align-items-center">
-                <label for="password" class="form-label fw-semibold text-secondary small">KATA SANDI</label>
+        @if(session('error'))
+            <div class="alert alert-danger alert-dismissible fade show d-flex align-items-center py-2 px-3 mb-3 rounded-3" role="alert" style="font-size: 0.82rem;">
+                <i class="bi bi-exclamation-triangle-fill me-2 fs-6 flex-shrink-0"></i>
+                <div class="flex-grow-1">{{ session('error') }}</div>
+                <button type="button" class="btn-close py-2" data-bs-dismiss="alert" aria-label="Close"></button>
             </div>
-            <div class="input-group">
-                <span class="input-group-text bg-light border-end-0 text-muted">
-                    <i class="fa-solid fa-lock"></i>
+        @endif
+
+        @if($errors->has('login'))
+            <div class="alert alert-danger alert-dismissible fade show d-flex align-items-center py-2 px-3 mb-3 rounded-3" role="alert" style="font-size: 0.82rem;">
+                <i class="bi bi-x-circle-fill me-2 fs-6 flex-shrink-0"></i>
+                <div class="flex-grow-1">{{ $errors->first('login') }}</div>
+                <button type="button" class="btn-close py-2" data-bs-dismiss="alert" aria-label="Close"></button>
+            </div>
+        @endif
+
+        <!-- Login Form -->
+        <form method="POST" action="{{ route('login.post') }}" class="needs-validation">
+            @csrf
+
+            <!-- Username / Email Field -->
+            <div class="mb-3">
+                <label for="login" class="form-label fw-bold text-dark small mb-1" style="font-size: 0.78rem; letter-spacing: 0.02em;">
+                    USERNAME ATAU EMAIL
+                </label>
+                <div class="input-group auth-input-group">
+                    <span class="input-group-text border-end-0">
+                        <i class="bi bi-person-fill"></i>
+                    </span>
+                    <input type="text" 
+                           class="form-control border-start-0 ps-1 @error('login') is-invalid @enderror" 
+                           id="login" 
+                           name="login" 
+                           value="{{ old('login') }}" 
+                           placeholder="Masukkan username atau email" 
+                           required 
+                           autofocus>
+                </div>
+            </div>
+
+            <!-- Password Field -->
+            <div class="mb-3">
+                <div class="d-flex justify-content-between align-items-center mb-1">
+                    <label for="password" class="form-label fw-bold text-dark small mb-0" style="font-size: 0.78rem; letter-spacing: 0.02em;">
+                        KATA SANDI
+                    </label>
+                </div>
+                <div class="input-group auth-input-group">
+                    <span class="input-group-text border-end-0">
+                        <i class="bi bi-shield-lock-fill"></i>
+                    </span>
+                    <input type="password" 
+                           class="form-control border-start-0 border-end-0 ps-1 @error('password') is-invalid @enderror" 
+                           id="password" 
+                           name="password" 
+                           placeholder="Masukkan kata sandi" 
+                           required>
+                    <button class="btn btn-outline-secondary auth-password-toggle border-start-0" 
+                            type="button" 
+                            id="togglePassword" 
+                            title="Tampilkan / Sembunyikan Password">
+                        <i class="bi bi-eye" id="eyeIcon"></i>
+                    </button>
+                </div>
+                @error('password')
+                    <div class="text-danger small mt-1" style="font-size: 0.75rem;">{{ $message }}</div>
+                @enderror
+            </div>
+
+            <!-- Remember Me & Version Badge -->
+            <div class="d-flex justify-content-between align-items-center mb-4">
+                <div class="form-check">
+                    <input class="form-check-input" type="checkbox" name="remember" id="remember" {{ old('remember') ? 'checked' : '' }}>
+                    <label class="form-check-label text-muted small fw-medium" for="remember" style="font-size: 0.8rem;">
+                        Ingat Saya
+                    </label>
+                </div>
+                <span class="badge bg-light text-secondary border px-2 py-1 rounded-pill" style="font-size: 0.68rem; font-weight: 600;">
+                    v1.2 &bull; Kolaka Utara
                 </span>
-                <input type="password" 
-                       class="form-control border-start-0 border-end-0 ps-0 @error('password') is-invalid @enderror" 
-                       id="password" 
-                       name="password" 
-                       placeholder="Masukkan kata sandi" 
-                       required>
-                <button class="btn btn-outline-secondary border-start-0 bg-light text-muted" 
-                        type="button" 
-                        id="togglePassword" 
-                        title="Tampilkan / Sembunyikan Password">
-                    <i class="fa-regular fa-eye" id="eyeIcon"></i>
+            </div>
+
+            <!-- Submit Button (BPS Orange) -->
+            <button type="submit" class="btn btn-bps-primary w-100 py-2.5 fs-6 shadow-sm d-flex align-items-center justify-content-center gap-2">
+                <i class="bi bi-box-arrow-in-right fs-5"></i>
+                <span>Masuk ke Sistem</span>
+            </button>
+        </form>
+
+        <!-- Quick Demo Credentials Section -->
+        <div class="mt-4 pt-3 border-top text-center" style="border-color: #E2E8F0 !important;">
+            <p class="text-muted small fw-semibold mb-2" style="font-size: 0.75rem;">
+                <i class="bi bi-lightning-charge-fill text-warning me-1"></i> Akun Demo Cepat (Klik untuk mengisi):
+            </p>
+            <div class="d-flex flex-wrap gap-2 justify-content-center">
+                <button type="button" class="btn-demo-pill" onclick="fillCredentials('admin', 'admin123')">
+                    <i class="bi bi-shield-fill text-primary"></i> Admin
+                </button>
+                <button type="button" class="btn-demo-pill" onclick="fillCredentials('petugas1', 'password')">
+                    <i class="bi bi-person-fill text-success"></i> Petugas 1
+                </button>
+                <button type="button" class="btn-demo-pill" onclick="fillCredentials('petugas2', 'password')">
+                    <i class="bi bi-person-fill text-info"></i> Petugas 2
                 </button>
             </div>
-            @error('password')
-                <div class="text-danger small mt-1">{{ $message }}</div>
-            @enderror
         </div>
 
-        <div class="d-flex justify-content-between align-items-center mb-4">
-            <div class="form-check">
-                <input class="form-check-input" type="checkbox" name="remember" id="remember" {{ old('remember') ? 'checked' : '' }}>
-                <label class="form-check-label text-muted small" for="remember">
-                    Ingat Saya
-                </label>
-            </div>
-            <span class="badge bg-light text-secondary border">v1.0-Release</span>
-        </div>
-
-        <button type="submit" class="btn btn-sp-primary w-100 py-2 fs-6 shadow">
-            <i class="fa-solid fa-right-to-bracket me-2"></i> Masuk ke Sistem
-        </button>
-    </form>
-
-    <!-- Quick Fill Credentials Pill for Testing -->
-    <div class="mt-4 pt-3 border-top text-center">
-        <p class="text-muted small fw-medium mb-2">Akun Demo Cepat (Klik untuk mengisi):</p>
-        <div class="d-flex gap-2 justify-content-center">
-            <button type="button" class="btn btn-sm btn-outline-primary" onclick="fillCredentials('admin', 'admin123')">
-                <i class="fa-solid fa-shield-halved me-1"></i> Admin
-            </button>
-            <button type="button" class="btn btn-sm btn-outline-info" onclick="fillCredentials('petugas1', 'password')">
-                <i class="fa-solid fa-user-check me-1"></i> Petugas 1
-            </button>
-            <button type="button" class="btn btn-sm btn-outline-info" onclick="fillCredentials('petugas2', 'password')">
-                <i class="fa-solid fa-user-check me-1"></i> Petugas 2
-            </button>
+        <!-- Footer Copyright -->
+        <div class="text-center mt-3 pt-2">
+            <span class="text-muted" style="font-size: 0.72rem;">
+                &copy; {{ date('Y') }} BPS Kabupaten Kolaka Utara &bull; Hak Cipta Dilindungi
+            </span>
         </div>
     </div>
+
 </div>
 @endsection
 
@@ -125,15 +262,19 @@
         togglePasswordBtn.addEventListener('click', function () {
             const isPassword = passwordInput.getAttribute('type') === 'password';
             passwordInput.setAttribute('type', isPassword ? 'text' : 'password');
-            eyeIcon.classList.toggle('fa-eye', !isPassword);
-            eyeIcon.classList.toggle('fa-eye-slash', isPassword);
+            eyeIcon.classList.toggle('bi-eye', !isPassword);
+            eyeIcon.classList.toggle('bi-eye-slash', isPassword);
         });
     }
 
     function fillCredentials(login, password) {
-        document.getElementById('login').value = login;
-        document.getElementById('password').value = password;
+        const loginEl = document.getElementById('login');
+        const passEl = document.getElementById('password');
+        if (loginEl && passEl) {
+            loginEl.value = login;
+            passEl.value = password;
+            loginEl.focus();
+        }
     }
 </script>
 @endpush
-
