@@ -114,13 +114,13 @@ function addRecipientRow(rowData) {
         </td>
         <td class="text-center text-nowrap">
             <button type="button" class="btn btn-xs btn-light border" title="Naik" onclick="moveRecipientRow(this, -1)">
-                <i class="fa-solid fa-arrow-up"></i>
+                <i class="bi bi-arrow-up"></i>
             </button>
             <button type="button" class="btn btn-xs btn-light border" title="Turun" onclick="moveRecipientRow(this, 1)">
-                <i class="fa-solid fa-arrow-down"></i>
+                <i class="bi bi-arrow-down"></i>
             </button>
             <button type="button" class="btn btn-xs btn-light border text-danger" title="Hapus" onclick="removeRecipientRow(this)">
-                <i class="fa-solid fa-xmark"></i>
+                <i class="bi bi-x-lg"></i>
             </button>
         </td>
     `;
@@ -381,7 +381,7 @@ function addBastItemRow(value) {
         <span class="input-group-text fw-semibold item-no-label">${idx + 1}.</span>
         <input type="text" name="items[]" class="form-control bast-item-input" value="${escapeHtmlAttr(value)}" placeholder="">
         <button type="button" class="btn btn-outline-danger" title="Hapus item" onclick="removeBastItemRow(this)">
-            <i class="fa-solid fa-xmark"></i>
+            <i class="bi bi-x-lg"></i>
         </button>
     `;
     container.appendChild(row);
