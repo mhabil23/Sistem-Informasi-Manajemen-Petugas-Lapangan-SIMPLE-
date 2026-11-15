@@ -20,56 +20,6 @@
     transition: all 0.22s ease;
 }
 
-/* 4 Bento KPI Stat Cards */
-.bento-stat-card {
-    background: #FFFFFF;
-    border-radius: 18px;
-    border: 1px solid #E2E8F0;
-    padding: 1.15rem 1.25rem;
-    box-shadow: 0 4px 14px rgba(15, 23, 42, 0.02);
-    transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
-    display: flex;
-    align-items: center;
-    gap: 1rem;
-    height: 100%;
-}
-.bento-stat-card:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 8px 20px rgba(15, 23, 42, 0.05);
-}
-.bento-stat-icon-circle,
-.bento-stat-icon-wrap {
-    width: 48px;
-    height: 48px;
-    border-radius: 14px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-size: 1.35rem;
-    flex-shrink: 0;
-}
-.bento-stat-number {
-    font-size: 1.65rem;
-    font-weight: 800;
-    color: #0F172A;
-    line-height: 1.1;
-    margin-bottom: 2px;
-}
-.bento-stat-label-text {
-    font-size: 0.74rem;
-    font-weight: 700;
-    color: #64748B;
-    text-transform: uppercase;
-    letter-spacing: 0.04em;
-    margin-bottom: 2px;
-}
-.bento-stat-desc-text {
-    font-size: 0.72rem;
-    color: #94A3B8;
-    margin: 0;
-    line-height: 1.2;
-}
-
 /* Action Buttons */
 .btn-bps-orange {
     background: #F37021;
@@ -92,7 +42,7 @@
     box-shadow: 0 6px 18px rgba(243, 112, 33, 0.35);
 }
 
-/* Fixed Table Card (No Horizontal Scroll / Anti Geser) */
+/* Fixed Bento Table Card (Compact / Zoom-out & Anti-Geser) */
 .bento-table-card {
     background: #FFFFFF;
     border-radius: 20px;
@@ -102,7 +52,7 @@
     width: 100%;
 }
 .bento-table-header {
-    padding: 1rem 1.25rem;
+    padding: 0.9rem 1.25rem;
     border-bottom: 1px solid #E2E8F0;
     background: #FAFAFA;
     display: flex;
@@ -119,25 +69,26 @@
     table-layout: fixed;
     width: 100%;
     margin-bottom: 0;
+    font-size: 0.8rem;
 }
 .bento-table-fixed th {
     background: #F8FAFC;
     color: #475569;
     font-weight: 700;
-    font-size: 0.71rem;
+    font-size: 0.68rem;
     text-transform: uppercase;
     letter-spacing: 0.04em;
-    padding: 0.85rem 0.65rem;
+    padding: 0.75rem 0.5rem;
     border-bottom: 1px solid #E2E8F0;
     overflow: hidden;
     text-overflow: ellipsis;
     white-space: nowrap;
 }
 .bento-table-fixed td {
-    padding: 0.85rem 0.65rem;
+    padding: 0.75rem 0.5rem;
     vertical-align: middle;
     border-bottom: 1px solid #F1F5F9;
-    font-size: 0.82rem;
+    font-size: 0.8rem;
     overflow: hidden;
 }
 .bento-table-fixed tbody tr:hover {
@@ -237,65 +188,6 @@
     </div>
 </div>
 
-<!-- 4 Bento KPI Stat Cards -->
-<div class="row g-3 mb-4">
-    <!-- 1. Total Kegiatan -->
-    <div class="col-xl-3 col-sm-6">
-        <div class="bento-stat-card">
-            <div class="bento-stat-icon-circle" style="background: #E0F2FE; color: #0284C7;">
-                <i class="bi bi-collection-fill"></i>
-            </div>
-            <div>
-                <div class="bento-stat-label-text">Total Kegiatan</div>
-                <div class="bento-stat-number">{{ number_format($totalAssignments) }}</div>
-                <div class="bento-stat-desc-text">Semua penugasan resmi</div>
-            </div>
-        </div>
-    </div>
-
-    <!-- 2. Sedang Berjalan -->
-    <div class="col-xl-3 col-sm-6">
-        <div class="bento-stat-card">
-            <div class="bento-stat-icon-circle" style="background: #FFF4ED; color: #F37021;">
-                <i class="bi bi-play-circle-fill"></i>
-            </div>
-            <div>
-                <div class="bento-stat-label-text">Sedang Berjalan</div>
-                <div class="bento-stat-number text-warning-emphasis">{{ number_format($totalOngoing) }}</div>
-                <div class="bento-stat-desc-text">Aktif di lapangan</div>
-            </div>
-        </div>
-    </div>
-
-    <!-- 3. Selesai -->
-    <div class="col-xl-3 col-sm-6">
-        <div class="bento-stat-card">
-            <div class="bento-stat-icon-circle" style="background: #DCFCE7; color: #16A34A;">
-                <i class="bi bi-check-circle-fill"></i>
-            </div>
-            <div>
-                <div class="bento-stat-label-text">Selesai</div>
-                <div class="bento-stat-number text-success">{{ number_format($totalCompleted) }}</div>
-                <div class="bento-stat-desc-text">Telah tuntas</div>
-            </div>
-        </div>
-    </div>
-
-    <!-- 4. Draft / Persiapan -->
-    <div class="col-xl-3 col-sm-6">
-        <div class="bento-stat-card">
-            <div class="bento-stat-icon-circle" style="background: #F1F5F9; color: #64748B;">
-                <i class="bi bi-pencil-square"></i>
-            </div>
-            <div>
-                <div class="bento-stat-label-text">Draft / Persiapan</div>
-                <div class="bento-stat-number">{{ number_format($totalDraft) }}</div>
-                <div class="bento-stat-desc-text">Belum dimulai</div>
-            </div>
-        </div>
-    </div>
-</div>
-
 <!-- Bento Search & Filter Card -->
 <div class="bento-card-clean p-3 mb-4">
     <form method="GET" action="{{ route('admin.assignments.index') }}" class="row g-2 align-items-center">
@@ -335,21 +227,21 @@
     </form>
 </div>
 
-<!-- Bento Table Card (Anti-Geser, Fixed 100%) -->
+<!-- Bento Table Card (Compact, Zoom-out, Anti-Geser) -->
 <div class="bento-table-card mb-4">
     <div class="bento-table-header">
         <div class="d-flex align-items-center gap-2">
-            <div class="rounded-3 p-1.5 text-white d-flex align-items-center justify-content-center" style="background: var(--bps-orange, #F37021); width: 34px; height: 34px;">
+            <div class="rounded-3 p-1.5 text-white d-flex align-items-center justify-content-center" style="background: var(--bps-orange, #F37021); width: 32px; height: 32px;">
                 <i class="bi bi-briefcase-fill"></i>
             </div>
             <div>
-                <h6 class="fw-bold text-dark mb-0" style="font-size: 0.95rem;">
+                <h6 class="fw-bold text-dark mb-0" style="font-size: 0.92rem;">
                     Daftar Kegiatan &amp; Penugasan Lapangan
                 </h6>
-                <span class="text-muted" style="font-size: 0.72rem;">Total {{ $assignments->total() }} kegiatan terdaftar dalam sistem</span>
+                <span class="text-muted" style="font-size: 0.7rem;">Total {{ $assignments->total() }} kegiatan terdaftar dalam sistem</span>
             </div>
         </div>
-        <span class="badge bg-light text-secondary border px-2.5 py-1.5 rounded-pill" style="font-size: 0.72rem;">
+        <span class="badge bg-light text-secondary border px-2.5 py-1 rounded-pill" style="font-size: 0.7rem;">
             Halaman {{ $assignments->currentPage() }} dari {{ max(1, $assignments->lastPage()) }}
         </span>
     </div>
@@ -358,57 +250,57 @@
         <table class="table bento-table-fixed align-middle mb-0">
             <thead>
                 <tr>
-                    <th style="width: 27%;"><i class="bi bi-journal-text me-1 text-muted"></i> Kegiatan</th>
-                    <th style="width: 18%;"><i class="bi bi-calendar3 me-1 text-muted"></i> Jadwal</th>
-                    <th style="width: 16%;"><i class="bi bi-geo-alt-fill me-1 text-danger"></i> Wilayah</th>
-                    <th class="text-center" style="width: 11%;"><i class="bi bi-people-fill me-1 text-primary"></i> Petugas</th>
-                    <th class="text-center" style="width: 11%;"><i class="bi bi-pie-chart-fill me-1 text-success"></i> Responden</th>
+                    <th style="width: 25%;"><i class="bi bi-journal-text me-1 text-muted"></i> Kegiatan</th>
+                    <th style="width: 17%;"><i class="bi bi-calendar3 me-1 text-muted"></i> Jadwal</th>
+                    <th style="width: 14%;"><i class="bi bi-geo-alt-fill me-1 text-danger"></i> Wilayah</th>
+                    <th class="text-center" style="width: 8%;"><i class="bi bi-people-fill me-1 text-primary"></i> Petugas</th>
+                    <th class="text-center" style="width: 10%;"><i class="bi bi-pie-chart-fill me-1 text-success"></i> Responden</th>
                     <th class="text-center" style="width: 9%;"><i class="bi bi-activity me-1 text-warning"></i> Status</th>
-                    <th class="text-end pe-2" style="width: 8%;">Aksi</th>
+                    <th class="text-end pe-3" style="width: 17%;">Aksi</th>
                 </tr>
             </thead>
             <tbody>
                 @forelse($assignments as $item)
                     <tr>
                         <td>
-                            <a href="{{ route('admin.assignments.show', $item) }}" class="fw-bold text-dark text-decoration-none d-block text-truncate mb-0.5" style="font-size: 0.86rem;" title="{{ $item->title }}">
+                            <a href="{{ route('admin.assignments.show', $item) }}" class="fw-bold text-dark text-decoration-none d-block text-truncate mb-0.5" style="font-size: 0.84rem;" title="{{ $item->title }}">
                                 {{ $item->title }}
                             </a>
-                            <div class="text-muted text-truncate" style="font-size: 0.72rem;" title="{{ $item->description }}">
+                            <div class="text-muted text-truncate" style="font-size: 0.7rem;" title="{{ $item->description }}">
                                 {{ $item->description ?: 'Tidak ada deskripsi tambahan.' }}
                             </div>
                         </td>
                         <td>
-                            <div class="small fw-semibold text-dark text-truncate d-flex align-items-center gap-1">
+                            <div class="small fw-semibold text-dark text-truncate d-flex align-items-center gap-1" style="font-size: 0.76rem;">
                                 <i class="bi bi-calendar-event text-secondary flex-shrink-0"></i>
                                 <span class="text-truncate">{{ $item->start_date->format('d/m/y') }} &ndash; {{ $item->end_date->format('d/m/y') }}</span>
                             </div>
                             <div class="mt-0.5">
-                                <span class="badge bg-light text-secondary border rounded-pill px-2 py-0.5" style="font-size: 0.68rem;">
+                                <span class="badge bg-light text-secondary border rounded-pill px-2 py-0.5" style="font-size: 0.65rem;">
                                     {{ $item->start_date->diffInDays($item->end_date) + 1 }} Hari
                                 </span>
                             </div>
                         </td>
                         <td>
-                            <div class="small fw-semibold text-dark text-truncate d-flex align-items-center gap-1" title="{{ $item->location }}">
+                            <div class="small fw-semibold text-dark text-truncate d-flex align-items-center gap-1" style="font-size: 0.76rem;" title="{{ $item->location }}">
                                 <i class="bi bi-geo-alt-fill text-danger flex-shrink-0"></i>
                                 <span class="text-truncate">{{ $item->location }}</span>
                             </div>
                         </td>
                         <td class="text-center">
-                            <span class="badge bg-primary-subtle text-primary border border-primary-subtle px-2 py-0.5 rounded-pill text-truncate" style="font-size: 0.72rem;">
+                            <span class="badge bg-primary-subtle text-primary border border-primary-subtle px-2 py-0.5 rounded-pill text-truncate" style="font-size: 0.7rem;">
                                 <i class="bi bi-people-fill me-0.5"></i> {{ $item->officers_count }}
                             </span>
                         </td>
                         <td class="text-center">
-                            <span class="badge bg-light text-dark border px-1.5 py-0.5 rounded-pill font-monospace" style="font-size: 0.7rem;">
+                            <span class="badge bg-light text-dark border px-1.5 py-0.5 rounded-pill font-monospace" style="font-size: 0.68rem;">
                                 {{ $item->respondents_count }}@if($item->target_respondents > 0)<span class="text-muted">/{{ number_format($item->target_respondents) }}</span>@endif
                             </span>
                             @if($item->target_respondents > 0)
                                 @php
                                     $pct = round(($item->respondents_count / $item->target_respondents) * 100);
                                 @endphp
-                                <div class="progress mt-1 mx-auto" style="height: 4px; width: 50px; border-radius: 999px;" title="{{ $pct }}% dari target {{ number_format($item->target_respondents) }} responden">
+                                <div class="progress mt-1 mx-auto" style="height: 4px; width: 48px; border-radius: 999px;" title="{{ $pct }}% dari target {{ number_format($item->target_respondents) }} responden">
                                     <div class="progress-bar {{ $pct >= 100 ? 'bg-success' : ($pct >= 50 ? 'bg-primary' : 'bg-warning') }}" style="width: {{ min(100, $pct) }}%;"></div>
                                 </div>
                             @endif
@@ -432,8 +324,8 @@
                                 </span>
                             @endif
                         </td>
-                        <td class="text-end pe-2">
-                            <div class="d-inline-flex gap-1 align-items-center justify-content-end">
+                        <td class="text-end pe-3">
+                            <div class="d-inline-flex gap-1.5 align-items-center justify-content-end">
                                 <!-- Detail & Pembagian Petugas -->
                                 <a href="{{ route('admin.assignments.show', $item) }}" 
                                    class="bento-action-btn btn-view" 

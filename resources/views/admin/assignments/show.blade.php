@@ -69,25 +69,26 @@
     table-layout: fixed;
     width: 100%;
     margin-bottom: 0;
+    font-size: 0.8rem;
 }
 .bento-table-fixed th {
     background: #F8FAFC;
     color: #475569;
     font-weight: 700;
-    font-size: 0.71rem;
+    font-size: 0.68rem;
     text-transform: uppercase;
     letter-spacing: 0.04em;
-    padding: 0.85rem 0.65rem;
+    padding: 0.75rem 0.5rem;
     border-bottom: 1px solid #E2E8F0;
     overflow: hidden;
     text-overflow: ellipsis;
     white-space: nowrap;
 }
 .bento-table-fixed td {
-    padding: 0.85rem 0.65rem;
+    padding: 0.75rem 0.5rem;
     vertical-align: middle;
     border-bottom: 1px solid #F1F5F9;
-    font-size: 0.82rem;
+    font-size: 0.8rem;
     overflow: hidden;
 }
 .bento-table-fixed tbody tr:hover {
@@ -383,12 +384,12 @@
         <table class="table bento-table-fixed align-middle mb-0">
             <thead>
                 <tr>
-                    <th style="width: 32%;">Petugas Lapangan</th>
-                    <th style="width: 30%;">Tugas Spesifik</th>
+                    <th style="width: 30%;">Petugas Lapangan</th>
+                    <th style="width: 28%;">Tugas Spesifik</th>
                     <th class="text-center" style="width: 14%;">Status Tugas</th>
                     <th style="width: 16%;">Catatan Progres</th>
                     @if(auth()->user()->isAdmin())
-                        <th class="text-end pe-2" style="width: 8%;">Aksi</th>
+                        <th class="text-end pe-3" style="width: 12%;">Aksi</th>
                     @endif
                 </tr>
             </thead>
@@ -434,7 +435,7 @@
                             </div>
                         </td>
                         @if(auth()->user()->isAdmin())
-                            <td class="text-end pe-2">
+                            <td class="text-end pe-3">
                                 <div class="d-inline-flex gap-1 align-items-center justify-content-end">
                                     <!-- Edit Rincian Tugas -->
                                     <button type="button" 
