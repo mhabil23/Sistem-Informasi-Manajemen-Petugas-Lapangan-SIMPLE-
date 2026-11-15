@@ -495,7 +495,7 @@
 
                 <div class="bento-quote-box">
                     <i class="bi bi-quote text-muted me-1.5 opacity-50"></i>
-                    Kualitas data statistik berawal dari ketelitian dan integritas di setiap kunjungan lapangan.
+                    BPS Kolut Bersih, BerAKHLAK, Bersinergi dan Hadir Melayani.
                     <div class="fw-semibold text-dark mt-1" style="font-size: 0.72rem;">&mdash; BPS Kabupaten Kolaka Utara</div>
                 </div>
             </div>

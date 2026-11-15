@@ -56,12 +56,12 @@
             </div>
         </div>
 
-        <!-- Bottom Quote Box (Desktop) -->
-        <div class="d-none d-lg-block pt-3 border-top" style="border-color: rgba(243, 112, 33, 0.18) !important;">
-            <div class="d-flex align-items-start gap-2 text-muted" style="font-size: 0.76rem; font-style: italic;">
+        <!-- Bottom Motto Box -->
+        <div class="pt-3 border-top mt-auto" style="border-color: rgba(243, 112, 33, 0.18) !important;">
+            <div class="d-flex align-items-start gap-2 text-muted" style="font-size: 0.78rem; font-style: italic;">
                 <i class="bi bi-quote text-bps-orange fs-5 lh-1 flex-shrink-0"></i>
                 <div>
-                    Kualitas data statistik berawal dari ketelitian dan integritas di setiap kunjungan lapangan.
+                    BPS Kolut Bersih, BerAKHLAK, Bersinergi dan Hadir Melayani.
                     <span class="d-block fw-bold text-dark not-italic mt-0.5" style="font-style: normal; font-size: 0.72rem;">
                         &mdash; BPS Kabupaten Kolaka Utara
                     </span>
