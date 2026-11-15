@@ -282,7 +282,7 @@
             <div class="d-flex flex-wrap justify-content-between align-items-center gap-2 mb-2 pb-2 border-bottom">
                 <div class="d-flex align-items-center gap-2">
                     <span class="badge bg-warning text-dark px-2.5 py-1 rounded-pill">
-                        <i class="fa-solid fa-bell me-1"></i> {{ $incomingApprovalReports->count() }} Laporan Masuk
+                        <i class="bi bi-bell-fill me-1"></i> {{ $incomingApprovalReports->count() }} Laporan Masuk
                     </span>
                     <span class="fw-bold text-dark small">
                         Laporan Perjadin Petugas Menunggu Pemeriksaan / ACC Admin
@@ -322,18 +322,18 @@
                                     <div class="d-inline-flex gap-1">
                                         <a href="{{ route('admin.reports.index', ['inspect' => $incRep->id]) }}"
                                            class="btn btn-xs btn-outline-info py-0.5 px-2 rounded-pill" style="font-size: 0.72rem;" title="Lihat Laporan">
-                                            <i class="fa-solid fa-eye me-1"></i> Lihat
+                                            <i class="bi bi-eye me-1"></i> Lihat
                                         </a>
                                         @if(auth()->user()->isAdmin())
                                             <a href="{{ route('admin.reports.index', ['edit' => $incRep->id]) }}"
                                                class="btn btn-xs btn-outline-warning text-dark py-0.5 px-2 rounded-pill" style="font-size: 0.72rem;" title="Edit Inputan Laporan">
-                                                <i class="fa-regular fa-pen-to-square me-1"></i> Edit
+                                                <i class="bi bi-pencil-square me-1"></i> Edit
                                             </a>
                                             <form method="POST" action="{{ route('admin.reports.approve', $incRep) }}" class="d-inline" onsubmit="return confirm('ACC (Setujui) laporan {{ addslashes($incRep->activity_title) }} agar petugas dapat mengunduh PDF?');">
                                                 @csrf
                                                 @method('PATCH')
                                                 <button type="submit" class="btn btn-xs btn-success py-0.5 px-2.5 rounded-pill" style="font-size: 0.72rem;" title="ACC / Setujui Laporan">
-                                                    <i class="fa-solid fa-check-double me-1"></i> ACC
+                                                    <i class="bi bi-check2-all me-1"></i> ACC
                                                 </button>
                                             </form>
                                         @endif
@@ -356,7 +356,7 @@
             <div class="col-xl-3 col-md-6">
                 <div class="input-group input-group-sm">
                     <span class="input-group-text bg-white text-muted border-end-0">
-                        <i class="fa-solid fa-briefcase" style="color: var(--bps-orange);"></i>
+                        <i class="bi bi-briefcase-fill" style="color: var(--bps-orange);"></i>
                     </span>
                     <select name="assignment_id" class="form-select form-select-sm border-start-0 ps-1" onchange="this.form.submit()">
                         <option value="">Semua Kegiatan BPS</option>
@@ -373,7 +373,7 @@
             <div class="col-xl-3 col-md-6">
                 <div class="input-group input-group-sm">
                     <span class="input-group-text bg-white text-muted border-end-0">
-                        <i class="fa-solid fa-map-location-dot text-danger"></i>
+                        <i class="bi bi-geo-alt-fill text-danger"></i>
                     </span>
                     <select name="district" class="form-select form-select-sm border-start-0 ps-1" onchange="this.form.submit()">
                         <option value="">Semua Kecamatan (15 Kec)</option>
@@ -390,7 +390,7 @@
             <div class="col-xl-3 col-md-6">
                 <div class="input-group input-group-sm">
                     <span class="input-group-text bg-white text-muted border-end-0">
-                        <i class="fa-solid fa-user-gear text-primary"></i>
+                        <i class="bi bi-person-gear text-primary"></i>
                     </span>
                     <select name="officer_id" class="form-select form-select-sm border-start-0 ps-1" onchange="this.form.submit()">
                         <option value="">Semua Petugas / PPL ({{ $allOfficersDropdown->count() }})</option>
@@ -408,14 +408,14 @@
                 <div class="d-flex gap-1.5">
                     <select name="progress_status" class="form-select form-select-sm" onchange="this.form.submit()">
                         <option value="all" {{ $progressFilter === 'all' ? 'selected' : '' }}>Semua Status Capaian</option>
-                        <option value="slow" {{ $progressFilter === 'slow' ? 'selected' : '' }}>🔴 Perlu Follow-Up (&lt;50%)</option>
-                        <option value="on_track" {{ $progressFilter === 'on_track' ? 'selected' : '' }}>🟡 On Track (50-99%)</option>
-                        <option value="completed" {{ $progressFilter === 'completed' ? 'selected' : '' }}>🟢 Selesai (100%)</option>
+                        <option value="slow" {{ $progressFilter === 'slow' ? 'selected' : '' }}>Perlu Follow-Up (&lt;50%)</option>
+                        <option value="on_track" {{ $progressFilter === 'on_track' ? 'selected' : '' }}>On Track (50-99%)</option>
+                        <option value="completed" {{ $progressFilter === 'completed' ? 'selected' : '' }}>Selesai (100%)</option>
                     </select>
 
                     @if($selectedAssignmentId || $selectedDistrict || $selectedOfficerId || $progressFilter !== 'all' || $reportFilter !== 'all')
                         <a href="{{ route('admin.dashboard') }}" class="btn btn-sm btn-outline-secondary d-flex align-items-center rounded-pill px-2.5" title="Reset Semua Filter">
-                            <i class="fa-solid fa-rotate-left"></i>
+                            <i class="bi bi-arrow-clockwise"></i>
                         </a>
                     @endif
                 </div>
@@ -427,26 +427,26 @@
                 <span class="text-muted fw-semibold">Filter Aktif:</span>
                 @if($selectedDistrict)
                     <span class="badge bg-danger-subtle text-danger border border-danger-subtle py-1 px-2 rounded-pill">
-                        <i class="fa-solid fa-location-dot me-1"></i> {{ $selectedDistrict }}
+                        <i class="bi bi-geo-alt-fill me-1"></i> {{ $selectedDistrict }}
                     </span>
                 @endif
                 @if($selectedOfficerId)
                     @php $currOff = $allOfficersDropdown->firstWhere('id', $selectedOfficerId); @endphp
                     <span class="badge bg-info-subtle text-info-emphasis border border-info-subtle py-1 px-2 rounded-pill">
-                        <i class="fa-solid fa-user me-1"></i> {{ $currOff ? $currOff->name : 'Petugas #' . $selectedOfficerId }}
+                        <i class="bi bi-person me-1"></i> {{ $currOff ? $currOff->name : 'Petugas #' . $selectedOfficerId }}
                     </span>
                 @endif
                 @if($progressFilter === 'slow')
                     <span class="badge bg-danger text-white py-1 px-2 rounded-pill">
-                        <i class="fa-solid fa-triangle-exclamation me-1"></i> Lambat / Perlu Follow-Up
+                        <i class="bi bi-exclamation-triangle-fill me-1"></i> Lambat / Perlu Follow-Up
                     </span>
                 @elseif($progressFilter === 'completed')
                     <span class="badge bg-success text-white py-1 px-2 rounded-pill">
-                        <i class="fa-solid fa-circle-check me-1"></i> Selesai 100%
+                        <i class="bi bi-check-circle-fill me-1"></i> Selesai 100%
                     </span>
                 @endif
                 <a href="{{ route('admin.dashboard') }}" class="text-danger ms-auto text-decoration-none small">
-                    <i class="fa-solid fa-xmark me-1"></i> Reset Filter
+                    <i class="bi bi-x-lg me-1"></i> Reset Filter
                 </a>
             </div>
         @endif
@@ -463,15 +463,15 @@
                 <div>
                     <div class="d-flex align-items-center justify-content-between mb-2">
                         <span class="bento-hero-badge">
-                            <i class="fa-solid fa-chart-line"></i> Ringkasan Monitoring Wilayah
+                            <i class="bi bi-graph-up-arrow"></i> Ringkasan Monitoring Wilayah
                         </span>
                         @if($slowOfficersCount > 0)
                             <span class="badge bg-danger text-white px-2.5 py-1 rounded-pill" style="font-size: 0.72rem;">
-                                <i class="fa-solid fa-triangle-exclamation me-1"></i> {{ $slowOfficersCount }} Petugas Lambat (&lt;50%)
+                                <i class="bi bi-exclamation-triangle-fill me-1"></i> {{ $slowOfficersCount }} Petugas Lambat (&lt;50%)
                             </span>
                         @else
                             <span class="badge bg-success-subtle text-success border border-success-subtle px-2.5 py-1 rounded-pill" style="font-size: 0.72rem;">
-                                <i class="fa-solid fa-circle-check me-1"></i> Seluruh Petugas On Track
+                                <i class="bi bi-check-circle-fill me-1"></i> Seluruh Petugas On Track
                             </span>
                         @endif
                     </div>
@@ -486,21 +486,21 @@
                         {{ $activeTitle }}
                     </h2>
                     <p class="bento-hero-desc">
-                        <i class="fa-solid fa-location-dot text-danger me-1"></i> <strong>{{ $activeLoc }}</strong> &bull; Total Realisasi: <strong>{{ number_format($bastCompletedCount) }}</strong> dari <strong>{{ number_format($bastTargetCount) }}</strong> responden telah memiliki Berita Acara (BAST).
+                        <i class="bi bi-geo-alt-fill text-danger me-1"></i> <strong>{{ $activeLoc }}</strong> &bull; Total Realisasi: <strong>{{ number_format($bastCompletedCount) }}</strong> dari <strong>{{ number_format($bastTargetCount) }}</strong> responden telah memiliki Berita Acara (BAST).
                         @if($slowOfficersCount > 0)
-                            <span class="d-block text-danger mt-1 fw-semibold"><i class="fa-solid fa-circle-exclamation me-1"></i> Tindakan diperlukan: Ingatkan petugas yang masih di bawah target kuota melalui tombol WhatsApp.</span>
+                            <span class="d-block text-danger mt-1 fw-semibold"><i class="bi bi-exclamation-circle-fill me-1"></i> Tindakan diperlukan: Ingatkan petugas yang masih di bawah target kuota melalui tombol WhatsApp.</span>
                         @endif
                     </p>
                 </div>
 
                 <div class="mt-2 d-flex flex-wrap gap-2 align-items-center">
                     <a href="#tabelPetugas" class="bento-hero-cta">
-                        <i class="fa-solid fa-user-gear"></i>
+                        <i class="bi bi-person-gear"></i>
                         <span>Pantau Kinerja Petugas</span>
-                        <i class="fa-solid fa-arrow-down small ms-1"></i>
+                        <i class="bi bi-arrow-down small ms-1"></i>
                     </a>
                     <a href="{{ route('admin.recapitulation.excel') }}" class="btn btn-outline-secondary rounded-pill px-3 py-2 font-weight-bold" style="font-size: 0.88rem; background: #FFFFFF;">
-                        <i class="fa-solid fa-file-excel text-success me-1"></i> Unduh Excel
+                        <i class="bi bi-file-earmark-spreadsheet-fill text-success me-1"></i> Unduh Excel
                     </a>
                 </div>
             </div>
@@ -511,7 +511,7 @@
             <div class="bento-card bento-progress-card h-100">
                 <div class="bento-card-header-sm">
                     <h5 class="bento-card-title-sm">
-                        <i class="fa-solid fa-chart-pie me-1.5" style="color: var(--bps-orange);"></i> Realisasi BAST Kabupaten
+                        <i class="bi bi-pie-chart-fill me-1.5" style="color: var(--bps-orange);"></i> Realisasi BAST Kabupaten
                     </h5>
                     <a href="{{ route('admin.basts.respondents.index') }}" class="bento-card-link-sm">
                         Kelola BAST &rarr;
@@ -540,11 +540,11 @@
                     <div class="bento-progress-info">
                         <div class="bento-progress-headline">
                             @if($bastPercentage >= 100)
-                                <span class="text-success"><i class="fa-solid fa-circle-check me-1"></i> Target Tercapai (100%) 🎉</span>
+                                <span class="text-success"><i class="bi bi-check-circle-fill me-1"></i> Target Tercapai (100%)</span>
                             @elseif($bastPercentage >= 50)
-                                <span class="text-dark"><i class="fa-solid fa-fire text-warning me-1"></i> Progres On Track</span>
+                                <span class="text-dark"><i class="bi bi-fire text-warning me-1"></i> Progres On Track</span>
                             @else
-                                <span class="text-danger"><i class="fa-solid fa-hourglass-half me-1"></i> Perlu Akselerasi</span>
+                                <span class="text-danger"><i class="bi bi-hourglass-split me-1"></i> Perlu Akselerasi</span>
                             @endif
                         </div>
                         <p class="bento-progress-details">
@@ -557,7 +557,7 @@
                 </div>
 
                 <div class="pt-2 border-top mt-2 d-flex justify-content-between align-items-center small text-muted" style="font-size: 0.75rem;">
-                    <span><i class="fa-solid fa-users me-1"></i> {{ $totalOfficers }} Petugas Terdaftar</span>
+                    <span><i class="bi bi-people-fill me-1"></i> {{ $totalOfficers }} Petugas Terdaftar</span>
                     <span class="fw-semibold text-dark">{{ $totalBasts }} Total Dokumen BAST</span>
                 </div>
             </div>
@@ -575,7 +575,7 @@
             <div class="bento-card h-100 d-flex flex-column">
                 <div class="bento-card-header-sm">
                     <h5 class="bento-card-title-sm">
-                        <i class="fa-solid fa-map-marked-alt text-danger me-1.5"></i> Rekapitulasi Capaian per Kecamatan
+                        <i class="bi bi-map-fill text-danger me-1.5"></i> Rekapitulasi Capaian per Kecamatan
                     </h5>
                     <span class="badge bg-light text-secondary border" style="font-size: 0.72rem;">
                         {{ count($districtSummaries) }} Kecamatan
@@ -590,7 +590,7 @@
                                    class="fw-bold text-dark text-decoration-none"
                                    style="font-size: 0.82rem;"
                                    title="Filter kecamatan {{ $dSum['name'] }}">
-                                    <i class="fa-solid fa-location-dot text-danger me-1"></i> {{ $dSum['name'] }}
+                                    <i class="bi bi-geo-alt-fill text-danger me-1"></i> {{ $dSum['name'] }}
                                 </a>
                                 <span class="badge {{ $dSum['percentage'] >= 75 ? 'bg-success-subtle text-success' : ($dSum['percentage'] >= 50 ? 'bg-warning-subtle text-warning-emphasis' : 'bg-danger-subtle text-danger') }} font-monospace" style="font-size: 0.7rem;">
                                     {{ $dSum['percentage'] }}%
@@ -610,7 +610,7 @@
                         </div>
                     @empty
                         <div class="text-center py-4 text-muted small">
-                            <i class="fa-solid fa-map-location-dot fa-2x mb-1 text-secondary opacity-50 d-block"></i>
+                            <i class="bi bi-geo-alt display-6 mb-1 text-secondary opacity-50 d-block"></i>
                             Tidak ada data kecamatan.
                         </div>
                     @endforelse
@@ -624,7 +624,7 @@
                 <div>
                     <div class="bento-card-header-sm">
                         <h5 class="bento-card-title-sm">
-                            <i class="fa-solid fa-clipboard-user text-primary me-1.5"></i> Kepatuhan Laporan Perjadin Petugas
+                            <i class="bi bi-clipboard2-check-fill text-primary me-1.5"></i> Kepatuhan Laporan Perjadin Petugas
                         </h5>
                         <span class="badge {{ $reportSubmissionRate >= 75 ? 'bg-success-subtle text-success' : 'bg-warning-subtle text-warning-emphasis' }} border" style="font-size: 0.72rem;">
                             {{ $reportSubmissionRate }}% Kepatuhan
@@ -659,7 +659,7 @@
                                         style="font-size: 0.7rem; background: var(--bps-orange);"
                                         title="Kirim pesan massal ke seluruh petugas yang belum lapor"
                                         onclick="openSendNoticeModal('all_without_reports', 'Semua Petugas Belum Lapor ({{ $officersWithoutReports->count() }} Orang)', 'report')">
-                                    <i class="fa-solid fa-paper-plane me-1"></i> Ingatkan Semua
+                                    <i class="bi bi-send-fill me-1"></i> Ingatkan Semua
                                 </button>
                             @endif
                             <a href="{{ route('admin.dashboard', array_merge(request()->query(), ['report_status' => 'not_submitted'])) }}" class="bento-card-link-sm" style="font-size: 0.72rem;">
@@ -674,7 +674,7 @@
                                 <div class="overflow-hidden me-2">
                                     <span class="fw-bold text-dark d-block text-truncate" style="font-size: 0.78rem;">{{ $offWithout->name }}</span>
                                     <small class="text-muted" style="font-size: 0.7rem;">
-                                        <i class="fa-solid fa-location-dot text-danger me-1"></i> {{ $offWithout->dominant_district }} &bull; BAST: {{ $offWithout->completed }}/{{ $offWithout->target }}
+                                        <i class="bi bi-geo-alt-fill text-danger me-1"></i> {{ $offWithout->dominant_district }} &bull; BAST: {{ $offWithout->completed }}/{{ $offWithout->target }}
                                     </small>
                                 </div>
                                 @if(auth()->user()->isAdmin())
@@ -684,21 +684,21 @@
                                                 style="font-size: 0.7rem;" 
                                                 title="Kirim pesan ke papan informasi petugas" 
                                                 onclick="openSendNoticeModal({{ $offWithout->id }}, '{{ addslashes($offWithout->name) }}', 'report')">
-                                            <i class="fa-solid fa-bullhorn me-1"></i> Ingatkan
+                                            <i class="bi bi-megaphone-fill me-1"></i> Ingatkan
                                         </button>
                                     </div>
                                 @endif
                             </div>
                         @empty
                             <div class="text-center py-2 text-success small" style="font-size: 0.75rem;">
-                                <i class="fa-solid fa-circle-check me-1"></i> Seluruh petugas telah mengumpulkan laporan perjalanan dinas!
+                                <i class="bi bi-check-circle-fill me-1"></i> Seluruh petugas telah mengumpulkan laporan perjalanan dinas!
                             </div>
                         @endforelse
                     </div>
                 </div>
 
                 <div class="pt-2 border-top mt-2 d-flex justify-content-between align-items-center small text-muted" style="font-size: 0.75rem;">
-                    <span><i class="fa-solid fa-file-invoice me-1"></i> Status Verifikasi Admin</span>
+                    <span><i class="bi bi-file-earmark-check-fill me-1"></i> Status Verifikasi Admin</span>
                     <span class="fw-semibold text-dark">{{ $reportsApproved }} Laporan Telah di-ACC</span>
                 </div>
             </div>
@@ -712,7 +712,7 @@
         <div class="d-flex flex-wrap align-items-center justify-content-between gap-2 p-3 border-bottom bg-light bg-opacity-40">
             <div>
                 <span class="fw-bold text-dark d-block" style="font-size: 0.95rem;">
-                    <i class="fa-solid fa-user-gear me-1.5" style="color: var(--bps-orange);"></i> Identifikasi Kinerja Petugas Lapangan / PPL
+                    <i class="bi bi-person-gear me-1.5" style="color: var(--bps-orange);"></i> Identifikasi Kinerja Petugas Lapangan / PPL
                 </span>
                 <span class="text-muted" style="font-size: 0.75rem;">Urutan prioritas: petugas dengan progres terendah berada di paling atas.</span>
             </div>
@@ -725,7 +725,7 @@
                 </a>
                 <a href="{{ route('admin.dashboard', array_merge(request()->query(), ['progress_status' => 'slow'])) }}" 
                    class="btn btn-xs rounded-pill {{ $progressFilter === 'slow' ? 'btn-danger' : 'btn-outline-danger' }}" style="font-size: 0.72rem; padding: 3px 10px;">
-                    <i class="fa-solid fa-triangle-exclamation me-1"></i> Lambat ({{ $slowOfficersCount }})
+                    <i class="bi bi-exclamation-triangle-fill me-1"></i> Lambat ({{ $slowOfficersCount }})
                 </a>
                 <a href="{{ route('admin.dashboard', array_merge(request()->query(), ['progress_status' => 'on_track'])) }}" 
                    class="btn btn-xs rounded-pill {{ $progressFilter === 'on_track' ? 'btn-warning' : 'btn-outline-warning' }}" style="font-size: 0.72rem; padding: 3px 10px;">
@@ -791,9 +791,9 @@
                             <td>
                                 <span class="badge {{ $off->badge_class }} py-1 px-2 rounded-pill" style="font-size: 0.68rem;">
                                     @if($off->category === 'slow')
-                                        <i class="fa-solid fa-triangle-exclamation me-1"></i>
+                                        <i class="bi bi-exclamation-triangle-fill me-1"></i>
                                     @elseif($off->category === 'completed')
-                                        <i class="fa-solid fa-check me-1"></i>
+                                        <i class="bi bi-check2 me-1"></i>
                                     @endif
                                     {{ $off->status_text }}
                                 </span>
@@ -801,11 +801,11 @@
                             <td class="text-center">
                                 @if($off->has_report)
                                     <span class="badge bg-success-subtle text-success border border-success-subtle rounded-pill" style="font-size: 0.68rem;" title="Laporan sudah diserahkan">
-                                        <i class="fa-solid fa-check me-1"></i> Ada ({{ $off->reports_count }})
+                                        <i class="bi bi-check2 me-1"></i> Ada ({{ $off->reports_count }})
                                     </span>
                                 @else
                                     <span class="badge bg-danger-subtle text-danger border border-danger-subtle rounded-pill" style="font-size: 0.68rem;" title="Belum membuat laporan kegiatan">
-                                        <i class="fa-solid fa-xmark me-1"></i> Belum
+                                        <i class="bi bi-x-lg me-1"></i> Belum
                                     </span>
                                 @endif
                             </td>
@@ -817,7 +817,7 @@
                                                 style="font-size: 0.72rem; background: var(--bps-orange);"
                                                 title="Kirim Pesan ke Papan Informasi Petugas"
                                                 onclick="openSendNoticeModal({{ $off->id }}, '{{ addslashes($off->name) }}', '{{ $off->has_report ? 'bast' : 'report' }}', '{{ $off->target }}', '{{ $off->completed }}', '{{ $off->pending }}', '{{ $off->percentage }}')">
-                                            <i class="fa-solid fa-bullhorn me-1"></i> Notif
+                                            <i class="bi bi-megaphone-fill me-1"></i> Notif
                                         </button>
                                     @endif
 
@@ -826,7 +826,7 @@
                                             style="font-size: 0.72rem;"
                                             title="Lihat Draf Pesan Notifikasi"
                                             onclick="openReminderModal('{{ $off->id }}', '{{ addslashes($off->name) }}', '{{ $off->phone ?? '-' }}', '{{ $off->target }}', '{{ $off->completed }}', '{{ $off->pending }}', '{{ $off->percentage }}', '{{ $off->has_report ? 'Sudah Diserahkan' : 'BELUM Diserahkan' }}', '{{ $off->wa_url ?? '' }}')">
-                                        <i class="fa-regular fa-comment-dots"></i>
+                                        <i class="bi bi-chat-dots"></i>
                                     </button>
 
                                     @if($off->wa_url)
@@ -835,7 +835,7 @@
                                            class="btn btn-xs btn-outline-success rounded-pill py-1 px-1.5" 
                                            style="font-size: 0.72rem;"
                                            title="Kirim WhatsApp Langsung">
-                                            <i class="fa-brands fa-whatsapp"></i>
+                                            <i class="bi bi-whatsapp"></i>
                                         </a>
                                     @endif
                                 </div>
@@ -844,7 +844,7 @@
                     @empty
                         <tr>
                             <td colspan="9" class="text-center py-4 text-muted small">
-                                <i class="fa-solid fa-user-slash fa-2x mb-2 text-secondary opacity-50 d-block"></i>
+                                <i class="bi bi-person-x display-6 mb-2 text-secondary opacity-50 d-block"></i>
                                 Tidak ada data petugas lapangan yang sesuai filter.
                             </td>
                         </tr>
@@ -863,7 +863,7 @@
             <div class="bento-card h-100 d-flex flex-column">
                 <div class="bento-card-header-sm">
                     <h5 class="bento-card-title-sm">
-                        <i class="fa-solid fa-chart-column me-1.5" style="color: var(--bps-orange);"></i> Tren Penginputan Responden &amp; BAST Terbit
+                        <i class="bi bi-bar-chart-fill me-1.5" style="color: var(--bps-orange);"></i> Tren Penginputan Responden &amp; BAST Terbit
                     </h5>
                     <span class="badge bg-light text-secondary border" style="font-size: 0.7rem;">6 Bulan Terakhir</span>
                 </div>
@@ -880,7 +880,7 @@
             <div class="bento-card h-100 d-flex flex-column">
                 <div class="bento-card-header-sm">
                     <h5 class="bento-card-title-sm">
-                        <i class="fa-solid fa-bolt text-warning me-1.5"></i> Log Aktivitas Terkini
+                        <i class="bi bi-lightning-charge-fill text-warning me-1.5"></i> Log Aktivitas Terkini
                     </h5>
                     @if(auth()->user()->isAdmin())
                         <a href="{{ route('admin.logs.index') }}" class="bento-card-link-sm">Semua &rarr;</a>
@@ -901,7 +901,7 @@
                             </div>
                         @empty
                             <div class="text-center py-4 text-muted small">
-                                <i class="fa-regular fa-clock fa-2x mb-1 text-secondary opacity-50 d-block"></i>
+                                <i class="bi bi-clock-history display-6 mb-1 text-secondary opacity-50 d-block"></i>
                                 Belum ada aktivitas tercatat.
                             </div>
                         @endforelse
@@ -921,7 +921,7 @@
         <div class="modal-content border-0 shadow">
             <div class="modal-header bg-light border-bottom py-2.5 px-3">
                 <h6 class="modal-title fw-bold" id="reminderFollowUpModalLabel">
-                    <i class="fa-solid fa-paper-plane text-primary me-1"></i> Draf Pesan Notifikasi Petugas
+                    <i class="bi bi-send-fill text-primary me-1"></i> Draf Pesan Notifikasi Petugas
                 </h6>
                 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
@@ -940,23 +940,23 @@
                 </div>
 
                 <div class="alert alert-info py-1.5 px-2.5 small mb-0 d-flex align-items-center gap-2" style="font-size: 0.75rem;">
-                    <i class="fa-solid fa-circle-info text-info"></i>
+                    <i class="bi bi-info-circle-fill text-info"></i>
                     <div>Salin pesan atau langsung kirimkan via WhatsApp resmi petugas.</div>
                 </div>
             </div>
             <div class="modal-footer bg-light border-top py-2 px-3 d-flex justify-content-between flex-wrap gap-2">
                 <button type="button" class="btn btn-sm btn-outline-secondary rounded-pill" onclick="copyReminderText()">
-                    <i class="fa-regular fa-copy me-1"></i> <span id="btnCopyText">Salin Teks</span>
+                    <i class="bi bi-copy me-1"></i> <span id="btnCopyText">Salin Teks</span>
                 </button>
                 <div class="d-flex gap-2">
                     <button type="button" class="btn btn-sm btn-light border rounded-pill" data-bs-dismiss="modal">Tutup</button>
                     @if(auth()->user()->isAdmin())
                         <button type="button" class="btn btn-sm rounded-pill text-white" style="background: var(--bps-orange);" onclick="transferReminderToNoticeBoard()">
-                            <i class="fa-solid fa-bullhorn me-1"></i> Kirim ke Papan Informasi
+                            <i class="bi bi-megaphone-fill me-1"></i> Kirim ke Papan Informasi
                         </button>
                     @endif
                     <a href="#" id="modal_wa_direct_link" target="_blank" class="btn btn-sm btn-outline-success rounded-pill">
-                        <i class="fa-brands fa-whatsapp me-1"></i> WhatsApp
+                        <i class="bi bi-whatsapp me-1"></i> WhatsApp
                     </a>
                 </div>
             </div>
@@ -973,7 +973,7 @@
         <div class="modal-content border-0 shadow">
             <div class="modal-header bg-light border-bottom py-2.5 px-3">
                 <h6 class="modal-title fw-bold text-dark" id="sendOfficerNoticeModalLabel">
-                    <i class="fa-solid fa-bullhorn me-1.5" style="color: var(--bps-orange);"></i> Kirim Pesan ke Papan Informasi Petugas
+                    <i class="bi bi-megaphone-fill me-1.5" style="color: var(--bps-orange);"></i> Kirim Pesan ke Papan Informasi Petugas
                 </h6>
                 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
@@ -999,7 +999,7 @@
                         <label class="form-label small fw-bold text-secondary mb-1">ISI PESAN (TAMPIL DI TAMPILAN AWAL PETUGAS) <span class="text-danger">*</span></label>
                         <textarea name="message" id="notice_message" class="form-control form-control-sm font-monospace" rows="4" required placeholder="Tuliskan pesan atau instruksi untuk petugas lapangan..." style="font-size: 0.8rem;"></textarea>
                         <div class="form-text" style="font-size: 0.7rem;">
-                            <i class="fa-solid fa-circle-info text-primary me-1"></i> Pesan ini akan langsung tampil di kotak <strong>"Informasi Terbaru"</strong> pada beranda HP/layar awal petugas yang bersangkutan.
+                            <i class="bi bi-info-circle-fill text-primary me-1"></i> Pesan ini akan langsung tampil di kotak <strong>"Informasi Terbaru"</strong> pada beranda HP/layar awal petugas yang bersangkutan.
                         </div>
                     </div>
 
@@ -1020,7 +1020,7 @@
                 <div class="modal-footer bg-light border-top py-2 px-3 d-flex justify-content-between">
                     <button type="button" class="btn btn-sm btn-light border rounded-pill" data-bs-dismiss="modal">Batal</button>
                     <button type="submit" class="btn btn-sm rounded-pill text-white" style="background: var(--bps-orange);" id="btnSubmitNotice">
-                        <i class="fa-solid fa-paper-plane me-1"></i> Kirim ke Papan Informasi Petugas
+                        <i class="bi bi-send-fill me-1"></i> Kirim ke Papan Informasi Petugas
                     </button>
                 </div>
             </form>
@@ -1078,7 +1078,7 @@
         currentNoticeOfficerName = officerName;
         document.getElementById('notice_user_id').value = userId;
         document.getElementById('notice_recipient_display').innerHTML = `
-            <i class="fa-solid fa-user-circle text-primary"></i>
+            <i class="bi bi-person-circle text-primary"></i>
             <span>${officerName}</span>
             ${userId === 'all_without_reports' ? '<span class="badge bg-danger ms-1">Broadcast Massal Seluruh Petugas Belum Lapor</span>' : '<span class="badge bg-light text-dark border ms-1">Papan Informasi Petugas</span>'}
         `;

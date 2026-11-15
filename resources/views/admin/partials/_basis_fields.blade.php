@@ -1,6 +1,6 @@
 <div class="card mb-3 border border-primary-subtle">
     <div class="card-header bg-light py-2 px-3 fw-bold text-dark small d-flex justify-content-between align-items-center">
-        <span><i class="fa-solid fa-scale-balanced text-primary me-1"></i> B. DASAR PELAKSANAAN (LAPORAN &amp; PENGELUARAN RIIL)</span>
+        <span><i class="bi bi-file-earmark-text text-primary me-1"></i> B. DASAR PELAKSANAAN (LAPORAN &amp; PENGELUARAN RIIL)</span>
         <span class="badge bg-primary-subtle text-primary border border-primary-subtle">Diisi Role Admin</span>
     </div>
     <div class="card-body p-3">

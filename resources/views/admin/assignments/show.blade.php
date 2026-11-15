@@ -42,16 +42,17 @@
     box-shadow: 0 6px 18px rgba(243, 112, 33, 0.35);
 }
 
-/* Bento Table Card */
+/* Fixed Bento Table Card (No Horizontal Scroll / Anti-Geser) */
 .bento-table-card {
     background: #FFFFFF;
     border-radius: 20px;
     border: 1px solid #E2E8F0;
     box-shadow: 0 4px 18px rgba(15, 23, 42, 0.03);
     overflow: hidden;
+    width: 100%;
 }
 .bento-table-header {
-    padding: 1.15rem 1.35rem;
+    padding: 1rem 1.25rem;
     border-bottom: 1px solid #E2E8F0;
     background: #FAFAFA;
     display: flex;
@@ -60,31 +61,44 @@
     flex-wrap: wrap;
     gap: 0.75rem;
 }
-.bento-table th {
+.bento-table-container-fixed {
+    width: 100%;
+    overflow: hidden;
+}
+.bento-table-fixed {
+    table-layout: fixed;
+    width: 100%;
+    margin-bottom: 0;
+}
+.bento-table-fixed th {
     background: #F8FAFC;
     color: #475569;
     font-weight: 700;
-    font-size: 0.72rem;
+    font-size: 0.71rem;
     text-transform: uppercase;
     letter-spacing: 0.04em;
-    padding: 0.95rem 1.15rem;
+    padding: 0.85rem 0.65rem;
     border-bottom: 1px solid #E2E8F0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
 }
-.bento-table td {
-    padding: 1rem 1.15rem;
+.bento-table-fixed td {
+    padding: 0.85rem 0.65rem;
     vertical-align: middle;
     border-bottom: 1px solid #F1F5F9;
-    font-size: 0.84rem;
+    font-size: 0.82rem;
+    overflow: hidden;
 }
-.bento-table tbody tr:hover {
+.bento-table-fixed tbody tr:hover {
     background-color: #F8FAFC;
 }
 
 /* Action buttons in table */
 .bento-action-btn {
-    width: 32px;
-    height: 32px;
-    border-radius: 10px;
+    width: 28px;
+    height: 28px;
+    border-radius: 8px;
     display: inline-flex;
     align-items: center;
     justify-content: center;
@@ -92,7 +106,8 @@
     background: #FFFFFF;
     transition: all 0.15s ease;
     text-decoration: none;
-    font-size: 0.85rem;
+    font-size: 0.78rem;
+    flex-shrink: 0;
 }
 .bento-action-btn:hover {
     transform: translateY(-1px);
@@ -114,18 +129,52 @@
 }
 
 .user-avatar-circle {
-    width: 38px;
-    height: 38px;
+    width: 36px;
+    height: 36px;
     border-radius: 12px;
     display: flex;
     align-items: center;
     justify-content: center;
     font-weight: 700;
-    font-size: 0.95rem;
+    font-size: 0.9rem;
     background: #FFF4ED;
     color: #F37021;
     border: 1px solid rgba(243, 112, 33, 0.2);
     flex-shrink: 0;
+}
+
+/* Mobile Responsive: Stack without scroll */
+@media (max-width: 767.98px) {
+    .bento-table-card .bento-table-fixed thead {
+        display: none;
+    }
+    .bento-table-card .bento-table-fixed,
+    .bento-table-card .bento-table-fixed tbody,
+    .bento-table-card .bento-table-fixed tr,
+    .bento-table-card .bento-table-fixed td {
+        display: block;
+        width: 100% !important;
+        text-align: left !important;
+    }
+    .bento-table-card .bento-table-fixed tr {
+        background: #FFFFFF;
+        border: 1px solid #E2E8F0;
+        border-radius: 14px;
+        margin: 0.75rem;
+        padding: 0.85rem;
+        box-shadow: 0 2px 8px rgba(15, 23, 42, 0.02);
+    }
+    .bento-table-card .bento-table-fixed td {
+        border: none;
+        padding: 0.25rem 0;
+    }
+    .bento-table-card .bento-table-fixed td:last-child {
+        border-top: 1px dashed #E2E8F0;
+        margin-top: 0.5rem;
+        padding-top: 0.5rem;
+        display: flex;
+        justify-content: flex-end;
+    }
 }
 </style>
 @endpush
@@ -187,7 +236,7 @@
             <div class="row g-3 mb-3">
                 <div class="col-sm-4">
                     <div class="text-muted small mb-1"><i class="bi bi-calendar3 me-1 text-primary"></i> Waktu Pelaksanaan</div>
-                    <div class="fw-bold text-dark small">
+                    <div class="fw-bold text-dark small text-truncate">
                         {{ $assignment->start_date->translatedFormat('d F Y') }} &ndash; {{ $assignment->end_date->translatedFormat('d F Y') }}
                     </div>
                     <span class="badge bg-light text-secondary border rounded-pill px-2 py-0.5 mt-1" style="font-size: 0.68rem;">
@@ -196,7 +245,7 @@
                 </div>
                 <div class="col-sm-4">
                     <div class="text-muted small mb-1"><i class="bi bi-geo-alt-fill me-1 text-danger"></i> Lokasi Wilayah</div>
-                    <div class="fw-bold text-dark small">
+                    <div class="fw-bold text-dark small text-truncate">
                         {{ $assignment->location }}
                     </div>
                 </div>
@@ -310,7 +359,7 @@
 </div>
 
 <!-- ==============================================================
-     BAGIAN 1: PEMBAGIAN TUGAS PETUGAS LAPANGAN
+     BAGIAN 1: PEMBAGIAN TUGAS PETUGAS LAPANGAN (ANTI-GESER)
      ============================================================== -->
 <div class="bento-table-card mb-4">
     <div class="bento-table-header">
@@ -330,16 +379,16 @@
         @endif
     </div>
 
-    <div class="table-responsive">
-        <table class="table bento-table align-middle mb-0">
+    <div class="bento-table-container-fixed">
+        <table class="table bento-table-fixed align-middle mb-0">
             <thead>
                 <tr>
-                    <th style="min-width: 220px;">Petugas Lapangan</th>
-                    <th style="min-width: 260px;">Tugas Spesifik yang Diberikan</th>
-                    <th class="text-center" style="min-width: 120px;">Status Tugas</th>
-                    <th style="min-width: 200px;">Catatan Progres Petugas</th>
+                    <th style="width: 32%;">Petugas Lapangan</th>
+                    <th style="width: 30%;">Tugas Spesifik</th>
+                    <th class="text-center" style="width: 14%;">Status Tugas</th>
+                    <th style="width: 16%;">Catatan Progres</th>
                     @if(auth()->user()->isAdmin())
-                        <th class="text-end pe-3" style="min-width: 90px;">Aksi</th>
+                        <th class="text-end pe-2" style="width: 8%;">Aksi</th>
                     @endif
                 </tr>
             </thead>
@@ -347,44 +396,46 @@
                 @forelse($assignment->assignmentOfficers as $officerAssigned)
                     <tr>
                         <td>
-                            <div class="d-flex align-items-center gap-2.5">
+                            <div class="d-flex align-items-center gap-2 overflow-hidden">
                                 <div class="user-avatar-circle">
                                     {{ strtoupper(substr($officerAssigned->user->name, 0, 1)) }}
                                 </div>
-                                <div>
-                                    <div class="fw-bold text-dark" style="font-size: 0.88rem;">{{ $officerAssigned->user->name }}</div>
-                                    <div class="small text-muted"><i class="bi bi-telephone me-1"></i> {{ $officerAssigned->user->phone ?? '-' }}</div>
+                                <div class="overflow-hidden">
+                                    <div class="fw-bold text-dark text-truncate" style="font-size: 0.86rem;" title="{{ $officerAssigned->user->name }}">
+                                        {{ $officerAssigned->user->name }}
+                                    </div>
+                                    <div class="small text-muted text-truncate"><i class="bi bi-telephone me-1"></i> {{ $officerAssigned->user->phone ?? '-' }}</div>
                                 </div>
                             </div>
                         </td>
                         <td>
-                            <div class="small text-dark fw-medium" style="line-height: 1.5;">
+                            <div class="small text-dark fw-medium text-truncate" title="{{ $officerAssigned->specific_task }}">
                                 {{ $officerAssigned->specific_task ?? 'Pelaksana pendataan dan verifikasi lapangan.' }}
                             </div>
                         </td>
                         <td class="text-center">
                             @if($officerAssigned->status === 'completed')
-                                <span class="badge bg-success-subtle text-success border border-success-subtle px-2.5 py-1 rounded-pill" style="font-size: 0.72rem;">
-                                    <i class="bi bi-check-circle-fill me-1"></i> Selesai
+                                <span class="badge bg-success-subtle text-success border border-success-subtle px-2 py-0.5 rounded-pill" style="font-size: 0.7rem;">
+                                    <i class="bi bi-check-circle-fill me-0.5"></i> Selesai
                                 </span>
                             @elseif($officerAssigned->status === 'in_progress')
-                                <span class="badge bg-warning-subtle text-warning-emphasis border border-warning-subtle px-2.5 py-1 rounded-pill" style="font-size: 0.72rem;">
-                                    <i class="bi bi-play-circle-fill me-1"></i> Berjalan
+                                <span class="badge bg-warning-subtle text-warning-emphasis border border-warning-subtle px-2 py-0.5 rounded-pill" style="font-size: 0.7rem;">
+                                    <i class="bi bi-play-circle-fill me-0.5"></i> Berjalan
                                 </span>
                             @else
-                                <span class="badge bg-secondary-subtle text-secondary border border-secondary-subtle px-2.5 py-1 rounded-pill" style="font-size: 0.72rem;">
-                                    <i class="bi bi-clock me-1"></i> Menunggu
+                                <span class="badge bg-secondary-subtle text-secondary border border-secondary-subtle px-2 py-0.5 rounded-pill" style="font-size: 0.7rem;">
+                                    <i class="bi bi-clock me-0.5"></i> Menunggu
                                 </span>
                             @endif
                         </td>
                         <td>
-                            <div class="small text-muted fst-italic">
+                            <div class="small text-muted fst-italic text-truncate" title="{{ $officerAssigned->progress_notes }}">
                                 {{ $officerAssigned->progress_notes ?? 'Belum ada catatan progres.' }}
                             </div>
                         </td>
                         @if(auth()->user()->isAdmin())
-                            <td class="text-end pe-3 text-nowrap">
-                                <div class="d-inline-flex gap-1.5 align-items-center">
+                            <td class="text-end pe-2">
+                                <div class="d-inline-flex gap-1 align-items-center justify-content-end">
                                     <!-- Edit Rincian Tugas -->
                                     <button type="button" 
                                             class="bento-action-btn btn-edit" 
@@ -427,7 +478,7 @@
 </div>
 
 <!-- ==============================================================
-     BAGIAN 2: RESPONDEN TERKAIT KEGIATAN INI
+     BAGIAN 2: RESPONDEN TERKAIT KEGIATAN INI (ANTI-GESER)
      ============================================================== -->
 <div class="bento-table-card mb-4">
     <div class="bento-table-header">
@@ -442,34 +493,40 @@
         </div>
     </div>
 
-    <div class="table-responsive">
-        <table class="table bento-table align-middle mb-0">
+    <div class="bento-table-container-fixed">
+        <table class="table bento-table-fixed align-middle mb-0">
             <thead>
                 <tr>
-                    <th style="min-width: 200px;">Nama Responden</th>
-                    <th style="min-width: 180px;">Instansi / Lembaga</th>
-                    <th style="min-width: 240px;">Alamat</th>
-                    <th style="min-width: 180px;">Petugas Penginput</th>
-                    <th style="min-width: 120px;">Tanggal Input</th>
+                    <th style="width: 25%;">Nama Responden</th>
+                    <th style="width: 20%;">Instansi</th>
+                    <th style="width: 27%;">Alamat</th>
+                    <th style="width: 16%;">Petugas Penginput</th>
+                    <th style="width: 12%;">Tanggal</th>
                 </tr>
             </thead>
             <tbody>
                 @forelse($assignment->respondents as $resp)
                     <tr>
-                        <td class="fw-bold text-dark">{{ $resp->name }}</td>
                         <td>
-                            <span class="badge bg-light text-primary border rounded-pill px-2.5 py-1">
+                            <div class="fw-bold text-dark text-truncate" title="{{ $resp->name }}">{{ $resp->name }}</div>
+                        </td>
+                        <td>
+                            <span class="badge bg-light text-primary border rounded-pill px-2 py-0.5 text-truncate d-inline-block" style="max-width: 100%;">
                                 {{ $resp->agency }}
                             </span>
                         </td>
-                        <td class="small text-secondary">{{ Str::limit($resp->address, 50) }}</td>
                         <td>
-                            <div class="small fw-semibold text-dark d-flex align-items-center gap-1.5">
-                                <i class="bi bi-person text-secondary"></i>
-                                <span>{{ $resp->officer->name }}</span>
+                            <div class="small text-secondary text-truncate" title="{{ $resp->address }}">{{ $resp->address }}</div>
+                        </td>
+                        <td>
+                            <div class="small fw-semibold text-dark text-truncate d-flex align-items-center gap-1">
+                                <i class="bi bi-person text-secondary flex-shrink-0"></i>
+                                <span class="text-truncate">{{ $resp->officer->name }}</span>
                             </div>
                         </td>
-                        <td class="small text-muted">{{ $resp->input_date->format('d/m/Y') }}</td>
+                        <td>
+                            <span class="small text-muted">{{ $resp->input_date->format('d/m/Y') }}</span>
+                        </td>
                     </tr>
                 @empty
                     <tr>
