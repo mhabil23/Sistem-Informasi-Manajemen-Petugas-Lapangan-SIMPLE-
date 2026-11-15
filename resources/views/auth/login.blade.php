@@ -44,55 +44,14 @@
             </div>
 
             <!-- ACRONYM HIGHLIGHT CARD (S-I-M-P-E-L) -->
-            <div class="p-3 mb-3" style="background: rgba(255, 255, 255, 0.9); border: 1.5px solid rgba(243, 112, 33, 0.3); border-radius: 18px; box-shadow: 0 4px 18px rgba(243, 112, 33, 0.06); backdrop-filter: blur(8px);">
-                <div class="d-flex align-items-center justify-content-between mb-1.5">
-                    <span class="text-uppercase fw-bold text-muted" style="font-size: 0.65rem; letter-spacing: 0.08em;">
-                        Kepanjangan Singkatan
-                    </span>
-                    <span class="badge bg-warning-subtle text-warning-emphasis border border-warning-subtle rounded-pill" style="font-size: 0.65rem; font-weight: 700;">
-                        Nama Resmi
-                    </span>
-                </div>
-                <div class="fw-bold" style="font-size: 0.94rem; line-height: 1.5; color: #1E293B;">
-                    <span class="text-bps-orange fw-bolder" style="font-size: 1.12rem;">S</span>istem 
-                    <span class="text-bps-orange fw-bolder" style="font-size: 1.12rem;">I</span>nformasi 
-                    <span class="text-bps-orange fw-bolder" style="font-size: 1.12rem;">M</span>anajemen 
-                    <span class="text-bps-orange fw-bolder" style="font-size: 1.12rem;">P</span>elayanan &amp; 
-                    <span class="text-bps-orange fw-bolder" style="font-size: 1.12rem;">E</span>valuasi 
-                    <span class="text-bps-orange fw-bolder" style="font-size: 1.12rem;">L</span>apangan
-                </div>
-            </div>
-
-            <!-- Brief Tagline -->
-            <p class="text-secondary small mb-4" style="line-height: 1.55; font-size: 0.84rem;">
-                Aplikasi terintegrasi untuk pendataan sensus dan survei, administrasi tanda terima BAST digital, pelaporan perjalanan dinas, serta pemantauan progres real-time.
-            </p>
-
-            <!-- 3 Feature Highlight Pills (Desktop only) -->
-            <div class="d-none d-lg-flex flex-column gap-2 mb-4">
-                <div class="d-flex align-items-center gap-2.5 p-2 rounded-3 bg-white bg-opacity-75 border" style="border-color: rgba(243, 112, 33, 0.16) !important;">
-                    <div class="rounded-3 d-flex align-items-center justify-content-center text-white" style="width: 32px; height: 32px; background: #16A34A; flex-shrink: 0; font-size: 0.9rem;">
-                        <i class="bi bi-pen-fill"></i>
-                    </div>
-                    <span class="small fw-semibold text-dark" style="font-size: 0.78rem;">
-                        Tanda Terima BAST Digital Responden &amp; Petugas (TTD Canvas)
-                    </span>
-                </div>
-                <div class="d-flex align-items-center gap-2.5 p-2 rounded-3 bg-white bg-opacity-75 border" style="border-color: rgba(243, 112, 33, 0.16) !important;">
-                    <div class="rounded-3 d-flex align-items-center justify-content-center text-white" style="width: 32px; height: 32px; background: #7C3AED; flex-shrink: 0; font-size: 0.9rem;">
-                        <i class="bi bi-file-earmark-pdf-fill"></i>
-                    </div>
-                    <span class="small fw-semibold text-dark" style="font-size: 0.78rem;">
-                        Laporan Perjalanan Dinas &amp; Auto-Generate Berkas PDF
-                    </span>
-                </div>
-                <div class="d-flex align-items-center gap-2.5 p-2 rounded-3 bg-white bg-opacity-75 border" style="border-color: rgba(243, 112, 33, 0.16) !important;">
-                    <div class="rounded-3 d-flex align-items-center justify-content-center text-white" style="width: 32px; height: 32px; background: #0284C7; flex-shrink: 0; font-size: 0.9rem;">
-                        <i class="bi bi-speedometer2"></i>
-                    </div>
-                    <span class="small fw-semibold text-dark" style="font-size: 0.78rem;">
-                        Dashboard Monitoring Capaian &amp; Rekapitulasi Progres Wilayah
-                    </span>
+            <div class="p-3 mb-4" style="background: rgba(255, 255, 255, 0.9); border: 1.5px solid rgba(243, 112, 33, 0.3); border-radius: 18px; box-shadow: 0 4px 18px rgba(243, 112, 33, 0.06); backdrop-filter: blur(8px);">
+                <div class="fw-bold" style="font-size: 0.96rem; line-height: 1.55; color: #1E293B;">
+                    <span class="text-bps-orange fw-bolder" style="font-size: 1.15rem;">S</span>istem 
+                    <span class="text-bps-orange fw-bolder" style="font-size: 1.15rem;">I</span>nformasi 
+                    <span class="text-bps-orange fw-bolder" style="font-size: 1.15rem;">M</span>anajemen 
+                    <span class="text-bps-orange fw-bolder" style="font-size: 1.15rem;">P</span>elayanan &amp; 
+                    <span class="text-bps-orange fw-bolder" style="font-size: 1.15rem;">E</span>valuasi 
+                    <span class="text-bps-orange fw-bolder" style="font-size: 1.15rem;">L</span>apangan
                 </div>
             </div>
         </div>
@@ -223,26 +182,8 @@
             </button>
         </form>
 
-        <!-- Quick Demo Credentials Section -->
-        <div class="mt-4 pt-3 border-top text-center" style="border-color: #E2E8F0 !important;">
-            <p class="text-muted small fw-semibold mb-2" style="font-size: 0.75rem;">
-                <i class="bi bi-lightning-charge-fill text-warning me-1"></i> Akun Demo Cepat (Klik untuk mengisi):
-            </p>
-            <div class="d-flex flex-wrap gap-2 justify-content-center">
-                <button type="button" class="btn-demo-pill" onclick="fillCredentials('admin', 'admin123')">
-                    <i class="bi bi-shield-fill text-primary"></i> Admin
-                </button>
-                <button type="button" class="btn-demo-pill" onclick="fillCredentials('petugas1', 'password')">
-                    <i class="bi bi-person-fill text-success"></i> Petugas 1
-                </button>
-                <button type="button" class="btn-demo-pill" onclick="fillCredentials('petugas2', 'password')">
-                    <i class="bi bi-person-fill text-info"></i> Petugas 2
-                </button>
-            </div>
-        </div>
-
         <!-- Footer Copyright -->
-        <div class="text-center mt-3 pt-2">
+        <div class="text-center mt-4 pt-3 border-top" style="border-color: #E2E8F0 !important;">
             <span class="text-muted" style="font-size: 0.72rem;">
                 &copy; {{ date('Y') }} BPS Kabupaten Kolaka Utara &bull; Hak Cipta Dilindungi
             </span>
@@ -265,16 +206,6 @@
             eyeIcon.classList.toggle('bi-eye', !isPassword);
             eyeIcon.classList.toggle('bi-eye-slash', isPassword);
         });
-    }
-
-    function fillCredentials(login, password) {
-        const loginEl = document.getElementById('login');
-        const passEl = document.getElementById('password');
-        if (loginEl && passEl) {
-            loginEl.value = login;
-            passEl.value = password;
-            loginEl.focus();
-        }
     }
 </script>
 @endpush

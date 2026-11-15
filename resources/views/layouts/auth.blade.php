@@ -93,7 +93,7 @@
             position: relative;
             z-index: 10;
             width: 100%;
-            max-width: 1100px;
+            max-width: 1040px;
             margin: auto;
             padding: 1.5rem 1rem;
         }
@@ -108,7 +108,8 @@
                 0 4px 16px rgba(243, 112, 33, 0.05);
             overflow: hidden;
             display: flex;
-            min-height: 640px;
+            align-items: stretch;
+            min-height: 520px;
             transition: all 0.3s ease;
         }
 
