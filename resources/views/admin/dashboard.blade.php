@@ -882,9 +882,6 @@
                     <h5 class="bento-card-title-sm">
                         <i class="bi bi-lightning-charge-fill text-warning me-1.5"></i> Log Aktivitas Terkini
                     </h5>
-                    @if(auth()->user()->isAdmin())
-                        <a href="{{ route('admin.logs.index') }}" class="bento-card-link-sm">Semua &rarr;</a>
-                    @endif
                 </div>
                 <div class="flex-grow-1" style="max-height: 235px; overflow-y: auto;">
                     <div class="list-group list-group-flush">

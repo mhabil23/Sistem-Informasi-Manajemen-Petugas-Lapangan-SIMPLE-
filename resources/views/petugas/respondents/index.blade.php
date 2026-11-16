@@ -8,323 +8,405 @@
     <li class="breadcrumb-item active" aria-current="page">Data Responden</li>
 @endsection
 
+@push('styles')
+<style>
+    .bento-card {
+        background: #FFFFFF;
+        border-radius: 18px;
+        border: 1px solid rgba(226, 232, 240, 0.85);
+        box-shadow: 0 4px 16px rgba(15, 23, 42, 0.03);
+    }
+    .bento-stat-card {
+        background: #FFFFFF;
+        border-radius: 16px;
+        border: 1px solid rgba(226, 232, 240, 0.85);
+        padding: 1.1rem 1.25rem;
+        box-shadow: 0 2px 10px rgba(15, 23, 42, 0.02);
+        display: flex;
+        align-items: center;
+        gap: 1rem;
+    }
+    .bento-stat-icon {
+        width: 44px;
+        height: 44px;
+        border-radius: 12px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1.35rem;
+        flex-shrink: 0;
+    }
+    .btn-bps-orange {
+        background-color: #F37021;
+        border-color: #F37021;
+        color: #ffffff;
+        font-weight: 600;
+        border-radius: 10px;
+        padding: 0.45rem 1rem;
+        font-size: 0.82rem;
+        display: inline-flex;
+        align-items: center;
+        gap: 0.4rem;
+        transition: all 0.2s ease;
+    }
+    .btn-bps-orange:hover {
+        background-color: #d95d12;
+        border-color: #d95d12;
+        color: #ffffff;
+        box-shadow: 0 4px 12px rgba(243, 112, 33, 0.25);
+    }
+    .bento-table {
+        table-layout: fixed;
+        width: 100%;
+        margin-bottom: 0;
+        font-size: 0.82rem;
+    }
+    .bento-table thead th {
+        background-color: #F8FAFC;
+        color: #475569;
+        font-weight: 700;
+        font-size: 0.72rem;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+        padding: 0.75rem 0.85rem;
+        border-bottom: 1px solid #E2E8F0;
+        vertical-align: middle;
+        white-space: nowrap;
+    }
+    .bento-table tbody td {
+        padding: 0.75rem 0.85rem;
+        vertical-align: middle;
+        border-bottom: 1px solid #F1F5F9;
+    }
+    .bento-table tbody tr:hover td {
+        background-color: #F8FAFC;
+    }
+    .bento-action-btn {
+        width: 32px;
+        height: 32px;
+        border-radius: 8px;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 0.85rem;
+        padding: 0;
+        transition: all 0.15s ease;
+    }
+    .bento-action-btn:hover {
+        transform: translateY(-1px);
+    }
+</style>
+@endpush
+
 @section('content')
 <!-- Header -->
-<div class="row align-items-center mb-4">
-    <div class="col-md-7">
-        <h3 class="fw-bold text-dark mb-1">
-            <i class="fa-solid fa-house-chimney-user text-primary me-2"></i>Daftar Sampel Ruta (Responden)
+<div class="d-flex flex-wrap align-items-center justify-content-between gap-3 mb-4">
+    <div>
+        <h3 class="fw-bold text-dark mb-1 d-flex align-items-center gap-2">
+            <i class="bi bi-houses text-primary"></i> Data Sampel Ruta (Responden)
         </h3>
-        <p class="text-muted small mb-0">Daftar sampel rumah tangga (ruta) resmi yang dialokasikan oleh Administrator BPS. Lakukan verifikasi data lapangan dan terbitkan Berita Acara Serah Terima (BAST).</p>
+        <p class="text-muted small mb-0">Daftar sampel rumah tangga (ruta) resmi yang dialokasikan oleh Administrator BPS. Lakukan verifikasi dan terbitkan Berita Acara Serah Terima (BAST).</p>
     </div>
-    <div class="col-md-5 text-md-end mt-3 mt-md-0 d-flex justify-content-md-end gap-2 align-items-center">
-        <span class="badge bg-primary-subtle text-primary border border-primary-subtle py-2 px-3 fw-semibold d-none d-sm-inline-block">
-            <i class="fa-solid fa-database me-1"></i> Alokasi Sampel BPS
-        </span>
-        <a href="{{ route('petugas.basts.respondents.index') }}" class="btn btn-success shadow-sm">
-            <i class="fa-solid fa-file-signature me-1"></i> Menu Tanda Terima Responden
+    <div class="d-flex flex-wrap align-items-center gap-2">
+        <a href="{{ route('petugas.basts.respondents.index') }}" class="btn-bps-orange shadow-sm">
+            <i class="bi bi-file-earmark-check-fill"></i> Menu Tanda Terima Responden
         </a>
     </div>
 </div>
 
-<!-- Stat Cards (4 Cards Balanced) -->
+<!-- Stat Cards -->
 <div class="row g-3 mb-4">
     <div class="col-xl-3 col-sm-6">
-        <div class="sp-stat-card">
-            <div class="sp-stat-icon-wrap" style="background: #e0f2fe; color: #0284c7;">
-                <i class="fa-solid fa-bullseye"></i>
+        <div class="bento-stat-card">
+            <div class="bento-stat-icon" style="background: #EFF6FF; color: #005BAC;">
+                <i class="bi bi-bullseye"></i>
             </div>
-            <div class="sp-stat-info">
-                <div class="sp-stat-label">Target Kuota</div>
-                <div class="sp-stat-value text-primary">{{ number_format($targetQuota ?? 120) }}</div>
-                <div class="sp-stat-desc">Alokasi responden Anda</div>
-            </div>
-        </div>
-    </div>
-
-    <div class="col-xl-3 col-sm-6">
-        <div class="sp-stat-card">
-            <div class="sp-stat-icon-wrap" style="background: #dcfce7; color: #16a34a;">
-                <i class="fa-solid fa-users"></i>
-            </div>
-            <div class="sp-stat-info">
-                <div class="sp-stat-label">Responden Terdata</div>
-                <div class="sp-stat-value text-success">{{ number_format($totalMyRespondents) }}</div>
-                <div class="sp-stat-desc">Telah diinput di sistem</div>
+            <div>
+                <div class="text-muted small fw-semibold" style="font-size: 0.76rem;">TARGET KUOTA</div>
+                <div class="fw-bold text-primary" style="font-size: 1.4rem;">{{ number_format($targetQuota ?? 120) }}</div>
+                <div class="text-muted small" style="font-size: 0.72rem;">Alokasi responden Anda</div>
             </div>
         </div>
     </div>
 
     <div class="col-xl-3 col-sm-6">
-        <div class="sp-stat-card">
-            <div class="sp-stat-icon-wrap" style="background: #fef3c7; color: #d97706;">
-                <i class="fa-solid fa-hourglass-half"></i>
+        <div class="bento-stat-card">
+            <div class="bento-stat-icon" style="background: #F0FDF4; color: #16A34A;">
+                <i class="bi bi-people-fill"></i>
             </div>
-            <div class="sp-stat-info">
-                <div class="sp-stat-label">Sisa Target</div>
-                <div class="sp-stat-value text-warning">{{ number_format($remainingTarget ?? max(0, ($targetQuota ?? 120) - $totalMyRespondents)) }}</div>
-                <div class="sp-stat-desc">Belum diverifikasi</div>
+            <div>
+                <div class="text-muted small fw-semibold" style="font-size: 0.76rem;">RESPONDEN TERDATA</div>
+                <div class="fw-bold text-success" style="font-size: 1.4rem;">{{ number_format($totalMyRespondents) }}</div>
+                <div class="text-muted small" style="font-size: 0.72rem;">Telah tercatat di sistem</div>
             </div>
         </div>
     </div>
 
     <div class="col-xl-3 col-sm-6">
-        <div class="sp-stat-card">
-            <div class="sp-stat-icon-wrap" style="background: #e0e7ff; color: #4338ca;">
-                <i class="fa-solid fa-file-signature"></i>
+        <div class="bento-stat-card">
+            <div class="bento-stat-icon" style="background: #FFFBEB; color: #D97706;">
+                <i class="bi bi-hourglass-split"></i>
             </div>
-            <div class="sp-stat-info">
-                <div class="sp-stat-label">BAST Terbit</div>
-                <div class="sp-stat-value text-indigo" style="color: #4338ca;">{{ number_format($withBastCount) }}</div>
-                <div class="sp-stat-desc">Sudah ada berita acara</div>
+            <div>
+                <div class="text-muted small fw-semibold" style="font-size: 0.76rem;">SISA TARGET</div>
+                <div class="fw-bold text-warning" style="font-size: 1.4rem;">{{ number_format($remainingTarget ?? max(0, ($targetQuota ?? 120) - $totalMyRespondents)) }}</div>
+                <div class="text-muted small" style="font-size: 0.72rem;">Belum diverifikasi</div>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-xl-3 col-sm-6">
+        <div class="bento-stat-card">
+            <div class="bento-stat-icon" style="background: #FAF5FF; color: #7C3AED;">
+                <i class="bi bi-file-earmark-check-fill"></i>
+            </div>
+            <div>
+                <div class="text-muted small fw-semibold" style="font-size: 0.76rem;">BAST TERBIT</div>
+                <div class="fw-bold" style="font-size: 1.4rem; color: #7C3AED;">{{ number_format($withBastCount) }}</div>
+                <div class="text-muted small" style="font-size: 0.72rem;">Berita acara sah</div>
             </div>
         </div>
     </div>
 </div>
 
 <!-- Filter Bar -->
-<div class="sp-card mb-4">
-    <div class="sp-card-body p-3">
-        <form method="GET" action="{{ route('petugas.respondents.index') }}" class="row g-2 align-items-center">
-            <div class="col-lg-6 col-md-5">
-                <div class="input-group">
-                    <span class="input-group-text bg-white border-end-0 text-muted">
-                        <i class="fa-solid fa-magnifying-glass"></i>
-                    </span>
-                    <input type="text" 
-                           name="search" 
-                           class="form-control border-start-0 ps-0" 
-                           placeholder="Cari nama responden, instansi, alamat, nomor HP..." 
-                           value="{{ request('search') }}">
-                </div>
+<div class="bento-card mb-4 p-3">
+    <form method="GET" action="{{ route('petugas.respondents.index') }}" class="row g-2 align-items-center">
+        <div class="col-lg-6 col-md-5">
+            <div class="input-group input-group-sm">
+                <span class="input-group-text bg-white border-end-0 text-muted">
+                    <i class="bi bi-search"></i>
+                </span>
+                <input type="text" 
+                       name="search" 
+                       class="form-control border-start-0 ps-0" 
+                       placeholder="Cari nama responden, instansi, alamat, nomor HP..." 
+                       value="{{ request('search') }}">
             </div>
-            <div class="col-lg-4 col-md-4">
-                <select name="assignment_id" class="form-select">
-                    <option value="">-- Semua Kegiatan Lapangan --</option>
-                    @foreach($myAssignments as $asgn)
-                        <option value="{{ $asgn->id }}" {{ request('assignment_id') == $asgn->id ? 'selected' : '' }}>
-                            {{ $asgn->title }}
-                        </option>
-                    @endforeach
-                </select>
-            </div>
-            <div class="col-lg-2 col-md-3 d-flex gap-2">
-                <button type="submit" class="btn btn-primary w-100">
-                    <i class="fa-solid fa-filter me-1"></i> Filter
-                </button>
-                @if(request('search') || request('assignment_id'))
-                    <a href="{{ route('petugas.respondents.index') }}" class="btn btn-outline-secondary" title="Reset Filter">
-                        <i class="fa-solid fa-rotate-left"></i>
-                    </a>
-                @endif
-            </div>
-        </form>
-    </div>
+        </div>
+        <div class="col-lg-4 col-md-4">
+            <select name="assignment_id" class="form-select form-select-sm">
+                <option value="">-- Semua Kegiatan Lapangan --</option>
+                @foreach($myAssignments as $asgn)
+                    <option value="{{ $asgn->id }}" {{ request('assignment_id') == $asgn->id ? 'selected' : '' }}>
+                        {{ $asgn->title }}
+                    </option>
+                @endforeach
+            </select>
+        </div>
+        <div class="col-lg-2 col-md-3 d-flex gap-2">
+            <button type="submit" class="btn btn-sm btn-primary rounded-pill w-100 fw-semibold">
+                <i class="bi bi-filter me-1"></i> Filter
+            </button>
+            @if(request('search') || request('assignment_id'))
+                <a href="{{ route('petugas.respondents.index') }}" class="btn btn-sm btn-outline-secondary rounded-pill" title="Reset Filter">
+                    <i class="bi bi-arrow-counterclockwise"></i>
+                </a>
+            @endif
+        </div>
+    </form>
 </div>
 
 <!-- Table Card -->
-<div class="sp-card mb-4">
-    <div class="sp-card-header d-flex justify-content-between align-items-center">
-        <h5 class="sp-card-title mb-0">
-            <i class="fa-solid fa-id-card text-primary"></i>
-            Daftar Responden yang Anda Input ({{ $respondents->total() }})
-        </h5>
-        <span class="badge bg-primary-subtle text-primary border border-primary-subtle d-md-none" style="font-size: 0.72rem;">
-            {{ $respondents->total() }} Data
+<div class="bento-card mb-4 overflow-hidden">
+    <div class="d-flex justify-content-between align-items-center px-4 py-3 border-bottom bg-white">
+        <div class="d-flex align-items-center gap-2">
+            <div class="rounded-circle d-flex align-items-center justify-content-center" style="width: 32px; height: 32px; background: #FFF4ED; color: #F37021;">
+                <i class="bi bi-people-fill"></i>
+            </div>
+            <h5 class="fw-bold text-dark mb-0" style="font-size: 0.95rem;">
+                Daftar Responden Lapangan ({{ $respondents->total() }})
+            </h5>
+        </div>
+        <span class="badge bg-primary-subtle text-primary border border-primary-subtle rounded-pill px-3 py-1 font-monospace" style="font-size: 0.72rem;">
+            Halaman {{ $respondents->currentPage() }} dari {{ $respondents->lastPage() ?: 1 }}
         </span>
     </div>
-    <div class="sp-card-body p-0">
-        <!-- MODE DESKTOP & TABLET: Tabel Data Lengkap -->
-        <div class="table-responsive d-none d-md-block">
-            <table class="table sp-table align-middle mb-0">
-                <thead>
+
+    <!-- MODE DESKTOP & TABLET: Tabel Data Anti-Geser -->
+    <div class="d-none d-md-block">
+        <table class="table bento-table align-middle">
+            <thead>
+                <tr>
+                    <th style="width: 25%;">Kepala Keluarga &amp; Responden</th>
+                    <th style="width: 17%;">Instansi / Lembaga</th>
+                    <th style="width: 22%;">Alamat</th>
+                    <th style="width: 14%;">Kegiatan</th>
+                    <th style="width: 10%; text-align: center;">Status BAST</th>
+                    <th style="width: 12%; text-align: right;" class="pe-3">Aksi</th>
+                </tr>
+            </thead>
+            <tbody>
+                @forelse($respondents as $resp)
                     <tr>
-                        <th style="min-width: 220px;">Kepala Keluarga &amp; Responden</th>
-                        <th style="min-width: 170px;">Instansi / Lembaga</th>
-                        <th style="min-width: 220px;">Alamat</th>
-                        <th>Kegiatan Terkait</th>
-                        <th>Tanggal Input</th>
-                        <th>Status BAST</th>
-                        <th class="text-end" style="min-width: 100px;">Aksi</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    @forelse($respondents as $resp)
-                        <tr>
-                            <td>
-                                <div class="fw-bold text-dark">{{ $resp->family_head_name ?? $resp->name }}</div>
-                                <div class="small my-1">
-                                    <span class="badge bg-light text-dark border me-1">
-                                        <i class="fa-solid fa-user me-1 text-primary"></i> {{ $resp->informant_name ?? $resp->name }}
-                                    </span>
-                                    <span class="badge bg-secondary-subtle text-secondary border">
-                                        {{ $resp->respondent_status ?? 'KRT' }}
-                                    </span>
-                                </div>
-                                <small class="text-muted"><i class="fa-solid fa-phone me-1"></i> {{ $resp->phone ?? '-' }}</small>
-                            </td>
-                            <td>
-                                <span class="badge bg-light text-primary border">
-                                    {{ $resp->agency }}
+                        <td>
+                            <div class="fw-bold text-dark text-truncate">{{ $resp->family_head_name ?? $resp->name }}</div>
+                            <div class="small my-1 d-flex flex-wrap gap-1 align-items-center">
+                                <span class="badge bg-light text-dark border" style="font-size: 0.68rem;">
+                                    <i class="bi bi-person text-primary me-0.5"></i> {{ $resp->informant_name ?? $resp->name }}
                                 </span>
-                            </td>
-                            <td>
-                                <div class="small text-secondary text-truncate" style="max-width: 240px;" title="{{ $resp->address }}">
-                                    <i class="fa-solid fa-location-dot me-1 text-danger"></i> {{ $resp->address }}
-                                </div>
-                            </td>
-                            <td>
-                                <span class="small fw-semibold text-dark text-truncate d-block" style="max-width: 180px;">
-                                    {{ $resp->assignment ? $resp->assignment->title : '-' }}
-                                </span>
-                            </td>
-                            <td class="small text-muted">{{ $resp->input_date->format('d/m/Y') }}</td>
-                            <td>
-                                @if($resp->basts->isNotEmpty())
-                                    <span class="badge bg-success-subtle text-success border border-success-subtle px-2 py-1">
-                                        <i class="fa-solid fa-check me-1"></i> {{ $resp->basts->count() }} BAST
-                                    </span>
-                                @else
-                                    <span class="badge bg-secondary-subtle text-secondary border border-secondary-subtle px-2 py-1">
-                                        Belum Ada
-                                    </span>
-                                @endif
-                            </td>
-                            <td class="text-end text-nowrap">
-                                <div class="sp-action-btn-group">
-                                    <!-- Verifikasi / Edit Data Lapangan -->
-                                    <button type="button" 
-                                            class="btn btn-light border sp-action-btn text-warning" 
-                                            title="Verifikasi / Update Lapangan" 
-                                            data-bs-toggle="tooltip"
-                                            onclick="openEditMyRespondentModal({{ json_encode($resp) }})">
-                                        <i class="fa-regular fa-pen-to-square"></i>
-                                    </button>
-                                    <!-- Shortcut Tanda Terima Responden -->
-                                    <a href="{{ route('petugas.basts.respondents.index') }}" 
-                                       class="btn btn-light border sp-action-btn text-success" 
-                                       title="Buka / Terbitkan Tanda Terima" 
-                                       data-bs-toggle="tooltip">
-                                        <i class="fa-solid fa-file-signature"></i>
-                                    </a>
-                                </div>
-                            </td>
-                        </tr>
-                    @empty
-                        <tr>
-                            <td colspan="7" class="text-center py-5 text-muted">
-                                <i class="fa-solid fa-users-slash fa-3x mb-3 text-secondary opacity-50"></i>
-                                <div class="fw-semibold">
-                                    @if(request('search') || request('assignment_id'))
-                                        Tidak ditemukan data sampel responden yang sesuai dengan filter pencarian.
-                                    @else
-                                        Belum ada sampel rumah tangga (ruta) yang dialokasikan oleh Administrator untuk Anda.
-                                    @endif
-                                </div>
-                                <div class="small mt-1">
-                                    @if(request('search') || request('assignment_id'))
-                                        Silakan reset filter atau cari dengan kata kunci lain.
-                                    @else
-                                        Daftar sampel responden akan muncul otomatis setelah Administrator Satker BPS mengalokasikan sampel kegiatan kepada akun Anda.
-                                    @endif
-                                </div>
-                            </td>
-                        </tr>
-                    @endforelse
-                </tbody>
-            </table>
-        </div>
-
-        <!-- MODE MOBILE / HP: Daftar Kartu Responsif (Pas di Layar HP & Tanpa Geser ke Kanan) -->
-        <div class="d-block d-md-none p-3">
-            @forelse($respondents as $resp)
-                <div class="card border rounded-3 mb-3 shadow-none bg-white">
-                    <div class="card-body p-3">
-                        <div class="d-flex justify-content-between align-items-start mb-2">
-                            <div>
-                                <h6 class="fw-bold text-dark mb-1">{{ $resp->family_head_name ?? $resp->name }}</h6>
-                                <div class="small text-muted mb-1">
-                                    <span class="badge bg-light text-dark border" style="font-size: 0.72rem;">
-                                        <i class="fa-solid fa-user me-1 text-primary"></i> {{ $resp->informant_name ?? $resp->name }}
-                                    </span>
-                                    <span class="badge bg-secondary-subtle text-secondary border" style="font-size: 0.72rem;">
-                                        {{ $resp->respondent_status ?? 'KRT' }}
-                                    </span>
-                                </div>
-                                <span class="badge bg-light text-primary border" style="font-size: 0.72rem;">
-                                    <i class="fa-solid fa-building me-1"></i> {{ $resp->agency }}
+                                <span class="badge bg-secondary-subtle text-secondary border" style="font-size: 0.68rem;">
+                                    {{ $resp->respondent_status ?? 'KRT' }}
                                 </span>
                             </div>
-                            <div class="d-flex gap-1.5">
-                                <button type="button" 
-                                        class="btn btn-sm btn-light border text-warning shadow-sm" 
-                                        title="Edit Data Responden" 
-                                        onclick="openEditMyRespondentModal({{ json_encode($resp) }})">
-                                    <i class="fa-regular fa-pen-to-square"></i>
-                                </button>
-                                @if($resp->phone)
-                                    <a href="tel:{{ $resp->phone }}" class="btn btn-sm btn-light border text-success shadow-sm" title="Telepon">
-                                        <i class="fa-solid fa-phone"></i>
-                                    </a>
-                                @endif
-                            </div>
-                        </div>
-
-                        <div class="small text-secondary mb-2.5">
-                            @if($resp->phone)
-                                <div class="mb-1">
-                                    <i class="fa-solid fa-phone text-muted me-1.5" style="width: 14px;"></i>
-                                    <span>{{ $resp->phone }}</span>
-                                </div>
-                            @endif
-                            <div class="mb-1">
-                                <i class="fa-solid fa-location-dot text-danger me-1.5" style="width: 14px;"></i>
-                                <span>{{ $resp->address }}</span>
-                            </div>
-                            @if($resp->assignment)
-                                <div class="mb-1 text-truncate">
-                                    <i class="fa-solid fa-briefcase text-primary me-1.5" style="width: 14px;"></i>
-                                    <span class="fw-semibold text-dark">{{ $resp->assignment->title }}</span>
-                                </div>
-                            @endif
-                        </div>
-
-                        <div class="d-flex justify-content-between align-items-center pt-2 border-top">
-                            <span class="text-muted small" style="font-size: 0.75rem;">
-                                <i class="fa-regular fa-calendar me-1"></i> {{ $resp->input_date->format('d/m/Y') }}
+                            <small class="text-muted" style="font-size: 0.72rem;">
+                                <i class="bi bi-telephone me-1"></i> {{ $resp->phone ?? '-' }}
+                            </small>
+                        </td>
+                        <td>
+                            <span class="badge bg-light text-primary border text-truncate d-inline-block" style="max-width: 100%; font-size: 0.72rem;">
+                                {{ $resp->agency }}
                             </span>
-                            <div>
-                                @if($resp->basts->isNotEmpty())
-                                    <span class="badge bg-success-subtle text-success border border-success-subtle px-2 py-1" style="font-size: 0.75rem;">
-                                        <i class="fa-solid fa-check me-1"></i> {{ $resp->basts->count() }} BAST Terbit
-                                    </span>
+                        </td>
+                        <td>
+                            <div class="small text-secondary text-truncate" title="{{ $resp->address }}" style="font-size: 0.75rem;">
+                                <i class="bi bi-geo-alt-fill text-danger me-1"></i> {{ $resp->address }}
+                            </div>
+                        </td>
+                        <td>
+                            <span class="small fw-semibold text-dark text-truncate d-block" style="font-size: 0.75rem;" title="{{ $resp->assignment ? $resp->assignment->title : '-' }}">
+                                {{ $resp->assignment ? $resp->assignment->title : '-' }}
+                            </span>
+                            <span class="text-muted" style="font-size: 0.68rem;">
+                                {{ $resp->input_date->format('d/m/Y') }}
+                            </span>
+                        </td>
+                        <td class="text-center">
+                            @if($resp->basts->isNotEmpty())
+                                <span class="badge bg-success-subtle text-success border border-success-subtle rounded-pill px-2.5 py-1 fw-bold" style="font-size: 0.72rem;">
+                                    <i class="bi bi-check2-circle me-1"></i> {{ $resp->basts->count() }} BAST
+                                </span>
+                            @else
+                                <span class="badge bg-secondary-subtle text-secondary border border-secondary-subtle rounded-pill px-2.5 py-1" style="font-size: 0.72rem;">
+                                    Belum Ada
+                                </span>
+                            @endif
+                        </td>
+                        <td class="text-end pe-3">
+                            <div class="d-inline-flex gap-1.5 align-items-center">
+                                <!-- Verifikasi / Edit Data Lapangan -->
+                                <button type="button" 
+                                        class="btn btn-outline-warning bento-action-btn" 
+                                        title="Verifikasi / Update Lapangan" 
+                                        data-bs-toggle="tooltip"
+                                        onclick="openEditMyRespondentModal({{ json_encode($resp) }})">
+                                    <i class="bi bi-pencil-square"></i>
+                                </button>
+                                <!-- Shortcut Tanda Terima Responden -->
+                                <a href="{{ route('petugas.basts.respondents.index') }}" 
+                                   class="btn btn-outline-success bento-action-btn" 
+                                   title="Buka / Terbitkan Tanda Terima" 
+                                   data-bs-toggle="tooltip">
+                                    <i class="bi bi-file-earmark-check"></i>
+                                </a>
+                            </div>
+                        </td>
+                    </tr>
+                @empty
+                    <tr>
+                        <td colspan="6" class="text-center py-5 text-muted">
+                            <i class="bi bi-people display-6 text-secondary opacity-50 mb-2 d-block"></i>
+                            <div class="fw-semibold">
+                                @if(request('search') || request('assignment_id'))
+                                    Tidak ditemukan data sampel responden yang sesuai filter.
                                 @else
-                                    <span class="badge bg-secondary-subtle text-secondary border border-secondary-subtle px-2 py-1" style="font-size: 0.75rem;">
-                                        Belum Ada BAST
-                                    </span>
+                                    Belum ada sampel rumah tangga (ruta) yang dialokasikan untuk Anda.
                                 @endif
                             </div>
+                        </td>
+                    </tr>
+                @endforelse
+            </tbody>
+        </table>
+    </div>
+
+    <!-- MODE MOBILE / HP: Daftar Kartu Responsif Cepat -->
+    <div class="d-block d-md-none p-3">
+        @forelse($respondents as $resp)
+            <div class="bento-card p-3 mb-3 border">
+                <div class="d-flex justify-content-between align-items-start mb-2">
+                    <div>
+                        <h6 class="fw-bold text-dark mb-1" style="font-size: 0.92rem;">{{ $resp->family_head_name ?? $resp->name }}</h6>
+                        <div class="small text-muted mb-1 d-flex flex-wrap gap-1">
+                            <span class="badge bg-light text-dark border" style="font-size: 0.68rem;">
+                                <i class="bi bi-person text-primary me-0.5"></i> {{ $resp->informant_name ?? $resp->name }}
+                            </span>
+                            <span class="badge bg-secondary-subtle text-secondary border" style="font-size: 0.68rem;">
+                                {{ $resp->respondent_status ?? 'KRT' }}
+                            </span>
                         </div>
+                        <span class="badge bg-light text-primary border" style="font-size: 0.68rem;">
+                            <i class="bi bi-building me-1"></i> {{ $resp->agency }}
+                        </span>
                     </div>
-                </div>
-            @empty
-                <div class="text-center py-4 text-muted">
-                    <i class="fa-solid fa-users-slash fa-2x mb-2 text-secondary opacity-50"></i>
-                    <div class="fw-semibold small">
-                        @if(request('search') || request('assignment_id'))
-                            Tidak ada sampel responden sesuai filter pencarian.
-                        @else
-                            Belum ada sampel rumah tangga (ruta) yang dialokasikan oleh Administrator untuk Anda.
+                    <div class="d-flex gap-1.5">
+                        <button type="button" 
+                                class="btn btn-sm btn-outline-warning bento-action-btn" 
+                                title="Edit Data Responden" 
+                                onclick="openEditMyRespondentModal({{ json_encode($resp) }})">
+                            <i class="bi bi-pencil-square"></i>
+                        </button>
+                        @if($resp->phone)
+                            <a href="tel:{{ $resp->phone }}" class="btn btn-sm btn-outline-success bento-action-btn" title="Telepon">
+                                <i class="bi bi-telephone"></i>
+                            </a>
                         @endif
                     </div>
                 </div>
-            @endforelse
-        </div>
+
+                <div class="small text-secondary mb-2.5" style="font-size: 0.78rem;">
+                    @if($resp->phone)
+                        <div class="mb-1">
+                            <i class="bi bi-telephone text-muted me-1.5"></i>
+                            <span>{{ $resp->phone }}</span>
+                        </div>
+                    @endif
+                    <div class="mb-1">
+                        <i class="bi bi-geo-alt-fill text-danger me-1.5"></i>
+                        <span>{{ $resp->address }}</span>
+                    </div>
+                    @if($resp->assignment)
+                        <div class="mb-1 text-truncate">
+                            <i class="bi bi-briefcase text-primary me-1.5"></i>
+                            <span class="fw-semibold text-dark">{{ $resp->assignment->title }}</span>
+                        </div>
+                    @endif
+                </div>
+
+                <div class="d-flex justify-content-between align-items-center pt-2 border-top">
+                    <span class="text-muted small" style="font-size: 0.72rem;">
+                        <i class="bi bi-calendar me-1"></i> {{ $resp->input_date->format('d/m/Y') }}
+                    </span>
+                    <div>
+                        @if($resp->basts->isNotEmpty())
+                            <span class="badge bg-success-subtle text-success border border-success-subtle rounded-pill px-2.5 py-1 fw-bold" style="font-size: 0.72rem;">
+                                <i class="bi bi-check2-circle me-1"></i> {{ $resp->basts->count() }} BAST Terbit
+                            </span>
+                        @else
+                            <a href="{{ route('petugas.basts.respondents.index') }}" class="btn btn-xs btn-outline-primary rounded-pill px-2.5 py-1" style="font-size: 0.72rem;">
+                                <i class="bi bi-file-earmark-plus me-1"></i> Buat BAST
+                            </a>
+                        @endif
+                    </div>
+                </div>
+            </div>
+        @empty
+            <div class="text-center py-4 text-muted">
+                <i class="bi bi-people display-6 text-secondary opacity-50 mb-2 d-block"></i>
+                <div class="fw-semibold small">
+                    @if(request('search') || request('assignment_id'))
+                        Tidak ada sampel responden sesuai filter.
+                    @else
+                        Belum ada sampel rumah tangga (ruta) yang dialokasikan untuk Anda.
+                    @endif
+                </div>
+            </div>
+        @endforelse
     </div>
 
     @if($respondents->hasPages())
-        <div class="sp-card-footer bg-white border-top p-3 d-flex justify-content-between align-items-center">
-            <div class="small text-muted">
+        <div class="bg-white border-top p-3 d-flex flex-wrap justify-content-between align-items-center gap-2">
+            <div class="small text-muted" style="font-size: 0.78rem;">
                 Menampilkan {{ $respondents->firstItem() }} sampai {{ $respondents->lastItem() }} dari {{ $respondents->total() }} responden
             </div>
             <div>
@@ -335,147 +417,34 @@
 </div>
 
 <!-- ==============================================================
-     MODAL TAMBAH RESPONDEN (PETUGAS)
-     ============================================================== -->
-<div class="modal fade" id="createMyRespondentModal" tabindex="-1" aria-labelledby="createMyRespondentModalLabel" aria-hidden="true">
-    <div class="modal-dialog modal-dialog-centered modal-lg">
-        <div class="modal-content border-0 shadow">
-            <div class="modal-header bg-light border-bottom">
-                <h5 class="modal-title fw-bold" id="createMyRespondentModalLabel">
-                    <i class="fa-solid fa-user-plus text-primary me-2"></i> Input Data Responden Baru
-                </h5>
-                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-            </div>
-            <form method="POST" action="{{ route('petugas.respondents.store') }}">
-                @csrf
-                <div class="modal-body p-4">
-                    <!-- Baris 1: Nama KRT & No HP -->
-                    <div class="row g-3 mb-3">
-                        <div class="col-md-7">
-                            <label class="form-label small fw-semibold text-secondary">
-                                <i class="fa-solid fa-house-user text-primary me-1"></i> NAMA KEPALA KELUARGA (KRT) <span class="text-danger">*</span>
-                            </label>
-                            <input type="text" id="create_resp_name" name="name" class="form-control" placeholder="Contoh: Jamaluddin Ali" required>
-                            <div class="form-text small">Nama kepala keluarga sesuai daftar sampel sensus/survei.</div>
-                        </div>
-                        <div class="col-md-5">
-                            <label class="form-label small fw-semibold text-secondary">
-                                <i class="fa-solid fa-phone text-muted me-1"></i> NOMOR HP / WHATSAPP
-                            </label>
-                            <input type="text" name="phone" class="form-control" placeholder="Contoh: 082112345678">
-                        </div>
-                    </div>
-
-                    <!-- Baris 2: Nama Pemberi Informasi & Status Hubungan -->
-                    <div class="row g-3 mb-3">
-                        <div class="col-md-7">
-                            <div class="d-flex justify-content-between align-items-center mb-1">
-                                <label class="form-label small fw-semibold text-secondary mb-0">
-                                    <i class="fa-solid fa-user-check text-success me-1"></i> NAMA PEMBERI INFORMASI <span class="text-danger">*</span>
-                                </label>
-                                <button type="button" class="btn btn-sm btn-outline-primary py-0 px-2" style="font-size: 0.72rem;" onclick="copyHeadNameToInformant('create_resp_name', 'create_informant_name', 'create_status_select')">
-                                    <i class="fa-solid fa-copy me-1"></i> Sama dg KRT
-                                </button>
-                            </div>
-                            <input type="text" id="create_informant_name" name="informant_name" class="form-control" placeholder="Contoh: Nama Keluarga (atau nama KRT jika ditemui langsung)" required>
-                            <div class="form-text small">Orang yang diwawancarai / memberikan data di lapangan.</div>
-                        </div>
-                        <div class="col-md-5">
-                            <label class="form-label small fw-semibold text-secondary">
-                                <i class="fa-solid fa-users text-primary me-1"></i> STATUS RESPONDEN / HUBUNGAN <span class="text-danger">*</span>
-                            </label>
-                            <select id="create_status_select" name="respondent_status" class="form-select" required>
-                                <option value="Kepala Keluarga (KRT)">Kepala Keluarga (KRT)</option>
-                                <option value="Istri / Suami (Pasangan)">Istri / Suami (Pasangan)</option>
-                                <option value="Anak Kandung">Anak Kandung</option>
-                                <option value="Famili Lain / ART">Famili Lain / ART</option>
-                                <option value="Pengelola / Perwakilan Usaha">Pengelola / Perwakilan Usaha</option>
-                                <option value="Lainnya">Lainnya</option>
-                            </select>
-                        </div>
-                    </div>
-
-                    <!-- Baris 3: Instansi & Penugasan Terkait -->
-                    <div class="row g-3 mb-3">
-                        <div class="col-md-6">
-                            <label class="form-label small fw-semibold text-secondary">
-                                <i class="fa-solid fa-building text-muted me-1"></i> INSTANSI / ASAL LEMBAGA <span class="text-danger">*</span>
-                            </label>
-                            <input type="text" name="agency" class="form-control" placeholder="Contoh: Rumah Tangga / Usaha Tani" required>
-                        </div>
-                        <div class="col-md-6">
-                            <label class="form-label small fw-semibold text-secondary">
-                                <i class="fa-solid fa-briefcase text-muted me-1"></i> KEGIATAN PENUGASAN TERKAIT
-                            </label>
-                            <select name="assignment_id" class="form-select">
-                                <option value="">-- Pilih Kegiatan Anda --</option>
-                                @foreach($myAssignments as $item)
-                                    <option value="{{ $item->id }}">{{ $item->title }}</option>
-                                @endforeach
-                            </select>
-                        </div>
-                    </div>
-
-                    <!-- Baris 4: Alamat Lengkap -->
-                    <div class="mb-3">
-                        <label class="form-label small fw-semibold text-secondary">
-                            <i class="fa-solid fa-location-dot text-danger me-1"></i> ALAMAT LENGKAP <span class="text-danger">*</span>
-                        </label>
-                        <textarea name="address" class="form-control" rows="2" placeholder="Nama jalan, RT/RW, Dusun/Desa, Kecamatan..." required></textarea>
-                    </div>
-
-                    <!-- Baris 5: Tujuan Kegiatan & Tanggal Input -->
-                    <div class="row g-3">
-                        <div class="col-md-8">
-                            <label class="form-label small fw-semibold text-secondary">TUJUAN KEGIATAN <span class="text-danger">*</span></label>
-                            <input type="text" name="purpose" class="form-control" placeholder="Contoh: Pendataan Sarana Prasarana & Verifikasi Legalitas" required>
-                        </div>
-                        <div class="col-md-4">
-                            <label class="form-label small fw-semibold text-secondary">TANGGAL INPUT <span class="text-danger">*</span></label>
-                            <input type="date" name="input_date" class="form-control" value="{{ now()->toDateString() }}" required>
-                        </div>
-                    </div>
-                </div>
-                <div class="modal-footer bg-light border-top">
-                    <button type="button" class="btn btn-light" data-bs-dismiss="modal">Batal</button>
-                    <button type="submit" class="btn btn-sp-primary">
-                        <i class="fa-solid fa-floppy-disk me-1"></i> Simpan Data Responden
-                    </button>
-                </div>
-            </form>
-        </div>
-    </div>
-</div>
-
-<!-- ==============================================================
      MODAL EDIT RESPONDEN (PETUGAS)
      ============================================================== -->
 <div class="modal fade" id="editMyRespondentModal" tabindex="-1" aria-labelledby="editMyRespondentModalLabel" aria-hidden="true">
     <div class="modal-dialog modal-dialog-centered modal-lg">
-        <div class="modal-content border-0 shadow">
-            <div class="modal-header bg-light border-bottom">
-                <h5 class="modal-title fw-bold" id="editMyRespondentModalLabel">
-                    <i class="fa-regular fa-pen-to-square text-warning me-2"></i> Edit Data Responden
-                </h5>
+        <div class="modal-content border-0 shadow" style="border-radius: 18px; overflow: hidden;">
+            <div class="modal-header bg-light border-bottom py-2.5 px-3">
+                <h6 class="modal-title fw-bold" id="editMyRespondentModalLabel">
+                    <i class="bi bi-pencil-square text-warning me-1.5"></i> Edit / Verifikasi Data Responden
+                </h6>
                 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
             <form id="editMyRespondentForm" method="POST">
                 @csrf
                 @method('PUT')
-                <div class="modal-body p-4">
+                <div class="modal-body p-3.5">
                     <!-- Baris 1: Nama KRT & No HP -->
                     <div class="row g-3 mb-3">
                         <div class="col-md-7">
-                            <label class="form-label small fw-semibold text-secondary">
-                                <i class="fa-solid fa-house-user text-primary me-1"></i> NAMA KEPALA KELUARGA (KRT) <span class="text-danger">*</span>
+                            <label class="form-label small fw-semibold text-secondary" style="font-size: 0.78rem;">
+                                <i class="bi bi-house-door text-primary me-1"></i> NAMA KEPALA KELUARGA (KRT) <span class="text-danger">*</span>
                             </label>
-                            <input type="text" id="my_edit_name" name="name" class="form-control" required>
+                            <input type="text" id="my_edit_name" name="name" class="form-control" style="font-size: 0.85rem;" required>
                         </div>
                         <div class="col-md-5">
-                            <label class="form-label small fw-semibold text-secondary">
-                                <i class="fa-solid fa-phone text-muted me-1"></i> NOMOR HP / WHATSAPP
+                            <label class="form-label small fw-semibold text-secondary" style="font-size: 0.78rem;">
+                                <i class="bi bi-telephone text-muted me-1"></i> NOMOR HP / WHATSAPP
                             </label>
-                            <input type="text" id="my_edit_phone" name="phone" class="form-control">
+                            <input type="text" id="my_edit_phone" name="phone" class="form-control" style="font-size: 0.85rem;">
                         </div>
                     </div>
 
@@ -483,20 +452,20 @@
                     <div class="row g-3 mb-3">
                         <div class="col-md-7">
                             <div class="d-flex justify-content-between align-items-center mb-1">
-                                <label class="form-label small fw-semibold text-secondary mb-0">
-                                    <i class="fa-solid fa-user-check text-success me-1"></i> NAMA PEMBERI INFORMASI <span class="text-danger">*</span>
+                                <label class="form-label small fw-semibold text-secondary mb-0" style="font-size: 0.78rem;">
+                                    <i class="bi bi-person-check text-success me-1"></i> NAMA PEMBERI INFORMASI <span class="text-danger">*</span>
                                 </label>
-                                <button type="button" class="btn btn-sm btn-outline-primary py-0 px-2" style="font-size: 0.72rem;" onclick="copyHeadNameToInformant('my_edit_name', 'my_edit_informant_name', 'my_edit_status')">
-                                    <i class="fa-solid fa-copy me-1"></i> Sama dg KRT
+                                <button type="button" class="btn btn-sm btn-outline-primary py-0 px-2 rounded-pill" style="font-size: 0.7rem;" onclick="copyHeadNameToInformant('my_edit_name', 'my_edit_informant_name', 'my_edit_status')">
+                                    <i class="bi bi-copy me-1"></i> Sama dg KRT
                                 </button>
                             </div>
-                            <input type="text" id="my_edit_informant_name" name="informant_name" class="form-control" required>
+                            <input type="text" id="my_edit_informant_name" name="informant_name" class="form-control" style="font-size: 0.85rem;" required>
                         </div>
                         <div class="col-md-5">
-                            <label class="form-label small fw-semibold text-secondary">
-                                <i class="fa-solid fa-users text-primary me-1"></i> STATUS RESPONDEN / HUBUNGAN <span class="text-danger">*</span>
+                            <label class="form-label small fw-semibold text-secondary" style="font-size: 0.78rem;">
+                                <i class="bi bi-people text-primary me-1"></i> STATUS RESPONDEN / HUBUNGAN <span class="text-danger">*</span>
                             </label>
-                            <select id="my_edit_status" name="respondent_status" class="form-select" required>
+                            <select id="my_edit_status" name="respondent_status" class="form-select" style="font-size: 0.85rem;" required>
                                 <option value="Kepala Keluarga (KRT)">Kepala Keluarga (KRT)</option>
                                 <option value="Istri / Suami (Pasangan)">Istri / Suami (Pasangan)</option>
                                 <option value="Anak Kandung">Anak Kandung</option>
@@ -510,16 +479,16 @@
                     <!-- Baris 3: Instansi & Penugasan -->
                     <div class="row g-3 mb-3">
                         <div class="col-md-6">
-                            <label class="form-label small fw-semibold text-secondary">
-                                <i class="fa-solid fa-building text-muted me-1"></i> INSTANSI / ASAL LEMBAGA <span class="text-danger">*</span>
+                            <label class="form-label small fw-semibold text-secondary" style="font-size: 0.78rem;">
+                                <i class="bi bi-building text-muted me-1"></i> INSTANSI / ASAL LEMBAGA <span class="text-danger">*</span>
                             </label>
-                            <input type="text" id="my_edit_agency" name="agency" class="form-control" required>
+                            <input type="text" id="my_edit_agency" name="agency" class="form-control" style="font-size: 0.85rem;" required>
                         </div>
                         <div class="col-md-6">
-                            <label class="form-label small fw-semibold text-secondary">
-                                <i class="fa-solid fa-briefcase text-muted me-1"></i> KEGIATAN PENUGASAN
+                            <label class="form-label small fw-semibold text-secondary" style="font-size: 0.78rem;">
+                                <i class="bi bi-briefcase text-muted me-1"></i> KEGIATAN PENUGASAN
                             </label>
-                            <select id="my_edit_assignment" name="assignment_id" class="form-select">
+                            <select id="my_edit_assignment" name="assignment_id" class="form-select" style="font-size: 0.85rem;">
                                 <option value="">-- Pilih Kegiatan --</option>
                                 @foreach($myAssignments as $item)
                                     <option value="{{ $item->id }}">{{ $item->title }}</option>
@@ -530,28 +499,28 @@
 
                     <!-- Baris 4: Alamat Lengkap -->
                     <div class="mb-3">
-                        <label class="form-label small fw-semibold text-secondary">
-                            <i class="fa-solid fa-location-dot text-danger me-1"></i> ALAMAT LENGKAP <span class="text-danger">*</span>
+                        <label class="form-label small fw-semibold text-secondary" style="font-size: 0.78rem;">
+                            <i class="bi bi-geo-alt-fill text-danger me-1"></i> ALAMAT LENGKAP <span class="text-danger">*</span>
                         </label>
-                        <textarea id="my_edit_address" name="address" class="form-control" rows="2" required></textarea>
+                        <textarea id="my_edit_address" name="address" class="form-control" rows="2" style="font-size: 0.85rem;" required></textarea>
                     </div>
 
                     <!-- Baris 5: Tujuan Kegiatan & Tanggal Input -->
                     <div class="row g-3">
                         <div class="col-md-8">
-                            <label class="form-label small fw-semibold text-secondary">TUJUAN KEGIATAN <span class="text-danger">*</span></label>
-                            <input type="text" id="my_edit_purpose" name="purpose" class="form-control" required>
+                            <label class="form-label small fw-semibold text-secondary" style="font-size: 0.78rem;">TUJUAN KEGIATAN <span class="text-danger">*</span></label>
+                            <input type="text" id="my_edit_purpose" name="purpose" class="form-control" style="font-size: 0.85rem;" required>
                         </div>
                         <div class="col-md-4">
-                            <label class="form-label small fw-semibold text-secondary">TANGGAL INPUT <span class="text-danger">*</span></label>
-                            <input type="date" id="my_edit_date" name="input_date" class="form-control" required>
+                            <label class="form-label small fw-semibold text-secondary" style="font-size: 0.78rem;">TANGGAL INPUT <span class="text-danger">*</span></label>
+                            <input type="date" id="my_edit_date" name="input_date" class="form-control" style="font-size: 0.85rem;" required>
                         </div>
                     </div>
                 </div>
-                <div class="modal-footer bg-light border-top">
-                    <button type="button" class="btn btn-light" data-bs-dismiss="modal">Batal</button>
-                    <button type="submit" class="btn btn-sp-primary">
-                        <i class="fa-solid fa-floppy-disk me-1"></i> Simpan Perubahan
+                <div class="modal-footer bg-light border-top py-2 px-3">
+                    <button type="button" class="btn btn-light rounded-pill px-3" data-bs-dismiss="modal" style="font-size: 0.82rem;">Batal</button>
+                    <button type="submit" class="btn-bps-orange rounded-pill px-4">
+                        <i class="bi bi-check2-circle"></i> Simpan Perubahan
                     </button>
                 </div>
             </form>
@@ -590,4 +559,3 @@
     }
 </script>
 @endpush
-

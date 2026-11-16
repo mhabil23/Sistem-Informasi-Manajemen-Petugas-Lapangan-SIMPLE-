@@ -216,16 +216,11 @@
 <!-- Bento Table Card (Compact, Zoom-out, Anti-Geser) -->
 <div class="bento-table-card mb-4">
     <div class="bento-table-header">
-        <div class="d-flex align-items-center gap-2">
-            <div class="rounded-3 p-1.5 text-white d-flex align-items-center justify-content-center" style="background: var(--bps-orange, #F37021); width: 34px; height: 34px;">
-                <i class="bi bi-calendar3"></i>
-            </div>
-            <div>
-                <h6 class="fw-bold text-dark mb-0" style="font-size: 0.92rem;">
-                    Daftar Agenda Kegiatan &amp; Jadwal Lapangan
-                </h6>
-                <span class="text-muted" style="font-size: 0.7rem;">Total {{ $schedules->total() }} agenda terdaftar dalam sistem</span>
-            </div>
+        <div>
+            <h6 class="fw-bold text-dark mb-0" style="font-size: 0.92rem;">
+                Daftar Agenda Kegiatan &amp; Jadwal Lapangan
+            </h6>
+            <span class="text-muted" style="font-size: 0.7rem;">Total {{ $schedules->total() }} agenda terdaftar dalam sistem</span>
         </div>
         <div class="d-flex align-items-center gap-2">
             <span class="badge bg-light text-secondary border px-2.5 py-1.5 rounded-pill" style="font-size: 0.7rem;">

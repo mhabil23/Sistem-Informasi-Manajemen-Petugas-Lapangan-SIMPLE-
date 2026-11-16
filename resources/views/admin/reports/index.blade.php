@@ -4,342 +4,450 @@
 @section('page_title', 'Verifikasi Laporan Petugas Lapangan')
 
 @section('breadcrumb')
-    <li class="breadcrumb-item"><a href="{{ route('admin.dashboard') }}">Admin</a></li>
+    <li class="breadcrumb-item"><a href="{{ route('admin.dashboard') }}" class="text-decoration-none">Admin</a></li>
     <li class="breadcrumb-item active" aria-current="page">Laporan Petugas</li>
 @endsection
 
-@section('content')
-<!-- Header -->
-<div class="row align-items-center mb-3">
-    <div class="col-md-7">
-        <h4 class="fw-bold text-dark mb-1">Verifikasi & Penilaian Laporan Lapangan</h4>
-        <p class="text-muted small mb-0">Tinjau laporan kegiatan lapangan dari petugas, periksa bukti dokumentasi foto/berkas, dan berikan status persetujuan atau catatan revisi.</p>
-    </div>
-    <div class="col-md-5 text-md-end mt-2 mt-md-0 d-flex flex-wrap justify-content-md-end align-items-center gap-2">
-        @if($submittedCount > 0 || ($draftCount ?? 0) > 0)
-            <a href="{{ route('admin.reports.index', ['status' => 'submitted']) }}" class="badge bg-warning text-dark px-2.5 py-1.5 fs-7 shadow-sm text-decoration-none">
-                <i class="fa-solid fa-bell me-1"></i> {{ $submittedCount }} Menunggu ACC
-                @if(($draftCount ?? 0) > 0)
-                    &bull; {{ $draftCount }} Draft Baru
-                @endif
-            </a>
-        @endif
-        @if(auth()->user()->isAdmin())
-            <button type="button" class="btn btn-sm btn-sp-primary" data-bs-toggle="modal" data-bs-target="#basisSettingsModal">
-                <i class="fa-solid fa-scale-balanced me-1"></i> Atur B. Dasar Pelaksanaan
-            </button>
-        @endif
-    </div>
-</div>
+@push('styles')
+<style>
+/* Bento Grid Layout & Cards */
+.bento-card-clean {
+    background: #FFFFFF;
+    border-radius: 20px;
+    border: 1px solid #E2E8F0;
+    box-shadow: 0 4px 16px rgba(15, 23, 42, 0.03);
+    transition: all 0.22s ease;
+}
 
+/* Action Buttons */
+.btn-bps-orange {
+    background: #F37021;
+    color: #FFFFFF !important;
+    border: none;
+    font-weight: 700;
+    border-radius: 999px;
+    padding: 0.55rem 1.25rem;
+    box-shadow: 0 4px 14px rgba(243, 112, 33, 0.25);
+    transition: all 0.2s ease;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.4rem;
+    text-decoration: none;
+}
+.btn-bps-orange:hover {
+    background: #E05D0E;
+    color: #FFFFFF !important;
+    transform: translateY(-1px);
+    box-shadow: 0 6px 18px rgba(243, 112, 33, 0.35);
+}
+.btn-outline-orange {
+    color: #F37021 !important;
+    border: 1px solid #F37021;
+    background: transparent;
+    font-weight: 700;
+    border-radius: 999px;
+    padding: 0.55rem 1rem;
+    transition: all 0.2s ease;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    text-decoration: none;
+}
+.btn-outline-orange:hover {
+    background-color: #F37021;
+    border-color: #F37021;
+    color: #FFFFFF !important;
+    box-shadow: 0 4px 12px rgba(243, 112, 33, 0.25);
+}
+
+/* Fixed Bento Table Card (Compact, Anti-Geser) */
+.bento-table-card {
+    background: #FFFFFF;
+    border-radius: 20px;
+    border: 1px solid #E2E8F0;
+    box-shadow: 0 4px 18px rgba(15, 23, 42, 0.03);
+    overflow: hidden;
+    width: 100%;
+}
+.bento-table-header {
+    padding: 0.9rem 1.25rem;
+    border-bottom: 1px solid #E2E8F0;
+    background: #FAFAFA;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 0.75rem;
+}
+.bento-table-container-fixed {
+    width: 100%;
+    overflow: hidden;
+}
+.bento-table-fixed {
+    table-layout: fixed;
+    width: 100%;
+    margin-bottom: 0;
+    font-size: 0.8rem;
+}
+.bento-table-fixed th {
+    background: #F8FAFC;
+    color: #475569;
+    font-weight: 700;
+    font-size: 0.68rem;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    padding: 0.75rem 0.5rem;
+    border-bottom: 1px solid #E2E8F0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+.bento-table-fixed td {
+    padding: 0.75rem 0.5rem;
+    vertical-align: middle;
+    border-bottom: 1px solid #F1F5F9;
+    font-size: 0.8rem;
+    overflow: hidden;
+}
+.bento-table-fixed tbody tr:hover {
+    background-color: #F8FAFC;
+}
+
+/* Action buttons in table */
+.bento-action-btn {
+    width: 28px;
+    height: 28px;
+    border-radius: 8px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    border: 1px solid #E2E8F0;
+    background: #FFFFFF;
+    transition: all 0.15s ease;
+    text-decoration: none;
+    font-size: 0.78rem;
+    flex-shrink: 0;
+}
+.bento-action-btn:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 2px 8px rgba(15, 23, 42, 0.08);
+}
+.bento-action-btn.btn-view { color: #0284C7; }
+.bento-action-btn.btn-view:hover { background: #E0F2FE; border-color: #BAE6FD; }
+.bento-action-btn.btn-edit { color: #D97706; }
+.bento-action-btn.btn-edit:hover { background: #FFFBEB; border-color: #FDE68A; }
+.bento-action-btn.btn-review { color: #4F46E5; }
+.bento-action-btn.btn-review:hover { background: #EEF2FF; border-color: #C7D2FE; }
+.bento-action-btn.btn-print { color: #2563EB; }
+.bento-action-btn.btn-print:hover { background: #EFF6FF; border-color: #BFDBFE; }
+.bento-action-btn.btn-download { color: #DC2626; }
+.bento-action-btn.btn-download:hover { background: #FEF2F2; border-color: #FECACA; }
+.bento-action-btn.btn-delete { color: #DC2626; }
+.bento-action-btn.btn-delete:hover { background: #FEF2F2; border-color: #FECACA; }
+
+/* Mobile Responsive */
+@media (max-width: 767.98px) {
+    .bento-table-card .bento-table-fixed thead {
+        display: none;
+    }
+    .bento-table-card .bento-table-fixed,
+    .bento-table-card .bento-table-fixed tbody,
+    .bento-table-card .bento-table-fixed tr,
+    .bento-table-card .bento-table-fixed td {
+        display: block;
+        width: 100% !important;
+        text-align: left !important;
+    }
+    .bento-table-card .bento-table-fixed tr {
+        background: #FFFFFF;
+        border: 1px solid #E2E8F0;
+        border-radius: 14px;
+        margin: 0.75rem;
+        padding: 0.85rem;
+        box-shadow: 0 2px 8px rgba(15, 23, 42, 0.02);
+    }
+    .bento-table-card .bento-table-fixed td {
+        border: none;
+        padding: 0.25rem 0;
+    }
+    .bento-table-card .bento-table-fixed td:last-child {
+        border-top: 1px dashed #E2E8F0;
+        margin-top: 0.5rem;
+        padding-top: 0.5rem;
+        display: flex;
+        justify-content: flex-end;
+    }
+}
+</style>
+@endpush
+
+@section('content')
 @if(auth()->user()->isAdmin() && ($unreadNotifCount ?? 0) > 0)
-    <div class="alert alert-warning border-warning d-flex flex-wrap justify-content-between align-items-center gap-2 mb-3 py-2 px-3 shadow-sm">
+    <div class="alert alert-warning border-warning d-flex flex-wrap justify-content-between align-items-center gap-2 mb-3 py-2 px-3 shadow-sm rounded-4">
         <div class="small text-dark">
-            <i class="fa-solid fa-bell text-warning me-1"></i>
-            <strong>Informasi Baru:</strong> Terdapat <strong>{{ $unreadNotifCount }} pemberitahuan</strong> laporan perjadin baru/diperbarui dari petugas lapangan. Silakan klik ikon <strong>Lihat</strong> (<i class="fa-solid fa-eye"></i>), <strong>Edit Inputan</strong> (<i class="fa-regular fa-pen-to-square"></i>), atau <strong>ACC</strong> (<i class="fa-solid fa-check-double text-success"></i>).
+            <i class="bi bi-bell-fill text-warning me-1"></i>
+            <strong>Informasi Baru:</strong> Terdapat <strong>{{ $unreadNotifCount }} pemberitahuan</strong> laporan perjadin baru/diperbarui dari petugas lapangan.
         </div>
         <form method="POST" action="{{ route('admin.notifications.mark-all-read') }}" class="m-0">
             @csrf
-            <button type="submit" class="btn btn-xs btn-outline-dark py-1 px-2" style="font-size: 0.72rem;">
-                <i class="fa-solid fa-check me-1"></i> Tandai Dibaca
+            <button type="submit" class="btn btn-xs btn-outline-dark py-1 px-2.5 rounded-pill" style="font-size: 0.72rem;">
+                <i class="bi bi-check-lg me-1"></i> Tandai Dibaca
             </button>
         </form>
     </div>
 @endif
 
-<!-- Stat Cards -->
-<div class="row g-2 mb-3">
-    <div class="col-xl-2 col-md-4 col-sm-6">
-        <div class="sp-stat-card">
-            <div class="sp-stat-icon-wrap" style="background: #e0f2fe; color: #0284c7;">
-                <i class="fa-solid fa-clipboard-list"></i>
-            </div>
-            <div class="sp-stat-info">
-                <div class="sp-stat-label">Total Laporan</div>
-                <div class="sp-stat-value">{{ number_format($totalReports) }}</div>
-                <div class="sp-stat-desc">Semua laporan</div>
+<!-- Bento Search & Filter Card -->
+<div class="bento-card-clean p-3 mb-3">
+    <form method="GET" action="{{ route('admin.reports.index') }}" class="row g-2 align-items-center">
+        <div class="col-lg-3 col-md-3">
+            <div class="input-group">
+                <span class="input-group-text bg-white border-end-0 text-muted">
+                    <i class="bi bi-search"></i>
+                </span>
+                <input type="text" 
+                       name="search" 
+                       class="form-control border-start-0 ps-1" 
+                       value="{{ request('search') }}" 
+                       placeholder="Cari nomor, judul, uraian...">
             </div>
         </div>
-    </div>
 
-    <div class="col-xl-2 col-md-4 col-sm-6">
-        <div class="sp-stat-card">
-            <div class="sp-stat-icon-wrap" style="background: #fef3c7; color: #d97706;">
-                <i class="fa-solid fa-inbox"></i>
-            </div>
-            <div class="sp-stat-info">
-                <div class="sp-stat-label">Menunggu</div>
-                <div class="sp-stat-value text-warning">{{ number_format($submittedCount) }}</div>
-                <div class="sp-stat-desc">Perlu verifikasi</div>
-            </div>
+        <div class="col-lg-2 col-md-2">
+            <select name="status" class="form-select">
+                <option value="all">-- Semua Status --</option>
+                <option value="submitted" {{ request('status') == 'submitted' ? 'selected' : '' }}>Diajukan (Menunggu)</option>
+                <option value="reviewing" {{ request('status') == 'reviewing' ? 'selected' : '' }}>Dalam Pemeriksaan</option>
+                <option value="revision_needed" {{ request('status') == 'revision_needed' ? 'selected' : '' }}>Perlu Revisi</option>
+                <option value="approved" {{ request('status') == 'approved' ? 'selected' : '' }}>Disetujui</option>
+                <option value="draft" {{ request('status') == 'draft' ? 'selected' : '' }}>Draft</option>
+            </select>
         </div>
-    </div>
 
-    <div class="col-xl-2 col-md-4 col-sm-6">
-        <div class="sp-stat-card">
-            <div class="sp-stat-icon-wrap" style="background: #e0e7ff; color: #4338ca;">
-                <i class="fa-solid fa-magnifying-glass"></i>
-            </div>
-            <div class="sp-stat-info">
-                <div class="sp-stat-label">Diperiksa</div>
-                <div class="sp-stat-value text-primary">{{ number_format($reviewingCount) }}</div>
-                <div class="sp-stat-desc">Dalam evaluasi</div>
-            </div>
+        <div class="col-lg-3 col-md-3">
+            <select name="officer_id" class="form-select">
+                <option value="">-- Semua Petugas --</option>
+                @foreach($officers as $officer)
+                    <option value="{{ $officer->id }}" {{ request('officer_id') == $officer->id ? 'selected' : '' }}>{{ $officer->name }}</option>
+                @endforeach
+            </select>
         </div>
-    </div>
 
-    <div class="col-xl-3 col-md-6 col-sm-6">
-        <div class="sp-stat-card">
-            <div class="sp-stat-icon-wrap" style="background: #fee2e2; color: #dc2626;">
-                <i class="fa-solid fa-triangle-exclamation"></i>
-            </div>
-            <div class="sp-stat-info">
-                <div class="sp-stat-label">Perlu Revisi</div>
-                <div class="sp-stat-value text-danger">{{ number_format($revisionNeededCount) }}</div>
-                <div class="sp-stat-desc">Dikembalikan ke petugas</div>
-            </div>
+        <div class="col-lg-2 col-md-2">
+            <select name="assignment_id" class="form-select">
+                <option value="">-- Semua Kegiatan --</option>
+                @foreach($assignments as $assignment)
+                    <option value="{{ $assignment->id }}" {{ request('assignment_id') == $assignment->id ? 'selected' : '' }}>{{ $assignment->title }}</option>
+                @endforeach
+            </select>
         </div>
-    </div>
 
-    <div class="col-xl-3 col-md-6 col-sm-6">
-        <div class="sp-stat-card">
-            <div class="sp-stat-icon-wrap" style="background: #dcfce7; color: #16a34a;">
-                <i class="fa-solid fa-circle-check"></i>
-            </div>
-            <div class="sp-stat-info">
-                <div class="sp-stat-label">Telah Disetujui</div>
-                <div class="sp-stat-value text-success">{{ number_format($approvedCount) }}</div>
-                <div class="sp-stat-desc">Laporan valid & sah</div>
-            </div>
+        <div class="col-lg-2 col-md-2 d-flex gap-2">
+            <button type="submit" class="btn btn-bps-orange flex-fill justify-content-center py-2 shadow-sm">
+                <i class="bi bi-funnel-fill"></i> Filter
+            </button>
+            @if(request()->hasAny(['search', 'status', 'officer_id', 'assignment_id']))
+                <a href="{{ route('admin.reports.index') }}" class="btn btn-outline-orange px-3 d-flex align-items-center justify-content-center" title="Reset Filter">
+                    <i class="bi bi-arrow-clockwise"></i>
+                </a>
+            @endif
         </div>
-    </div>
+    </form>
 </div>
 
-<!-- Search & Filter Card -->
-<div class="sp-card mb-3">
-    <div class="sp-card-body p-2.5">
-        <form method="GET" action="{{ route('admin.reports.index') }}" class="row g-2 align-items-center">
-            <div class="col-md-3">
-                <div class="input-group input-group-sm">
-                    <span class="input-group-text bg-white border-end-0 text-muted">
-                        <i class="fa-solid fa-magnifying-glass"></i>
-                    </span>
-                    <input type="text" 
-                           name="search" 
-                           class="form-control form-control-sm border-start-0 ps-0" 
-                           value="{{ request('search') }}" 
-                           placeholder="Cari nomor, judul, uraian...">
-                </div>
-            </div>
-
-            <div class="col-md-2">
-                <select name="status" class="form-select form-select-sm">
-                    <option value="all">-- Semua Status --</option>
-                    <option value="submitted" {{ request('status') == 'submitted' ? 'selected' : '' }}>Diajukan (Menunggu)</option>
-                    <option value="reviewing" {{ request('status') == 'reviewing' ? 'selected' : '' }}>Dalam Pemeriksaan</option>
-                    <option value="revision_needed" {{ request('status') == 'revision_needed' ? 'selected' : '' }}>Perlu Revisi</option>
-                    <option value="approved" {{ request('status') == 'approved' ? 'selected' : '' }}>Disetujui</option>
-                    <option value="draft" {{ request('status') == 'draft' ? 'selected' : '' }}>Draft</option>
-                </select>
-            </div>
-
-            <div class="col-md-3">
-                <select name="officer_id" class="form-select form-select-sm">
-                    <option value="">-- Semua Petugas --</option>
-                    @foreach($officers as $officer)
-                        <option value="{{ $officer->id }}" {{ request('officer_id') == $officer->id ? 'selected' : '' }}>{{ $officer->name }}</option>
-                    @endforeach
-                </select>
-            </div>
-
-            <div class="col-md-2">
-                <select name="assignment_id" class="form-select form-select-sm">
-                    <option value="">-- Semua Kegiatan --</option>
-                    @foreach($assignments as $assignment)
-                        <option value="{{ $assignment->id }}" {{ request('assignment_id') == $assignment->id ? 'selected' : '' }}>{{ $assignment->title }}</option>
-                    @endforeach
-                </select>
-            </div>
-
-            <div class="col-md-2 d-flex gap-2">
-                <button type="submit" class="btn btn-sm btn-sp-primary flex-fill">
-                    <i class="fa-solid fa-filter me-1"></i> Filter
+<!-- Bento Table Card (Anti-Geser, 100% Pas Layar) -->
+<div class="bento-table-card mb-4">
+    <div class="bento-table-header">
+        <div>
+            <h6 class="fw-bold text-dark mb-0" style="font-size: 0.92rem;">
+                Daftar Laporan Kegiatan Lapangan
+            </h6>
+            <span class="text-muted" style="font-size: 0.7rem;">Total {{ $reports->total() }} laporan terdaftar dalam sistem</span>
+        </div>
+        <div class="d-flex align-items-center gap-2 flex-wrap">
+            @if($submittedCount > 0 || ($draftCount ?? 0) > 0)
+                <a href="{{ route('admin.reports.index', ['status' => 'submitted']) }}" class="badge bg-warning text-dark px-2.5 py-1.5 shadow-sm text-decoration-none rounded-pill" style="font-size: 0.72rem;">
+                    <i class="bi bi-bell-fill me-1"></i> {{ $submittedCount }} Menunggu ACC
+                    @if(($draftCount ?? 0) > 0)
+                        &bull; {{ $draftCount }} Draft
+                    @endif
+                </a>
+            @endif
+            <span class="badge bg-light text-secondary border px-2.5 py-1.5 rounded-pill" style="font-size: 0.7rem;">
+                Halaman {{ $reports->currentPage() }} dari {{ max(1, $reports->lastPage()) }}
+            </span>
+            @if(auth()->user()->isAdmin())
+                <button type="button" class="btn-bps-orange shadow-sm py-1.5 px-3" style="font-size: 0.8rem;" data-bs-toggle="modal" data-bs-target="#basisSettingsModal">
+                    <i class="bi bi-sliders me-1"></i> Atur B. Dasar Pelaksanaan
                 </button>
-                @if(request()->hasAny(['search', 'status', 'officer_id', 'assignment_id']))
-                    <a href="{{ route('admin.reports.index') }}" class="btn btn-outline-secondary" title="Reset Filter">
-                        <i class="fa-solid fa-rotate-left"></i>
-                    </a>
-                @endif
-            </div>
-        </form>
+            @endif
+        </div>
     </div>
-</div>
 
-<!-- Table Card -->
-<div class="sp-card mb-4">
-    <div class="sp-card-header">
-        <h5 class="sp-card-title">
-            <i class="fa-solid fa-clipboard-check text-primary"></i>
-            Daftar Laporan Kegiatan Lapangan ({{ $reports->total() }})
-        </h5>
-    </div>
-    <div class="sp-card-body p-0">
-        <div class="table-responsive">
-            <table class="table sp-table align-middle">
-                <thead>
+    <div class="bento-table-container-fixed">
+        <table class="table bento-table-fixed align-middle mb-0">
+            <thead>
+                <tr>
+                    <th style="width: 12%;">NOMOR LAPORAN</th>
+                    <th style="width: 14%;">PETUGAS LAPANGAN</th>
+                    <th style="width: 18%;">KEGIATAN &amp; TANGGAL</th>
+                    <th style="width: 17%;">URAIAN SINGKAT</th>
+                    <th class="text-center" style="width: 8%;">LAMPIRAN</th>
+                    <th class="text-center" style="width: 10%;">STATUS</th>
+                    <th class="text-end pe-2" style="width: 21%;">AKSI</th>
+                </tr>
+            </thead>
+            <tbody>
+                @forelse($reports as $rep)
                     <tr>
-                        <th style="width: 14%;">No. Laporan</th>
-                        <th style="width: 16%;">Petugas Lapangan</th>
-                        <th style="width: 21%;">Kegiatan &amp; Tanggal</th>
-                        <th style="width: 20%;">Uraian Singkat</th>
-                        <th class="text-center" style="width: 7%;">Lampiran</th>
-                        <th class="text-center" style="width: 9%;">Status</th>
-                        <th class="text-end" style="min-width: 220px;">Aksi</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    @forelse($reports as $rep)
-                        <tr>
-                            <td>
-                                <span class="fw-bold font-monospace text-dark">{{ $rep->report_number ?? 'LAP-'.$rep->id }}</span>
-                            </td>
-                            <td>
-                                <div class="fw-bold text-dark">{{ $rep->user ? $rep->user->name : '-' }}</div>
-                                <small class="text-muted">{{ $rep->user ? $rep->user->email : '' }}</small>
-                            </td>
-                            <td>
-                                <div class="fw-bold text-primary">{{ $rep->activity_title }}</div>
-                                <div class="small text-muted">
-                                    <i class="fa-regular fa-calendar me-1"></i> {{ $rep->activity_date->format('d/m/Y') }}
-                                    @if($rep->assignment)
-                                        &bull; <span class="text-secondary">{{ $rep->assignment->title }}</span>
-                                    @endif
-                                </div>
-                            </td>
-                            <td>
-                                <div class="small text-secondary text-truncate" style="max-width: 250px;" title="{{ $rep->work_description }}">
-                                    {{ $rep->work_description }}
-                                </div>
-                                @if($rep->admin_notes)
-                                    <div class="small text-danger mt-1">
-                                        <i class="fa-solid fa-comment-dots me-1"></i> Catatan: {{ \Illuminate\Support\Str::limit($rep->admin_notes, 40) }}
-                                    </div>
+                        <td>
+                            <span class="fw-bold font-monospace text-dark text-truncate d-block" style="font-size: 0.8rem;" title="{{ $rep->report_number ?? 'LAP-'.$rep->id }}">
+                                {{ $rep->report_number ?? 'LAP-'.$rep->id }}
+                            </span>
+                        </td>
+                        <td>
+                            <div class="fw-bold text-dark text-truncate mb-0.5" style="font-size: 0.82rem;" title="{{ $rep->user ? $rep->user->name : '-' }}">
+                                {{ $rep->user ? $rep->user->name : '-' }}
+                            </div>
+                            <small class="text-muted text-truncate d-block" style="font-size: 0.7rem;">{{ $rep->user ? $rep->user->email : '' }}</small>
+                        </td>
+                        <td>
+                            <div class="fw-bold text-primary text-truncate mb-0.5" style="font-size: 0.8rem;" title="{{ $rep->activity_title }}">
+                                {{ $rep->activity_title }}
+                            </div>
+                            <div class="small text-muted text-truncate d-flex align-items-center gap-1" style="font-size: 0.7rem;">
+                                <i class="bi bi-calendar-event text-secondary flex-shrink-0"></i>
+                                <span>{{ $rep->activity_date->format('d/m/Y') }}</span>
+                                @if($rep->assignment)
+                                    &bull; <span class="text-secondary text-truncate">{{ $rep->assignment->title }}</span>
                                 @endif
-                            </td>
-                            <td>
-                                @if($rep->attachments->isNotEmpty())
-                                    <span class="badge bg-light text-dark border">
-                                        <i class="fa-solid fa-paperclip text-primary me-1"></i> {{ $rep->attachments->count() }} Berkas
-                                    </span>
-                                @else
-                                    <span class="text-muted small">-</span>
-                                @endif
-                            </td>
-                            <td>
-                                <span class="badge {{ $rep->status_badge }} px-2 py-1">
-                                    {{ $rep->status_label }}
+                            </div>
+                        </td>
+                        <td>
+                            <div class="small text-secondary text-truncate" style="font-size: 0.74rem;" title="{{ $rep->work_description }}">
+                                {{ $rep->work_description }}
+                            </div>
+                            @if($rep->admin_notes)
+                                <div class="small text-danger text-truncate mt-0.5" style="font-size: 0.7rem;" title="{{ $rep->admin_notes }}">
+                                    <i class="bi bi-chat-left-dots-fill me-0.5"></i> Catatan: {{ \Illuminate\Support\Str::limit($rep->admin_notes, 30) }}
+                                </div>
+                            @endif
+                        </td>
+                        <td class="text-center">
+                            @if($rep->attachments->isNotEmpty())
+                                <span class="badge bg-light text-dark border rounded-pill px-1.5 py-0.5" style="font-size: 0.68rem;">
+                                    <i class="bi bi-paperclip text-primary me-0.5"></i> {{ $rep->attachments->count() }} Berkas
                                 </span>
-                            </td>
-                            <td class="text-end text-nowrap">
-                                <div class="sp-action-btn-group d-inline-flex align-items-center gap-1">
-                                    <!-- 1. Melihat Laporan Lengkap -->
+                            @else
+                                <span class="text-muted small">-</span>
+                            @endif
+                        </td>
+                        <td class="text-center">
+                            <span class="badge {{ $rep->status_badge }} rounded-pill px-2 py-0.5" style="font-size: 0.68rem;">
+                                {{ $rep->status_label }}
+                            </span>
+                        </td>
+                        <td class="text-end pe-2">
+                            <div class="d-flex align-items-center justify-content-end gap-1 flex-wrap">
+                                <!-- 1. Melihat Laporan Lengkap -->
+                                <button type="button"
+                                        class="bento-action-btn btn-view"
+                                        title="Lihat Detail &amp; Pratinjau Laporan"
+                                        data-bs-toggle="tooltip"
+                                        onclick='openViewReportModal(@json($rep))'>
+                                    <i class="bi bi-eye"></i>
+                                </button>
+
+                                @if(auth()->user()->isAdmin())
+                                    <!-- 2. Edit Inputan Laporan Petugas -->
                                     <button type="button"
-                                            class="btn btn-light border sp-action-btn text-info"
-                                            title="Lihat Detail &amp; Pratinjau Laporan"
+                                            class="bento-action-btn btn-edit"
+                                            title="Edit Inputan Laporan"
                                             data-bs-toggle="tooltip"
-                                            onclick='openViewReportModal(@json($rep))'>
-                                        <i class="fa-solid fa-eye"></i>
+                                            onclick='openAdminEditModal(@json($rep))'>
+                                        <i class="bi bi-pencil-square"></i>
                                     </button>
 
-                                    @if(auth()->user()->isAdmin())
-                                        <!-- 2. Edit Inputan Laporan Petugas -->
-                                        <button type="button"
-                                                class="btn btn-light border sp-action-btn text-warning"
-                                                title="Edit Inputan Laporan"
-                                                data-bs-toggle="tooltip"
-                                                onclick='openAdminEditModal(@json($rep))'>
-                                            <i class="fa-regular fa-pen-to-square"></i>
-                                        </button>
-
-                                        <!-- 3. ACC Laporan (Setujui Cepat) -->
-                                        @if($rep->status !== 'approved')
-                                            <form method="POST" action="{{ route('admin.reports.approve', $rep) }}" class="d-inline" onsubmit="return confirm('ACC (Setujui) laporan {{ addslashes($rep->activity_title) }} agar petugas dapat mengunduh PDF resminya?');">
-                                                @csrf
-                                                @method('PATCH')
-                                                <button type="submit"
-                                                        class="btn btn-success btn-sm px-2 py-1 fw-semibold"
-                                                        title="ACC / Setujui Laporan"
-                                                        data-bs-toggle="tooltip"
-                                                        style="font-size: 0.72rem;">
-                                                    <i class="fa-solid fa-check-double me-0.5"></i> ACC
-                                                </button>
-                                            </form>
-                                        @else
-                                            <span class="badge bg-success-subtle text-success border border-success-subtle py-1 px-1.5" style="font-size: 0.68rem;" title="Sudah Di-ACC (Petugas dapat download PDF)">
-                                                <i class="fa-solid fa-circle-check me-0.5"></i> ACC
-                                            </span>
-                                        @endif
-
-                                        <!-- Verifikasi / Revisi dengan Catatan -->
-                                        <button type="button" 
-                                                class="btn btn-light border sp-action-btn text-primary" 
-                                                title="Verifikasi / Catatan Revisi" 
-                                                data-bs-toggle="tooltip"
-                                                onclick='openReviewModal(@json($rep))'>
-                                            <i class="fa-solid fa-file-circle-check"></i>
-                                        </button>
-                                    @endif
-
-                                    <!-- Pratinjau / Cetak PDF -->
-                                    <a href="{{ route('admin.reports.preview', $rep) }}" 
-                                       target="_blank"
-                                       class="btn btn-light border sp-action-btn text-secondary" 
-                                       title="Pratinjau / Cetak Dokumen PDF" 
-                                       data-bs-toggle="tooltip">
-                                        <i class="fa-solid fa-print"></i>
-                                    </a>
-
-                                    <!-- Unduh PDF Resmi -->
-                                    <a href="{{ route('admin.reports.download', $rep) }}" 
-                                       class="btn btn-light border sp-action-btn text-danger" 
-                                       title="Unduh PDF Resmi" 
-                                       data-bs-toggle="tooltip">
-                                        <i class="fa-solid fa-file-pdf"></i>
-                                    </a>
-
-                                    @if(auth()->user()->isAdmin())
-                                        <!-- Hapus Laporan -->
-                                        <form method="POST" action="{{ route('admin.reports.destroy', $rep) }}" class="d-inline" onsubmit="return confirm('Hapus laporan {{ addslashes($rep->activity_title) }}?');">
+                                    <!-- 3. ACC Laporan (Setujui Cepat) -->
+                                    @if($rep->status !== 'approved')
+                                        <form method="POST" action="{{ route('admin.reports.approve', $rep) }}" class="d-inline" onsubmit="return confirm('ACC (Setujui) laporan {{ addslashes($rep->activity_title) }} agar petugas dapat mengunduh PDF resminya?');">
                                             @csrf
-                                            @method('DELETE')
-                                            <button type="submit" 
-                                                    class="btn btn-light border sp-action-btn text-danger" 
-                                                    title="Hapus Laporan" 
-                                                    data-bs-toggle="tooltip">
-                                                <i class="fa-regular fa-trash-can"></i>
+                                            @method('PATCH')
+                                            <button type="submit"
+                                                    class="btn btn-success btn-sm px-2 py-0.5 fw-semibold rounded-pill d-inline-flex align-items-center gap-0.5 shadow-none"
+                                                    title="ACC / Setujui Laporan"
+                                                    data-bs-toggle="tooltip"
+                                                    style="font-size: 0.7rem; height: 28px;">
+                                                <i class="bi bi-check-all"></i> ACC
                                             </button>
                                         </form>
+                                    @else
+                                        <span class="badge bg-success-subtle text-success border border-success-subtle rounded-pill py-1 px-1.5" style="font-size: 0.65rem;" title="Sudah Di-ACC">
+                                            <i class="bi bi-check-circle-fill me-0.5"></i> ACC
+                                        </span>
                                     @endif
-                                </div>
-                            </td>
-                        </tr>
-                    @empty
-                        <tr>
-                            <td colspan="7" class="text-center py-5 text-muted">
-                                <i class="fa-solid fa-clipboard-check fa-3x mb-3 text-secondary opacity-50"></i>
-                                <div class="fw-semibold">Belum ada laporan kegiatan ditemukan.</div>
-                                <div class="small">Laporan dari petugas lapangan akan otomatis tampil di sini untuk diverifikasi.</div>
-                            </td>
-                        </tr>
-                    @endforelse
-                </tbody>
-            </table>
-        </div>
+
+                                    <!-- Verifikasi / Revisi dengan Catatan -->
+                                    <button type="button" 
+                                            class="bento-action-btn btn-review text-primary" 
+                                            title="Verifikasi / Catatan Revisi" 
+                                            data-bs-toggle="tooltip"
+                                            onclick='openReviewModal(@json($rep))'>
+                                        <i class="bi bi-file-earmark-check"></i>
+                                    </button>
+                                @endif
+
+                                <!-- Pratinjau / Cetak PDF -->
+                                <a href="{{ route('admin.reports.preview', $rep) }}" 
+                                   target="_blank"
+                                   class="bento-action-btn btn-print" 
+                                   title="Pratinjau / Cetak Dokumen PDF" 
+                                   data-bs-toggle="tooltip">
+                                    <i class="bi bi-printer"></i>
+                                </a>
+
+                                <!-- Unduh PDF Resmi -->
+                                <a href="{{ route('admin.reports.download', $rep) }}" 
+                                   class="bento-action-btn btn-download text-danger" 
+                                   title="Unduh PDF Resmi" 
+                                   data-bs-toggle="tooltip">
+                                    <i class="bi bi-file-earmark-pdf"></i>
+                                </a>
+
+                                @if(auth()->user()->isAdmin())
+                                    <!-- Hapus Laporan -->
+                                    <form method="POST" action="{{ route('admin.reports.destroy', $rep) }}" class="d-inline" onsubmit="return confirm('Hapus laporan {{ addslashes($rep->activity_title) }}?');">
+                                        @csrf
+                                        @method('DELETE')
+                                        <button type="submit" 
+                                                class="bento-action-btn btn-delete" 
+                                                title="Hapus Laporan" 
+                                                data-bs-toggle="tooltip">
+                                            <i class="bi bi-trash3"></i>
+                                        </button>
+                                    </form>
+                                @endif
+                            </div>
+                        </td>
+                    </tr>
+                @empty
+                    <tr>
+                        <td colspan="7" class="text-center py-5 text-muted">
+                            <div class="d-inline-flex p-3 rounded-circle bg-light text-secondary mb-2">
+                                <i class="bi bi-clipboard2-check fs-1 opacity-50"></i>
+                            </div>
+                            <div class="fw-semibold text-dark">Belum ada laporan kegiatan ditemukan.</div>
+                            <div class="small text-muted">Laporan dari petugas lapangan akan otomatis tampil di sini untuk diverifikasi.</div>
+                        </td>
+                    </tr>
+                @endforelse
+            </tbody>
+        </table>
     </div>
 
     @if($reports->hasPages())
-        <div class="sp-card-footer bg-white border-top p-3 d-flex justify-content-between align-items-center">
-            <div class="small text-muted">
+        <div class="p-3 bg-white border-top d-flex justify-content-between align-items-center flex-wrap gap-2">
+            <div class="small text-muted" style="font-size: 0.75rem;">
                 Menampilkan {{ $reports->firstItem() }} sampai {{ $reports->lastItem() }} dari {{ $reports->total() }} laporan
             </div>
             <div>
@@ -355,11 +463,16 @@
      ============================================================== -->
 <div class="modal fade" id="reviewReportModal" tabindex="-1" aria-labelledby="reviewReportModalLabel" aria-hidden="true">
     <div class="modal-dialog modal-dialog-centered modal-lg">
-        <div class="modal-content border-0 shadow">
-            <div class="modal-header bg-light border-bottom">
-                <h5 class="modal-title fw-bold" id="reviewReportModalLabel">
-                    <i class="fa-solid fa-clipboard-check text-primary me-2"></i> Periksa & Verifikasi Laporan Kegiatan
-                </h5>
+        <div class="modal-content border-0 shadow" style="border-radius: 20px; overflow: hidden;">
+            <div class="modal-header bg-light border-bottom py-3 px-4">
+                <div class="d-flex align-items-center gap-2">
+                    <div class="rounded-3 p-1.5 text-white d-flex align-items-center justify-content-center bg-primary" style="width: 32px; height: 32px;">
+                        <i class="bi bi-file-earmark-check-fill"></i>
+                    </div>
+                    <h6 class="modal-title fw-bold text-dark mb-0" id="reviewReportModalLabel">
+                        Periksa &amp; Verifikasi Laporan Kegiatan
+                    </h6>
+                </div>
                 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
             <form id="reviewReportForm" method="POST" action="">
@@ -367,7 +480,7 @@
                 @method('PUT')
                 <div class="modal-body p-4">
                     <!-- Rincian Laporan -->
-                    <div class="row g-3 mb-3 bg-light p-3 rounded border">
+                    <div class="row g-3 mb-3 bg-light p-3 rounded-3 border">
                         <div class="col-sm-6">
                             <div class="text-muted small">Nomor Laporan:</div>
                             <div class="fw-bold font-monospace text-dark" id="rev_number"></div>
@@ -390,14 +503,14 @@
                         </div>
                         <div class="col-12">
                             <div class="text-muted small mb-1">Uraian Pekerjaan / Hasil Lapangan:</div>
-                            <div class="p-3 bg-white border rounded text-dark small" style="white-space: pre-wrap; max-height: 180px; overflow-y: auto;" id="rev_description"></div>
+                            <div class="p-3 bg-white border rounded-3 text-dark small" style="white-space: pre-wrap; max-height: 180px; overflow-y: auto;" id="rev_description"></div>
                         </div>
                     </div>
 
                     <!-- Galeri Lampiran -->
                     <div class="mb-4">
                         <label class="form-label small fw-semibold text-secondary">
-                            <i class="fa-solid fa-paperclip text-primary me-1"></i> BUKTI DOKUMENTASI &amp; LAMPIRAN:
+                            <i class="bi bi-paperclip text-primary me-1"></i> BUKTI DOKUMENTASI &amp; LAMPIRAN:
                         </label>
                         <div id="rev_attachments_container" class="row g-2">
                             <!-- Populated by JS -->
@@ -409,14 +522,14 @@
 
                     <!-- Aksi Verifikasi Admin -->
                     <div class="border-top pt-3">
-                        <h6 class="fw-bold text-dark mb-3"><i class="fa-solid fa-gavel text-primary me-2"></i> Keputusan Verifikasi Admin</h6>
+                        <h6 class="fw-bold text-dark mb-3"><i class="bi bi-shield-check text-primary me-1"></i> Keputusan Verifikasi Admin</h6>
                         
                         <div class="mb-3">
                             <label class="form-label small fw-semibold text-secondary">STATUS PERSETUJUAN <span class="text-danger">*</span></label>
                             <select id="rev_status_select" name="status" class="form-select" required>
-                                <option value="approved">✅ Disetujui (Laporan Sah & Sesuai)</option>
-                                <option value="revision_needed">⚠️ Perlu Revisi (Kembalikan ke Petugas)</option>
-                                <option value="reviewing">🔍 Dalam Pemeriksaan</option>
+                                <option value="approved">Disetujui (Laporan Sah & Sesuai)</option>
+                                <option value="revision_needed">Perlu Revisi (Kembalikan ke Petugas)</option>
+                                <option value="reviewing">Dalam Pemeriksaan</option>
                             </select>
                         </div>
 
@@ -427,19 +540,19 @@
                         </div>
                     </div>
                 </div>
-                <div class="modal-footer bg-light border-top d-flex justify-content-between">
+                <div class="modal-footer bg-light border-top py-2.5 px-4 d-flex justify-content-between flex-wrap gap-2">
                     <div class="d-flex gap-2">
-                        <a id="rev_preview_link" href="#" target="_blank" class="btn btn-outline-primary">
-                            <i class="fa-solid fa-print me-1"></i> Cetak / Preview PDF
+                        <a id="rev_preview_link" href="#" target="_blank" class="btn btn-outline-secondary rounded-pill px-3 py-1.5" style="font-size: 0.82rem;">
+                            <i class="bi bi-printer me-1"></i> Cetak / Preview
                         </a>
-                        <a id="rev_download_link" href="#" class="btn btn-outline-danger">
-                            <i class="fa-solid fa-file-pdf me-1"></i> Unduh PDF
+                        <a id="rev_download_link" href="#" class="btn btn-outline-danger rounded-pill px-3 py-1.5" style="font-size: 0.82rem;">
+                            <i class="bi bi-file-earmark-pdf me-1"></i> Unduh PDF
                         </a>
                     </div>
                     <div class="d-flex gap-2">
-                        <button type="button" class="btn btn-light" data-bs-dismiss="modal">Tutup</button>
-                        <button type="submit" class="btn btn-sp-primary">
-                            <i class="fa-solid fa-check-double me-1"></i> Simpan Hasil Verifikasi
+                        <button type="button" class="btn btn-light rounded-pill px-3 py-1.5" data-bs-dismiss="modal" style="font-size: 0.82rem;">Tutup</button>
+                        <button type="submit" class="btn-bps-orange py-1.5 px-3" style="font-size: 0.82rem;">
+                            <i class="bi bi-check-all me-1"></i> Simpan Hasil Verifikasi
                         </button>
                     </div>
                 </div>
@@ -452,13 +565,18 @@
      ============================================================== -->
 <div class="modal fade" id="basisSettingsModal" tabindex="-1" aria-labelledby="basisSettingsModalLabel" aria-hidden="true">
     <div class="modal-dialog modal-dialog-centered modal-lg">
-        <div class="modal-content border-0 shadow">
-            <div class="modal-header bg-light border-bottom">
-                <div>
-                    <h5 class="modal-title fw-bold" id="basisSettingsModalLabel">
-                        <i class="fa-solid fa-scale-balanced text-primary me-2"></i> Atur B. Dasar Pelaksanaan (Role Admin)
-                    </h5>
-                    <div class="small text-muted">Nilai DIPA &amp; Surat Tugas di sini otomatis diterapkan saat petugas mengisi Laporan Perjadin &amp; Pengeluaran Riil.</div>
+        <div class="modal-content border-0 shadow" style="border-radius: 20px; overflow: hidden;">
+            <div class="modal-header bg-light border-bottom py-3 px-4">
+                <div class="d-flex align-items-center gap-2">
+                    <div class="rounded-3 p-1.5 text-white d-flex align-items-center justify-content-center" style="background: var(--bps-orange, #F37021); width: 32px; height: 32px;">
+                        <i class="bi bi-sliders"></i>
+                    </div>
+                    <div>
+                        <h6 class="modal-title fw-bold text-dark mb-0" id="basisSettingsModalLabel">
+                            Atur B. Dasar Pelaksanaan (Role Admin)
+                        </h6>
+                        <div class="small text-muted" style="font-size: 0.72rem;">Nilai DIPA &amp; Surat Tugas otomatis diterapkan saat petugas mengisi Laporan Perjadin.</div>
+                    </div>
                 </div>
                 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
@@ -468,10 +586,10 @@
                 <div class="modal-body p-4">
                     @include('admin.partials._basis_fields', ['prefix' => 'master', 'defaults' => $basisSettings, 'required' => true])
                 </div>
-                <div class="modal-footer bg-light border-top">
-                    <button type="button" class="btn btn-light" data-bs-dismiss="modal">Batal</button>
-                    <button type="submit" class="btn btn-sp-primary">
-                        <i class="fa-solid fa-floppy-disk me-1"></i> Simpan Pengaturan Admin
+                <div class="modal-footer bg-light border-top py-2.5 px-4 d-flex justify-content-end gap-2">
+                    <button type="button" class="btn btn-outline-secondary rounded-pill px-3 py-1.5" data-bs-dismiss="modal" style="font-size: 0.82rem;">Batal</button>
+                    <button type="submit" class="btn-bps-orange py-1.5 px-3" style="font-size: 0.82rem;">
+                        <i class="bi bi-check-lg me-1"></i> Simpan Pengaturan
                     </button>
                 </div>
             </form>
@@ -484,43 +602,46 @@
      ============================================================== -->
 <div class="modal fade" id="viewReportModal" tabindex="-1" aria-labelledby="viewReportModalLabel" aria-hidden="true">
     <div class="modal-dialog modal-dialog-centered modal-xl">
-        <div class="modal-content border-0 shadow">
-            <div class="modal-header bg-light border-bottom">
+        <div class="modal-content border-0 shadow" style="border-radius: 20px; overflow: hidden;">
+            <div class="modal-header bg-light border-bottom py-3 px-4">
                 <div class="d-flex align-items-center gap-2">
-                    <h5 class="modal-title fw-bold text-dark mb-0" id="viewReportModalLabel">
-                        <i class="fa-solid fa-eye text-info me-2"></i> Lihat Detail &amp; Dokumen Laporan Petugas
-                    </h5>
-                    <span id="det_status_badge" class="badge"></span>
+                    <div class="rounded-3 p-1.5 text-white d-flex align-items-center justify-content-center bg-info" style="width: 32px; height: 32px;">
+                        <i class="bi bi-eye"></i>
+                    </div>
+                    <h6 class="modal-title fw-bold text-dark mb-0" id="viewReportModalLabel">
+                        Lihat Detail &amp; Dokumen Laporan Petugas
+                    </h6>
+                    <span id="det_status_badge" class="badge rounded-pill ms-2"></span>
                 </div>
                 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
             <div class="modal-body p-4 bg-light">
                 @include('reports._document_preview_body')
             </div>
-            <div class="modal-footer bg-light border-top d-flex flex-wrap justify-content-between gap-2">
+            <div class="modal-footer bg-light border-top py-2.5 px-4 d-flex flex-wrap justify-content-between gap-2">
                 <div class="d-flex gap-2">
-                    <a id="adm_view_preview_link" href="#" target="_blank" class="btn btn-outline-primary">
-                        <i class="fa-solid fa-print me-1"></i> Cetak / Preview PDF
+                    <a id="adm_view_preview_link" href="#" target="_blank" class="btn btn-outline-secondary rounded-pill px-3 py-1.5" style="font-size: 0.82rem;">
+                        <i class="bi bi-printer me-1"></i> Cetak / Preview
                     </a>
-                    <a id="adm_view_download_link" href="#" class="btn btn-outline-danger">
-                        <i class="fa-solid fa-file-pdf me-1"></i> Unduh PDF
+                    <a id="adm_view_download_link" href="#" class="btn btn-outline-danger rounded-pill px-3 py-1.5" style="font-size: 0.82rem;">
+                        <i class="bi bi-file-earmark-pdf me-1"></i> Unduh PDF
                     </a>
                 </div>
                 <div class="d-flex flex-wrap gap-2 align-items-center">
-                    <button type="button" class="btn btn-warning text-dark fw-semibold" onclick="switchAdminViewToEdit()">
-                        <i class="fa-regular fa-pen-to-square me-1"></i> Edit Inputan Laporan
+                    <button type="button" class="btn btn-warning text-dark fw-semibold rounded-pill px-3 py-1.5" style="font-size: 0.82rem;" onclick="switchAdminViewToEdit()">
+                        <i class="bi bi-pencil-square me-1"></i> Edit Inputan
                     </button>
                     <form id="adm_view_approve_form" method="POST" action="" class="d-inline" onsubmit="return confirm('ACC (Setujui) laporan ini agar petugas dapat mengunduh PDF resminya?');">
                         @csrf
                         @method('PATCH')
-                        <button type="submit" class="btn btn-success fw-semibold">
-                            <i class="fa-solid fa-check-double me-1"></i> ACC / Setujui Laporan
+                        <button type="submit" class="btn btn-success fw-semibold rounded-pill px-3 py-1.5" style="font-size: 0.82rem;">
+                            <i class="bi bi-check-all me-1"></i> ACC / Setujui
                         </button>
                     </form>
-                    <span id="adm_view_already_acc_badge" class="badge bg-success-subtle text-success border border-success-subtle py-2 px-3 d-none">
-                        <i class="fa-solid fa-circle-check me-1"></i> Sudah Di-ACC Admin
+                    <span id="adm_view_already_acc_badge" class="badge bg-success-subtle text-success border border-success-subtle rounded-pill py-2 px-3 d-none">
+                        <i class="bi bi-check-circle-fill me-1"></i> Sudah Di-ACC Admin
                     </span>
-                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Tutup</button>
+                    <button type="button" class="btn btn-outline-secondary rounded-pill px-3 py-1.5" data-bs-dismiss="modal" style="font-size: 0.82rem;">Tutup</button>
                 </div>
             </div>
         </div>
@@ -532,11 +653,11 @@
      ============================================================== -->
 <div class="modal fade" id="adminEditReportModal" tabindex="-1" aria-labelledby="adminEditReportModalLabel" aria-hidden="true">
     <div class="modal-dialog modal-dialog-centered modal-xl">
-        <div class="modal-content border-0 shadow">
+        <div class="modal-content border-0 shadow" style="border-radius: 20px; overflow: hidden;">
             <div class="modal-header bg-light border-bottom">
                 <div>
                     <h5 class="modal-title fw-bold text-dark" id="adminEditReportModalLabel">
-                        <i class="fa-regular fa-pen-to-square text-warning me-2"></i> Edit Inputan Laporan Perjadin Petugas
+                        <i class="bi bi-pencil-square text-warning me-2"></i> Edit Inputan Laporan Perjadin Petugas
                     </h5>
                     <div class="small text-muted">Administrator dapat mengoreksi seluruh isian laporan, rincian pengeluaran riil, maupun dasar pelaksanaan, lalu menyimpan atau langsung ACC.</div>
                 </div>
@@ -549,7 +670,7 @@
                     <!-- A. Identitas Pelaksana -->
                     <div class="card mb-3 border">
                         <div class="card-header bg-light py-2 px-3 fw-bold text-dark small">
-                            <i class="fa-solid fa-user-tie text-primary me-1"></i> A. YANG MELAKUKAN PERJALANAN DINAS
+                            <i class="bi bi-person-badge text-primary me-1"></i> A. YANG MELAKUKAN PERJALANAN DINAS
                         </div>
                         <div class="card-body p-3">
                             <div class="row g-3">
@@ -586,7 +707,7 @@
                     <!-- C & D. Tujuan & Waktu -->
                     <div class="card mb-3 border">
                         <div class="card-header bg-light py-2 px-3 fw-bold text-dark small">
-                            <i class="fa-solid fa-map-location-dot text-primary me-1"></i> C &amp; D. TUJUAN &amp; WAKTU PERJALANAN DINAS
+                            <i class="bi bi-geo-alt text-primary me-1"></i> C &amp; D. TUJUAN &amp; WAKTU PERJALANAN DINAS
                         </div>
                         <div class="card-body p-3">
                             <div class="row g-3 mb-3">
@@ -625,7 +746,7 @@
                     <!-- E & F. Hasil, Kendala, Solusi & Saran -->
                     <div class="card mb-3 border">
                         <div class="card-header bg-light py-2 px-3 fw-bold text-dark small">
-                            <i class="fa-solid fa-file-lines text-primary me-1"></i> E &amp; F. HASIL PERJALANAN DINAS &amp; SARAN
+                            <i class="bi bi-file-earmark-text text-primary me-1"></i> E &amp; F. HASIL PERJALANAN DINAS &amp; SARAN
                         </div>
                         <div class="card-body p-3">
                             <div class="mb-3">
@@ -652,9 +773,9 @@
                     <!-- Daftar Pengeluaran Riil -->
                     <div class="card mb-3 border border-success">
                         <div class="card-header bg-success-subtle text-success-emphasis py-2 px-3 fw-bold small d-flex justify-content-between align-items-center">
-                            <span><i class="fa-solid fa-receipt me-1"></i> DAFTAR PENGELUARAN RIIL</span>
+                            <span><i class="bi bi-receipt me-1"></i> DAFTAR PENGELUARAN RIIL</span>
                             <button type="button" class="btn btn-xs btn-success py-0.5 px-2" style="font-size: 0.72rem;" onclick="addExpenseRow('adm_edit_expense_list', 'adm_edit_expense_total', 'adm_edit_expense_terbilang')">
-                                <i class="fa-solid fa-plus me-1"></i> Tambah Baris Biaya
+                                <i class="bi bi-plus-lg me-1"></i> Tambah Baris Biaya
                             </button>
                         </div>
                         <div class="card-body p-3">
@@ -696,7 +817,7 @@
                     <!-- Penandatanganan & Opsional -->
                     <div class="card mb-3 border">
                         <div class="card-header bg-light py-2 px-3 fw-bold text-dark small">
-                            <i class="fa-solid fa-signature text-primary me-1"></i> PENGESAHAN &amp; LAMPIRAN OPSIONAL
+                            <i class="bi bi-pen text-primary me-1"></i> PENGESAHAN &amp; LAMPIRAN OPSIONAL
                         </div>
                         <div class="card-body p-3">
                             <div class="row g-3 mb-3">
@@ -729,7 +850,7 @@
                     <!-- Foto Dokumentasi Tersimpan (Admin dapat meninjau atau menghapus foto tidak sesuai) -->
                     <div id="adm_edit_existing_photos_box" class="card mb-3 border d-none">
                         <div class="card-header bg-light py-2 px-3 fw-bold text-dark small">
-                            <i class="fa-solid fa-camera text-primary me-1"></i> DOKUMENTASI FOTO TERSIMPAN
+                            <i class="bi bi-camera text-primary me-1"></i> DOKUMENTASI FOTO TERSIMPAN
                         </div>
                         <div class="card-body p-3">
                             <div id="adm_edit_existing_photos_list" class="row g-2"></div>
@@ -745,11 +866,11 @@
                 <div class="modal-footer bg-light border-top d-flex flex-wrap justify-content-between gap-2">
                     <button type="button" class="btn btn-light" data-bs-dismiss="modal">Batal</button>
                     <div class="d-flex flex-wrap gap-2">
-                        <button type="submit" name="after_action" value="save" class="btn btn-sp-primary">
-                            <i class="fa-solid fa-floppy-disk me-1"></i> Simpan Perubahan
+                        <button type="submit" name="after_action" value="save" class="btn btn-bps-orange">
+                            <i class="bi bi-floppy me-1"></i> Simpan Perubahan
                         </button>
                         <button type="submit" name="after_action" value="approve" class="btn btn-success fw-semibold">
-                            <i class="fa-solid fa-check-double me-1"></i> Simpan &amp; ACC Laporan
+                            <i class="bi bi-check2-all me-1"></i> Simpan &amp; ACC Laporan
                         </button>
                     </div>
                 </div>
@@ -822,7 +943,7 @@
                 } else {
                     const pdfIcon = document.createElement('div');
                     pdfIcon.className = 'py-3';
-                    pdfIcon.innerHTML = '<i class="fa-regular fa-file-pdf fa-3x text-danger"></i>';
+                    pdfIcon.innerHTML = '<i class="bi bi-file-earmark-pdf fs-1 text-danger"></i>';
                     card.appendChild(pdfIcon);
                 }
 
@@ -871,7 +992,7 @@
                     mapLink.href = `https://www.google.com/maps?q=${lat},${lng}`;
                     mapLink.target = '_blank';
                     mapLink.className = 'badge bg-info-subtle text-info-emphasis border border-info-subtle text-decoration-none mt-1';
-                    mapLink.innerHTML = '<i class="fa-solid fa-map-location-dot me-1"></i> Lihat Peta';
+                    mapLink.innerHTML = '<i class="bi bi-geo-alt me-1"></i> Lihat Peta';
                     meta.appendChild(mapLink);
                 }
                 card.appendChild(meta);
@@ -880,7 +1001,7 @@
                 openBtn.href = mediaUrl;
                 openBtn.target = '_blank';
                 openBtn.className = 'btn btn-sm btn-link text-decoration-none mt-1';
-                openBtn.innerHTML = '<i class="fa-solid fa-arrow-up-right-from-square"></i> Buka File';
+                openBtn.innerHTML = '<i class="bi bi-box-arrow-up-right me-1"></i> Buka File';
                 card.appendChild(openBtn);
 
                 col.appendChild(card);

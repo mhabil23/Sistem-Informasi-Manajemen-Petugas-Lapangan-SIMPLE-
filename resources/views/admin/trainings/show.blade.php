@@ -9,20 +9,134 @@
     <li class="breadcrumb-item active" aria-current="page">{{ \Illuminate\Support\Str::limit($training->title, 25) }}</li>
 @endsection
 
+@push('styles')
+<style>
+    .bento-card {
+        background: #ffffff;
+        border-radius: 16px;
+        border: 1px solid rgba(226, 232, 240, 0.8);
+        box-shadow: 0 4px 20px -2px rgba(0, 0, 0, 0.05);
+        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        overflow: hidden;
+    }
+    .bento-table-container-fixed {
+        width: 100%;
+        overflow: hidden;
+    }
+    .bento-table {
+        table-layout: fixed;
+        width: 100%;
+        margin-bottom: 0;
+        border-collapse: separate;
+        border-spacing: 0;
+        font-size: 0.8rem;
+    }
+    .bento-table thead th {
+        background: #f8fafc;
+        color: #475569;
+        font-size: 0.7rem;
+        font-weight: 700;
+        text-transform: uppercase;
+        letter-spacing: 0.05em;
+        padding: 0.75rem 0.55rem;
+        border-bottom: 1px solid #e2e8f0;
+        border-top: none;
+        white-space: nowrap;
+        vertical-align: middle;
+    }
+    .bento-table tbody td {
+        padding: 0.75rem 0.55rem;
+        vertical-align: middle;
+        border-bottom: 1px solid #f1f5f9;
+        font-size: 0.8rem;
+        color: #334155;
+        background: #ffffff;
+        transition: background 0.2s ease;
+    }
+    .bento-table tbody tr:hover td {
+        background-color: #f8fafc;
+    }
+    .bento-table tbody tr:last-child td {
+        border-bottom: none;
+    }
+    .btn-bps-orange {
+        background-color: #F37021;
+        border-color: #F37021;
+        color: #ffffff;
+        font-weight: 600;
+    }
+    .btn-bps-orange:hover, .btn-bps-orange:focus {
+        background-color: #d95d13;
+        border-color: #d95d13;
+        color: #ffffff;
+    }
+    /* Compact Action Buttons */
+    .bento-action-btn {
+        width: 28px;
+        height: 28px;
+        border-radius: 8px;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        border: 1px solid #E2E8F0;
+        background: #FFFFFF;
+        transition: all 0.15s ease;
+        font-size: 0.8rem;
+        padding: 0;
+        flex-shrink: 0;
+    }
+    .bento-action-btn.btn-edit { color: #D97706; border-color: #FDE68A; background: #FFFBEB; }
+    .bento-action-btn.btn-edit:hover { background: #D97706; color: #FFFFFF; }
+    .bento-action-btn.btn-delete { color: #DC2626; border-color: #FECACA; background: #FEF2F2; }
+    .bento-action-btn.btn-delete:hover { background: #DC2626; color: #FFFFFF; }
+    @media (max-width: 767.98px) {
+        .bento-table thead {
+            display: none;
+        }
+        .bento-table, .bento-table tbody, .bento-table tr, .bento-table td {
+            display: block;
+            width: 100% !important;
+        }
+        .bento-table tr {
+            margin-bottom: 1rem;
+            border: 1px solid #e2e8f0;
+            border-radius: 12px;
+            padding: 0.5rem;
+            background: #fff;
+        }
+        .bento-table td {
+            text-align: right;
+            padding: 0.5rem 0.75rem;
+            border-bottom: 1px solid #f1f5f9;
+        }
+        .bento-table td:last-child {
+            border-bottom: none;
+        }
+        .bento-table td::before {
+            content: attr(data-label);
+            float: left;
+            font-weight: 600;
+            color: #64748b;
+            font-size: 0.75rem;
+        }
+    }
+</style>
+@endpush
+
 @section('content')
-<!-- Header Card -->
-<div class="sp-card mb-4">
-    <div class="sp-card-body p-4">
+<!-- Header Card Detail Pelatihan -->
+<div class="bento-card mb-4">
+    <div class="p-4">
         <div class="row align-items-center">
             <div class="col-lg-8">
-                <a href="{{ route('admin.trainings.index') }}" class="btn btn-sm btn-outline-secondary mb-2">
-                    <i class="fa-solid fa-arrow-left me-1"></i> Kembali ke Daftar Agenda
+                <a href="{{ route('admin.trainings.index') }}" class="btn btn-sm btn-outline-secondary mb-2 rounded-pill px-3 py-1" style="font-size: 0.8rem;">
+                    <i class="bi bi-arrow-left me-1"></i> Kembali ke Daftar Agenda
                 </a>
-                <h3 class="fw-bold text-dark mb-1">{{ $training->title }}</h3>
+                <h4 class="fw-bold text-dark mb-1">{{ $training->title }}</h4>
                 <div class="d-flex flex-wrap gap-3 text-secondary small mt-2">
-                    <div><i class="fa-regular fa-calendar-check text-primary me-1"></i> <strong>{{ $training->start_date->format('d M Y') }} - {{ $training->end_date->format('d M Y') }}</strong></div>
-                    <div><i class="fa-solid fa-location-dot text-danger me-1"></i> {{ $training->location }}</div>
-                    <div><i class="fa-solid fa-users text-info me-1"></i> Kuota: <strong>{{ $training->quota ?: 'Tak Terbatas' }}</strong></div>
+                    <div><i class="bi bi-calendar-check text-primary me-1"></i> <strong>{{ $training->start_date->format('d M Y') }} - {{ $training->end_date->format('d M Y') }}</strong></div>
+                    <div><i class="bi bi-geo-alt text-danger me-1"></i> {{ $training->location }}</div>
+                    <div><i class="bi bi-people text-info me-1"></i> Kuota: <strong>{{ $training->quota ?: 'Tak Terbatas' }}</strong></div>
                     <div>
                         @php
                             $statusBadges = [
@@ -43,11 +157,11 @@
             </div>
             <div class="col-lg-4 text-lg-end mt-3 mt-lg-0">
                 <div class="d-flex flex-wrap justify-content-lg-end gap-2">
-                    <button type="button" class="btn btn-sp-primary" data-bs-toggle="modal" data-bs-target="#createParticipantModal">
-                        <i class="fa-solid fa-user-plus me-1"></i> Tambah Peserta
+                    <button type="button" class="btn btn-bps-orange rounded-pill px-3 py-1.5" data-bs-toggle="modal" data-bs-target="#createParticipantModal" style="font-size: 0.85rem;">
+                        <i class="bi bi-person-plus me-1"></i> Tambah Peserta
                     </button>
-                    <a href="{{ route('admin.trainings.attendance.pdf', $training) }}" class="btn btn-outline-danger">
-                        <i class="fa-solid fa-file-pdf me-1"></i> Cetak Daftar Hadir PDF
+                    <a href="{{ route('admin.trainings.attendance.pdf', $training) }}" class="btn btn-outline-danger rounded-pill px-3 py-1.5" style="font-size: 0.85rem;">
+                        <i class="bi bi-file-earmark-pdf me-1"></i> Cetak Daftar Hadir PDF
                     </a>
                 </div>
             </div>
@@ -55,69 +169,14 @@
     </div>
 </div>
 
-<!-- Stat Cards Kehadiran -->
-<div class="row g-3 mb-4">
-    <div class="col-xl-3 col-sm-6">
-        <div class="sp-stat-card">
-            <div class="sp-stat-icon-wrap" style="background: #e0f2fe; color: #0284c7;">
-                <i class="fa-solid fa-users"></i>
-            </div>
-            <div class="sp-stat-info">
-                <div class="sp-stat-label">Total Peserta</div>
-                <div class="sp-stat-value">{{ number_format($participants->total()) }}</div>
-                <div class="sp-stat-desc">Terdaftar di kegiatan</div>
-            </div>
-        </div>
-    </div>
-
-    <div class="col-xl-3 col-sm-6">
-        <div class="sp-stat-card">
-            <div class="sp-stat-icon-wrap" style="background: #dcfce7; color: #16a34a;">
-                <i class="fa-solid fa-user-check"></i>
-            </div>
-            <div class="sp-stat-info">
-                <div class="sp-stat-label">Hadir Presensi</div>
-                <div class="sp-stat-value text-success">{{ number_format($presentCount) }}</div>
-                <div class="sp-stat-desc">Mengikuti pelatihan</div>
-            </div>
-        </div>
-    </div>
-
-    <div class="col-xl-3 col-sm-6">
-        <div class="sp-stat-card">
-            <div class="sp-stat-icon-wrap" style="background: #fef3c7; color: #d97706;">
-                <i class="fa-solid fa-user-clock"></i>
-            </div>
-            <div class="sp-stat-info">
-                <div class="sp-stat-label">Izin / Sakit</div>
-                <div class="sp-stat-value text-warning">{{ number_format($excusedCount) }}</div>
-                <div class="sp-stat-desc">Pemberitahuan resmi</div>
-            </div>
-        </div>
-    </div>
-
-    <div class="col-xl-3 col-sm-6">
-        <div class="sp-stat-card">
-            <div class="sp-stat-icon-wrap" style="background: #fee2e2; color: #dc2626;">
-                <i class="fa-solid fa-user-xmark"></i>
-            </div>
-            <div class="sp-stat-info">
-                <div class="sp-stat-label">Tidak Hadir (Alpa)</div>
-                <div class="sp-stat-value text-danger">{{ number_format($absentCount) }}</div>
-                <div class="sp-stat-desc">Tanpa keterangan</div>
-            </div>
-        </div>
-    </div>
-</div>
-
 <!-- Search & Filter Card -->
-<div class="sp-card mb-4">
-    <div class="sp-card-body p-3">
+<div class="bento-card mb-4">
+    <div class="p-3">
         <form method="GET" action="{{ route('admin.trainings.show', $training) }}" class="row g-2 align-items-center">
             <div class="col-md-5">
                 <div class="input-group">
-                    <span class="input-group-text bg-white border-end-0 text-muted">
-                        <i class="fa-solid fa-magnifying-glass"></i>
+                    <span class="input-group-text bg-light border-end-0 text-muted">
+                        <i class="bi bi-search"></i>
                     </span>
                     <input type="text" 
                            name="search" 
@@ -146,12 +205,12 @@
             </div>
 
             <div class="col-md-2 d-flex gap-2">
-                <button type="submit" class="btn btn-sp-primary flex-fill">
-                    <i class="fa-solid fa-filter me-1"></i> Filter
+                <button type="submit" class="btn btn-bps-orange flex-fill">
+                    <i class="bi bi-funnel me-1"></i> Filter
                 </button>
                 @if(request()->hasAny(['search', 'category', 'attendance']))
                     <a href="{{ route('admin.trainings.show', $training) }}" class="btn btn-outline-secondary" title="Reset Filter">
-                        <i class="fa-solid fa-rotate-left"></i>
+                        <i class="bi bi-arrow-counterclockwise"></i>
                     </a>
                 @endif
             </div>
@@ -160,118 +219,133 @@
 </div>
 
 <!-- Participants Table Card -->
-<div class="sp-card mb-4">
-    <div class="sp-card-header">
-        <h5 class="sp-card-title">
-            <i class="fa-solid fa-id-card text-primary"></i>
-            Daftar Peserta & Presensi ({{ $participants->total() }})
-        </h5>
-    </div>
-    <div class="sp-card-body p-0">
-        <div class="table-responsive">
-            <table class="table sp-table align-middle">
-                <thead>
-                    <tr>
-                        <th style="width: 50px;">No.</th>
-                        <th style="min-width: 200px;">Nama Peserta</th>
-                        <th style="min-width: 130px;">Kategori</th>
-                        <th style="min-width: 170px;">Instansi / Asal</th>
-                        <th style="min-width: 140px;">Kontak (HP/Email)</th>
-                        <th>Presensi</th>
-                        <th>No. Sertifikat</th>
-                        <th class="text-end" style="min-width: 110px;">Aksi</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    @forelse($participants as $idx => $p)
-                        <tr>
-                            <td class="text-muted small">{{ $participants->firstItem() + $idx }}</td>
-                            <td>
-                                <div class="fw-bold text-dark">{{ $p->name }}</div>
-                                @if($p->nip_or_id)
-                                    <small class="text-muted font-monospace">NIP/ID: {{ $p->nip_or_id }}</small>
-                                @endif
-                            </td>
-                            <td>
-                                @php
-                                    $catBadges = [
-                                        'DPW' => 'bg-primary-subtle text-primary border border-primary-subtle',
-                                        'Magang Mitra' => 'bg-info-subtle text-info-emphasis border border-info-subtle',
-                                        'Pegawai' => 'bg-success-subtle text-success border border-success-subtle',
-                                    ];
-                                @endphp
-                                <span class="badge {{ $catBadges[$p->category] ?? 'bg-secondary-subtle text-dark border' }} px-2 py-1">
-                                    {{ $p->category }}
-                                </span>
-                            </td>
-                            <td>
-                                <div class="small text-secondary">{{ $p->agency ?: '-' }}</div>
-                            </td>
-                            <td>
-                                <div class="small text-dark">{{ $p->phone ?: '-' }}</div>
-                                @if($p->email)
-                                    <div class="text-muted" style="font-size: 0.75rem;">{{ $p->email }}</div>
-                                @endif
-                            </td>
-                            <td>
-                                @if($p->attendance_status === 'present')
-                                    <span class="badge bg-success-subtle text-success border border-success-subtle px-2 py-1">
-                                        <i class="fa-solid fa-check me-1"></i> Hadir
-                                    </span>
-                                @elseif($p->attendance_status === 'excused')
-                                    <span class="badge bg-warning-subtle text-warning-emphasis border border-warning-subtle px-2 py-1">
-                                        <i class="fa-solid fa-clock me-1"></i> Izin
-                                    </span>
-                                @else
-                                    <span class="badge bg-danger-subtle text-danger border border-danger-subtle px-2 py-1">
-                                        <i class="fa-solid fa-xmark me-1"></i> Alpa
-                                    </span>
-                                @endif
-                            </td>
-                            <td>
-                                <span class="small font-monospace text-secondary">{{ $p->certificate_number ?: '-' }}</span>
-                            </td>
-                            <td class="text-end text-nowrap">
-                                <div class="sp-action-btn-group">
-                                    <!-- Edit -->
-                                    <button type="button" 
-                                            class="btn btn-light border sp-action-btn text-warning" 
-                                            title="Edit Data Peserta" 
-                                            data-bs-toggle="tooltip"
-                                            onclick="openEditParticipantModal({{ json_encode($p) }})">
-                                        <i class="fa-regular fa-pen-to-square"></i>
-                                    </button>
-
-                                    <!-- Hapus -->
-                                    <form method="POST" action="{{ route('admin.trainings.participants.destroy', [$training, $p]) }}" class="d-inline" onsubmit="return confirm('Hapus peserta {{ addslashes($p->name) }}?');">
-                                        @csrf
-                                        @method('DELETE')
-                                        <button type="submit" 
-                                                class="btn btn-light border sp-action-btn text-danger" 
-                                                title="Hapus Peserta" 
-                                                data-bs-toggle="tooltip">
-                                            <i class="fa-regular fa-trash-can"></i>
-                                        </button>
-                                    </form>
-                                </div>
-                            </td>
-                        </tr>
-                    @empty
-                        <tr>
-                            <td colspan="8" class="text-center py-5 text-muted">
-                                <i class="fa-solid fa-users-slash fa-3x mb-3 text-secondary opacity-50"></i>
-                                <div class="fw-semibold">Belum ada peserta yang didaftarkan.</div>
-                                <div class="small">Klik tombol "Tambah Peserta" untuk menambahkan data peserta pelatihan.</div>
-                            </td>
-                        </tr>
-                    @endforelse
-                </tbody>
-            </table>
+<div class="bento-card mb-4">
+    <div class="d-flex flex-wrap justify-content-between align-items-center p-3 border-bottom gap-2">
+        <div class="d-flex align-items-center gap-2">
+            <div class="p-2 rounded-3 text-white" style="background: linear-gradient(135deg, #0284c7 0%, #0369a1 100%);">
+                <i class="bi bi-person-lines-fill fs-5"></i>
+            </div>
+            <div>
+                <h5 class="fw-bold text-dark mb-0" style="font-size: 1.05rem;">Daftar Peserta & Presensi ({{ $participants->total() }})</h5>
+                <span class="badge bg-light text-secondary border mt-1">Halaman {{ $participants->currentPage() }} dari {{ $participants->lastPage() ?: 1 }}</span>
+            </div>
+        </div>
+        <div class="d-flex align-items-center gap-2">
+            <span class="badge bg-success-subtle text-success border border-success-subtle px-2 py-1">
+                Hadir: {{ $presentCount }}
+            </span>
+            <span class="badge bg-warning-subtle text-warning-emphasis border border-warning-subtle px-2 py-1">
+                Izin: {{ $excusedCount }}
+            </span>
+            <span class="badge bg-danger-subtle text-danger border border-danger-subtle px-2 py-1">
+                Alpa: {{ $absentCount }}
+            </span>
         </div>
     </div>
 
+    <div class="bento-table-container-fixed">
+        <table class="bento-table align-middle">
+            <thead>
+                <tr>
+                    <th style="width: 4%;" class="text-center">NO</th>
+                    <th style="width: 24%;">NAMA PESERTA</th>
+                    <th style="width: 13%;">KATEGORI</th>
+                    <th style="width: 19%;">INSTANSI / ASAL</th>
+                    <th style="width: 14%;">KONTAK</th>
+                    <th style="width: 10%;" class="text-center">PRESENSI</th>
+                    <th style="width: 7%;">NO. SERTIFIKAT</th>
+                    <th class="text-end pe-3" style="width: 9%;">AKSI</th>
+                </tr>
+            </thead>
+            <tbody>
+                @forelse($participants as $idx => $p)
+                    <tr>
+                        <td class="text-muted small text-center" data-label="No">{{ $participants->firstItem() + $idx }}</td>
+                        <td data-label="Nama Peserta">
+                            <div class="fw-bold text-dark text-truncate">{{ $p->name }}</div>
+                            @if($p->nip_or_id)
+                                <small class="text-muted font-monospace">NIP/ID: {{ $p->nip_or_id }}</small>
+                            @endif
+                        </td>
+                        <td data-label="Kategori">
+                            @php
+                                $catBadges = [
+                                    'DPW' => 'bg-primary-subtle text-primary border border-primary-subtle',
+                                    'Magang Mitra' => 'bg-info-subtle text-info-emphasis border border-info-subtle',
+                                    'Pegawai' => 'bg-success-subtle text-success border border-success-subtle',
+                                ];
+                            @endphp
+                            <span class="badge {{ $catBadges[$p->category] ?? 'bg-secondary-subtle text-dark border' }} px-2 py-1">
+                                {{ $p->category }}
+                            </span>
+                        </td>
+                        <td data-label="Instansi / Asal">
+                            <div class="small text-secondary text-truncate">{{ $p->agency ?: '-' }}</div>
+                        </td>
+                        <td data-label="Kontak">
+                            <div class="small text-dark">{{ $p->phone ?: '-' }}</div>
+                            @if($p->email)
+                                <div class="text-muted text-truncate" style="font-size: 0.72rem;">{{ $p->email }}</div>
+                            @endif
+                        </td>
+                        <td class="text-center" data-label="Presensi">
+                            @if($p->attendance_status === 'present')
+                                <span class="badge bg-success-subtle text-success border border-success-subtle px-2 py-1">
+                                    <i class="bi bi-check2 me-1"></i> Hadir
+                                </span>
+                            @elseif($p->attendance_status === 'excused')
+                                <span class="badge bg-warning-subtle text-warning-emphasis border border-warning-subtle px-2 py-1">
+                                    <i class="bi bi-clock me-1"></i> Izin
+                                </span>
+                            @else
+                                <span class="badge bg-danger-subtle text-danger border border-danger-subtle px-2 py-1">
+                                    <i class="bi bi-x me-1"></i> Alpa
+                                </span>
+                            @endif
+                        </td>
+                        <td data-label="No. Sertifikat">
+                            <span class="small font-monospace text-secondary text-truncate d-block">{{ $p->certificate_number ?: '-' }}</span>
+                        </td>
+                        <td class="text-end text-nowrap pe-3" data-label="Aksi">
+                            <div class="d-inline-flex align-items-center justify-content-end gap-1">
+                                <!-- Edit -->
+                                <button type="button" 
+                                        class="bento-action-btn btn-edit" 
+                                        title="Edit Data Peserta" 
+                                        data-bs-toggle="tooltip"
+                                        onclick="openEditParticipantModal({{ json_encode($p) }})">
+                                    <i class="bi bi-pencil-square"></i>
+                                </button>
+
+                                <!-- Hapus -->
+                                <form method="POST" action="{{ route('admin.trainings.participants.destroy', [$training, $p]) }}" class="d-inline" onsubmit="return confirm('Hapus peserta {{ addslashes($p->name) }}?');">
+                                    @csrf
+                                    @method('DELETE')
+                                    <button type="submit" 
+                                            class="bento-action-btn btn-delete" 
+                                            title="Hapus Peserta" 
+                                            data-bs-toggle="tooltip">
+                                        <i class="bi bi-trash"></i>
+                                    </button>
+                                </form>
+                            </div>
+                        </td>
+                    </tr>
+                @empty
+                    <tr>
+                        <td colspan="8" class="text-center py-5 text-muted">
+                            <i class="bi bi-person-x fs-1 mb-3 text-secondary opacity-50 d-block"></i>
+                            <div class="fw-semibold">Belum ada peserta yang didaftarkan.</div>
+                            <div class="small">Klik tombol "Tambah Peserta" untuk menambahkan data peserta pelatihan.</div>
+                        </td>
+                    </tr>
+                @endforelse
+            </tbody>
+        </table>
+    </div>
+
     @if($participants->hasPages())
-        <div class="sp-card-footer bg-white border-top p-3 d-flex justify-content-between align-items-center">
+        <div class="p-3 border-top d-flex justify-content-between align-items-center">
             <div class="small text-muted">
                 Menampilkan {{ $participants->firstItem() }} sampai {{ $participants->lastItem() }} dari {{ $participants->total() }} peserta
             </div>
@@ -287,10 +361,10 @@
      ============================================================== -->
 <div class="modal fade" id="createParticipantModal" tabindex="-1" aria-labelledby="createParticipantModalLabel" aria-hidden="true">
     <div class="modal-dialog modal-dialog-centered modal-lg">
-        <div class="modal-content border-0 shadow">
+        <div class="modal-content border-0 shadow" style="border-radius: 20px; overflow: hidden;">
             <div class="modal-header bg-light border-bottom">
                 <h5 class="modal-title fw-bold" id="createParticipantModalLabel">
-                    <i class="fa-solid fa-user-plus text-primary me-2"></i> Tambah Peserta Pelatihan
+                    <i class="bi bi-person-plus text-primary me-2"></i> Tambah Peserta Pelatihan
                 </h5>
                 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
@@ -355,8 +429,8 @@
                 </div>
                 <div class="modal-footer bg-light border-top">
                     <button type="button" class="btn btn-light" data-bs-dismiss="modal">Batal</button>
-                    <button type="submit" class="btn btn-sp-primary">
-                        <i class="fa-solid fa-floppy-disk me-1"></i> Simpan Peserta
+                    <button type="submit" class="btn btn-bps-orange">
+                        <i class="bi bi-floppy me-1"></i> Simpan Peserta
                     </button>
                 </div>
             </form>
@@ -369,10 +443,10 @@
      ============================================================== -->
 <div class="modal fade" id="editParticipantModal" tabindex="-1" aria-labelledby="editParticipantModalLabel" aria-hidden="true">
     <div class="modal-dialog modal-dialog-centered modal-lg">
-        <div class="modal-content border-0 shadow">
+        <div class="modal-content border-0 shadow" style="border-radius: 20px; overflow: hidden;">
             <div class="modal-header bg-light border-bottom">
                 <h5 class="modal-title fw-bold" id="editParticipantModalLabel">
-                    <i class="fa-solid fa-pen-to-square text-warning me-2"></i> Edit Data Peserta
+                    <i class="bi bi-pencil-square text-warning me-2"></i> Edit Data Peserta
                 </h5>
                 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
@@ -430,8 +504,8 @@
                 </div>
                 <div class="modal-footer bg-light border-top">
                     <button type="button" class="btn btn-light" data-bs-dismiss="modal">Batal</button>
-                    <button type="submit" class="btn btn-sp-primary">
-                        <i class="fa-solid fa-floppy-disk me-1"></i> Simpan Perubahan
+                    <button type="submit" class="btn btn-bps-orange">
+                        <i class="bi bi-floppy me-1"></i> Simpan Perubahan
                     </button>
                 </div>
             </form>
@@ -458,4 +532,3 @@
     }
 </script>
 @endpush
-

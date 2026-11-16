@@ -39,8 +39,8 @@ class AuthAndDashboardTest extends TestCase
 
         $dashResponse = $this->actingAs($admin)->get(route('admin.dashboard'));
         $dashResponse->assertStatus(200);
-        $dashResponse->assertSee('Dashboard Administrator');
-        $dashResponse->assertSee('Total Petugas');
+        $dashResponse->assertSee('Dashboard Monitoring');
+        $dashResponse->assertSee('Petugas Lapangan');
     }
 
     public function test_petugas_cannot_access_admin_dashboard(): void
@@ -65,8 +65,7 @@ class AuthAndDashboardTest extends TestCase
 
         $dashResponse = $this->actingAs($petugas)->get(route('petugas.dashboard'));
         $dashResponse->assertStatus(200);
-        $dashResponse->assertSee('Dashboard Petugas');
-        $dashResponse->assertSee('Tugas Diberikan');
+        $dashResponse->assertSee('Beranda Petugas');
     }
 
     public function test_user_can_logout(): void
@@ -94,6 +93,40 @@ class AuthAndDashboardTest extends TestCase
             'name' => 'Nama Baru Diperbarui',
             'email' => 'emailbaru@spkrt.go.id',
         ]);
+    }
+
+    public function test_petugas_and_pegawai_cannot_update_email_or_password(): void
+    {
+        $petugas = User::where('role', 'petugas')->first();
+        if (! $petugas) {
+            $petugas = User::factory()->create(['role' => 'petugas', 'email' => 'petugas_test@bps.go.id']);
+        }
+
+        $originalEmail = $petugas->email;
+
+        // Coba ganti email sebagai petugas
+        $response = $this->actingAs($petugas)->put(route('profile.update'), [
+            'name' => 'Nama Petugas Baru',
+            'email' => 'hacked_email@spkrt.go.id',
+            'phone' => '081234567899',
+        ]);
+
+        $response->assertSessionHas('success');
+        // Email harus tetap email asli, tidak boleh berubah
+        $this->assertDatabaseHas('users', [
+            'id' => $petugas->id,
+            'name' => 'Nama Petugas Baru',
+            'email' => $originalEmail,
+        ]);
+
+        // Coba ganti password sebagai petugas
+        $pwdResponse = $this->actingAs($petugas)->put(route('profile.password.update'), [
+            'current_password' => 'password',
+            'password' => 'newpassword123',
+            'password_confirmation' => 'newpassword123',
+        ]);
+
+        $pwdResponse->assertSessionHas('error');
     }
 
     public function test_guest_is_redirected_to_login(): void

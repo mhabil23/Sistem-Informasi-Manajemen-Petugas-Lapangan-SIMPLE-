@@ -95,17 +95,22 @@
                         <div class="col-md-6">
                             <label class="form-label small fw-semibold text-secondary">USERNAME</label>
                             <input type="text" class="form-control bg-light" value="{{ $user->username }}" readonly disabled>
-                            <small class="text-muted" style="font-size: 0.75rem;">Username tidak dapat diubah sendiri.</small>
+                            <small class="text-muted" style="font-size: 0.75rem;"><i class="bi bi-lock-fill text-secondary me-1"></i> Username dikunci &amp; tidak dapat diubah.</small>
                         </div>
                     </div>
 
                     <div class="row g-3 mb-3">
                         <div class="col-md-6">
                             <label class="form-label small fw-semibold text-secondary">EMAIL</label>
-                            <input type="email" name="email" class="form-control @error('email') is-invalid @enderror" value="{{ old('email', $user->email) }}" required>
-                            @error('email')
-                                <div class="invalid-feedback">{{ $message }}</div>
-                            @enderror
+                            @if($user->isAdmin())
+                                <input type="email" name="email" class="form-control @error('email') is-invalid @enderror" value="{{ old('email', $user->email) }}" required>
+                                @error('email')
+                                    <div class="invalid-feedback">{{ $message }}</div>
+                                @enderror
+                            @else
+                                <input type="email" class="form-control bg-light" value="{{ $user->email }}" readonly disabled>
+                                <small class="text-muted" style="font-size: 0.75rem;"><i class="bi bi-lock-fill text-secondary me-1"></i> Email dikunci &amp; hanya dapat diubah oleh Administrator.</small>
+                            @endif
                         </div>
                         <div class="col-md-6">
                             <label class="form-label small fw-semibold text-secondary">NOMOR HP / WHATSAPP</label>
@@ -136,7 +141,7 @@
                     </div>
 
                     <div class="text-end">
-                        <button type="submit" class="btn btn-sp-primary">
+                        <button type="submit" class="btn btn-bps-orange rounded-pill px-4 py-2">
                             <i class="fa-solid fa-floppy-disk me-1"></i> Simpan Perubahan Profil
                         </button>
                     </div>
@@ -153,38 +158,52 @@
                 </h5>
             </div>
             <div class="sp-card-body">
-                <form method="POST" action="{{ route('profile.password.update') }}">
-                    @csrf
-                    @method('PUT')
+                @if($user->isAdmin())
+                    <form method="POST" action="{{ route('profile.password.update') }}">
+                        @csrf
+                        @method('PUT')
 
-                    <div class="mb-3">
-                        <label class="form-label small fw-semibold text-secondary">KATA SANDI SAAT INI</label>
-                        <input type="password" name="current_password" class="form-control @error('current_password') is-invalid @enderror" required placeholder="Masukkan kata sandi lama Anda">
-                        @error('current_password')
-                            <div class="invalid-feedback">{{ $message }}</div>
-                        @enderror
-                    </div>
-
-                    <div class="row g-3 mb-4">
-                        <div class="col-md-6">
-                            <label class="form-label small fw-semibold text-secondary">KATA SANDI BARU</label>
-                            <input type="password" name="password" class="form-control @error('password') is-invalid @enderror" required placeholder="Minimal 6 karakter">
-                            @error('password')
+                        <div class="mb-3">
+                            <label class="form-label small fw-semibold text-secondary">KATA SANDI SAAT INI</label>
+                            <input type="password" name="current_password" class="form-control @error('current_password') is-invalid @enderror" required placeholder="Masukkan kata sandi lama Anda">
+                            @error('current_password')
                                 <div class="invalid-feedback">{{ $message }}</div>
                             @enderror
                         </div>
-                        <div class="col-md-6">
-                            <label class="form-label small fw-semibold text-secondary">KONFIRMASI KATA SANDI BARU</label>
-                            <input type="password" name="password_confirmation" class="form-control" required placeholder="Ulangi kata sandi baru">
+
+                        <div class="row g-3 mb-4">
+                            <div class="col-md-6">
+                                <label class="form-label small fw-semibold text-secondary">KATA SANDI BARU</label>
+                                <input type="password" name="password" class="form-control @error('password') is-invalid @enderror" required placeholder="Minimal 6 karakter">
+                                @error('password')
+                                    <div class="invalid-feedback">{{ $message }}</div>
+                                @enderror
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label small fw-semibold text-secondary">KONFIRMASI KATA SANDI BARU</label>
+                                <input type="password" name="password_confirmation" class="form-control" required placeholder="Ulangi kata sandi baru">
+                            </div>
+                        </div>
+
+                        <div class="text-end">
+                            <button type="submit" class="btn btn-bps-orange rounded-pill px-4 py-2">
+                                <i class="fa-solid fa-key me-1"></i> Perbarui Kata Sandi
+                            </button>
+                        </div>
+                    </form>
+                @else
+                    <div class="d-flex align-items-center p-3 rounded-3" style="background: #F8FAFC; border: 1px dashed #CBD5E1;">
+                        <div class="d-inline-flex align-items-center justify-content-center rounded-circle me-3 flex-shrink-0" style="width: 44px; height: 44px; background: rgba(243, 112, 33, 0.1); color: #F37021;">
+                            <i class="bi bi-shield-lock-fill fs-4"></i>
+                        </div>
+                        <div>
+                            <h6 class="fw-bold text-dark mb-1">Keamanan Akun Dikelola Administrator</h6>
+                            <p class="text-muted small mb-0">
+                                Akun Petugas dan Pegawai / PML tidak dapat mengubah kata sandi, email, dan username secara mandiri. Untuk pembaruan kredensial akun, silakan hubungi <strong>Administrator SIMPLE</strong>.
+                            </p>
                         </div>
                     </div>
-
-                    <div class="text-end">
-                        <button type="submit" class="btn btn-sp-accent">
-                            <i class="fa-solid fa-key me-1"></i> Perbarui Kata Sandi
-                        </button>
-                    </div>
-                </form>
+                @endif
             </div>
         </div>
     </div>

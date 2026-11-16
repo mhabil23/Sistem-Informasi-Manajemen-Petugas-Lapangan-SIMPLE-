@@ -14,7 +14,7 @@ class AuthController extends Controller
     public function showLoginForm()
     {
         if (Auth::check()) {
-            return Auth::user()->isAdmin()
+            return Auth::user()->canAccessMonitoring()
                 ? redirect()->route('admin.dashboard')
                 : redirect()->route('petugas.dashboard');
         }
@@ -67,7 +67,7 @@ class AuthController extends Controller
 
             $notification = 'Selamat datang kembali, ' . $user->name . '!';
 
-            if ($user->isAdmin()) {
+            if ($user->canAccessMonitoring()) {
                 return redirect()->intended(route('admin.dashboard'))->with('success', $notification);
             }
 

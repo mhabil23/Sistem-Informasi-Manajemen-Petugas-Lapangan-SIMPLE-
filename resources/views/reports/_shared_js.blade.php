@@ -128,7 +128,7 @@
         btnDel.type = 'button';
         btnDel.className = 'btn btn-sm btn-outline-danger py-0 px-1.5';
         btnDel.title = 'Hapus baris';
-        btnDel.innerHTML = '<i class="fa-solid fa-xmark"></i>';
+        btnDel.innerHTML = '<i class="bi bi-x-lg"></i>';
         btnDel.addEventListener('click', function() {
             removeExpenseRow(btnDel, tbodyId, totalId, terbilangId);
         });
@@ -210,7 +210,7 @@
         if (timeLabel) {
             const tDiv = document.createElement('div');
             tDiv.className = 'text-dark fw-semibold';
-            tDiv.innerHTML = '<i class="fa-regular fa-clock text-primary me-1"></i>';
+            tDiv.innerHTML = '<i class="bi bi-clock text-primary me-1"></i>';
             tDiv.appendChild(document.createTextNode(timeLabel));
             meta.appendChild(tDiv);
         }
@@ -219,7 +219,7 @@
             const lDiv = document.createElement('div');
             lDiv.className = 'text-secondary text-truncate';
             lDiv.title = att.location_address;
-            lDiv.innerHTML = '<i class="fa-solid fa-location-dot text-danger me-1"></i>';
+            lDiv.innerHTML = '<i class="bi bi-geo-alt text-danger me-1"></i>';
             lDiv.appendChild(document.createTextNode(att.location_address));
             meta.appendChild(lDiv);
         }
@@ -236,7 +236,7 @@
             mapLink.href = `https://www.google.com/maps?q=${lat},${lng}`;
             mapLink.target = '_blank';
             mapLink.className = 'badge bg-info-subtle text-info-emphasis border border-info-subtle text-decoration-none mt-1';
-            mapLink.innerHTML = '<i class="fa-solid fa-map-location-dot me-1"></i> Lihat Peta GPS';
+            mapLink.innerHTML = '<i class="bi bi-geo-alt me-1"></i> Lihat Peta GPS';
             meta.appendChild(mapLink);
         } else if (att.caption) {
             const capDiv = document.createElement('div');
@@ -291,14 +291,14 @@
         card.className = 'card h-100 border p-2 shadow-sm text-center';
         const pdfBox = document.createElement('div');
         pdfBox.className = 'py-3';
-        pdfBox.innerHTML = '<i class="fa-regular fa-file-pdf fa-3x text-danger"></i>';
+        pdfBox.innerHTML = '<i class="bi bi-file-earmark-pdf fs-1 text-danger"></i>';
         card.appendChild(pdfBox);
 
         const openBtn = document.createElement('a');
         openBtn.href = mediaUrl;
         openBtn.target = '_blank';
         openBtn.className = 'btn btn-sm btn-link text-decoration-none mt-auto pt-1';
-        openBtn.innerHTML = '<i class="fa-solid fa-arrow-up-right-from-square me-1"></i> Buka Berkas';
+        openBtn.innerHTML = '<i class="bi bi-box-arrow-up-right me-1"></i> Buka Berkas';
         card.appendChild(openBtn);
 
         col.appendChild(card);

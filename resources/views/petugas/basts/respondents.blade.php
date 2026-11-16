@@ -8,264 +8,297 @@
     <li class="breadcrumb-item active" aria-current="page">Tanda Terima Responden</li>
 @endsection
 
+@push('styles')
+<style>
+    .bento-card {
+        background: #FFFFFF;
+        border-radius: 18px;
+        border: 1px solid rgba(226, 232, 240, 0.85);
+        box-shadow: 0 4px 16px rgba(15, 23, 42, 0.03);
+    }
+    .btn-bps-orange {
+        background-color: #F37021;
+        border-color: #F37021;
+        color: #ffffff;
+        font-weight: 600;
+        border-radius: 10px;
+        padding: 0.45rem 1rem;
+        font-size: 0.82rem;
+        display: inline-flex;
+        align-items: center;
+        gap: 0.4rem;
+        transition: all 0.2s ease;
+    }
+    .btn-bps-orange:hover {
+        background-color: #d95d12;
+        border-color: #d95d12;
+        color: #ffffff;
+        box-shadow: 0 4px 12px rgba(243, 112, 33, 0.25);
+    }
+    .bento-table {
+        table-layout: fixed;
+        width: 100%;
+        margin-bottom: 0;
+        font-size: 0.82rem;
+    }
+    .bento-table thead th {
+        background-color: #F8FAFC;
+        color: #475569;
+        font-weight: 700;
+        font-size: 0.72rem;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+        padding: 0.75rem 0.85rem;
+        border-bottom: 1px solid #E2E8F0;
+        vertical-align: middle;
+        white-space: nowrap;
+    }
+    .bento-table tbody td {
+        padding: 0.75rem 0.85rem;
+        vertical-align: middle;
+        border-bottom: 1px solid #F1F5F9;
+    }
+    .bento-table tbody tr:hover td {
+        background-color: #F8FAFC;
+    }
+    .bento-action-btn {
+        width: 32px;
+        height: 32px;
+        border-radius: 8px;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 0.85rem;
+        padding: 0;
+        transition: all 0.15s ease;
+    }
+    .bento-action-btn:hover {
+        transform: translateY(-1px);
+    }
+</style>
+@endpush
+
 @section('content')
 <!-- Header -->
-<div class="row align-items-center mb-3">
-    <div class="col-md-7">
-        <h3 class="fw-bold text-dark mb-1">Tanda Terima Responden</h3>
+<div class="d-flex flex-wrap align-items-center justify-content-between gap-3 mb-4">
+    <div>
+        <h3 class="fw-bold text-dark mb-1 d-flex align-items-center gap-2">
+            <i class="bi bi-file-earmark-check-fill text-primary"></i> Tanda Terima Responden Lapangan
+        </h3>
         <p class="text-muted small mb-0">Terbitkan dokumen resmi tanda terima responden atau wakil penerima yang Anda kunjungi, lengkap dengan tanda tangan digital.</p>
     </div>
-    <div class="col-md-5 text-md-end mt-3 mt-md-0">
-        <button type="button" class="btn btn-sp-primary" data-bs-toggle="modal" data-bs-target="#createMyBastModal">
-            <i class="fa-solid fa-file-circle-plus me-1"></i> Buat Tanda Terima Responden
+    <div class="d-flex flex-wrap align-items-center gap-2">
+        <button type="button" class="btn-bps-orange shadow-sm" data-bs-toggle="modal" data-bs-target="#createMyBastModal">
+            <i class="bi bi-file-earmark-plus"></i> Buat Tanda Terima Responden
         </button>
     </div>
 </div>
 
-<!-- Stat Cards (Status Penyelesaian Sampel Responden) -->
-<div class="row g-3 mb-4">
-    <div class="col-sm-4">
-        <div class="sp-stat-card">
-            <div class="sp-stat-icon-wrap" style="background: #e0f2fe; color: #0284c7;">
-                <i class="fa-solid fa-file-signature"></i>
-            </div>
-            <div class="sp-stat-info">
-                <div class="sp-stat-label">Total Tanda Terima Terbit</div>
-                <div class="sp-stat-value">{{ number_format($basts->total()) }}</div>
-                <div class="sp-stat-desc">Dokumen selesai</div>
-            </div>
-        </div>
-    </div>
-
-    <div class="col-sm-4">
-        <div class="sp-stat-card">
-            <div class="sp-stat-icon-wrap" style="background: #dcfce7; color: #16a34a;">
-                <i class="fa-solid fa-circle-check"></i>
-            </div>
-            <div class="sp-stat-info">
-                <div class="sp-stat-label">Sampel Selesai BAST</div>
-                <div class="sp-stat-value text-success">{{ number_format($completedCount ?? 0) }}</div>
-                <div class="sp-stat-desc">Sudah ada berita acara</div>
-            </div>
-        </div>
-    </div>
-
-    <div class="col-sm-4">
-        <div class="sp-stat-card">
-            <div class="sp-stat-icon-wrap" style="background: #fef3c7; color: #d97706;">
-                <i class="fa-solid fa-clock-rotate-left"></i>
-            </div>
-            <div class="sp-stat-info">
-                <div class="sp-stat-label">Sampel Belum BAST</div>
-                <div class="sp-stat-value text-warning">{{ number_format($pendingCount ?? 0) }}</div>
-                <div class="sp-stat-desc">Perlu dibuatkan BAST</div>
-            </div>
-        </div>
-    </div>
-</div>
-
 <!-- Table Card -->
-<div class="sp-card mb-4">
-    <div class="sp-card-header d-flex justify-content-between align-items-center">
-        <h5 class="sp-card-title mb-0">
-            <i class="fa-solid fa-file-contract text-primary"></i>
-            Daftar BAST yang Anda Terbitkan ({{ $basts->total() }})
-        </h5>
-        <span class="badge bg-primary-subtle text-primary border border-primary-subtle d-md-none" style="font-size: 0.72rem;">
-            {{ $basts->total() }} Dokumen
+<div class="bento-card mb-4 overflow-hidden">
+    <div class="d-flex justify-content-between align-items-center px-4 py-3 border-bottom bg-white">
+        <div class="d-flex align-items-center gap-2">
+            <div class="rounded-circle d-flex align-items-center justify-content-center" style="width: 32px; height: 32px; background: #EFF6FF; color: #005BAC;">
+                <i class="bi bi-file-earmark-check"></i>
+            </div>
+            <h5 class="fw-bold text-dark mb-0" style="font-size: 0.95rem;">
+                Daftar BAST yang Anda Terbitkan ({{ $basts->total() }})
+            </h5>
+        </div>
+        <span class="badge bg-primary-subtle text-primary border border-primary-subtle rounded-pill px-3 py-1 font-monospace" style="font-size: 0.72rem;">
+            Halaman {{ $basts->currentPage() }} dari {{ $basts->lastPage() ?: 1 }}
         </span>
     </div>
-    <div class="sp-card-body p-0">
-        <!-- MODE DESKTOP & TABLET: Tabel Lengkap -->
-        <div class="table-responsive d-none d-md-block">
-            <table class="table sp-table align-middle mb-0">
-                <thead>
-                    <tr>
-                        <th style="min-width: 200px;">Nomor & Tanggal BAST</th>
-                        <th style="min-width: 200px;">Responden / KRT</th>
-                        <th style="min-width: 200px;">Penerima Dokumen</th>
-                        <th>Kegiatan Terkait</th>
-                        <th>Tanda Tangan</th>
-                        <th class="text-end" style="min-width: 130px;">Aksi</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    @forelse($basts as $item)
-                        <tr>
-                            <td>
-                                <div class="fw-bold text-dark font-monospace">{{ $item->bast_number }}</div>
-                                <div class="small text-muted"><i class="fa-regular fa-calendar me-1"></i> {{ $item->bast_date->translatedFormat('d F Y') }}</div>
-                                @php $respCat = strtoupper($item->handover_category ?: 'KUES'); @endphp
-                                <div class="mt-1 d-flex flex-wrap gap-1">
-                                    @if(!empty($item->respondent_number))
-                                        <span class="badge bg-dark-subtle text-dark border border-dark-subtle" style="font-size: 0.68rem;">
-                                            No. Resp: {{ $item->respondent_number }}
-                                        </span>
-                                    @endif
-                                    <span class="badge {{ $respCat === 'ATK' ? 'bg-success-subtle text-success-emphasis border border-success-subtle' : 'bg-primary-subtle text-primary-emphasis border border-primary-subtle' }}" style="font-size: 0.68rem;">
-                                        {{ $respCat }}
-                                    </span>
-                                </div>
-                            </td>
-                            <td>
-                                <div class="fw-bold text-dark">{{ $item->respondent ? $item->respondent->name : '-' }}</div>
-                                <div class="small text-muted">{{ $item->respondent ? $item->respondent->agency : '-' }}</div>
-                            </td>
-                            <td>
-                                @if($item->recipient_type === 'representative')
-                                    <div class="fw-bold text-dark">{{ $item->recipient_name }}</div>
-                                    <span class="badge bg-warning-subtle text-warning border border-warning-subtle" style="font-size: 0.7rem;">
-                                        <i class="fa-solid fa-users me-1"></i> Wakil ({{ $item->recipient_relation ?? 'Keluarga' }})
-                                    </span>
-                                @else
-                                    <div class="fw-bold text-dark">{{ $item->respondent ? $item->respondent->name : '-' }}</div>
-                                    <span class="badge bg-success-subtle text-success border border-success-subtle" style="font-size: 0.7rem;">
-                                        <i class="fa-solid fa-user-check me-1"></i> KRT Langsung
-                                    </span>
-                                @endif
-                            </td>
-                            <td>
-                                <span class="small fw-semibold text-dark text-truncate d-block" style="max-width: 180px;">
-                                    {{ $item->assignment ? $item->assignment->title : '-' }}
-                                </span>
-                            </td>
-                            <td>
-                                @if(!empty($item->signature_path))
-                                    <span class="badge bg-light text-success border border-success-subtle">
-                                        <i class="fa-solid fa-signature me-1"></i> Ada TTD
-                                    </span>
-                                @else
-                                    <span class="text-muted small">-</span>
-                                @endif
-                            </td>
-                            <td class="text-end text-nowrap">
-                                <div class="sp-action-btn-group">
-                                    <a href="{{ route('petugas.basts.respondents.download', $item) }}" 
-                                       class="btn btn-light border sp-action-btn text-success" 
-                                       title="Unduh PDF" 
-                                       data-bs-toggle="tooltip">
-                                        <i class="fa-solid fa-file-arrow-down"></i>
-                                    </a>
-                                    <a href="{{ route('petugas.basts.respondents.preview', $item) }}" 
-                                       target="_blank" 
-                                       class="btn btn-light border sp-action-btn text-primary" 
-                                       title="Cetak / Preview" 
-                                       data-bs-toggle="tooltip">
-                                        <i class="fa-solid fa-print"></i>
-                                    </a>
-                                </div>
-                            </td>
-                        </tr>
-                    @empty
-                        <tr>
-                            <td colspan="6" class="text-center py-5 text-muted">
-                                <i class="fa-regular fa-folder-open fa-3x mb-3 text-secondary opacity-50"></i>
-                                <div class="fw-semibold">Anda belum menerbitkan Tanda Terima Responden.</div>
-                                <div class="small">Klik tombol "Buat Tanda Terima Responden" di atas untuk membuat dokumen.</div>
-                            </td>
-                        </tr>
-                    @endforelse
-                </tbody>
-            </table>
-        </div>
 
-        <!-- MODE MOBILE / HP: Daftar Kartu BAST Responsif (No Horizontal Scroll) -->
-        <div class="d-block d-md-none p-3">
-            @forelse($basts as $item)
-                <div class="card border rounded-3 mb-3 shadow-none bg-white">
-                    <div class="card-body p-3">
-                        <div class="d-flex justify-content-between align-items-start mb-2">
-                            <div>
-                                @php $respCat = strtoupper($item->handover_category ?: 'KUES'); @endphp
-                                <div class="d-flex flex-wrap align-items-center gap-1 mb-1">
-                                    <span class="badge bg-light text-dark font-monospace border" style="font-size: 0.75rem;">
-                                        {{ $item->bast_number }}
-                                    </span>
-                                    @if(!empty($item->respondent_number))
-                                        <span class="badge bg-dark-subtle text-dark border border-dark-subtle" style="font-size: 0.68rem;">
-                                            No. {{ $item->respondent_number }}
-                                        </span>
-                                    @endif
-                                    <span class="badge {{ $respCat === 'ATK' ? 'bg-success-subtle text-success-emphasis border border-success-subtle' : 'bg-primary-subtle text-primary-emphasis border border-primary-subtle' }}" style="font-size: 0.68rem;">
-                                        {{ $respCat }}
-                                    </span>
-                                </div>
-                                <h6 class="fw-bold text-dark mb-0">{{ $item->respondent ? $item->respondent->name : '-' }}</h6>
-                                <small class="text-primary fw-medium">{{ $item->respondent ? $item->respondent->agency : '-' }}</small>
+    <!-- MODE DESKTOP & TABLET: Tabel Anti-Geser -->
+    <div class="d-none d-md-block">
+        <table class="table bento-table align-middle">
+            <thead>
+                <tr>
+                    <th style="width: 24%;">Nomor &amp; Tanggal BAST</th>
+                    <th style="width: 22%;">Responden / KRT</th>
+                    <th style="width: 20%;">Penerima Dokumen</th>
+                    <th style="width: 14%;">Kegiatan</th>
+                    <th style="width: 8%; text-align: center;">TTD</th>
+                    <th style="width: 12%; text-align: right;" class="pe-3">Aksi</th>
+                </tr>
+            </thead>
+            <tbody>
+                @forelse($basts as $item)
+                    <tr>
+                        <td>
+                            <div class="fw-bold text-dark font-monospace text-truncate" style="font-size: 0.8rem;">{{ $item->bast_number }}</div>
+                            <div class="small text-muted" style="font-size: 0.72rem;">
+                                <i class="bi bi-calendar3 me-1"></i> {{ $item->bast_date->translatedFormat('d F Y') }}
                             </div>
-                            <div class="d-flex gap-1.5">
+                            @php $respCat = strtoupper($item->handover_category ?: 'KUES'); @endphp
+                            <div class="mt-1 d-flex flex-wrap gap-1 align-items-center">
+                                @if(!empty($item->respondent_number))
+                                    <span class="badge bg-dark-subtle text-dark border border-dark-subtle" style="font-size: 0.65rem;">
+                                        No. {{ $item->respondent_number }}
+                                    </span>
+                                @endif
+                                <span class="badge {{ $respCat === 'ATK' ? 'bg-success-subtle text-success-emphasis border border-success-subtle' : 'bg-primary-subtle text-primary-emphasis border border-primary-subtle' }}" style="font-size: 0.65rem;">
+                                    {{ $respCat }}
+                                </span>
+                            </div>
+                        </td>
+                        <td>
+                            <div class="fw-bold text-dark text-truncate">{{ $item->respondent ? $item->respondent->name : '-' }}</div>
+                            <div class="small text-muted text-truncate" style="font-size: 0.72rem;">{{ $item->respondent ? $item->respondent->agency : '-' }}</div>
+                        </td>
+                        <td>
+                            @if($item->recipient_type === 'representative')
+                                <div class="fw-bold text-dark text-truncate">{{ $item->recipient_name }}</div>
+                                <span class="badge bg-warning-subtle text-warning-emphasis border border-warning-subtle" style="font-size: 0.68rem;">
+                                    <i class="bi bi-people me-1"></i> Wakil ({{ $item->recipient_relation ?? 'Keluarga' }})
+                                </span>
+                            @else
+                                <div class="fw-bold text-dark text-truncate">{{ $item->respondent ? $item->respondent->name : '-' }}</div>
+                                <span class="badge bg-success-subtle text-success border border-success-subtle" style="font-size: 0.68rem;">
+                                    <i class="bi bi-person-check me-1"></i> KRT Langsung
+                                </span>
+                            @endif
+                        </td>
+                        <td>
+                            <span class="small fw-semibold text-dark text-truncate d-block" style="font-size: 0.75rem;" title="{{ $item->assignment ? $item->assignment->title : '-' }}">
+                                {{ $item->assignment ? $item->assignment->title : '-' }}
+                            </span>
+                        </td>
+                        <td class="text-center">
+                            @if(!empty($item->signature_path))
+                                <span class="badge bg-success-subtle text-success border border-success-subtle rounded-pill px-2 py-0.5" style="font-size: 0.68rem;" title="Ada TTD Digital">
+                                    <i class="bi bi-pen-fill"></i> Ada
+                                </span>
+                            @else
+                                <span class="text-muted small">-</span>
+                            @endif
+                        </td>
+                        <td class="text-end pe-3">
+                            <div class="d-inline-flex gap-1.5 align-items-center">
                                 <a href="{{ route('petugas.basts.respondents.download', $item) }}" 
-                                   class="btn btn-sm btn-light border text-success shadow-sm" 
-                                   title="Unduh PDF">
-                                    <i class="fa-solid fa-file-arrow-down"></i>
+                                   class="btn btn-outline-success bento-action-btn" 
+                                   title="Unduh PDF" 
+                                   data-bs-toggle="tooltip">
+                                    <i class="bi bi-download"></i>
                                 </a>
                                 <a href="{{ route('petugas.basts.respondents.preview', $item) }}" 
                                    target="_blank" 
-                                   class="btn btn-sm btn-light border text-primary shadow-sm" 
-                                   title="Cetak">
-                                    <i class="fa-solid fa-print"></i>
+                                   class="btn btn-outline-primary bento-action-btn" 
+                                   title="Cetak / Preview" 
+                                   data-bs-toggle="tooltip">
+                                    <i class="bi bi-printer"></i>
                                 </a>
                             </div>
-                        </div>
+                        </td>
+                    </tr>
+                @empty
+                    <tr>
+                        <td colspan="6" class="text-center py-5 text-muted">
+                            <i class="bi bi-folder2-open display-6 text-secondary opacity-50 mb-2 d-block"></i>
+                            <div class="fw-semibold">Anda belum menerbitkan Tanda Terima Responden.</div>
+                            <div class="small mt-1">Klik tombol "Buat Tanda Terima Responden" di atas untuk membuat dokumen.</div>
+                        </td>
+                    </tr>
+                @endforelse
+            </tbody>
+        </table>
+    </div>
 
-                        <!-- Penerima Info -->
-                        <div class="p-2 mb-2 bg-light rounded-2 small">
-                            <span class="text-muted">Penerima:</span>
-                            @if($item->recipient_type === 'representative')
-                                <strong>{{ $item->recipient_name }}</strong>
-                                <span class="badge bg-warning-subtle text-warning border border-warning-subtle ms-1" style="font-size: 0.68rem;">
-                                    Wakil ({{ $item->recipient_relation ?? 'Keluarga' }})
-                                </span>
-                            @else
-                                <strong>{{ $item->respondent ? $item->respondent->name : '-' }}</strong>
-                                <span class="badge bg-success-subtle text-success border border-success-subtle ms-1" style="font-size: 0.68rem;">
-                                    KRT Langsung
-                                </span>
-                            @endif
-                        </div>
-
-                        <div class="small text-secondary mb-2">
-                            @if($item->assignment)
-                                <div class="mb-1 text-truncate">
-                                    <i class="fa-solid fa-briefcase text-primary me-1.5" style="width: 14px;"></i>
-                                    <span>{{ $item->assignment->title }}</span>
-                                </div>
-                            @endif
-                            <div class="mb-1">
-                                <i class="fa-solid fa-box-archive text-muted me-1.5" style="width: 14px;"></i>
-                                <span>{{ Str::limit($item->handover_items, 60) }}</span>
-                            </div>
-                        </div>
-
-                        <div class="d-flex justify-content-between align-items-center pt-2 border-top">
-                            <span class="text-muted small" style="font-size: 0.75rem;">
-                                <i class="fa-regular fa-calendar me-1"></i> {{ $item->bast_date->translatedFormat('d F Y') }}
+    <!-- MODE MOBILE / HP: Daftar Kartu BAST Responsif -->
+    <div class="d-block d-md-none p-3">
+        @forelse($basts as $item)
+            <div class="bento-card p-3 mb-3 border">
+                <div class="d-flex justify-content-between align-items-start mb-2">
+                    <div>
+                        @php $respCat = strtoupper($item->handover_category ?: 'KUES'); @endphp
+                        <div class="d-flex flex-wrap align-items-center gap-1 mb-1">
+                            <span class="badge bg-light text-dark font-monospace border" style="font-size: 0.72rem;">
+                                {{ $item->bast_number }}
                             </span>
-                            <div>
-                                @if(!empty($item->signature_path))
-                                    <span class="badge bg-light text-success border border-success-subtle px-2 py-1" style="font-size: 0.72rem;">
-                                        <i class="fa-solid fa-signature me-1"></i> Ada TTD
-                                    </span>
-                                @endif
-                                <span class="badge bg-success-subtle text-success border border-success-subtle px-2 py-1" style="font-size: 0.72rem;">
-                                    <i class="fa-solid fa-circle-check me-1"></i> Terbit
+                            @if(!empty($item->respondent_number))
+                                <span class="badge bg-dark-subtle text-dark border border-dark-subtle" style="font-size: 0.65rem;">
+                                    No. {{ $item->respondent_number }}
                                 </span>
-                            </div>
+                            @endif
+                            <span class="badge {{ $respCat === 'ATK' ? 'bg-success-subtle text-success-emphasis border border-success-subtle' : 'bg-primary-subtle text-primary-emphasis border border-primary-subtle' }}" style="font-size: 0.65rem;">
+                                {{ $respCat }}
+                            </span>
                         </div>
+                        <h6 class="fw-bold text-dark mb-0" style="font-size: 0.92rem;">{{ $item->respondent ? $item->respondent->name : '-' }}</h6>
+                        <small class="text-primary fw-medium" style="font-size: 0.75rem;">{{ $item->respondent ? $item->respondent->agency : '-' }}</small>
+                    </div>
+                    <div class="d-flex gap-1.5">
+                        <a href="{{ route('petugas.basts.respondents.download', $item) }}" 
+                           class="btn btn-sm btn-outline-success bento-action-btn" 
+                           title="Unduh PDF">
+                            <i class="bi bi-download"></i>
+                        </a>
+                        <a href="{{ route('petugas.basts.respondents.preview', $item) }}" 
+                           target="_blank" 
+                           class="btn btn-sm btn-outline-primary bento-action-btn" 
+                           title="Cetak">
+                            <i class="bi bi-printer"></i>
+                        </a>
                     </div>
                 </div>
-            @empty
-                <div class="text-center py-4 text-muted">
-                    <i class="fa-regular fa-folder-open fa-2x mb-2 text-secondary opacity-50"></i>
-                    <div class="fw-semibold small">Anda belum menerbitkan Tanda Terima Responden</div>
+
+                <!-- Penerima Info -->
+                <div class="p-2 mb-2 bg-light rounded-3 small" style="font-size: 0.75rem;">
+                    <span class="text-muted">Penerima:</span>
+                    @if($item->recipient_type === 'representative')
+                        <strong class="text-dark">{{ $item->recipient_name }}</strong>
+                        <span class="badge bg-warning-subtle text-warning-emphasis border border-warning-subtle ms-1" style="font-size: 0.65rem;">
+                            Wakil ({{ $item->recipient_relation ?? 'Keluarga' }})
+                        </span>
+                    @else
+                        <strong class="text-dark">{{ $item->respondent ? $item->respondent->name : '-' }}</strong>
+                        <span class="badge bg-success-subtle text-success border border-success-subtle ms-1" style="font-size: 0.65rem;">
+                            KRT Langsung
+                        </span>
+                    @endif
                 </div>
-            @endforelse
-        </div>
+
+                <div class="small text-secondary mb-2" style="font-size: 0.75rem;">
+                    @if($item->assignment)
+                        <div class="mb-1 text-truncate">
+                            <i class="bi bi-briefcase text-primary me-1.5"></i>
+                            <span>{{ $item->assignment->title }}</span>
+                        </div>
+                    @endif
+                    <div class="mb-1 text-truncate">
+                        <i class="bi bi-box-seam text-muted me-1.5"></i>
+                        <span>{{ Str::limit($item->handover_items, 60) }}</span>
+                    </div>
+                </div>
+
+                <div class="d-flex justify-content-between align-items-center pt-2 border-top">
+                    <span class="text-muted small" style="font-size: 0.72rem;">
+                        <i class="bi bi-calendar me-1"></i> {{ $item->bast_date->translatedFormat('d F Y') }}
+                    </span>
+                    <div class="d-flex gap-1 align-items-center">
+                        @if(!empty($item->signature_path))
+                            <span class="badge bg-success-subtle text-success border border-success-subtle px-2 py-0.5" style="font-size: 0.68rem;">
+                                <i class="bi bi-pen-fill me-0.5"></i> Ada TTD
+                            </span>
+                        @endif
+                        <span class="badge bg-success-subtle text-success border border-success-subtle px-2 py-0.5" style="font-size: 0.68rem;">
+                            <i class="bi bi-check-circle-fill me-0.5"></i> Terbit
+                        </span>
+                    </div>
+                </div>
+            </div>
+        @empty
+            <div class="text-center py-4 text-muted">
+                <i class="bi bi-folder2-open display-6 text-secondary opacity-50 mb-2 d-block"></i>
+                <div class="fw-semibold small">Anda belum menerbitkan Tanda Terima Responden</div>
+            </div>
+        @endforelse
     </div>
 
     @if($basts->hasPages())
-        <div class="sp-card-footer bg-white border-top p-3 d-flex justify-content-between align-items-center">
-            <div class="small text-muted">
+        <div class="bg-white border-top p-3 d-flex flex-wrap justify-content-between align-items-center gap-2">
+            <div class="small text-muted" style="font-size: 0.78rem;">
                 Menampilkan {{ $basts->firstItem() }} sampai {{ $basts->lastItem() }} dari {{ $basts->total() }} dokumen
             </div>
             <div>
@@ -280,252 +313,249 @@
      ============================================================== -->
 <div class="modal fade" id="createMyBastModal" tabindex="-1" aria-labelledby="createMyBastModalLabel" aria-hidden="true">
     <div class="modal-dialog modal-dialog-centered modal-lg modal-dialog-scrollable">
-        <form method="POST" action="{{ route('petugas.basts.respondents.store') }}" id="bastCreateForm" class="modal-content border-0 shadow" style="max-height: 90vh; display: flex; flex-direction: column;">
+        <form method="POST" action="{{ route('petugas.basts.respondents.store') }}" id="bastCreateForm" class="modal-content border-0 shadow" style="border-radius: 18px; max-height: 90vh; display: flex; flex-direction: column; overflow: hidden;">
             @csrf
-            <div class="modal-header bg-light border-bottom sticky-top flex-shrink-0">
+            <div class="modal-header bg-light border-bottom sticky-top flex-shrink-0 py-2.5 px-3">
                 <div>
-                    <h5 class="modal-title fw-bold text-dark" id="createMyBastModalLabel">
-                        <i class="fa-solid fa-file-circle-plus text-primary me-2"></i> Tanda Terima Responden Lapangan
-                    </h5>
-                    <div class="small text-muted">
-                        <i class="fa-solid fa-lock text-secondary me-1"></i> Rincian berkas &amp; kategori dibakukan oleh Admin. Petugas hanya menentukan penerima (KRT / Wakil) dan mengambil tanda tangan digital responden saat kunjungan.
+                    <h6 class="modal-title fw-bold text-dark mb-0.5" id="createMyBastModalLabel">
+                        <i class="bi bi-file-earmark-plus text-primary me-1.5"></i> Tanda Terima Responden Lapangan
+                    </h6>
+                    <div class="text-muted" style="font-size: 0.72rem;">
+                        <i class="bi bi-shield-check text-secondary me-1"></i> Rincian berkas dibakukan Admin. Tentukan penerima (KRT / Wakil) dan ambil tanda tangan digital saat kunjungan.
                     </div>
                 </div>
                 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
-            <div class="modal-body p-4" style="flex: 1 1 auto; overflow-y: auto;">
-                    @php
-                        $orderedRespondents = $myRespondents->values();
-                        $sampleNumberById = $orderedRespondents->mapWithKeys(fn($r, $idx) => [$r->id => $idx + 1]);
-                        $uncompletedRespondents = $orderedRespondents->filter(fn($r) => $r->basts->isEmpty());
-                        $completedRespondents = $orderedRespondents->filter(fn($r) => $r->basts->isNotEmpty());
-                    @endphp
+            <div class="modal-body p-3.5" style="flex: 1 1 auto; overflow-y: auto;">
+                @php
+                    $orderedRespondents = $myRespondents->values();
+                    $sampleNumberById = $orderedRespondents->mapWithKeys(fn($r, $idx) => [$r->id => $idx + 1]);
+                    $uncompletedRespondents = $orderedRespondents->filter(fn($r) => $r->basts->isEmpty());
+                    $completedRespondents = $orderedRespondents->filter(fn($r) => $r->basts->isNotEmpty());
+                @endphp
 
-                    <!-- 0. Pilih Cepat Nomor Urut Responden (1, 2, 3 ... 10+) -->
-                    @if($orderedRespondents->isNotEmpty())
-                        <div class="mb-3 p-3 rounded-3 border bg-light-subtle">
-                            <div class="d-flex justify-content-between align-items-center mb-2">
-                                <span class="small fw-semibold text-secondary">PILIH NOMOR SAMPEL RESPONDEN</span>
-                                <span class="small text-muted">Hijau = sudah TTD/BAST</span>
-                            </div>
-                            <div class="d-flex flex-wrap gap-1.5" id="respondentNumberPills">
-                                @foreach($orderedRespondents as $idx => $resp)
-                                    @php
-                                        $sampleNo = $idx + 1;
-                                        $isDone = $resp->basts->isNotEmpty();
-                                    @endphp
-                                    <button type="button"
-                                            class="btn btn-sm {{ $isDone ? 'btn-success text-white' : 'btn-outline-primary' }} fw-semibold rounded-pill px-2.5 py-1"
-                                            data-sample-pill="{{ $resp->id }}"
-                                            data-sample-number="{{ $sampleNo }}"
-                                            title="No. {{ $sampleNo }}: {{ $resp->family_head_name ?? $resp->name }}"
-                                            onclick="selectSamplePill({{ $resp->id }}, {{ $sampleNo }})">
-                                        No. {{ $sampleNo }}
-                                    </button>
-                                @endforeach
-                            </div>
+                <!-- 0. Pilih Cepat Nomor Urut Responden (1, 2, 3 ... 10+) -->
+                @if($orderedRespondents->isNotEmpty())
+                    <div class="mb-3 p-3 rounded-3 border bg-light-subtle">
+                        <div class="d-flex justify-content-between align-items-center mb-2">
+                            <span class="small fw-semibold text-secondary" style="font-size: 0.76rem;">PILIH NOMOR SAMPEL RESPONDEN</span>
+                            <span class="small text-muted" style="font-size: 0.72rem;">Hijau = sudah TTD/BAST</span>
                         </div>
-                    @endif
-
-                    <!-- 1. Pemilihan Sampel Responden & Tanggal Dibuka -->
-                    <div class="row g-3 mb-3">
-                        <div class="col-md-7">
-                            <label class="form-label small fw-semibold text-secondary">
-                                PILIH SAMPEL RESPONDEN <span class="text-danger">*</span>
-                            </label>
-                            <select name="respondent_id" id="bastRespondentSelect" class="form-select" required onchange="handleRespondentSelect(this)">
-                                <option value="">-- Pilih Sampel Responden --</option>
-
-                                @if($uncompletedRespondents->isNotEmpty())
-                                    <optgroup label="📋 BELUM BAST (Silakan Pilih)">
-                                        @foreach($uncompletedRespondents as $resp)
-                                            @php $sampleNo = $sampleNumberById[$resp->id] ?? null; @endphp
-                                            <option value="{{ $resp->id }}" 
-                                                    data-number="{{ $sampleNo }}"
-                                                    data-name="{{ $resp->family_head_name ?? $resp->name }}" 
-                                                    data-informant="{{ $resp->informant_name ?? $resp->name }}"
-                                                    data-status="{{ $resp->respondent_status ?? 'Kepala Keluarga (KRT)' }}"
-                                                    data-agency="{{ $resp->agency }}"
-                                                    data-completed="0">
-                                                No. {{ $sampleNo }} — {{ $resp->family_head_name ?? $resp->name }} @if($resp->informant_name && $resp->informant_name !== ($resp->family_head_name ?? $resp->name)) (Pemberi Info: {{ $resp->informant_name }}) @endif — {{ $resp->agency }}
-                                            </option>
-                                        @endforeach
-                                    </optgroup>
-                                @endif
-
-                                {{-- Prioritas 2: Responden yang SUDAH Selesai BAST (Warna Hijau) --}}
-                                @if($completedRespondents->isNotEmpty())
-                                    <optgroup label="✅ SUDAH SELESAI BAST (Warna Hijau)">
-                                        @foreach($completedRespondents as $resp)
-                                            @php $sampleNo = $sampleNumberById[$resp->id] ?? null; @endphp
-                                            <option value="{{ $resp->id }}" 
-                                                    data-number="{{ $sampleNo }}"
-                                                    data-name="{{ $resp->family_head_name ?? $resp->name }}" 
-                                                    data-informant="{{ $resp->informant_name ?? $resp->name }}"
-                                                    data-status="{{ $resp->respondent_status ?? 'Kepala Keluarga (KRT)' }}"
-                                                    data-agency="{{ $resp->agency }}"
-                                                    data-completed="1" 
-                                                    class="text-success fw-semibold">
-                                                No. {{ $sampleNo }} — {{ $resp->family_head_name ?? $resp->name }} — [Sudah BAST]
-                                            </option>
-                                        @endforeach
-                                    </optgroup>
-                                @endif
-                            </select>
-                            <div class="form-text small mt-1" id="respCompletedHint" style="display: none;">
-                                <span class="badge bg-success-subtle text-success border border-success-subtle">
-                                    <i class="fa-solid fa-circle-check me-1"></i> Responden ini sudah pernah dibuatkan BAST sebelumnya.
-                                </span>
-                            </div>
-                        </div>
-
-                        <div class="col-md-5">
-                            <label class="form-label small fw-semibold text-secondary d-flex justify-content-between align-items-center">
-                                <span>TANGGAL TANDA TERIMA <span class="text-danger">*</span></span>
-                                <span class="badge bg-info-subtle text-info-emphasis border border-info-subtle" style="font-size: 0.65rem;">
-                                    <i class="fa-solid fa-lock-open me-1"></i>Tgl Dibuka
-                                </span>
-                            </label>
-                            <input type="date" name="bast_date" class="form-control" value="{{ now()->toDateString() }}" required>
+                        <div class="d-flex flex-wrap gap-1.5" id="respondentNumberPills">
+                            @foreach($orderedRespondents as $idx => $resp)
+                                @php
+                                    $sampleNo = $idx + 1;
+                                    $isDone = $resp->basts->isNotEmpty();
+                                @endphp
+                                <button type="button"
+                                        class="btn btn-sm {{ $isDone ? 'btn-success text-white' : 'btn-outline-primary' }} fw-semibold rounded-pill px-2.5 py-1"
+                                        style="font-size: 0.72rem;"
+                                        data-sample-pill="{{ $resp->id }}"
+                                        data-sample-number="{{ $sampleNo }}"
+                                        title="No. {{ $sampleNo }}: {{ $resp->family_head_name ?? $resp->name }}"
+                                        onclick="selectSamplePill({{ $resp->id }}, {{ $sampleNo }})">
+                                    No. {{ $sampleNo }}
+                                </button>
+                            @endforeach
                         </div>
                     </div>
+                @endif
 
-                    <!-- 1b. Nomor Responden & Kategori ATK / KUES (Standar Baku Admin) -->
-                    <div class="row g-3 mb-3">
-                        <div class="col-md-4">
-                            <label class="form-label small fw-semibold text-secondary d-flex justify-content-between align-items-center">
-                                <span>NO. RESP (1, 2, ... 10)</span>
-                                <span class="badge bg-secondary-subtle text-secondary border" style="font-size: 0.65rem;">
-                                    <i class="fa-solid fa-lock me-1"></i> Otomatis
-                                </span>
-                            </label>
-                            <input type="number" name="respondent_number" id="respondentNumberInput" class="form-control fw-semibold" min="1" placeholder="Pilih responden" readonly style="background-color: #f8fafc; cursor: not-allowed;">
-                        </div>
-                        <div class="col-md-8">
-                            <label class="form-label small fw-semibold text-secondary d-flex justify-content-between align-items-center">
-                                <span>KATEGORI TANDA TERIMA <span class="text-danger">*</span></span>
-                                <span class="badge bg-secondary-subtle text-secondary border" style="font-size: 0.65rem;">
-                                    <i class="fa-solid fa-lock me-1"></i> Standar Baku Admin
-                                </span>
-                            </label>
-                            <div class="row g-2">
-                                <div class="col-6">
-                                    <label class="border rounded-3 p-2.5 d-flex align-items-start gap-2 cursor-pointer bg-light h-100" id="respCatAtkLabel">
-                                        <input type="radio" name="handover_category" id="respCatAtk" value="ATK" class="form-check-input mt-1" onchange="onRespCategoryChanged('ATK')">
-                                        <div>
-                                            <div class="fw-bold text-dark small"><i class="fa-solid fa-pen-ruler text-success me-1"></i> ATK</div>
-                                            <small class="text-muted d-block" style="font-size: 0.72rem;">Paket perlengkapan responden.</small>
-                                        </div>
-                                    </label>
-                                </div>
-                                <div class="col-6">
-                                    <label class="border rounded-3 p-2.5 d-flex align-items-start gap-2 cursor-pointer bg-white border-primary h-100" id="respCatKuesLabel">
-                                        <input type="radio" name="handover_category" id="respCatKues" value="KUES" class="form-check-input mt-1" checked onchange="onRespCategoryChanged('KUES')">
-                                        <div>
-                                            <div class="fw-bold text-dark small"><i class="fa-solid fa-file-lines text-primary me-1"></i> KUES</div>
-                                            <small class="text-muted d-block" style="font-size: 0.72rem;">Paket kuesioner pendataan.</small>
-                                        </div>
-                                    </label>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- 2. Pihak yang Menerima (KRT vs Selain KRT) -->
-                    <div class="mb-3">
-                        <label class="form-label small fw-semibold text-secondary d-block">
-                            PIHAK PENERIMA BERKAS / PENANDATANGAN <span class="text-danger">*</span>
+                <!-- 1. Pemilihan Sampel Responden & Tanggal Dibuka -->
+                <div class="row g-3 mb-3">
+                    <div class="col-md-7">
+                        <label class="form-label small fw-semibold text-secondary" style="font-size: 0.78rem;">
+                            PILIH SAMPEL RESPONDEN <span class="text-danger">*</span>
                         </label>
-                        <div class="row g-2">
-                            <div class="col-sm-6">
-                                <label class="border rounded-3 p-3 d-flex align-items-center w-100 cursor-pointer bg-light" id="krtRadioLabel" style="cursor: pointer;">
-                                    <input class="form-check-input me-2.5 mt-0" type="radio" name="recipient_type" id="recipientTypeKrt" value="krt" checked onchange="toggleRecipientType()">
-                                    <div>
-                                        <div class="fw-bold text-dark small"><i class="fa-solid fa-user me-1 text-primary"></i> Sesuai Kepala Keluarga (KRT)</div>
-                                        <div class="text-muted" style="font-size: 0.72rem;">Nama penerima otomatis sama dengan nama responden</div>
-                                    </div>
-                                </label>
-                            </div>
-                            <div class="col-sm-6">
-                                <label class="border rounded-3 p-3 d-flex align-items-center w-100 cursor-pointer bg-light" id="repRadioLabel" style="cursor: pointer;">
-                                    <input class="form-check-input me-2.5 mt-0" type="radio" name="recipient_type" id="recipientTypeRep" value="representative" onchange="toggleRecipientType()">
-                                    <div>
-                                        <div class="fw-bold text-dark small"><i class="fa-solid fa-users me-1 text-warning"></i> Selain Kepala Keluarga (Wakil)</div>
-                                        <div class="text-muted" style="font-size: 0.72rem;">Diterima oleh pasangan / anak / anggota keluarga lain</div>
-                                    </div>
-                                </label>
-                            </div>
-                        </div>
-                    </div>
+                        <select name="respondent_id" id="bastRespondentSelect" class="form-select form-select-sm" required onchange="handleRespondentSelect(this)">
+                            <option value="">-- Pilih Sampel Responden --</option>
 
-                    <!-- Dynamic Input: Jika Penerima adalah Selain KRT (Wakil) -->
-                    <div id="representativeFields" class="p-3 mb-3 border rounded-3 bg-light border-warning" style="display: none;">
-                        <h6 class="fw-bold text-dark mb-2 small">
-                            <i class="fa-solid fa-address-card text-warning me-1"></i> Data Identitas Penerima (Wakil KRT)
-                        </h6>
-                        <div class="row g-3">
-                            <div class="col-md-6">
-                                <label class="form-label small fw-semibold text-secondary">NAMA PENERIMA YANG MENANDATANGANI <span class="text-danger">*</span></label>
-                                <input type="text" name="recipient_name" id="recipientNameInput" class="form-control" placeholder="Contoh: Nama Keluarga">
-                            </div>
-                            <div class="col-md-6">
-                                <label class="form-label small fw-semibold text-secondary">STATUS / HUBUNGAN DENGAN KRT <span class="text-danger">*</span></label>
-                                <input type="text" name="recipient_relation" id="recipientRelationInput" class="form-control" placeholder="Contoh: Istri / Pasangan / Anak">
-                            </div>
-                        </div>
-                    </div>
+                            @if($uncompletedRespondents->isNotEmpty())
+                                <optgroup label="📋 BELUM BAST (Silakan Pilih)">
+                                    @foreach($uncompletedRespondents as $resp)
+                                        @php $sampleNo = $sampleNumberById[$resp->id] ?? null; @endphp
+                                        <option value="{{ $resp->id }}" 
+                                                data-number="{{ $sampleNo }}"
+                                                data-name="{{ $resp->family_head_name ?? $resp->name }}" 
+                                                data-informant="{{ $resp->informant_name ?? $resp->name }}"
+                                                data-status="{{ $resp->respondent_status ?? 'Kepala Keluarga (KRT)' }}"
+                                                data-agency="{{ $resp->agency }}"
+                                                data-completed="0">
+                                            No. {{ $sampleNo }} — {{ $resp->family_head_name ?? $resp->name }} @if($resp->informant_name && $resp->informant_name !== ($resp->family_head_name ?? $resp->name)) (Pemberi Info: {{ $resp->informant_name }}) @endif — {{ $resp->agency }}
+                                        </option>
+                                    @endforeach
+                                </optgroup>
+                            @endif
 
-                    <!-- 3. Rincian Dokumen / Barang Serah Terima (Terkunci dari Admin) -->
-                    <div class="mb-3">
-                        <div class="d-flex justify-content-between align-items-center mb-1">
-                            <label class="form-label small fw-semibold text-secondary mb-0">
-                                RINCIAN DOKUMEN / BARANG YANG DISERAHKAN <span class="text-danger">*</span>
-                            </label>
-                            <span class="badge bg-secondary-subtle text-secondary border" style="font-size: 0.65rem;">
-                                <i class="fa-solid fa-lock me-1"></i> Terkunci dari Admin
+                            @if($completedRespondents->isNotEmpty())
+                                <optgroup label="✅ SUDAH SELESAI BAST (Warna Hijau)">
+                                    @foreach($completedRespondents as $resp)
+                                        @php $sampleNo = $sampleNumberById[$resp->id] ?? null; @endphp
+                                        <option value="{{ $resp->id }}" 
+                                                data-number="{{ $sampleNo }}"
+                                                data-name="{{ $resp->family_head_name ?? $resp->name }}" 
+                                                data-informant="{{ $resp->informant_name ?? $resp->name }}"
+                                                data-status="{{ $resp->respondent_status ?? 'Kepala Keluarga (KRT)' }}"
+                                                data-agency="{{ $resp->agency }}"
+                                                data-completed="1" 
+                                                class="text-success fw-semibold">
+                                            No. {{ $sampleNo }} — {{ $resp->family_head_name ?? $resp->name }} — [Sudah BAST]
+                                        </option>
+                                    @endforeach
+                                </optgroup>
+                            @endif
+                        </select>
+                        <div class="form-text small mt-1" id="respCompletedHint" style="display: none;">
+                            <span class="badge bg-success-subtle text-success border border-success-subtle" style="font-size: 0.72rem;">
+                                <i class="bi bi-check-circle-fill me-1"></i> Responden ini sudah pernah dibuatkan BAST sebelumnya.
                             </span>
                         </div>
-                        <textarea name="handover_items" id="respHandoverItemsInput" class="form-control" rows="3" readonly style="background-color: #f8fafc; cursor: not-allowed; border-color: #cbd5e1; font-size: 0.85rem;" required>1. Formulir Kuesioner Pendataan Lapangan (1 Berkas)
-2. Bukti Kelengkapan Berkas Administrasi Responden</textarea>
-                        <div class="form-text text-muted" style="font-size: 0.72rem;">
-                            <i class="fa-solid fa-shield-halved text-primary me-1"></i> Rincian paket serah terima responden dibakukan secara resmi oleh Administrator BPS. Petugas tidak perlu mengetik rincian berkas.
-                        </div>
                     </div>
 
-                    <!-- 4. Tanda Tangan Digital Touch Canvas -->
-                    <div class="mb-3">
-                        <div class="d-flex justify-content-between align-items-center mb-1">
-                            <label class="form-label small fw-semibold text-secondary mb-0">
-                                TANDA TANGAN DIGITAL PENERIMA / RESPONDEN
-                            </label>
-                            <button type="button" class="btn btn-sm btn-outline-secondary py-0 px-2" style="font-size: 0.75rem;" onclick="clearBastSignaturePad()">
-                                <i class="fa-solid fa-rotate-left me-1"></i> Hapus / Ulangi
-                            </button>
-                        </div>
-                        <div class="border rounded-3 p-1 bg-light text-center">
-                            <canvas id="bastSignatureCanvas" width="450" height="150" class="border bg-white rounded-2 w-100" style="touch-action: none; cursor: crosshair; max-height: 160px;"></canvas>
-                            <input type="hidden" name="signature_data" id="bastSignatureData">
-                            <div class="small text-muted py-1" style="font-size: 0.72rem;">
-                                <i class="fa-solid fa-fingerprint me-1 text-primary"></i> Bubuhkan tanda tangan langsung menggunakan jari di layar HP
+                    <div class="col-md-5">
+                        <label class="form-label small fw-semibold text-secondary d-flex justify-content-between align-items-center" style="font-size: 0.78rem;">
+                            <span>TANGGAL TANDA TERIMA <span class="text-danger">*</span></span>
+                            <span class="badge bg-info-subtle text-info-emphasis border border-info-subtle" style="font-size: 0.65rem;">
+                                <i class="bi bi-unlock me-1"></i>Tgl Dibuka
+                            </span>
+                        </label>
+                        <input type="date" name="bast_date" class="form-control form-control-sm" value="{{ now()->toDateString() }}" required>
+                    </div>
+                </div>
+
+                <!-- 1b. Nomor Responden & Kategori ATK / KUES -->
+                <div class="row g-3 mb-3">
+                    <div class="col-md-4">
+                        <label class="form-label small fw-semibold text-secondary d-flex justify-content-between align-items-center" style="font-size: 0.78rem;">
+                            <span>NO. RESP (1, 2, ... 10)</span>
+                            <span class="badge bg-secondary-subtle text-secondary border" style="font-size: 0.65rem;">
+                                <i class="bi bi-lock me-1"></i> Otomatis
+                            </span>
+                        </label>
+                        <input type="number" name="respondent_number" id="respondentNumberInput" class="form-control form-control-sm fw-semibold" min="1" placeholder="Pilih responden" readonly style="background-color: #f8fafc; cursor: not-allowed;">
+                    </div>
+                    <div class="col-md-8">
+                        <label class="form-label small fw-semibold text-secondary d-flex justify-content-between align-items-center" style="font-size: 0.78rem;">
+                            <span>KATEGORI TANDA TERIMA <span class="text-danger">*</span></span>
+                            <span class="badge bg-secondary-subtle text-secondary border" style="font-size: 0.65rem;">
+                                <i class="bi bi-lock me-1"></i> Standar Baku Admin
+                            </span>
+                        </label>
+                        <div class="row g-2">
+                            <div class="col-6">
+                                <label class="border rounded-3 p-2.5 d-flex align-items-start gap-2 cursor-pointer bg-light h-100" id="respCatAtkLabel" style="cursor: pointer;">
+                                    <input type="radio" name="handover_category" id="respCatAtk" value="ATK" class="form-check-input mt-1" onchange="onRespCategoryChanged('ATK')">
+                                    <div>
+                                        <div class="fw-bold text-dark small" style="font-size: 0.8rem;"><i class="bi bi-pencil-fill text-success me-1"></i> ATK</div>
+                                        <small class="text-muted d-block" style="font-size: 0.7rem;">Paket perlengkapan responden.</small>
+                                    </div>
+                                </label>
+                            </div>
+                            <div class="col-6">
+                                <label class="border rounded-3 p-2.5 d-flex align-items-start gap-2 cursor-pointer bg-white border-primary h-100" id="respCatKuesLabel" style="cursor: pointer;">
+                                    <input type="radio" name="handover_category" id="respCatKues" value="KUES" class="form-check-input mt-1" checked onchange="onRespCategoryChanged('KUES')">
+                                    <div>
+                                        <div class="fw-bold text-dark small" style="font-size: 0.8rem;"><i class="bi bi-file-text-fill text-primary me-1"></i> KUES</div>
+                                        <small class="text-muted d-block" style="font-size: 0.7rem;">Paket kuesioner pendataan.</small>
+                                    </div>
+                                </label>
                             </div>
                         </div>
                     </div>
+                </div>
 
-                    <!-- 5. Catatan Tambahan (Opsional) -->
-                    <div class="mb-0">
-                        <label class="form-label small fw-semibold text-secondary">CATATAN TAMBAHAN (OPSIONAL)</label>
-                        <input type="text" name="notes" class="form-control" placeholder="Catatan kondisi berkas serah terima...">
+                <!-- 2. Pihak yang Menerima (KRT vs Selain KRT) -->
+                <div class="mb-3">
+                    <label class="form-label small fw-semibold text-secondary d-block" style="font-size: 0.78rem;">
+                        PIHAK PENERIMA BERKAS / PENANDATANGAN <span class="text-danger">*</span>
+                    </label>
+                    <div class="row g-2">
+                        <div class="col-sm-6">
+                            <label class="border rounded-3 p-2.5 d-flex align-items-center w-100 bg-white border-primary" id="krtRadioLabel" style="cursor: pointer;">
+                                <input class="form-check-input me-2 mt-0" type="radio" name="recipient_type" id="recipientTypeKrt" value="krt" checked onchange="toggleRecipientType()">
+                                <div>
+                                    <div class="fw-bold text-dark small" style="font-size: 0.82rem;"><i class="bi bi-person-fill text-primary me-1"></i> Sesuai Kepala Keluarga (KRT)</div>
+                                    <div class="text-muted" style="font-size: 0.7rem;">Nama penerima otomatis sama dg KRT</div>
+                                </div>
+                            </label>
+                        </div>
+                        <div class="col-sm-6">
+                            <label class="border rounded-3 p-2.5 d-flex align-items-center w-100 bg-light" id="repRadioLabel" style="cursor: pointer;">
+                                <input class="form-check-input me-2 mt-0" type="radio" name="recipient_type" id="recipientTypeRep" value="representative" onchange="toggleRecipientType()">
+                                <div>
+                                    <div class="fw-bold text-dark small" style="font-size: 0.82rem;"><i class="bi bi-people-fill text-warning me-1"></i> Selain Kepala Keluarga (Wakil)</div>
+                                    <div class="text-muted" style="font-size: 0.7rem;">Diterima oleh pasangan / anak / ART</div>
+                                </div>
+                            </label>
+                        </div>
                     </div>
                 </div>
-                <div class="modal-footer bg-light border-top sticky-bottom flex-shrink-0">
-                    <button type="button" class="btn btn-light" data-bs-dismiss="modal">Batal</button>
-                    <button type="submit" class="btn btn-sp-primary">
-                        <i class="fa-solid fa-paper-plane me-1"></i> Kirim & Terbitkan BAST
-                    </button>
+
+                <!-- Dynamic Input: Jika Penerima adalah Selain KRT (Wakil) -->
+                <div id="representativeFields" class="p-3 mb-3 border rounded-3 bg-light border-warning" style="display: none;">
+                    <h6 class="fw-bold text-dark mb-2 small" style="font-size: 0.82rem;">
+                        <i class="bi bi-person-badge text-warning me-1"></i> Data Identitas Penerima (Wakil KRT)
+                    </h6>
+                    <div class="row g-3">
+                        <div class="col-md-6">
+                            <label class="form-label small fw-semibold text-secondary" style="font-size: 0.78rem;">NAMA PENERIMA YANG MENANDATANGANI <span class="text-danger">*</span></label>
+                            <input type="text" name="recipient_name" id="recipientNameInput" class="form-control form-control-sm" placeholder="Contoh: Nama Keluarga">
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label small fw-semibold text-secondary" style="font-size: 0.78rem;">STATUS / HUBUNGAN DENGAN KRT <span class="text-danger">*</span></label>
+                            <input type="text" name="recipient_relation" id="recipientRelationInput" class="form-control form-control-sm" placeholder="Contoh: Istri / Pasangan / Anak">
+                        </div>
+                    </div>
                 </div>
-            </form>
-        </div>
+
+                <!-- 3. Rincian Dokumen / Barang Serah Terima (Terkunci dari Admin) -->
+                <div class="mb-3">
+                    <div class="d-flex justify-content-between align-items-center mb-1">
+                        <label class="form-label small fw-semibold text-secondary mb-0" style="font-size: 0.78rem;">
+                            RINCIAN DOKUMEN / BARANG YANG DISERAHKAN <span class="text-danger">*</span>
+                        </label>
+                        <span class="badge bg-secondary-subtle text-secondary border" style="font-size: 0.65rem;">
+                            <i class="bi bi-lock me-1"></i> Terkunci dari Admin
+                        </span>
+                    </div>
+                    <textarea name="handover_items" id="respHandoverItemsInput" class="form-control" rows="2" readonly style="background-color: #f8fafc; cursor: not-allowed; border-color: #cbd5e1; font-size: 0.82rem;" required>1. Formulir Kuesioner Pendataan Lapangan (1 Berkas)
+2. Bukti Kelengkapan Berkas Administrasi Responden</textarea>
+                </div>
+
+                <!-- 4. Tanda Tangan Digital Touch Canvas -->
+                <div class="mb-3">
+                    <div class="d-flex justify-content-between align-items-center mb-1">
+                        <label class="form-label small fw-semibold text-secondary mb-0" style="font-size: 0.78rem;">
+                            TANDA TANGAN DIGITAL PENERIMA / RESPONDEN
+                        </label>
+                        <button type="button" class="btn btn-sm btn-outline-secondary py-0 px-2 rounded-pill" style="font-size: 0.72rem;" onclick="clearBastSignaturePad()">
+                            <i class="bi bi-arrow-counterclockwise me-1"></i> Hapus / Ulangi
+                        </button>
+                    </div>
+                    <div class="border rounded-3 p-1 bg-light text-center">
+                        <canvas id="bastSignatureCanvas" width="450" height="150" class="border bg-white rounded-2 w-100" style="touch-action: none; cursor: crosshair; max-height: 160px;"></canvas>
+                        <input type="hidden" name="signature_data" id="bastSignatureData">
+                        <div class="text-muted py-1" style="font-size: 0.72rem;">
+                            <i class="bi bi-fingerprint text-primary me-1"></i> Bubuhkan tanda tangan langsung menggunakan jari di layar HP
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 5. Catatan Tambahan (Opsional) -->
+                <div class="mb-0">
+                    <label class="form-label small fw-semibold text-secondary" style="font-size: 0.78rem;">CATATAN TAMBAHAN (OPSIONAL)</label>
+                    <input type="text" name="notes" class="form-control form-control-sm" placeholder="Catatan kondisi berkas serah terima...">
+                </div>
+            </div>
+            <div class="modal-footer bg-light border-top sticky-bottom flex-shrink-0 py-2 px-3">
+                <button type="button" class="btn btn-light rounded-pill px-3" data-bs-dismiss="modal" style="font-size: 0.82rem;">Batal</button>
+                <button type="submit" class="btn-bps-orange rounded-pill px-4">
+                    <i class="bi bi-send-fill"></i> Kirim &amp; Terbitkan BAST
+                </button>
+            </div>
+        </form>
     </div>
+</div>
 @endsection
 
 @push('scripts')
@@ -542,19 +572,21 @@
         if (isRep) {
             repFields.style.display = 'block';
             krtLabel.classList.remove('border-primary', 'bg-white');
+            krtLabel.classList.add('bg-light');
             repLabel.classList.add('border-warning', 'bg-white');
+            repLabel.classList.remove('bg-light');
             nameInput.setAttribute('required', 'required');
             relationInput.setAttribute('required', 'required');
         } else {
             repFields.style.display = 'none';
             repLabel.classList.remove('border-warning', 'bg-white');
+            repLabel.classList.add('bg-light');
             krtLabel.classList.add('border-primary', 'bg-white');
+            krtLabel.classList.remove('bg-light');
             nameInput.removeAttribute('required');
             relationInput.removeAttribute('required');
         }
     }
-
-    let handoverItemsDirty = false;
 
     const RESP_CATEGORY_TEMPLATES = {
         ATK: "1. Map / Perlengkapan Pencacahan Responden (1 Set)\n2. Bolpoin / Alat Tulis Lapangan (1 Buah)\n3. Bukti Tanda Terima Perlengkapan Responden",
@@ -649,7 +681,6 @@
         let isDrawing = false;
         let hasDrawn = false;
 
-        // Resize canvas to match display width
         function resize() {
             const rect = canvas.getBoundingClientRect();
             if (rect.width > 0 && rect.width !== canvas.width) {

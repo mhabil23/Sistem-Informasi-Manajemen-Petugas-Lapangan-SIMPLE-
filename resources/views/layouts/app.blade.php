@@ -35,7 +35,7 @@
             <!-- Sidebar Navigation (Admin & Pegawai / PML) -->
             <aside class="sp-sidebar" id="sidebar">
                 <div class="sp-sidebar-brand">
-                    <div class="d-flex align-items-center">
+                    <a href="{{ route('admin.dashboard') }}" class="d-flex align-items-center text-decoration-none">
                         <div class="sp-brand-logo">
                             <img src="{{ asset('images/logo.png') }}?v={{ file_exists(public_path('images/logo.png')) ? filemtime(public_path('images/logo.png')) : time() }}" alt="Logo BPS SIMPLE">
                         </div>
@@ -43,7 +43,7 @@
                             <span class="sp-brand-title">SIMPLE</span>
                             <span class="sp-brand-sub">{{ auth()->user()->isAdmin() ? 'Portal Administrator' : 'Portal Pegawai / PML' }}</span>
                         </div>
-                    </div>
+                    </a>
                     <button class="sp-sidebar-close" id="sidebarCloseBtn" type="button" aria-label="Tutup menu">
                         <i class="bi bi-x-lg"></i>
                     </button>
@@ -108,7 +108,7 @@
                             <span>Rekapitulasi &amp; Export</span>
                         </a>
 
-                        <div class="sp-nav-heading">Sistem &amp; Audit</div>
+                        <div class="sp-nav-heading">Sistem &amp; Dokumen</div>
                         <a href="{{ route('admin.spreadsheet.index') }}" class="sp-nav-link {{ request()->routeIs('admin.spreadsheet.*') ? 'active' : '' }}">
                             <i class="bi bi-table sp-nav-icon text-success"></i>
                             <span>Database Spreadsheet</span>
@@ -117,13 +117,56 @@
                             <i class="bi bi-file-earmark-richtext sp-nav-icon"></i>
                             <span>Template Dokumen</span>
                         </a>
-                        <a href="{{ route('admin.logs.index') }}" class="sp-nav-link {{ request()->routeIs('admin.logs.*') ? 'active' : '' }}">
-                            <i class="bi bi-clock-history sp-nav-icon"></i>
-                            <span>Audit Log Aktivitas</span>
+                    @elseif(auth()->user()->isPegawai())
+                        <!-- PEGAWAI / PML MENU (Ramping, Terfokus & Nol Duplikasi) -->
+                        <div class="sp-nav-heading">Pengawasan &amp; Monitoring</div>
+                        <a href="{{ route('admin.dashboard') }}" class="sp-nav-link {{ request()->routeIs('admin.dashboard') ? 'active' : '' }}">
+                            <i class="bi bi-speedometer2 sp-nav-icon"></i>
+                            <span>Dashboard Monitoring</span>
+                        </a>
+                        <a href="{{ route('admin.assignments.index') }}" class="sp-nav-link {{ request()->routeIs('admin.assignments.*') ? 'active' : '' }}">
+                            <i class="bi bi-briefcase sp-nav-icon"></i>
+                            <span>Kegiatan &amp; Tugas</span>
+                        </a>
+                        <a href="{{ route('admin.schedules.index') }}" class="sp-nav-link {{ request()->routeIs('admin.schedules.*') ? 'active' : '' }}">
+                            <i class="bi bi-calendar3 sp-nav-icon"></i>
+                            <span>Jadwal Kegiatan</span>
+                        </a>
+                        <a href="{{ route('admin.respondents.index') }}" class="sp-nav-link {{ request()->routeIs('admin.respondents.*') ? 'active' : '' }}">
+                            <i class="bi bi-person-vcard sp-nav-icon"></i>
+                            <span>Data Responden</span>
+                        </a>
+                        <a href="{{ route('admin.basts.respondents.index') }}" class="sp-nav-link {{ request()->routeIs('admin.basts.respondents.*') ? 'active' : '' }}">
+                            <i class="bi bi-file-earmark-check sp-nav-icon"></i>
+                            <span>BAST Responden</span>
+                        </a>
+                        <a href="{{ route('admin.reports.index') }}" class="sp-nav-link {{ request()->routeIs('admin.reports.*') ? 'active' : '' }}">
+                            <i class="bi bi-clipboard2-data sp-nav-icon"></i>
+                            <span>Laporan Petugas</span>
+                            @php
+                                $sidebarReportBadge = max((int) ($adminPendingReportsCount ?? 0), (int) ($adminUnreadNotifCount ?? 0));
+                            @endphp
+                            @if($sidebarReportBadge > 0)
+                                <span id="sidebarReportBadge" class="badge bg-warning text-dark sp-nav-badge">{{ $sidebarReportBadge }}</span>
+                            @endif
+                        </a>
+                        <a href="{{ route('admin.recapitulation.index') }}" class="sp-nav-link {{ request()->routeIs('admin.recapitulation.*') ? 'active' : '' }}">
+                            <i class="bi bi-pie-chart sp-nav-icon"></i>
+                            <span>Rekapitulasi &amp; Export</span>
+                        </a>
+
+                        <div class="sp-nav-heading">Administrasi Pribadi</div>
+                        <a href="{{ route('petugas.reports.index') }}" class="sp-nav-link {{ request()->routeIs('petugas.reports.*') ? 'active' : '' }}">
+                            <i class="bi bi-signpost-2 sp-nav-icon"></i>
+                            <span>Perjadin Saya</span>
+                        </a>
+                        <a href="{{ route('petugas.basts.officers.index') }}" class="sp-nav-link {{ request()->routeIs('petugas.basts.officers.*') ? 'active' : '' }}">
+                            <i class="bi bi-shield-check sp-nav-icon"></i>
+                            <span>Tanda Terima Petugas</span>
                         </a>
                     @else
-                        <!-- PEGAWAI / PML MENU -->
-                        <div class="sp-nav-heading">Portal Pegawai / PML</div>
+                        <!-- PETUGAS LAPANGAN FALLBACK MENU -->
+                        <div class="sp-nav-heading">Menu Petugas Lapangan</div>
                         <a href="{{ route('petugas.dashboard') }}" class="sp-nav-link {{ request()->routeIs('petugas.dashboard') ? 'active' : '' }}">
                             <i class="bi bi-house-door sp-nav-icon"></i>
                             <span>Beranda Saya</span>
@@ -151,40 +194,6 @@
                         <a href="{{ route('petugas.reports.index') }}" class="sp-nav-link {{ request()->routeIs('petugas.reports.*') ? 'active' : '' }}">
                             <i class="bi bi-signpost-2 sp-nav-icon"></i>
                             <span>Perjadin Saya</span>
-                        </a>
-
-                        <div class="sp-nav-heading">Monitoring Lapangan</div>
-                        <a href="{{ route('admin.dashboard') }}" class="sp-nav-link {{ request()->routeIs('admin.dashboard') ? 'active' : '' }}">
-                            <i class="bi bi-speedometer2 sp-nav-icon"></i>
-                            <span>Dashboard Monitoring</span>
-                        </a>
-                        <a href="{{ route('admin.assignments.index') }}" class="sp-nav-link {{ request()->routeIs('admin.assignments.*') ? 'active' : '' }}">
-                            <i class="bi bi-briefcase sp-nav-icon"></i>
-                            <span>Kegiatan &amp; Tugas</span>
-                        </a>
-                        <a href="{{ route('admin.schedules.index') }}" class="sp-nav-link {{ request()->routeIs('admin.schedules.*') ? 'active' : '' }}">
-                            <i class="bi bi-calendar3 sp-nav-icon"></i>
-                            <span>Jadwal Kegiatan</span>
-                        </a>
-                        <a href="{{ route('admin.respondents.index') }}" class="sp-nav-link {{ request()->routeIs('admin.respondents.*') ? 'active' : '' }}">
-                            <i class="bi bi-person-vcard sp-nav-icon"></i>
-                            <span>Data Responden</span>
-                        </a>
-                        <a href="{{ route('admin.basts.respondents.index') }}" class="sp-nav-link {{ request()->routeIs('admin.basts.respondents.*') ? 'active' : '' }}">
-                            <i class="bi bi-file-earmark-check sp-nav-icon"></i>
-                            <span>BAST Responden</span>
-                        </a>
-                        <a href="{{ route('admin.basts.officers.index') }}" class="sp-nav-link {{ request()->routeIs('admin.basts.officers.*') ? 'active' : '' }}">
-                            <i class="bi bi-folder2-open sp-nav-icon"></i>
-                            <span>BAST Petugas</span>
-                        </a>
-                        <a href="{{ route('admin.reports.index') }}" class="sp-nav-link {{ request()->routeIs('admin.reports.*') ? 'active' : '' }}">
-                            <i class="bi bi-clipboard2-data sp-nav-icon"></i>
-                            <span>Laporan Petugas</span>
-                        </a>
-                        <a href="{{ route('admin.recapitulation.index') }}" class="sp-nav-link {{ request()->routeIs('admin.recapitulation.*') ? 'active' : '' }}">
-                            <i class="bi bi-pie-chart sp-nav-icon"></i>
-                            <span>Rekapitulasi &amp; Export</span>
                         </a>
                     @endif
                 </div>
@@ -217,25 +226,25 @@
                         </button>
                         <div class="sp-breadcrumb-container overflow-hidden">
                             <h1 class="sp-page-title text-truncate">@yield('page_title', 'Halaman')</h1>
-                            <nav aria-label="breadcrumb" class="d-none d-sm-block">
-                                <ol class="breadcrumb sp-breadcrumb mb-0">
-                                    <li class="breadcrumb-item"><a href="{{ auth()->user()->isAdmin() ? route('admin.dashboard') : route('petugas.dashboard') }}" class="text-decoration-none">SIMPLE</a></li>
-                                    @yield('breadcrumb')
-                                </ol>
-                            </nav>
                         </div>
                     </div>
                 @else
                     <!-- Petugas Navbar: Full-Width Clean Header (Zero Sidebar) -->
-                    <a href="{{ route('petugas.dashboard') }}" class="d-flex align-items-center gap-2 text-decoration-none" title="Beranda Petugas">
-                        <div class="sp-brand-logo" style="width: 38px; height: 38px;">
-                            <img src="{{ asset('images/logo.png') }}?v={{ file_exists(public_path('images/logo.png')) ? filemtime(public_path('images/logo.png')) : time() }}" alt="Logo BPS SIMPLE">
-                        </div>
-                        <div class="lh-1">
-                            <div class="fw-bold text-dark fs-6" style="letter-spacing: 0.5px;">SIMPLE</div>
-                            <small class="text-primary fw-semibold" style="font-size: 0.68rem; text-transform: uppercase;">Portal Petugas</small>
-                        </div>
-                    </a>
+                    <div class="d-flex align-items-center gap-2">
+                        <a href="{{ route('petugas.dashboard') }}" class="d-flex align-items-center gap-2 text-decoration-none me-2" title="Beranda Petugas">
+                            <div class="sp-brand-logo" style="width: 38px; height: 38px;">
+                                <img src="{{ asset('images/logo.png') }}?v={{ file_exists(public_path('images/logo.png')) ? filemtime(public_path('images/logo.png')) : time() }}" alt="Logo BPS SIMPLE">
+                            </div>
+                            <div class="lh-1">
+                                <div class="fw-bold text-dark fs-6" style="letter-spacing: 0.5px;">SIMPLE</div>
+                                <small class="text-primary fw-semibold" style="font-size: 0.68rem; text-transform: uppercase;">Portal Petugas</small>
+                            </div>
+                        </a>
+                        @if(!request()->routeIs('petugas.dashboard'))
+                            <div class="vr text-muted opacity-25 d-none d-sm-block" style="height: 20px;"></div>
+                            <span class="fw-bold text-dark d-none d-sm-inline" style="font-size: 0.95rem;">@yield('page_title', 'Halaman')</span>
+                        @endif
+                    </div>
                 @endif
 
                 <div class="d-flex align-items-center gap-3">

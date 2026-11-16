@@ -192,7 +192,7 @@ class FullModuleTestSuiteTest extends TestCase
         $this->assertStringContainsString('text/csv', $excelResponse->headers->get('content-type'));
     }
 
-    public function test_activity_log_viewer()
+    public function test_activity_log_creation()
     {
         ActivityLog::log(
             'create',
@@ -200,9 +200,11 @@ class FullModuleTestSuiteTest extends TestCase
             'Administrator membuat akun uji coba.'
         );
 
-        $response = $this->actingAs($this->admin)->get(route('admin.logs.index'));
-        $response->assertStatus(200);
-        $response->assertSee('Administrator membuat akun uji coba.');
+        $this->assertDatabaseHas('activity_logs', [
+            'action' => 'create',
+            'module' => 'users',
+            'description' => 'Administrator membuat akun uji coba.',
+        ]);
     }
 }
 

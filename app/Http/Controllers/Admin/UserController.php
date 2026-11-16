@@ -27,14 +27,17 @@ class UserController extends Controller
     {
         $query = User::query();
 
-        // 1. Search (Name, Username, Email, Phone, NIK)
+        // 1. Search (Name, Username, Email, Phone, NIK, Sobat ID, Kecamatan, Desa)
         if ($search = $request->input('search')) {
             $query->where(function ($q) use ($search) {
                 $q->where('name', 'like', "%{$search}%")
                   ->orWhere('username', 'like', "%{$search}%")
                   ->orWhere('email', 'like', "%{$search}%")
                   ->orWhere('phone', 'like', "%{$search}%")
-                  ->orWhere('nik', 'like', "%{$search}%");
+                  ->orWhere('nik', 'like', "%{$search}%")
+                  ->orWhere('sobat_id', 'like', "%{$search}%")
+                  ->orWhere('district', 'like', "%{$search}%")
+                  ->orWhere('village', 'like', "%{$search}%");
             });
         }
 

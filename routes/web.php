@@ -10,7 +10,7 @@ use Illuminate\Support\Facades\Route;
 // Root redirect
 Route::get('/', function () {
     if (Auth::check()) {
-        return Auth::user()->isAdmin()
+        return Auth::user()->canAccessMonitoring()
             ? redirect()->route('admin.dashboard')
             : redirect()->route('petugas.dashboard');
     }
@@ -104,17 +104,14 @@ Route::middleware(['auth', 'role:admin'])->prefix('admin')->as('admin.')->group(
     Route::get('/trainings/{training}/attendance-pdf', [\App\Http\Controllers\Admin\TrainingController::class, 'exportAttendancePdf'])->name('trainings.attendance.pdf');
 
     // Template Dokumen (Admin)
+    Route::post('/templates/extract-word', [\App\Http\Controllers\Admin\DocumentTemplateController::class, 'extractWord'])->name('templates.extract-word');
+    Route::get('/templates/{template}/download-file', [\App\Http\Controllers\Admin\DocumentTemplateController::class, 'downloadFile'])->name('templates.download-file');
     Route::get('/templates', [\App\Http\Controllers\Admin\DocumentTemplateController::class, 'index'])->name('templates.index');
     Route::post('/templates', [\App\Http\Controllers\Admin\DocumentTemplateController::class, 'store'])->name('templates.store');
     Route::get('/templates/{template}', [\App\Http\Controllers\Admin\DocumentTemplateController::class, 'show'])->name('templates.show');
     Route::put('/templates/{template}', [\App\Http\Controllers\Admin\DocumentTemplateController::class, 'update'])->name('templates.update');
     Route::patch('/templates/{template}/toggle-status', [\App\Http\Controllers\Admin\DocumentTemplateController::class, 'toggleStatus'])->name('templates.toggle-status');
     Route::delete('/templates/{template}', [\App\Http\Controllers\Admin\DocumentTemplateController::class, 'destroy'])->name('templates.destroy');
-
-    // Audit Log Aktivitas (Admin)
-    Route::get('/logs', [\App\Http\Controllers\Admin\ActivityLogController::class, 'index'])->name('logs.index');
-    Route::get('/logs/{log}', [\App\Http\Controllers\Admin\ActivityLogController::class, 'show'])->name('logs.show');
-    Route::post('/logs/clear', [\App\Http\Controllers\Admin\ActivityLogController::class, 'clearOld'])->name('logs.clear');
 
     // Notifikasi ke Papan Informasi Petugas (Admin)
     Route::post('/notices/send', [\App\Http\Controllers\Admin\NoticeController::class, 'send'])->name('notices.send');

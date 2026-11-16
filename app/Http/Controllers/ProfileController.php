@@ -20,18 +20,28 @@ class ProfileController extends Controller
     {
         $user = Auth::user();
 
-        $validated = $request->validate([
+        $rules = [
             'name' => ['required', 'string', 'max:255'],
-            'email' => ['required', 'string', 'email', 'max:255', Rule::unique('users')->ignore($user->id)],
             'phone' => ['nullable', 'string', 'max:20'],
             'nik' => ['nullable', 'string', 'max:32'],
             'rank' => ['nullable', 'string', 'max:100'],
             'position' => ['nullable', 'string', 'max:150'],
-        ], [
+        ];
+
+        if ($user->isAdmin()) {
+            $rules['email'] = ['required', 'string', 'email', 'max:255', Rule::unique('users')->ignore($user->id)];
+        }
+
+        $validated = $request->validate($rules, [
             'name.required' => 'Nama lengkap wajib diisi.',
             'email.required' => 'Email wajib diisi.',
             'email.unique' => 'Email sudah digunakan oleh pengguna lain.',
         ]);
+
+        // Pastikan petugas dan pegawai tidak dapat mengubah email maupun username
+        if (! $user->isAdmin()) {
+            unset($validated['email'], $validated['username']);
+        }
 
         $user->update($validated);
 
@@ -47,6 +57,11 @@ class ProfileController extends Controller
     public function updatePassword(Request $request)
     {
         $user = Auth::user();
+
+        // Petugas dan Pegawai tidak diizinkan mengubah kata sandi mandiri
+        if (! $user->isAdmin()) {
+            return back()->with('error', 'Petugas dan Pegawai tidak diizinkan mengubah kata sandi mandiri. Silakan hubungi Administrator.');
+        }
 
         $request->validate([
             'current_password' => ['required', 'current_password'],

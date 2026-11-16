@@ -175,16 +175,11 @@
 <!-- Bento Table Card (Anti-Geser, 100% Pas Layar) -->
 <div class="bento-table-card mb-4">
     <div class="bento-table-header">
-        <div class="d-flex align-items-center gap-2">
-            <div class="rounded-3 p-1.5 text-white d-flex align-items-center justify-content-center" style="background: var(--bps-orange, #F37021); width: 34px; height: 34px;">
-                <i class="bi bi-file-earmark-check-fill"></i>
-            </div>
-            <div>
-                <h6 class="fw-bold text-dark mb-0" style="font-size: 0.92rem;">
-                    Daftar Dokumen Tanda Terima Responden
-                </h6>
-                <span class="text-muted" style="font-size: 0.7rem;">Total {{ $basts->total() }} dokumen sah terdaftar dalam sistem</span>
-            </div>
+        <div>
+            <h6 class="fw-bold text-dark mb-0" style="font-size: 0.92rem;">
+                Daftar Dokumen Tanda Terima Responden
+            </h6>
+            <span class="text-muted" style="font-size: 0.7rem;">Total {{ $basts->total() }} dokumen sah terdaftar dalam sistem</span>
         </div>
         <div class="d-flex align-items-center gap-2">
             <span class="badge bg-light text-secondary border px-2.5 py-1.5 rounded-pill" style="font-size: 0.7rem;">
@@ -202,13 +197,13 @@
         <table class="table bento-table-fixed align-middle mb-0">
             <thead>
                 <tr>
-                    <th style="width: 20%;"><i class="bi bi-file-earmark-text me-1 text-primary"></i> Nomor &amp; Tanggal BAST</th>
-                    <th style="width: 18%;"><i class="bi bi-person-fill me-1 text-primary"></i> Pihak KRT / Responden</th>
-                    <th style="width: 18%;"><i class="bi bi-person-check-fill me-1 text-success"></i> Penerima Dokumen</th>
-                    <th style="width: 16%;"><i class="bi bi-briefcase me-1 text-muted"></i> Kegiatan Terkait</th>
-                    <th style="width: 12%;"><i class="bi bi-person-gear me-1 text-primary"></i> Petugas Pelaksana</th>
+                    <th style="width: 19%;"><i class="bi bi-file-earmark-text me-1 text-primary"></i> Nomor &amp; Tanggal BAST</th>
+                    <th style="width: 17%;"><i class="bi bi-person-fill me-1 text-primary"></i> Pihak KRT / Responden</th>
+                    <th style="width: 17%;"><i class="bi bi-person-check-fill me-1 text-success"></i> Penerima Dokumen</th>
+                    <th style="width: 15%;"><i class="bi bi-briefcase me-1 text-muted"></i> Kegiatan Terkait</th>
+                    <th style="width: 13%;"><i class="bi bi-person-gear me-1 text-primary"></i> Petugas Pelaksana</th>
                     <th class="text-center" style="width: 6%;"><i class="bi bi-pen me-1 text-info"></i> TTD</th>
-                    <th class="text-end pe-2" style="width: 10%;">Aksi</th>
+                    <th class="text-end pe-3" style="width: 13%;">Aksi</th>
                 </tr>
             </thead>
             <tbody>
@@ -282,7 +277,7 @@
                                 <span class="text-muted small">-</span>
                             @endif
                         </td>
-                        <td class="text-end pe-2">
+                        <td class="text-end pe-3">
                             <div class="d-flex align-items-center justify-content-end gap-1">
                                 <!-- Unduh PDF -->
                                 <a href="{{ route('admin.basts.respondents.download', $item) }}" 
