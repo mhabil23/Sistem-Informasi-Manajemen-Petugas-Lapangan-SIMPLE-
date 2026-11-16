@@ -107,11 +107,7 @@ class BastController extends Controller
             $officerSignaturePath = $fileName;
         }
 
-        $year = now()->format('Y');
-        $romanMonths = ['I','II','III','IV','V','VI','VII','VIII','IX','X','XI','XII'];
-        $month = $romanMonths[now()->month - 1];
-        $count = RespondentBast::whereYear('created_at', now()->year)->count() + 1;
-        $bastNumber = sprintf('BAST-RESP/%s/%s/%04d', $year, $month, $count);
+        $bastNumber = RespondentBast::generateBastNumber();
 
         $respNumber = $validated['respondent_number'] ?? null;
         if (empty($respNumber)) {

@@ -157,10 +157,34 @@ class OfficerBast extends Model
         $year = now()->format('Y');
         $romanMonths = ['I', 'II', 'III', 'IV', 'V', 'VI', 'VII', 'VIII', 'IX', 'X', 'XI', 'XII'];
         $month = $romanMonths[now()->month - 1];
-        $count = static::whereYear('created_at', now()->year)->count() + 1;
         $prefix = $bastType === 'petugas_ke_kantor' ? 'BAST-TERISI' : 'BAST-BLANKO';
 
-        return sprintf('%s/%s/%s/%04d', $prefix, $year, $month, $count);
+        // Cari seluruh nomor yang pernah dibuat (termasuk yang di-soft-delete) untuk prefix dan tahun ini
+        $existingNumbers = static::withTrashed()
+            ->where('bast_number', 'like', "{$prefix}/{$year}/%")
+            ->pluck('bast_number');
+
+        $maxSeq = 0;
+        foreach ($existingNumbers as $num) {
+            if (preg_match('/\/(\d+)$/', $num, $matches)) {
+                $seq = (int) $matches[1];
+                if ($seq > $maxSeq) {
+                    $maxSeq = $seq;
+                }
+            }
+        }
+
+        // Tentukan nomor berikutnya dan pastikan belum pernah terdaftar sama sekali di database
+        $nextSeq = $maxSeq + 1;
+        do {
+            $candidate = sprintf('%s/%s/%s/%04d', $prefix, $year, $month, $nextSeq);
+            $exists = static::withTrashed()->where('bast_number', $candidate)->exists();
+            if ($exists) {
+                $nextSeq++;
+            }
+        } while ($exists);
+
+        return $candidate;
     }
 
     public function resolvedRecipients(): Collection

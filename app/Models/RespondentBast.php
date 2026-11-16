@@ -80,5 +80,38 @@ class RespondentBast extends Model
     {
         return $this->morphMany(GeneratedDocument::class, 'documentable');
     }
+
+    public static function generateBastNumber(): string
+    {
+        $year = now()->format('Y');
+        $romanMonths = ['I', 'II', 'III', 'IV', 'V', 'VI', 'VII', 'VIII', 'IX', 'X', 'XI', 'XII'];
+        $month = $romanMonths[now()->month - 1];
+        $prefix = 'BAST-RESP';
+
+        $existingNumbers = static::withTrashed()
+            ->where('bast_number', 'like', "{$prefix}/{$year}/%")
+            ->pluck('bast_number');
+
+        $maxSeq = 0;
+        foreach ($existingNumbers as $num) {
+            if (preg_match('/\/(\d+)$/', $num, $matches)) {
+                $seq = (int) $matches[1];
+                if ($seq > $maxSeq) {
+                    $maxSeq = $seq;
+                }
+            }
+        }
+
+        $nextSeq = $maxSeq + 1;
+        do {
+            $candidate = sprintf('%s/%s/%s/%04d', $prefix, $year, $month, $nextSeq);
+            $exists = static::withTrashed()->where('bast_number', $candidate)->exists();
+            if ($exists) {
+                $nextSeq++;
+            }
+        } while ($exists);
+
+        return $candidate;
+    }
 }
 

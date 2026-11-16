@@ -68,6 +68,47 @@ class AuthAndDashboardTest extends TestCase
         $dashResponse->assertSee('Beranda Petugas');
     }
 
+    public function test_petugas_can_authenticate_using_email_and_spaces(): void
+    {
+        $petugas = User::where('role', 'petugas')->first();
+
+        $response = $this->post('/login', [
+            'login' => ' ' . strtoupper($petugas->email) . ' ',
+            'password' => 'password',
+        ]);
+
+        $response->assertRedirect(route('petugas.dashboard'));
+        $this->assertAuthenticatedAs($petugas);
+    }
+
+    public function test_mitra_petugas_can_authenticate_with_default_passwords(): void
+    {
+        $mitra = User::create([
+            'name' => 'Mitra Lapangan',
+            'username' => '740899999999',
+            'email' => 'mitra.lapangan@gmail.com',
+            'password' => \Illuminate\Support\Facades\Hash::make('bps7408'),
+            'role' => 'petugas',
+            'status' => 'active',
+        ]);
+
+        $response = $this->post('/login', [
+            'login' => 'mitra.lapangan@gmail.com',
+            'password' => 'bps7408',
+        ]);
+        $response->assertRedirect(route('petugas.dashboard'));
+        $this->assertAuthenticatedAs($mitra);
+
+        $this->post('/logout');
+
+        $response2 = $this->post('/login', [
+            'login' => 'mitra.lapangan@gmail.com',
+            'password' => 'password',
+        ]);
+        $response2->assertRedirect(route('petugas.dashboard'));
+        $this->assertAuthenticatedAs($mitra);
+    }
+
     public function test_user_can_logout(): void
     {
         $user = User::first();

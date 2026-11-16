@@ -27,7 +27,7 @@ class AssignmentAndScheduleTest extends TestCase
         $response = $this->actingAs($admin)->get(route('admin.assignments.index'));
         $response->assertStatus(200);
         $response->assertSee('Kegiatan');
-        $response->assertSee('Total Kegiatan');
+        $response->assertSee('kegiatan terdaftar');
         $response->assertSee('Buat Kegiatan Baru');
     }
 

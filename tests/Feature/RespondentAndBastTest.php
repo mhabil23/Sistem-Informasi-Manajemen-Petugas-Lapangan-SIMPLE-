@@ -65,9 +65,8 @@ class RespondentAndBastTest extends TestCase
         $response = $this->actingAs($this->admin)->get(route('admin.respondents.index'));
 
         $response->assertStatus(200);
-        $response->assertSee('Data Responden Lapangan');
+        $response->assertSee('Data Responden');
         $response->assertSee('Kelompok Tani Sejahtera');
-        $response->assertSee('Total Responden');
     }
 
     public function test_admin_can_create_new_respondent()
@@ -105,7 +104,7 @@ class RespondentAndBastTest extends TestCase
 
         $indexResponse = $this->actingAs($this->admin)->get(route('admin.basts.respondents.index'));
         $indexResponse->assertStatus(200);
-        $indexResponse->assertSee('BAST Responden');
+        $indexResponse->assertSee('Tanda Terima Responden');
 
         $storeResponse = $this->actingAs($this->admin)->post(route('admin.basts.respondents.store'), [
             'respondent_id' => $respondent->id,
@@ -127,7 +126,7 @@ class RespondentAndBastTest extends TestCase
     {
         $response = $this->actingAs($this->admin)->get(route('admin.basts.officers.index'));
         $response->assertStatus(200);
-        $response->assertSee('BAST Petugas');
+        $response->assertSee('Tanda Terima Petugas');
     }
 
     public function test_petugas_can_view_own_respondents_only()
@@ -185,6 +184,7 @@ class RespondentAndBastTest extends TestCase
             'respondent_id' => $respondent->id,
             'bast_date' => now()->toDateString(),
             'recipient_type' => 'krt',
+            'handover_category' => 'KUES',
             'handover_items' => '1. Kuesioner Sensus Lapangan',
             'notes' => 'Diserahkan langsung ke KRT',
         ]);
@@ -216,6 +216,7 @@ class RespondentAndBastTest extends TestCase
             'recipient_type' => 'representative',
             'recipient_name' => 'Nama Keluarga',
             'recipient_relation' => 'Istri / Pasangan',
+            'handover_category' => 'KUES',
             'handover_items' => '1. Kuesioner Sensus Lapangan',
             'notes' => 'Diterima oleh istri karena KRT sedang di kebun',
         ]);

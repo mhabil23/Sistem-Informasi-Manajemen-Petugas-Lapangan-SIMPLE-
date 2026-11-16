@@ -3,8 +3,10 @@
 namespace App\Http\Controllers;
 
 use App\Models\ActivityLog;
+use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Hash;
 
 class AuthController extends Controller
 {
@@ -35,28 +37,40 @@ class AuthController extends Controller
             'password.required' => 'Password wajib diisi.',
         ]);
 
-        $loginType = filter_var($credentials['login'], FILTER_VALIDATE_EMAIL) ? 'email' : 'username';
-
-        $attemptData = [
-            $loginType => $credentials['login'],
-            'password' => $credentials['password'],
-        ];
-
+        $loginInput = trim($credentials['login']);
+        $password = (string) $credentials['password'];
         $remember = $request->boolean('remember');
 
-        if (Auth::attempt($attemptData, $remember)) {
-            $user = Auth::user();
+        // Cari pengguna secara fleksibel: cocokkan email ATAU username (case-insensitive & trim)
+        $user = User::where(function ($q) use ($loginInput) {
+            $q->where('email', $loginInput)
+              ->orWhere('username', $loginInput)
+              ->orWhereRaw('LOWER(email) = ?', [strtolower($loginInput)])
+              ->orWhereRaw('LOWER(username) = ?', [strtolower($loginInput)]);
+        })->first();
 
+        // Validasi kecocokan password:
+        // 1. Password sesuai hash di database
+        // 2. Untuk role petugas/pegawai yang memakai password default (bps7408 atau password), keduanya diterima
+        $isPasswordValid = false;
+        if ($user) {
+            if (Hash::check($password, $user->password)) {
+                $isPasswordValid = true;
+            } elseif ($user->isFieldStaff() && in_array($password, ['bps7408', 'password'], true)) {
+                if (Hash::check('bps7408', $user->password) || Hash::check('password', $user->password)) {
+                    $isPasswordValid = true;
+                }
+            }
+        }
+
+        if ($user && $isPasswordValid) {
             if (!$user->isActive()) {
-                Auth::logout();
-                $request->session()->invalidate();
-                $request->session()->regenerateToken();
-
                 return back()->withInput($request->only('login', 'remember'))->withErrors([
                     'login' => 'Akun Anda berstatus nonaktif. Silakan hubungi Administrator SIMPLE.',
                 ]);
             }
 
+            Auth::login($user, $remember);
             $request->session()->regenerate();
 
             ActivityLog::log(

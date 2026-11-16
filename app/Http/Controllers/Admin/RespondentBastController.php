@@ -86,11 +86,7 @@ class RespondentBastController extends Controller
 
         // Auto-generate BAST number if empty
         if (empty($validated['bast_number'])) {
-            $year = now()->format('Y');
-            $romanMonths = ['I','II','III','IV','V','VI','VII','VIII','IX','X','XI','XII'];
-            $month = $romanMonths[now()->month - 1];
-            $count = RespondentBast::whereYear('created_at', now()->year)->count() + 1;
-            $validated['bast_number'] = sprintf('BAST-RESP/%s/%s/%04d', $year, $month, $count);
+            $validated['bast_number'] = RespondentBast::generateBastNumber();
         }
 
         $validated['handover_category'] = strtoupper((string) ($validated['handover_category'] ?? 'KUES'));
