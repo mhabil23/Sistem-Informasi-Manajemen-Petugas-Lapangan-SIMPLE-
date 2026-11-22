@@ -163,35 +163,198 @@
         background-color: #f0f7ff !important;
     }
 
+    /* Mobile Responsive Card Layout */
+    .user-stats-scroll {
+        display: flex;
+        align-items: center;
+        gap: 0.35rem;
+        overflow-x: auto;
+        white-space: nowrap;
+        -webkit-overflow-scrolling: touch;
+        scrollbar-width: none;
+        padding-bottom: 2px;
+    }
+    .user-stats-scroll::-webkit-scrollbar {
+        display: none;
+    }
+
     @media (max-width: 767.98px) {
+        .user-action-buttons {
+            display: grid !important;
+            grid-template-columns: 1fr 1fr;
+            gap: 0.45rem !important;
+            width: 100% !important;
+            margin-top: 0.6rem;
+        }
+        .user-action-buttons .btn {
+            width: 100%;
+            padding: 0.42rem 0.5rem !important;
+            font-size: 0.76rem !important;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .bento-table-container-fixed {
+            padding: 0.5rem !important;
+        }
         .bento-table thead {
-            display: none;
+            display: none !important;
         }
         .bento-table, .bento-table tbody, .bento-table tr, .bento-table td {
             display: block;
             width: 100% !important;
         }
         .bento-table tr {
-            margin-bottom: 1rem;
+            position: relative;
+            margin-bottom: 0.85rem;
             border: 1px solid #e2e8f0;
-            border-radius: 12px;
-            padding: 0.5rem;
-            background: #fff;
+            border-radius: 14px;
+            padding: 0.85rem;
+            background: #ffffff;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.03);
+            text-align: left !important;
         }
-        .bento-table td {
-            text-align: right;
-            padding: 0.5rem 0.75rem;
-            border-bottom: 1px solid #f1f5f9;
+        .bento-table tbody tr.row-selected {
+            background-color: #f0f7ff !important;
+            border-color: #93c5fd !important;
         }
-        .bento-table td:last-child {
-            border-bottom: none;
+
+        /* Checkbox Pilihan (Top-Right of card) */
+        .bento-table td[data-label="Pilih"] {
+            position: absolute;
+            top: 0.85rem;
+            right: 0.85rem;
+            width: auto !important;
+            padding: 0 !important;
+            border: none !important;
+            text-align: right !important;
+            z-index: 2;
         }
-        .bento-table td::before {
-            content: attr(data-label);
-            float: left;
-            font-weight: 600;
+        .bento-table td[data-label="Pilih"]::before {
+            display: none !important;
+        }
+        .bento-table td[data-label="Pilih"] .form-check-input {
+            width: 1.25rem;
+            height: 1.25rem;
+            cursor: pointer;
+        }
+
+        /* Pengguna Section (Header of card) */
+        .bento-table td[data-label="Pengguna"] {
+            padding: 0 2.2rem 0.5rem 0 !important;
+            border: none !important;
+            border-bottom: 1px solid #f1f5f9 !important;
+            text-align: left !important;
+        }
+        .bento-table td[data-label="Pengguna"]::before {
+            display: none !important;
+        }
+        .bento-table td[data-label="Pengguna"] .user-avatar-circle {
+            width: 38px;
+            height: 38px;
+            font-size: 0.95rem;
+        }
+        .bento-table td[data-label="Pengguna"] .fw-bold {
+            font-size: 0.92rem;
+            color: #0f172a;
+        }
+
+        /* Role & Status (Inline Badges Row) */
+        .bento-table td[data-label="Role"] {
+            display: inline-block !important;
+            width: auto !important;
+            padding: 0.45rem 0.4rem 0.25rem 0 !important;
+            border: none !important;
+            text-align: left !important;
+        }
+        .bento-table td[data-label="Role"]::before {
+            display: none !important;
+        }
+
+        .bento-table td[data-label="Status Akun"] {
+            display: inline-block !important;
+            width: auto !important;
+            padding: 0.45rem 0 0.25rem 0 !important;
+            border: none !important;
+            text-align: left !important;
+        }
+        .bento-table td[data-label="Status Akun"]::before {
+            display: none !important;
+        }
+
+        /* Kontak */
+        .bento-table td[data-label="Kontak"] {
+            display: block !important;
+            padding: 0.45rem 0 !important;
+            border: none !important;
+            border-top: 1px dashed #f1f5f9 !important;
+            text-align: left !important;
+            font-size: 0.78rem !important;
+        }
+        .bento-table td[data-label="Kontak"]::before {
+            display: none !important;
+        }
+
+        /* Terdaftar */
+        .bento-table td[data-label="Terdaftar"] {
+            display: flex !important;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0.35rem 0 !important;
+            border: none !important;
+            border-top: 1px dashed #f1f5f9 !important;
+            font-size: 0.72rem !important;
             color: #64748b;
-            font-size: 0.75rem;
+        }
+        .bento-table td[data-label="Terdaftar"]::before {
+            content: "Terdaftar:" !important;
+            font-weight: 500;
+            color: #94a3b8;
+            float: none !important;
+        }
+        .bento-table td[data-label="Terdaftar"] .small {
+            display: inline-flex;
+            gap: 0.3rem;
+            align-items: center;
+        }
+
+        /* Aksi */
+        .bento-table td[data-label="Aksi"] {
+            display: block !important;
+            padding: 0.5rem 0 0 0 !important;
+            border: none !important;
+            border-top: 1px solid #f1f5f9 !important;
+            margin-top: 0.3rem;
+            text-align: right !important;
+        }
+        .bento-table td[data-label="Aksi"]::before {
+            display: none !important;
+        }
+        .bento-table td[data-label="Aksi"] .d-inline-flex {
+            width: 100%;
+            justify-content: flex-end;
+            gap: 0.45rem;
+        }
+        .bento-table td[data-label="Aksi"] .bento-action-btn {
+            width: 32px;
+            height: 32px;
+            font-size: 0.85rem;
+            border-radius: 8px;
+        }
+
+        /* Bulk Action Bar Mobile */
+        #bulkActionBar {
+            padding: 0.5rem 0.75rem !important;
+        }
+        #bulkActionBar .btn-bulk-action,
+        #bulkActionBar .btn-bulk-action-danger {
+            padding: 0.28rem 0.6rem;
+            font-size: 0.72rem;
         }
     }
 </style>
@@ -252,7 +415,7 @@
     <div class="d-flex flex-wrap justify-content-between align-items-center p-3 border-bottom gap-2">
         <div>
             <h5 class="fw-bold text-dark mb-0" style="font-size: 1.05rem;">Daftar Pengguna Sistem</h5>
-            <div class="d-flex align-items-center gap-1 mt-1 flex-wrap">
+            <div class="user-stats-scroll gap-1 mt-1">
                 <span class="badge bg-light text-secondary border">Total Pengguna: {{ $totalUsers }}</span>
                 <span class="badge bg-primary-subtle text-primary border border-primary-subtle">Pegawai: {{ $totalPegawai }}</span>
                 <span class="badge bg-warning-subtle text-warning-emphasis border border-warning-subtle">Dual Role (+Admin): {{ $totalDualRole }}</span>
@@ -260,18 +423,18 @@
                 <span class="badge bg-light text-secondary border">Admin: {{ $totalAdmins }}</span>
             </div>
         </div>
-        <div class="d-flex align-items-center gap-2 flex-wrap">
-            <button type="button" class="btn btn-outline-success rounded-pill px-3 py-1.5" data-bs-toggle="modal" data-bs-target="#importMitraModal" style="font-size: 0.85rem;" title="Upload file Excel daftar mitra untuk membuat/memperbarui akun petugas secara otomatis">
-                <i class="bi bi-file-earmark-excel-fill text-success me-1"></i> Import Excel Mitra
+        <div class="user-action-buttons d-flex align-items-center gap-2 flex-wrap">
+            <button type="button" class="btn btn-outline-success rounded-pill px-3 py-1.5" data-bs-toggle="modal" data-bs-target="#importMitraModal" style="font-size: 0.82rem;" title="Upload file Excel daftar mitra untuk membuat/memperbarui akun petugas secara otomatis">
+                <i class="bi bi-file-earmark-excel-fill text-success me-1"></i> Import Mitra
             </button>
-            <button type="button" class="btn btn-outline-primary rounded-pill px-3 py-1.5" data-bs-toggle="modal" data-bs-target="#managePegawaiAdminModal" style="font-size: 0.85rem;" title="Pilih pegawai sekaligus untuk diberikan atau dicabut hak akses Administrator">
-                <i class="bi bi-shield-check text-primary me-1"></i> Kelola Hak Admin Pegawai
-            </button>
-            <button type="button" class="btn btn-outline-danger rounded-pill px-3 py-1.5" data-bs-toggle="modal" data-bs-target="#revokeAllPegawaiAdminModal" style="font-size: 0.85rem;" title="Tutup seluruh akses Administrator untuk semua pegawai secara serentak">
-                <i class="bi bi-shield-slash me-1"></i> Tutup Semua Akses Admin Pegawai
-            </button>
-            <button type="button" class="btn btn-bps-orange rounded-pill px-3 py-1.5" data-bs-toggle="modal" data-bs-target="#createUserModal" style="font-size: 0.85rem;">
+            <button type="button" class="btn btn-bps-orange rounded-pill px-3 py-1.5" data-bs-toggle="modal" data-bs-target="#createUserModal" style="font-size: 0.82rem;">
                 <i class="bi bi-person-plus me-1"></i> Tambah Pengguna Baru
+            </button>
+            <button type="button" class="btn btn-outline-primary rounded-pill px-3 py-1.5" data-bs-toggle="modal" data-bs-target="#managePegawaiAdminModal" style="font-size: 0.82rem;" title="Pilih pegawai sekaligus untuk diberikan atau dicabut hak akses Administrator">
+                <i class="bi bi-shield-check text-primary me-1"></i> Hak Admin Pegawai
+            </button>
+            <button type="button" class="btn btn-outline-danger rounded-pill px-3 py-1.5" data-bs-toggle="modal" data-bs-target="#revokeAllPegawaiAdminModal" style="font-size: 0.82rem;" title="Tutup seluruh akses Administrator untuk semua pegawai secara serentak">
+                <i class="bi bi-shield-slash me-1"></i> Tutup Akses Admin
             </button>
         </div>
     </div>
