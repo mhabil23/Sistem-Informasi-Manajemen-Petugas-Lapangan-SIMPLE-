@@ -48,7 +48,8 @@ class AuthController extends Controller
               ->orWhere('nik', $loginInput)
               ->orWhere('sobat_id', $loginInput)
               ->orWhereRaw('LOWER(email) = ?', [strtolower($loginInput)])
-              ->orWhereRaw('LOWER(username) = ?', [strtolower($loginInput)]);
+              ->orWhereRaw('LOWER(username) = ?', [strtolower($loginInput)])
+              ->orWhereRaw('LOWER(sobat_id) = ?', [strtolower($loginInput)]);
         })->first();
 
         // Validasi kecocokan password:

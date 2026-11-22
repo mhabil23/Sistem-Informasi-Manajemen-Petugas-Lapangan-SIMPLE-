@@ -113,10 +113,10 @@
         <form method="POST" action="{{ route('login.post') }}" class="needs-validation">
             @csrf
 
-            <!-- Username / Email Field -->
+            <!-- Username / Email / SOBAT ID Field -->
             <div class="mb-3">
                 <label for="login" class="form-label fw-bold text-dark small mb-1" style="font-size: 0.78rem; letter-spacing: 0.02em;">
-                    USERNAME ATAU EMAIL
+                    USERNAME, EMAIL, ATAU ID SOBAT
                 </label>
                 <div class="input-group auth-input-group">
                     <span class="input-group-text border-end-0">
@@ -127,9 +127,12 @@
                            id="login" 
                            name="login" 
                            value="{{ old('login') }}" 
-                           placeholder="Masukkan username atau email" 
+                           placeholder="Masukkan username, email, atau ID SOBAT" 
                            required 
                            autofocus>
+                </div>
+                <div class="form-text mt-1 text-muted" style="font-size: 0.72rem;">
+                    <i class="bi bi-info-circle text-primary me-0.5"></i> Petugas/Mitra dapat masuk dengan <strong>ID SOBAT</strong> atau <strong>Email</strong> (Password bawaan: <code>bps7408</code>).
                 </div>
             </div>
 

@@ -132,10 +132,10 @@ class SimpleExcelParser
             $sheetTargets['Sheet1'] = 'xl/worksheets/sheet1.xml';
         }
 
-        // Find candidate sheet: prefer sheets containing 'SIMPLE', 'Database', 'SPKRT', 'Sampel'
+        // Find candidate sheet: prefer sheets containing 'SIMPLE', 'Database', 'SPKRT', 'Sampel', 'Mitra'
         $chosenTarget = null;
         foreach ($sheetTargets as $name => $path) {
-            if (preg_match('/(simple|database|spkrt|sampel|responden|kegiatan|petugas|peserta)/i', $name)) {
+            if (preg_match('/(simple|database|spkrt|sampel|responden|kegiatan|petugas|peserta|mitra)/i', $name)) {
                 $chosenTarget = $path;
                 break;
             }
@@ -448,5 +448,203 @@ class SimpleExcelParser
             $index = intdiv($index, 26) - 1;
         }
         return $letters;
+    }
+
+    /**
+     * Parse Excel / CSV containing Mitra BPS and map into clean array of mitra records.
+     * Supports both standard BPS Mitra export structure and generic tabular spreadsheets.
+     *
+     * @param string $filePath
+     * @param string|null $extension
+     * @return array<int, array<string, mixed>>
+     */
+    public function parseMitraRows(string $filePath, ?string $extension = null): array
+    {
+        $rawRows = $this->getRawRows($filePath, $extension);
+        if (empty($rawRows)) {
+            return [];
+        }
+
+        // 1. Detect header row
+        $headerRowIdx = -1;
+        $matchedMap = [];
+
+        foreach (array_slice($rawRows, 0, 10, true) as $idx => $row) {
+            $tempMap = [];
+            foreach ($row as $col => $cellText) {
+                $clean = strtolower(preg_replace('/[^a-zA-Z0-9]/', '', (string) $cellText));
+                if (empty($clean)) {
+                    continue;
+                }
+
+                if ($clean === 'sobatid' || $clean === 'idsobat' || str_contains($clean, 'sobat')) {
+                    $tempMap['sobat_id'] = $col;
+                } elseif (str_contains($clean, 'namalengkap') || $clean === 'nama' || str_contains($clean, 'namamitra') || str_contains($clean, 'namapetugas')) {
+                    $tempMap['name'] = $col;
+                } elseif (str_contains($clean, 'email') || str_contains($clean, 'surel')) {
+                    $tempMap['email'] = $col;
+                } elseif (str_contains($clean, 'notelp') || str_contains($clean, 'nohp') || str_contains($clean, 'telepon') || str_contains($clean, 'phone') || str_contains($clean, 'kontak') || $clean === 'hp') {
+                    $tempMap['phone'] = $col;
+                } elseif (str_contains($clean, 'kecamatan') || $clean === 'kec') {
+                    $tempMap['district'] = $col;
+                } elseif (str_contains($clean, 'desa') || str_contains($clean, 'kelurahan') || str_contains($clean, 'desakel')) {
+                    $tempMap['village'] = $col;
+                } elseif (str_contains($clean, 'alamatdetail') || $clean === 'alamat') {
+                    $tempMap['address'] = $col;
+                } elseif (str_contains($clean, 'jeniskelamin') || $clean === 'kelamin' || $clean === 'gender' || $clean === 'jk') {
+                    $tempMap['gender'] = $col;
+                } elseif (str_contains($clean, 'tempattanggal') || str_contains($clean, 'tanggallahir') || $clean === 'ttl' || str_contains($clean, 'lahir')) {
+                    $tempMap['birth_info'] = $col;
+                } elseif (str_contains($clean, 'pendidikan')) {
+                    $tempMap['education'] = $col;
+                } elseif (str_contains($clean, 'posisi') || str_contains($clean, 'jabatan')) {
+                    $tempMap['position'] = $col;
+                } elseif (str_contains($clean, 'nik') || str_contains($clean, 'noktp')) {
+                    $tempMap['nik'] = $col;
+                }
+            }
+
+            // If header row has at least 'name' and ('sobat_id' or 'email' or 'phone' or 'district')
+            if (isset($tempMap['name']) && (isset($tempMap['sobat_id']) || isset($tempMap['email']) || isset($tempMap['phone']) || isset($tempMap['district']))) {
+                $headerRowIdx = $idx;
+                $matchedMap = $tempMap;
+                break;
+            }
+        }
+
+        // 2. Fallback to standard BPS SOBAT export column positions if no header was matched
+        if ($headerRowIdx === -1) {
+            $matchedMap = [
+                'name' => 'A',
+                'position' => 'B',
+                'address' => 'E',
+                'district' => 'H',
+                'village' => 'I',
+                'birth_info' => 'J',
+                'gender' => 'L',
+                'education' => 'N',
+                'phone' => 'T',
+                'sobat_id' => 'U',
+                'email' => 'V',
+            ];
+            $dataRows = $rawRows;
+        } else {
+            $dataRows = array_slice($rawRows, $headerRowIdx + 1);
+        }
+
+        $records = [];
+        foreach ($dataRows as $row) {
+            $colName = $matchedMap['name'] ?? 'A';
+            $name = trim((string) ($row[$colName] ?? ''));
+
+            // Ignore empty rows, header repeats, or total/footer notes
+            if ($name === '' || str_starts_with($name, '*') || str_starts_with(strtolower($name), 'umur') || str_starts_with(strtolower($name), 'total') || strtolower($name) === 'nama lengkap' || strtolower($name) === 'nama') {
+                continue;
+            }
+
+            // Extract Sobat ID
+            $sobatId = '';
+            if (isset($matchedMap['sobat_id']) && isset($row[$matchedMap['sobat_id']])) {
+                $sobatId = preg_replace('/[^\w]/', '', trim((string) $row[$matchedMap['sobat_id']]));
+            }
+
+            // Extract Email & clean trailing junk like "Sjaa" at end of .com
+            $email = '';
+            if (isset($matchedMap['email']) && isset($row[$matchedMap['email']])) {
+                $rawEmail = strtolower(trim((string) $row[$matchedMap['email']]));
+                $email = preg_replace('/(\.(?:com|co\.id|id|org|net|gov|edu)).*$/i', '$1', $rawEmail);
+                if (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
+                    $email = '';
+                }
+            }
+
+            // Extract & normalize Phone
+            $phone = '';
+            if (isset($matchedMap['phone']) && isset($row[$matchedMap['phone']])) {
+                $phone = preg_replace('/[^\d+]/', '', trim((string) $row[$matchedMap['phone']]));
+                if (str_starts_with($phone, '+62')) {
+                    $phone = '0' . substr($phone, 3);
+                } elseif (str_starts_with($phone, '62')) {
+                    $phone = '0' . substr($phone, 2);
+                }
+            }
+
+            // Extract & clean Kecamatan (remove leading code e.g. "(020) LASUSUA" -> "Lasusua")
+            $district = '';
+            if (isset($matchedMap['district']) && isset($row[$matchedMap['district']])) {
+                $rawKec = trim((string) $row[$matchedMap['district']]);
+                $cleanKec = preg_replace('/^\(\d+\)\s*/', '', $rawKec);
+                $district = ucwords(strtolower(trim($cleanKec)));
+            }
+
+            // Extract & clean Desa
+            $village = '';
+            if (isset($matchedMap['village']) && isset($row[$matchedMap['village']])) {
+                $rawDesa = trim((string) $row[$matchedMap['village']]);
+                $cleanDesa = preg_replace('/^\(\d+\)\s*/', '', $rawDesa);
+                $village = ucwords(strtolower(trim($cleanDesa)));
+            }
+
+            // Extract Address
+            $address = '';
+            if (isset($matchedMap['address']) && isset($row[$matchedMap['address']])) {
+                $address = trim((string) $row[$matchedMap['address']]);
+            }
+
+            // Extract & normalize Gender
+            $gender = '';
+            if (isset($matchedMap['gender']) && isset($row[$matchedMap['gender']])) {
+                $rawG = strtolower(trim((string) $row[$matchedMap['gender']]));
+                if (str_starts_with($rawG, 'p') || str_contains($rawG, 'wanita')) {
+                    $gender = 'Perempuan';
+                } elseif (str_starts_with($rawG, 'l') || str_contains($rawG, 'pria')) {
+                    $gender = 'Laki-Laki';
+                }
+            }
+
+            // Extract Birth Info (TTL)
+            $birthInfo = '';
+            if (isset($matchedMap['birth_info']) && isset($row[$matchedMap['birth_info']])) {
+                $birthInfo = trim((string) $row[$matchedMap['birth_info']]);
+            }
+
+            // Extract Education
+            $education = '';
+            if (isset($matchedMap['education']) && isset($row[$matchedMap['education']])) {
+                $education = trim((string) $row[$matchedMap['education']]);
+            }
+
+            // Extract Position
+            $position = 'Mitra Pendataan';
+            if (isset($matchedMap['position']) && isset($row[$matchedMap['position']])) {
+                $pos = trim((string) $row[$matchedMap['position']]);
+                if (!empty($pos)) {
+                    $position = $pos;
+                }
+            }
+
+            // Extract NIK if present
+            $nik = null;
+            if (isset($matchedMap['nik']) && isset($row[$matchedMap['nik']])) {
+                $nik = trim((string) $row[$matchedMap['nik']]);
+            }
+
+            $records[] = [
+                'name' => $name,
+                'sobat_id' => $sobatId,
+                'email' => $email,
+                'phone' => $phone,
+                'district' => $district,
+                'village' => $village,
+                'address' => $address,
+                'gender' => $gender,
+                'birth_info' => $birthInfo,
+                'education' => $education,
+                'position' => $position,
+                'nik' => $nik,
+            ];
+        }
+
+        return $records;
     }
 }

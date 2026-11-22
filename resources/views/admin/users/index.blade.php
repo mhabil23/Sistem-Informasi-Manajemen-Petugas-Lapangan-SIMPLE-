@@ -261,6 +261,9 @@
             </div>
         </div>
         <div class="d-flex align-items-center gap-2 flex-wrap">
+            <button type="button" class="btn btn-outline-success rounded-pill px-3 py-1.5" data-bs-toggle="modal" data-bs-target="#importMitraModal" style="font-size: 0.85rem;" title="Upload file Excel daftar mitra untuk membuat/memperbarui akun petugas secara otomatis">
+                <i class="bi bi-file-earmark-excel-fill text-success me-1"></i> Import Excel Mitra
+            </button>
             <button type="button" class="btn btn-outline-primary rounded-pill px-3 py-1.5" data-bs-toggle="modal" data-bs-target="#managePegawaiAdminModal" style="font-size: 0.85rem;" title="Pilih pegawai sekaligus untuk diberikan atau dicabut hak akses Administrator">
                 <i class="bi bi-shield-check text-primary me-1"></i> Kelola Hak Admin Pegawai
             </button>
@@ -350,6 +353,11 @@
                                     <div class="fw-bold text-dark text-truncate" title="{{ $user->name }}">{{ $user->name }}</div>
                                     <div class="d-flex align-items-center gap-1 flex-wrap">
                                         <span class="text-muted small">@<span>{{ $user->username }}</span></span>
+                                        @if($user->sobat_id)
+                                            <span class="badge bg-light text-success border font-monospace px-1.5 py-0.5" style="font-size: 0.65rem;" title="ID SOBAT: {{ $user->sobat_id }}">
+                                                <i class="bi bi-person-vcard me-0.5"></i>SOBAT: {{ $user->sobat_id }}
+                                            </span>
+                                        @endif
                                         @if($user->district)
                                             <span class="badge bg-light text-primary border px-1.5 py-0.5" style="font-size: 0.65rem;" title="Wilayah: {{ $user->district }} @if($user->village) - {{ $user->village }} @endif">
                                                 <i class="bi bi-geo-alt me-0.5"></i>{{ $user->district }}
@@ -552,6 +560,104 @@
             </div>
         </div>
     @endif
+</div>
+
+<!-- ==============================================================
+     MODAL IMPORT EXCEL MITRA LAPANGAN
+     ============================================================== -->
+<div class="modal fade" id="importMitraModal" tabindex="-1" aria-labelledby="importMitraModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered modal-lg">
+        <div class="modal-content border-0 shadow" style="border-radius: 20px; overflow: hidden;">
+            <div class="modal-header bg-light border-bottom px-4 py-3">
+                <div class="d-flex align-items-center gap-2">
+                    <div class="rounded-3 p-1.5 text-white d-flex align-items-center justify-content-center" style="background: #198754; width: 34px; height: 34px;">
+                        <i class="bi bi-file-earmark-excel-fill fs-5"></i>
+                    </div>
+                    <div>
+                        <h5 class="modal-title fw-bold text-dark mb-0" id="importMitraModalLabel" style="font-size: 1.05rem;">
+                            Import Daftar Mitra Lapangan (Excel / CSV)
+                        </h5>
+                        <div class="text-muted" style="font-size: 0.73rem;">Unggah berkas rekrutmen / database mitra BPS untuk membuat dan memperbarui akun secara otomatis</div>
+                    </div>
+                </div>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <form method="POST" action="{{ route('admin.users.import-mitra') }}" enctype="multipart/form-data" id="importMitraForm">
+                @csrf
+                <div class="modal-body p-4">
+                    <!-- Template Download & Format Info Card -->
+                    <div class="p-3 mb-4 rounded-3 border bg-light-subtle d-flex flex-column flex-sm-row align-items-sm-center justify-content-between gap-3">
+                        <div class="d-flex align-items-center gap-2.5">
+                            <i class="bi bi-file-earmark-arrow-down fs-2 text-success"></i>
+                            <div>
+                                <div class="fw-bold text-dark" style="font-size: 0.88rem;">Format Rekrutmen BPS / Template SIMPEL</div>
+                                <div class="text-muted small" style="font-size: 0.75rem;">Mendukung format ekspor resmi SOBAT (kolom Nama, SOBAT ID, Email, No HP, Kecamatan, Desa, dll).</div>
+                            </div>
+                        </div>
+                        <div class="d-flex align-items-center shrink-0">
+                            <a href="{{ route('admin.users.template-mitra') }}" class="btn btn-outline-success btn-sm rounded-pill px-3 py-1.5 shadow-sm fw-semibold" style="font-size: 0.78rem;">
+                                <i class="bi bi-download me-1"></i> Unduh Format Contoh
+                            </a>
+                        </div>
+                    </div>
+
+                    <!-- Highlight Ketentuan Akun & Login -->
+                    <div class="row g-2 mb-4">
+                        <div class="col-md-6">
+                            <div class="p-3 rounded-3 border h-100" style="background: #FFFBEB; border-color: #FDE68A !important;">
+                                <div class="d-flex align-items-center gap-2 mb-1">
+                                    <i class="bi bi-key-fill text-warning fs-5"></i>
+                                    <span class="fw-bold text-dark" style="font-size: 0.85rem;">Password Bawaan</span>
+                                </div>
+                                <div class="small text-muted" style="font-size: 0.75rem; line-height: 1.45;">
+                                    Seluruh akun mitra yang diimpor otomatis memiliki kata sandi bawaan resmi: 
+                                    <code class="px-1.5 py-0.5 rounded bg-white text-danger fw-bold border">bps7408</code>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="p-3 rounded-3 border h-100" style="background: #EFF6FF; border-color: #BFDBFE !important;">
+                                <div class="d-flex align-items-center gap-2 mb-1">
+                                    <i class="bi bi-person-badge-fill text-primary fs-5"></i>
+                                    <span class="fw-bold text-dark" style="font-size: 0.85rem;">Fleksibilitas Login</span>
+                                </div>
+                                <div class="small text-muted" style="font-size: 0.75rem; line-height: 1.45;">
+                                    Petugas/Mitra dapat langsung masuk ke portal menggunakan <strong>ID SOBAT</strong> ataupun <strong>Email</strong> yang terdaftar.
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- File Input -->
+                    <div class="mb-3">
+                        <label class="form-label small fw-bold text-dark mb-1" style="font-size: 0.8rem; letter-spacing: 0.02em;">
+                            PILIH BERKAS SPREADSHEET (.XLSX / .XLS / .CSV) <span class="text-danger">*</span>
+                        </label>
+                        <input type="file" 
+                               name="excel_file" 
+                               class="form-control @error('excel_file') is-invalid @enderror" 
+                               accept=".xlsx,.xls,.csv" 
+                               required>
+                        @error('excel_file')
+                            <div class="invalid-feedback">{{ $message }}</div>
+                        @enderror
+                        <div class="form-text text-muted" style="font-size: 0.72rem;">
+                            Ukuran berkas maksimal 20 MB. Sistem akan membaca otomatis kolom profil mitra termasuk ID SOBAT, nama, wilayah tugas, dan kontak.
+                        </div>
+                    </div>
+                </div>
+
+                <div class="modal-footer bg-light px-4 py-3 d-flex justify-content-between">
+                    <button type="button" class="btn btn-outline-secondary rounded-pill px-3 py-1.5" data-bs-dismiss="modal" style="font-size: 0.82rem;">
+                        Batal
+                    </button>
+                    <button type="submit" class="btn btn-success rounded-pill px-4 py-1.5 shadow-sm fw-semibold" id="btnSubmitImportMitra" style="font-size: 0.85rem;">
+                        <i class="bi bi-cloud-arrow-up-fill me-1"></i> Unggah &amp; Import Mitra
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
 </div>
 
 <!-- ==============================================================

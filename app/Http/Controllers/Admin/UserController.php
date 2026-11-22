@@ -6,20 +6,25 @@ use App\Http\Controllers\Controller;
 use App\Models\ActivityLog;
 use App\Models\User;
 use App\Services\GoogleSheetService;
+use App\Services\SimpleExcelParser;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Artisan;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Schema;
+use Illuminate\Support\Str;
 use Illuminate\Validation\Rule;
 
 class UserController extends Controller
 {
     protected GoogleSheetService $sheetService;
+    protected SimpleExcelParser $excelParser;
 
-    public function __construct(GoogleSheetService $sheetService)
+    public function __construct(GoogleSheetService $sheetService, SimpleExcelParser $excelParser)
     {
         $this->sheetService = $sheetService;
+        $this->excelParser = $excelParser;
     }
 
     /**
@@ -647,6 +652,239 @@ class UserController extends Controller
         );
 
         return back()->with('success', "Hak akses Administrator pegawai berhasil diperbarui! ({$grantedCount} pegawai aktif Dual Role).");
+    }
+
+    /**
+     * Import daftar mitra lapangan dari berkas Excel (.xlsx / .csv).
+     * Password bawaan: bps7408, login dapat menggunakan ID SOBAT atau Email.
+     */
+    public function importMitra(Request $request)
+    {
+        $request->validate([
+            'excel_file' => ['required', 'file', 'extensions:xlsx,xls,csv,txt', 'max:20480'],
+        ], [
+            'excel_file.required' => 'Pilih berkas Excel (.xlsx) atau CSV daftar mitra yang akan diunggah.',
+            'excel_file.extensions' => 'Format berkas harus berupa .xlsx, .xls, atau .csv.',
+            'excel_file.max' => 'Ukuran berkas maksimal adalah 20 MB.',
+        ]);
+
+        $file = $request->file('excel_file');
+        $ext = $file->getClientOriginalExtension();
+
+        try {
+            $parsedMitra = $this->excelParser->parseMitraRows($file->getRealPath(), $ext);
+        } catch (\Throwable $e) {
+            return back()->with('error', 'Gagal memproses berkas Excel: ' . $e->getMessage());
+        }
+
+        if (empty($parsedMitra)) {
+            return back()->with('error', 'Tidak ada data mitra yang valid ditemukan dalam berkas Excel.');
+        }
+
+        // Cache existing users in memory for instant matching without N+1 queries
+        $existingBySobat = User::whereNotNull('sobat_id')
+            ->where('sobat_id', '!=', '')
+            ->get()
+            ->keyBy('sobat_id');
+
+        $existingByEmail = User::whereNotNull('email')
+            ->where('email', '!=', '')
+            ->get()
+            ->keyBy(fn ($u) => strtolower($u->email));
+
+        $existingByUsername = User::all()
+            ->keyBy(fn ($u) => strtolower($u->username));
+
+        $createdCount = 0;
+        $updatedCount = 0;
+
+        DB::beginTransaction();
+        try {
+            foreach ($parsedMitra as $row) {
+                $name = $row['name'];
+                $sobatId = $row['sobat_id'] ?: null;
+                $email = $row['email'] ?: null;
+                $phone = $row['phone'] ?: null;
+                $district = $row['district'] ?: null;
+                $village = $row['village'] ?: null;
+                $address = $row['address'] ?: null;
+                $gender = $row['gender'] ?: null;
+                $birthInfo = $row['birth_info'] ?: null;
+                $education = $row['education'] ?: null;
+                $position = $row['position'] ?: 'Mitra Pendataan';
+                $nik = $row['nik'] ?: null;
+
+                // 1. Check existing user by SOBAT ID or Email
+                $user = null;
+                if ($sobatId && isset($existingBySobat[$sobatId])) {
+                    $user = $existingBySobat[$sobatId];
+                } elseif ($email && isset($existingByEmail[strtolower($email)])) {
+                    $user = $existingByEmail[strtolower($email)];
+                }
+
+                if ($user) {
+                    // Update existing mitra
+                    $updateData = [
+                        'name' => $name,
+                        'phone' => $phone ?: $user->phone,
+                        'district' => $district ?: $user->district,
+                        'village' => $village ?: $user->village,
+                        'address' => $address ?: $user->address,
+                        'gender' => $gender ?: $user->gender,
+                        'birth_info' => $birthInfo ?: $user->birth_info,
+                        'education' => $education ?: $user->education,
+                        'position' => $position ?: ($user->position ?: 'Mitra Pendataan'),
+                        'status' => 'active',
+                    ];
+
+                    if ($sobatId && empty($user->sobat_id)) {
+                        $updateData['sobat_id'] = $sobatId;
+                        $existingBySobat[$sobatId] = $user;
+                    }
+                    if ($nik && empty($user->nik)) {
+                        $updateData['nik'] = $nik;
+                    }
+
+                    $user->update($updateData);
+                    $updatedCount++;
+                } else {
+                    // Create new mitra account
+                    // Username priority: sobat_id if unique, else slug of name
+                    $username = null;
+                    if ($sobatId && !isset($existingByUsername[strtolower($sobatId)])) {
+                        $username = $sobatId;
+                    } else {
+                        $baseSlug = Str::slug($name, '');
+                        if (empty($baseSlug)) {
+                            $baseSlug = 'mitra' . rand(100, 999);
+                        }
+                        $cleanUsername = $baseSlug;
+                        $uIdx = 1;
+                        while (isset($existingByUsername[strtolower($cleanUsername)])) {
+                            $cleanUsername = $baseSlug . $uIdx++;
+                        }
+                        $username = $cleanUsername;
+                    }
+
+                    // Email priority: valid excel email if not taken, else fallback
+                    $userEmail = null;
+                    if ($email && !isset($existingByEmail[strtolower($email)])) {
+                        $userEmail = $email;
+                    } else {
+                        $baseEmail = $sobatId ? "sobat_{$sobatId}@bps.go.id" : Str::slug($name, '.') . '@bps.go.id';
+                        $cleanEmail = $baseEmail;
+                        $eIdx = 1;
+                        while (isset($existingByEmail[strtolower($cleanEmail)])) {
+                            $cleanEmail = Str::slug($name, '.') . $eIdx++ . '@bps.go.id';
+                        }
+                        $userEmail = $cleanEmail;
+                    }
+
+                    $newUser = User::create([
+                        'name' => $name,
+                        'username' => $username,
+                        'email' => $userEmail,
+                        'password' => Hash::make('bps7408'),
+                        'sobat_id' => $sobatId,
+                        'phone' => $phone,
+                        'nik' => $nik,
+                        'role' => 'petugas',
+                        'status' => 'active',
+                        'district' => $district,
+                        'village' => $village,
+                        'address' => $address,
+                        'gender' => $gender,
+                        'birth_info' => $birthInfo,
+                        'education' => $education,
+                        'position' => $position,
+                    ]);
+
+                    if ($newUser->sobat_id) {
+                        $existingBySobat[$newUser->sobat_id] = $newUser;
+                    }
+                    $existingByEmail[strtolower($newUser->email)] = $newUser;
+                    $existingByUsername[strtolower($newUser->username)] = $newUser;
+                    $createdCount++;
+                }
+            }
+
+            DB::commit();
+
+            ActivityLog::log(
+                'import',
+                'users',
+                "Mengimpor {$createdCount} akun mitra baru dan memperbarui {$updatedCount} akun mitra dari berkas Excel/CSV."
+            );
+
+            return back()->with('success', "Import berhasil! Sebanyak {$createdCount} akun mitra baru berhasil dibuat dan {$updatedCount} akun diperbarui. Seluruh akun dapat login dengan ID SOBAT atau Email dan password bawaan: bps7408.");
+
+        } catch (\Throwable $e) {
+            DB::rollBack();
+            return back()->with('error', 'Terjadi kesalahan saat menyimpan data mitra: ' . $e->getMessage());
+        }
+    }
+
+    /**
+     * Download format template spreadsheet (.csv) untuk import daftar mitra.
+     */
+    public function downloadMitraTemplate(Request $request)
+    {
+        $headers = [
+            'Content-Type' => 'text/csv; charset=UTF-8',
+            'Content-Disposition' => 'attachment; filename=Template_Daftar_Mitra_SIMPEL.csv',
+        ];
+
+        return response()->stream(function () {
+            $handle = fopen('php://output', 'w');
+            // Write UTF-8 BOM so Excel opens properly
+            fwrite($handle, "\xEF\xBB\xBF");
+
+            // Header columns
+            fputcsv($handle, [
+                'SOBAT ID',
+                'Nama Lengkap',
+                'Email',
+                'No Telp',
+                'Posisi',
+                'Alamat Kecamatan',
+                'Alamat Desa/Kel',
+                'Alamat Detail',
+                'Jenis Kelamin',
+                'Tempat, Tanggal Lahir',
+                'Pendidikan',
+            ]);
+
+            // Sample rows
+            fputcsv($handle, [
+                '740822020003',
+                'Ahmad Fauzi',
+                'ahmadfauziliwang@gmail.com',
+                '082188167081',
+                'Mitra Pendataan',
+                'Lasusua',
+                'Lasusua',
+                'Dusun 2 Desa Babussalam',
+                'Laki-Laki',
+                'JENEPONTO, 23 Januari 1993',
+                'Tamat SMA/Sederajat',
+            ]);
+
+            fputcsv($handle, [
+                '740822020017',
+                'Marjainah',
+                'marjaina@gmail.com',
+                '082393703204',
+                'Mitra Pendataan',
+                'Watunohu',
+                'Watunohu',
+                'Dusun 1 Desa Watunohu',
+                'Perempuan',
+                'KOLAKA UTARA, 15 Oktober 1990',
+                'Tamat SMA/Sederajat',
+            ]);
+
+            fclose($handle);
+        }, 200, $headers);
     }
 }
 
