@@ -477,7 +477,14 @@ class SimpleExcelParser
                     continue;
                 }
 
-                if ($clean === 'sobatid' || $clean === 'idsobat' || str_contains($clean, 'sobat')) {
+                // Pencocokan ID SOBAT atau semacamnya (ID Mitra, Kode Petugas, No Peserta, ID User, NIK/KTP)
+                if (
+                    $clean === 'sobatid' || $clean === 'idsobat' || str_contains($clean, 'sobat') ||
+                    $clean === 'idmitra' || $clean === 'mitraid' || str_contains($clean, 'kodemitra') || str_contains($clean, 'nomitra') ||
+                    $clean === 'idpetugas' || $clean === 'petugasid' || str_contains($clean, 'kodepetugas') || str_contains($clean, 'nopetugas') ||
+                    $clean === 'idpeserta' || $clean === 'kodepeserta' || $clean === 'userid' || $clean === 'idpengguna' ||
+                    $clean === 'kodesobat' || $clean === 'nosobat' || $clean === 'id' || $clean === 'kode'
+                ) {
                     $tempMap['sobat_id'] = $col;
                 } elseif (str_contains($clean, 'namalengkap') || $clean === 'nama' || str_contains($clean, 'namamitra') || str_contains($clean, 'namapetugas')) {
                     $tempMap['name'] = $col;
@@ -627,6 +634,9 @@ class SimpleExcelParser
             $nik = null;
             if (isset($matchedMap['nik']) && isset($row[$matchedMap['nik']])) {
                 $nik = trim((string) $row[$matchedMap['nik']]);
+                if (empty($sobatId) && !empty($nik)) {
+                    $sobatId = preg_replace('/[^\w]/', '', $nik);
+                }
             }
 
             $records[] = [

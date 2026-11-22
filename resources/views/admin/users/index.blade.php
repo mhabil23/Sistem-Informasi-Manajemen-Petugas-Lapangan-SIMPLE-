@@ -614,7 +614,7 @@
                         </div>
 
                         <p class="text-muted mb-2" style="font-size: 0.74rem; line-height: 1.5;">
-                            Sistem secara cerdas hanya membaca data profil penting mitra. <strong>Jika terdapat field/kolom lain pada file Excel Anda, sistem akan secara otomatis MENGABAIKANNYA</strong> sehingga Anda tidak perlu menghapus kolom-kolom tambahan dari hasil unduhan aplikasi SOBAT BPS.
+                            Sistem secara cerdas mengenali identitas mitra (seperti <strong>SOBAT ID, ID Mitra, Kode Petugas, atau NIK</strong>). <strong>Jika terdapat field/kolom lain pada file Excel Anda, sistem akan secara otomatis MENGABAIKANNYA</strong> sehingga Anda tidak perlu menghapus kolom-kolom tambahan dari hasil unduhan aplikasi SOBAT BPS.
                         </p>
 
                         <div class="row g-2">
@@ -626,7 +626,7 @@
                                     </div>
                                     <div class="d-flex flex-wrap gap-1">
                                         <span class="badge bg-light text-dark border py-1 px-1.5" style="font-size: 0.68rem;"><i class="bi bi-person me-1 text-primary"></i>Nama Lengkap</span>
-                                        <span class="badge bg-light text-dark border py-1 px-1.5" style="font-size: 0.68rem;"><i class="bi bi-card-text me-1 text-primary"></i>SOBAT ID</span>
+                                        <span class="badge bg-light text-dark border py-1 px-1.5" style="font-size: 0.68rem;"><i class="bi bi-card-text me-1 text-primary"></i>SOBAT ID / ID Mitra / NIK</span>
                                         <span class="badge bg-light text-dark border py-1 px-1.5" style="font-size: 0.68rem;"><i class="bi bi-envelope me-1 text-primary"></i>Email</span>
                                         <span class="badge bg-light text-dark border py-1 px-1.5" style="font-size: 0.68rem;"><i class="bi bi-telephone me-1 text-primary"></i>No Telp / WA</span>
                                         <span class="badge bg-light text-dark border py-1 px-1.5" style="font-size: 0.68rem;"><i class="bi bi-geo-alt me-1 text-primary"></i>Kecamatan</span>
@@ -675,7 +675,7 @@
                                     <span class="fw-bold text-dark" style="font-size: 0.85rem;">Fleksibilitas Login</span>
                                 </div>
                                 <div class="small text-muted" style="font-size: 0.75rem; line-height: 1.45;">
-                                    Petugas/Mitra dapat langsung masuk ke portal menggunakan <strong>ID SOBAT</strong> ataupun <strong>Email</strong> yang terdaftar.
+                                    Petugas/Mitra dapat langsung masuk ke portal menggunakan <strong>ID SOBAT / ID Mitra / NIK</strong> ataupun <strong>Email</strong> yang terdaftar.
                                 </div>
                             </div>
                         </div>
