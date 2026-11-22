@@ -586,7 +586,7 @@
                 @csrf
                 <div class="modal-body p-4">
                     <!-- Template Download & Format Info Card -->
-                    <div class="p-3 mb-4 rounded-3 border bg-light-subtle d-flex flex-column flex-sm-row align-items-sm-center justify-content-between gap-3">
+                    <div class="p-3 mb-3 rounded-3 border bg-light-subtle d-flex flex-column flex-sm-row align-items-sm-center justify-content-between gap-3">
                         <div class="d-flex align-items-center gap-2.5">
                             <i class="bi bi-file-earmark-arrow-down fs-2 text-success"></i>
                             <div>
@@ -598,6 +598,59 @@
                             <a href="{{ route('admin.users.template-mitra') }}" class="btn btn-outline-success btn-sm rounded-pill px-3 py-1.5 shadow-sm fw-semibold" style="font-size: 0.78rem;">
                                 <i class="bi bi-download me-1"></i> Unduh Format Contoh
                             </a>
+                        </div>
+                    </div>
+
+                    <!-- Informasi Kolom yang Dibaca vs Diabaikan -->
+                    <div class="p-3 mb-3 rounded-3 border" style="background: #f8fafc; border-color: #e2e8f0 !important;">
+                        <div class="d-flex align-items-center justify-content-between mb-2">
+                            <div class="d-flex align-items-center gap-1.5">
+                                <i class="bi bi-info-circle-fill text-primary" style="font-size: 0.95rem;"></i>
+                                <span class="fw-bold text-dark" style="font-size: 0.84rem;">Ketentuan Kolom Excel: Apa yang Dibaca &amp; Diabaikan</span>
+                            </div>
+                            <span class="badge rounded-pill bg-success-subtle text-success border border-success-subtle px-2 py-0.5" style="font-size: 0.68rem; font-weight: 700;">
+                                <i class="bi bi-shield-check me-0.5"></i>Aman Kolom Ekstra
+                            </span>
+                        </div>
+
+                        <p class="text-muted mb-2" style="font-size: 0.74rem; line-height: 1.5;">
+                            Sistem secara cerdas hanya membaca data profil penting mitra. <strong>Jika terdapat field/kolom lain pada file Excel Anda, sistem akan secara otomatis MENGABAIKANNYA</strong> sehingga Anda tidak perlu menghapus kolom-kolom tambahan dari hasil unduhan aplikasi SOBAT BPS.
+                        </p>
+
+                        <div class="row g-2">
+                            <!-- Kolom yang DIBACA -->
+                            <div class="col-lg-7 col-md-12">
+                                <div class="p-2.5 rounded-3 border bg-white h-100 shadow-2xs">
+                                    <div class="fw-bold text-success d-flex align-items-center gap-1 mb-1.5" style="font-size: 0.75rem; letter-spacing: 0.02em;">
+                                        <i class="bi bi-check-circle-fill text-success"></i> DATA YANG DIBACA OLEH SISTEM:
+                                    </div>
+                                    <div class="d-flex flex-wrap gap-1">
+                                        <span class="badge bg-light text-dark border py-1 px-1.5" style="font-size: 0.68rem;"><i class="bi bi-person me-1 text-primary"></i>Nama Lengkap</span>
+                                        <span class="badge bg-light text-dark border py-1 px-1.5" style="font-size: 0.68rem;"><i class="bi bi-card-text me-1 text-primary"></i>SOBAT ID</span>
+                                        <span class="badge bg-light text-dark border py-1 px-1.5" style="font-size: 0.68rem;"><i class="bi bi-envelope me-1 text-primary"></i>Email</span>
+                                        <span class="badge bg-light text-dark border py-1 px-1.5" style="font-size: 0.68rem;"><i class="bi bi-telephone me-1 text-primary"></i>No Telp / WA</span>
+                                        <span class="badge bg-light text-dark border py-1 px-1.5" style="font-size: 0.68rem;"><i class="bi bi-geo-alt me-1 text-primary"></i>Kecamatan</span>
+                                        <span class="badge bg-light text-dark border py-1 px-1.5" style="font-size: 0.68rem;"><i class="bi bi-pin-map me-1 text-primary"></i>Desa / Kelurahan</span>
+                                        <span class="badge bg-light text-dark border py-1 px-1.5" style="font-size: 0.68rem;"><i class="bi bi-house me-1 text-primary"></i>Alamat Detail</span>
+                                        <span class="badge bg-light text-dark border py-1 px-1.5" style="font-size: 0.68rem;"><i class="bi bi-gender-ambiguous me-1 text-primary"></i>Jenis Kelamin</span>
+                                        <span class="badge bg-light text-dark border py-1 px-1.5" style="font-size: 0.68rem;"><i class="bi bi-calendar-event me-1 text-primary"></i>TTL</span>
+                                        <span class="badge bg-light text-dark border py-1 px-1.5" style="font-size: 0.68rem;"><i class="bi bi-mortarboard me-1 text-primary"></i>Pendidikan</span>
+                                        <span class="badge bg-light text-dark border py-1 px-1.5" style="font-size: 0.68rem;"><i class="bi bi-briefcase me-1 text-primary"></i>Posisi</span>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Kolom yang DIABAIKAN -->
+                            <div class="col-lg-5 col-md-12">
+                                <div class="p-2.5 rounded-3 border bg-white h-100 shadow-2xs">
+                                    <div class="fw-bold text-secondary d-flex align-items-center gap-1 mb-1.5" style="font-size: 0.75rem; letter-spacing: 0.02em;">
+                                        <i class="bi bi-dash-circle-fill text-muted"></i> FIELD LAIN OTOMATIS DIABAIKAN:
+                                    </div>
+                                    <div class="text-muted" style="font-size: 0.71rem; line-height: 1.45;">
+                                        Kolom seperti <em>Status Seleksi, Umur, Status Kawin, Punya Motor, Pengalaman CAPI, Merk HP, RAM, Pernah SP/ST/SE/Susenas/Sakernas</em>, dll. akan dilewati secara aman tanpa mengganggu proses import.
+                                    </div>
+                                </div>
+                            </div>
                         </div>
                     </div>
 
