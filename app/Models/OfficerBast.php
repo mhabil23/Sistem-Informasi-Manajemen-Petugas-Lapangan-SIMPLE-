@@ -30,6 +30,15 @@ class OfficerBast extends Model
         'document_place',
         'maker_name',
         'maker_nip',
+        'maker_signature_path',
+        'first_party_position',
+        'first_party_address',
+        'second_party_nik',
+        'second_party_address',
+        'contract_number',
+        'contract_date',
+        'doc_count',
+        'activity_work_name',
         'notes',
         'file_path',
         'status',
@@ -45,9 +54,10 @@ class OfficerBast extends Model
     public function getReceiptCategoryLabelAttribute(): string
     {
         return match (strtoupper($this->receipt_category ?? '')) {
-            'PELATIHAN' => 'Perlengkapan Pelatihan',
+            'PELATIHAN', 'PERLENGKAPAN' => 'Perlengkapan Petugas',
             'ATK' => 'ATK Pendataan',
             'KUES' => 'Kuesioner Pendataan',
+            'ATK_RESPONDEN', 'RESPONDEN' => 'ATK & Dokumen Responden',
             'TIMBANGAN' => 'Timbangan',
             default => 'Tanda Terima Petugas',
         };
@@ -67,7 +77,61 @@ class OfficerBast extends Model
     {
         return [
             'bast_date' => 'date',
+            'contract_date' => 'date',
         ];
+    }
+
+    public static function terbilang(int $number): string
+    {
+        $bilangan = [
+            '', 'satu', 'dua', 'tiga', 'empat', 'lima',
+            'enam', 'tujuh', 'delapan', 'sembilan', 'sepuluh', 'sebelas'
+        ];
+
+        if ($number < 12) {
+            return $bilangan[$number];
+        } elseif ($number < 20) {
+            return self::terbilang($number - 10) . ' belas';
+        } elseif ($number < 100) {
+            $hasil = self::terbilang((int) ($number / 10)) . ' puluh';
+            $sisa = $number % 10;
+            if ($sisa > 0) {
+                $hasil .= ' ' . self::terbilang($sisa);
+            }
+            return $hasil;
+        } elseif ($number < 200) {
+            return 'seratus ' . self::terbilang($number - 100);
+        } elseif ($number < 1000) {
+            $hasil = self::terbilang((int) ($number / 100)) . ' ratus';
+            $sisa = $number % 100;
+            if ($sisa > 0) {
+                $hasil .= ' ' . self::terbilang($sisa);
+            }
+            return $hasil;
+        } elseif ($number < 2000) {
+            return 'seribu ' . self::terbilang($number - 1000);
+        } elseif ($number < 1000000) {
+            $hasil = self::terbilang((int) ($number / 1000)) . ' ribu';
+            $sisa = $number % 1000;
+            if ($sisa > 0) {
+                $hasil .= ' ' . self::terbilang($sisa);
+            }
+            return $hasil;
+        }
+
+        return (string) $number;
+    }
+
+    public function getSpelledDatePhraseAttribute(): string
+    {
+        $date = $this->bast_date ?: now();
+        $hari = $date->translatedFormat('l');
+        $tgl = self::terbilang((int) $date->format('j'));
+        $bln = $date->translatedFormat('F');
+        $thn = self::terbilang((int) $date->format('Y'));
+        $tempat = $this->document_place ?: 'Badan Pusat Statistik Kabupaten Kolaka Utara';
+
+        return "Pada hari ini {$hari}, tanggal {$tgl}, bulan {$bln}, tahun {$thn}, bertempat di {$tempat}, kami yang bertanda tangan di bawah ini:";
     }
 
     public function assignment(): BelongsTo
@@ -229,6 +293,39 @@ class OfficerBast extends Model
         return $parsed;
     }
 
+    public function getParsedItemsDetailedAttribute(): array
+    {
+        $rawItems = $this->parsed_items;
+        $detailed = [];
+
+        foreach ($rawItems as $item) {
+            if (preg_match('/^(.*?)\s*\(([0-9]+(?:\.[0-9]+)?)\s*([a-zA-Z\/\.\s]*)\)$/u', $item, $matches)) {
+                $detailed[] = [
+                    'name' => trim($matches[1]),
+                    'qty' => trim($matches[2]),
+                    'unit' => trim($matches[3]),
+                    'raw' => $item,
+                ];
+            } elseif (preg_match('/^([0-9]+(?:\.[0-9]+)?)\s*([a-zA-Z\/\.]+)?\s*[-–:]\s*(.*)$/u', $item, $matches)) {
+                $detailed[] = [
+                    'name' => trim($matches[3]),
+                    'qty' => trim($matches[1]),
+                    'unit' => trim($matches[2] ?? ''),
+                    'raw' => $item,
+                ];
+            } else {
+                $detailed[] = [
+                    'name' => $item,
+                    'qty' => '1',
+                    'unit' => '',
+                    'raw' => $item,
+                ];
+            }
+        }
+
+        return $detailed;
+    }
+
     public function getPlaceDateLineAttribute(): string
     {
         $place = trim((string) ($this->document_place ?: ($this->assignment?->location ?: 'Lasusua')));
@@ -290,6 +387,7 @@ class OfficerBast extends Model
         foreach ($request->input('recipients', []) as $row) {
             $name = trim((string) ($row['recipient_name'] ?? ''));
             $userId = !empty($row['user_id']) ? (int) $row['user_id'] : null;
+            $recId = !empty($row['recipient_id']) ? (int) $row['recipient_id'] : (!empty($row['id']) ? (int) $row['id'] : null);
 
             if ($name === '' && $userId) {
                 $user = User::find($userId);
@@ -303,6 +401,7 @@ class OfficerBast extends Model
             $origin = trim((string) ($row['origin_role'] ?? ''));
 
             $cleanRecipients[] = [
+                'recipient_id' => $recId,
                 'user_id' => $userId,
                 'recipient_name' => $name,
                 'position_unit' => $pos !== '' ? $pos : 'Mitra',
@@ -333,10 +432,31 @@ class OfficerBast extends Model
         }
 
         $cleanItems = [];
-        foreach ($request->input('items', []) as $itemText) {
-            $trimmed = trim((string) $itemText);
-            if ($trimmed !== '') {
-                $cleanItems[] = $trimmed;
+        foreach ($request->input('items', []) as $item) {
+            if (is_array($item)) {
+                $name = trim((string) ($item['name'] ?? ''));
+                $qty = trim((string) ($item['qty'] ?? ''));
+                $unit = trim((string) ($item['unit'] ?? ''));
+
+                if ($name === '') {
+                    continue;
+                }
+
+                $qtyPart = '';
+                if ($qty !== '' && $unit !== '') {
+                    $qtyPart = " ({$qty} {$unit})";
+                } elseif ($qty !== '') {
+                    $qtyPart = " ({$qty})";
+                } elseif ($unit !== '') {
+                    $qtyPart = " ({$unit})";
+                }
+
+                $cleanItems[] = "{$name}{$qtyPart}";
+            } else {
+                $trimmed = trim((string) $item);
+                if ($trimmed !== '') {
+                    $cleanItems[] = $trimmed;
+                }
             }
         }
 
@@ -352,15 +472,22 @@ class OfficerBast extends Model
 
         $year = date('Y', strtotime($bastDate));
         $category = strtoupper(trim((string) $request->input('receipt_category', 'PELATIHAN')));
-        if (!in_array($category, ['PELATIHAN', 'ATK', 'KUES', 'TIMBANGAN'], true)) {
+        if (!in_array($category, ['PELATIHAN', 'ATK', 'KUES', 'TIMBANGAN', 'ATK_RESPONDEN', 'RESPONDEN', 'PERLENGKAPAN'], true)) {
+            $category = 'PELATIHAN';
+        }
+        if ($category === 'RESPONDEN') {
+            $category = 'ATK_RESPONDEN';
+        }
+        if ($category === 'PERLENGKAPAN') {
             $category = 'PELATIHAN';
         }
 
         $defaultTitle = match ($category) {
-            'PELATIHAN' => 'Tanda Terima Perlengkapan Pelatihan',
+            'PELATIHAN' => 'Tanda Terima Perlengkapan Petugas',
             'ATK' => 'Tanda Terima ATK Pendataan',
             'KUES' => 'Tanda Terima Kuesioner Pendataan',
-            'TIMBANGAN' => 'Tanda Terima Timbangan Petugas',
+            'ATK_RESPONDEN' => 'Tanda Terima ATK dan Dokumen untuk Responden',
+            'TIMBANGAN' => 'Tanda Terima Timbangan',
             default => 'Tanda Terima Petugas',
         };
 
@@ -384,10 +511,53 @@ class OfficerBast extends Model
 
     public function syncRecipients(array $recipients): void
     {
-        $this->recipients()->delete();
+        $existingRecipients = $this->recipients()->get();
+        $processedIds = [];
 
-        if (!empty($recipients)) {
-            $this->recipients()->createMany($recipients);
+        foreach ($recipients as $idx => $row) {
+            $recId = !empty($row['recipient_id']) ? (int) $row['recipient_id'] : (!empty($row['id']) ? (int) $row['id'] : null);
+            $userId = !empty($row['user_id']) ? (int) $row['user_id'] : null;
+            $name = trim((string) ($row['recipient_name'] ?? ''));
+
+            // Match priority:
+            // 1. Explicit recipient_id (jika baris tersebut adalah penerima lama)
+            // 2. user_id (jika petugas tersebut terdaftar dengan user_id yang sama)
+            // 3. recipient_name (pencocokan nama tidak peka huruf besar/kecil)
+            $match = null;
+            if ($recId) {
+                $match = $existingRecipients->first(fn ($r) => (int) $r->id === $recId && !in_array($r->id, $processedIds, true));
+            }
+            if (!$match && $userId) {
+                $match = $existingRecipients->first(fn ($r) => (int) $r->user_id === $userId && !in_array($r->id, $processedIds, true));
+            }
+            if (!$match && $name !== '') {
+                $match = $existingRecipients->first(fn ($r) => strcasecmp(trim($r->recipient_name), $name) === 0 && !in_array($r->id, $processedIds, true));
+            }
+
+            $payload = [
+                'user_id' => $userId,
+                'recipient_name' => $name,
+                'position_unit' => trim((string) ($row['position_unit'] ?? '')) ?: 'Mitra',
+                'origin_role' => trim((string) ($row['origin_role'] ?? '')) ?: '-',
+                'sort_order' => $idx + 1,
+            ];
+
+            if ($match) {
+                // JANGAN PERNAH MENGHAPUS ATAU ME-RESET TANDA TANGAN YANG SUDAH DIBUBUHKAN!
+                // Tanda tangan (signature_path), waktu tanda tangan, dan status verifikasi tetap aman 100%
+                $match->update($payload);
+                $processedIds[] = $match->id;
+            } else {
+                $created = $this->recipients()->create($payload);
+                $processedIds[] = $created->id;
+            }
+        }
+
+        // Hapus hanya penerima yang benar-benar dikeluarkan dari daftar
+        if (!empty($processedIds)) {
+            $this->recipients()->whereNotIn('id', $processedIds)->delete();
+        } else {
+            $this->recipients()->delete();
         }
     }
 }

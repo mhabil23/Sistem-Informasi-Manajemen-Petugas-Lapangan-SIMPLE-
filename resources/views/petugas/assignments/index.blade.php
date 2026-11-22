@@ -59,6 +59,33 @@
         color: #ffffff;
         box-shadow: 0 4px 12px rgba(243, 112, 33, 0.25);
     }
+    .bento-card.card-selected {
+        border-color: #005BAC !important;
+        background-color: #f8fbff !important;
+        box-shadow: 0 4px 18px rgba(0, 91, 172, 0.12) !important;
+    }
+    .btn-bulk-action {
+        background: #ffffff;
+        border: 1px solid #e2e8f0;
+        color: #334155;
+        font-weight: 600;
+        font-size: 0.78rem;
+        padding: 0.32rem 0.8rem;
+        border-radius: 9999px;
+        display: inline-flex;
+        align-items: center;
+        gap: 0.4rem;
+        transition: all 0.15s ease;
+        box-shadow: 0 1px 2px rgba(0, 0, 0, 0.04);
+        cursor: pointer;
+    }
+    .btn-bulk-action:hover {
+        background: #f8fafc;
+        border-color: #cbd5e1;
+        color: #0f172a;
+        transform: translateY(-1px);
+        box-shadow: 0 2px 5px rgba(0, 0, 0, 0.08);
+    }
 </style>
 @endpush
 
@@ -133,20 +160,55 @@
     </div>
 </div>
 
+<!-- Bulk Action Toolbar Tugas Lapangan (Modern, Bersih & Elegan) -->
+<div id="bulkActionBar" class="d-none bento-card p-3 mb-3 align-items-center justify-content-between flex-wrap gap-2 shadow-xs" style="background: #f8fafc; border: 1px solid #e2e8f0;">
+    <div class="d-flex align-items-center gap-2">
+        <span class="badge rounded-pill px-3 py-1.5 fw-semibold d-inline-flex align-items-center gap-1.5" style="background: #005BAC; color: #ffffff; font-size: 0.78rem;">
+            <i class="bi bi-check2-circle fs-6"></i>
+            <span id="bulkSelectedCountBadge">0 Tugas Dipilih</span>
+        </span>
+        <span class="text-muted small">|</span>
+        <button type="button" class="btn btn-link btn-sm text-secondary text-decoration-none p-0 d-inline-flex align-items-center gap-1" onclick="clearAllSelectedTasks()" style="font-size: 0.78rem;">
+            <i class="bi bi-x-circle text-muted"></i> Batal Pilih
+        </button>
+    </div>
+    <div class="d-flex flex-wrap align-items-center gap-2">
+        <button type="button" class="btn-bulk-action" onclick="submitBulkProgress('in_progress')" title="Tandai seluruh tugas yang dicentang sedang dalam tahap pelaksanaan">
+            <i class="bi bi-hourglass-split text-warning fs-6"></i> Set Sedang Berjalan
+        </button>
+        <button type="button" class="btn-bulk-action" onclick="submitBulkProgress('completed')" title="Tandai seluruh tugas yang dicentang tuntas dikerjakan">
+            <i class="bi bi-check2-circle text-success fs-6"></i> Set Selesai
+        </button>
+        <button type="button" class="btn-bulk-action" onclick="submitBulkProgress('pending')" title="Kembalikan tugas yang dicentang ke status Menunggu">
+            <i class="bi bi-clock text-secondary fs-6"></i> Set Menunggu
+        </button>
+    </div>
+</div>
+
 <!-- Task List -->
 <div class="row g-3">
     @forelse($assignedTasks as $task)
         <div class="col-12">
-            <div class="bento-card p-4">
+            <div class="bento-card p-4 task-card-item">
                 <div class="d-flex flex-wrap justify-content-between align-items-start gap-2 mb-3">
-                    <div>
-                        <span class="badge bg-light text-primary border rounded-pill px-3 py-1.5 fw-semibold mb-1.5 d-inline-flex align-items-center gap-1.5 small">
-                            <i class="bi bi-calendar-check"></i>
-                            {{ $task->assignment->start_date->format('d/m/Y') }} s/d {{ $task->assignment->end_date->format('d/m/Y') }}
-                        </span>
-                        <h4 class="fw-bold text-dark mb-1" style="font-size: 1.15rem;">{{ $task->assignment->title }}</h4>
-                        <div class="text-secondary small d-flex align-items-center gap-1.5">
-                            <i class="bi bi-geo-alt-fill text-danger"></i> {{ $task->assignment->location }}
+                    <div class="d-flex align-items-start gap-3">
+                        <div class="pt-1">
+                            <input type="checkbox" 
+                                   name="task_ids[]" 
+                                   value="{{ $task->id }}" 
+                                   class="form-check-input task-row-checkbox cursor-pointer" 
+                                   style="width: 20px; height: 20px;"
+                                   onchange="onTaskCheckboxChange()">
+                        </div>
+                        <div>
+                            <span class="badge bg-light text-primary border rounded-pill px-3 py-1.5 fw-semibold mb-1.5 d-inline-flex align-items-center gap-1.5 small">
+                                <i class="bi bi-calendar-check"></i>
+                                {{ $task->assignment->start_date->format('d/m/Y') }} s/d {{ $task->assignment->end_date->format('d/m/Y') }}
+                            </span>
+                            <h4 class="fw-bold text-dark mb-1" style="font-size: 1.15rem;">{{ $task->assignment->title }}</h4>
+                            <div class="text-secondary small d-flex align-items-center gap-1.5">
+                                <i class="bi bi-geo-alt-fill text-danger"></i> {{ $task->assignment->location }}
+                            </div>
                         </div>
                     </div>
                     <div class="d-flex align-items-center gap-2">
@@ -259,6 +321,13 @@
         </div>
     </div>
 </div>
+
+<!-- Form Tersembunyi untuk Eksekusi Aksi Massal Progres Tugas Lapangan -->
+<form id="bulkProgressForm" method="POST" action="{{ route('petugas.assignments.bulk-progress') }}" class="d-none">
+    @csrf
+    <input type="hidden" name="status" id="bulkProgressStatusInput">
+    <div id="bulkProgressTaskIdsContainer"></div>
+</form>
 @endsection
 
 @push('scripts')
@@ -271,6 +340,83 @@
 
         const modal = new bootstrap.Modal(document.getElementById('updateProgressModal'));
         modal.show();
+    }
+
+    // ==============================================================
+    // Aksi Massal Progres Tugas Lapangan (Multi-Select)
+    // ==============================================================
+    function onTaskCheckboxChange() {
+        const allCheckboxes = document.querySelectorAll('.task-row-checkbox');
+        const checkedBoxes = document.querySelectorAll('.task-row-checkbox:checked');
+        const count = checkedBoxes.length;
+        const bar = document.getElementById('bulkActionBar');
+        const badge = document.getElementById('bulkSelectedCountBadge');
+
+        allCheckboxes.forEach(cb => {
+            const card = cb.closest('.task-card-item');
+            if (card) {
+                if (cb.checked) card.classList.add('card-selected');
+                else card.classList.remove('card-selected');
+            }
+        });
+
+        if (badge) badge.textContent = `${count} Tugas Dipilih`;
+
+        if (count > 0) {
+            if (bar) {
+                bar.classList.remove('d-none');
+                bar.classList.add('d-flex');
+            }
+        } else {
+            if (bar) {
+                bar.classList.add('d-none');
+                bar.classList.remove('d-flex');
+            }
+        }
+    }
+
+    function clearAllSelectedTasks() {
+        document.querySelectorAll('.task-row-checkbox').forEach(cb => {
+            cb.checked = false;
+            const card = cb.closest('.task-card-item');
+            if (card) card.classList.remove('card-selected');
+        });
+        onTaskCheckboxChange();
+    }
+
+    function submitBulkProgress(status) {
+        const selected = Array.from(document.querySelectorAll('.task-row-checkbox:checked')).map(cb => cb.value);
+        if (selected.length === 0) {
+            alert('Pilih minimal satu tugas terlebih dahulu.');
+            return;
+        }
+
+        const labels = {
+            'in_progress': 'Ubah status ' + selected.length + ' tugas terpilih menjadi Sedang Berjalan?',
+            'completed': 'Tandai ' + selected.length + ' tugas terpilih telah Selesai?',
+            'pending': 'Kembalikan status ' + selected.length + ' tugas terpilih menjadi Menunggu?'
+        };
+
+        const confirmMsg = labels[status] || 'Perbarui status ' + selected.length + ' tugas terpilih?';
+        if (!confirm(confirmMsg)) {
+            return;
+        }
+
+        const form = document.getElementById('bulkProgressForm');
+        const statusInput = document.getElementById('bulkProgressStatusInput');
+        const container = document.getElementById('bulkProgressTaskIdsContainer');
+
+        statusInput.value = status;
+        container.innerHTML = '';
+        selected.forEach(id => {
+            const hidden = document.createElement('input');
+            hidden.type = 'hidden';
+            hidden.name = 'task_ids[]';
+            hidden.value = id;
+            container.appendChild(hidden);
+        });
+
+        form.submit();
     }
 </script>
 @endpush

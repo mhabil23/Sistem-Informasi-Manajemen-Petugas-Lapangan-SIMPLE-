@@ -78,5 +78,54 @@ class AssignmentController extends Controller
 
         return back()->with('success', 'Perkembangan tugas berhasil disimpan!');
     }
+
+    /**
+     * Aksi massal petugas/pegawai memperbarui progres beberapa tugas sekaligus.
+     */
+    public function bulkProgress(Request $request)
+    {
+        $validated = $request->validate([
+            'status' => ['required', Rule::in(['pending', 'in_progress', 'completed'])],
+            'task_ids' => ['required', 'array', 'min:1'],
+            'task_ids.*' => ['integer'],
+        ], [
+            'task_ids.required' => 'Pilih minimal satu tugas untuk melakukan pembaruan massal.',
+            'task_ids.min' => 'Pilih minimal satu tugas untuk melakukan pembaruan massal.',
+        ]);
+
+        $userId = Auth::id();
+        $status = $validated['status'];
+        $taskIds = array_unique($validated['task_ids']);
+
+        $tasks = AssignmentOfficer::where('user_id', $userId)
+            ->whereIn('id', $taskIds)
+            ->get();
+
+        $affectedCount = 0;
+        foreach ($tasks as $task) {
+            $task->update(['status' => $status]);
+            if ($this->sheetService->isConfigured()) {
+                $this->sheetService->update('assignment_officers', $task->id, [
+                    'status' => $status,
+                    'updated_at' => now()->toISOString(),
+                ]);
+            }
+            $affectedCount++;
+        }
+
+        $statusLabels = [
+            'pending' => 'Menunggu (Belum Dimulai)',
+            'in_progress' => 'Sedang Berjalan',
+            'completed' => 'Selesai (Tuntas)',
+        ];
+
+        ActivityLog::log(
+            'bulk_update',
+            'assignments',
+            "Petugas " . Auth::user()->name . " memperbarui status massal {$affectedCount} tugas menjadi: {$statusLabels[$status]}."
+        );
+
+        return back()->with('success', "Sebanyak {$affectedCount} tugas berhasil diperbarui statusnya menjadi {$statusLabels[$status]}!");
+    }
 }
 

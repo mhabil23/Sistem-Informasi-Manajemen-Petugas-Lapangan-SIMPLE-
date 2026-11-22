@@ -132,4 +132,95 @@ class AssignmentAndScheduleTest extends TestCase
         $response->assertStatus(200);
         $response->assertSee('Agenda Lapangan Saya');
     }
+
+    public function test_show_assignment_renders_cleanly_even_if_assigned_officer_user_is_soft_deleted(): void
+    {
+        $admin = User::where('role', 'admin')->first();
+        $assignment = Assignment::first();
+
+        $tempUser = User::create([
+            'name' => 'Petugas Sementara',
+            'username' => 'petugas.sementara',
+            'email' => 'sementara@bps.go.id',
+            'password' => \Illuminate\Support\Facades\Hash::make('password'),
+            'role' => 'petugas',
+            'status' => 'active',
+        ]);
+
+        AssignmentOfficer::create([
+            'assignment_id' => $assignment->id,
+            'user_id' => $tempUser->id,
+            'specific_task' => 'Tugas Pengawasan Lapangan',
+            'status' => 'pending',
+        ]);
+
+        // Soft delete the user
+        $tempUser->delete();
+        $this->assertSoftDeleted('users', ['id' => $tempUser->id]);
+
+        $response = $this->actingAs($admin)->get(route('admin.assignments.show', $assignment));
+        $response->assertStatus(200);
+        $response->assertSee('Petugas Sementara');
+    }
+
+    public function test_admin_can_download_schedule_excel_and_csv_templates(): void
+    {
+        $admin = User::where('role', 'admin')->first();
+
+        $csvResponse = $this->actingAs($admin)->get(route('admin.schedules.template.download', ['format' => 'csv']));
+        $csvResponse->assertStatus(200);
+        $csvResponse->assertHeader('Content-Type', 'text/csv; charset=utf-8');
+
+        $xlsxResponse = $this->actingAs($admin)->get(route('admin.schedules.template.download', ['format' => 'xlsx']));
+        $xlsxResponse->assertStatus(200);
+        $xlsxResponse->assertHeader('Content-Type', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
+    }
+
+    public function test_admin_can_preview_and_import_schedules_from_excel_file(): void
+    {
+        $admin = User::where('role', 'admin')->first();
+        $officer = User::where('role', 'petugas')->first();
+        $assignment = Assignment::first();
+
+        $csvContent = "NO,Nama Agenda,Kegiatan Terkait,Petugas Terkait,Waktu Mulai,Waktu Selesai,Lokasi / Tempat,Status,Catatan / Perlengkapan\n";
+        $csvContent .= "1,\"Briefing Lapangan Sensus SPKI\",\"{$assignment->title}\",\"{$officer->name}\",\"2026-11-21 08:30\",\"2026-11-21 11:30\",\"Ruang Rapat Utama\",\"Terjadwal\",\"Bawa dokumen sensus\"\n";
+        $csvContent .= "2,\"Pencacahan Serentak Kolaka Utara\",\"{$assignment->title}\",\"-- Seluruh Petugas --\",\"2026-11-22 09:00\",\"2026-11-22 15:00\",\"Kecamatan Lasusua\",\"Terjadwal\",\"Target 20 rumah tangga\"\n";
+
+        $file = \Illuminate\Http\UploadedFile::fake()->createWithContent('jadwal_kegiatan.csv', $csvContent);
+
+        // 1. Preview AJAX Endpoint
+        $previewResponse = $this->actingAs($admin)->post(route('admin.schedules.preview-excel'), [
+            'excel_file' => $file,
+        ]);
+
+        $previewResponse->assertStatus(200);
+        $previewResponse->assertJson([
+            'success' => true,
+            'count' => 2,
+        ]);
+        $data = $previewResponse->json('schedules');
+        $this->assertEquals('Briefing Lapangan Sensus SPKI', $data[0]['title']);
+        $this->assertEquals($assignment->id, $data[0]['assignment_id']);
+        $this->assertEquals($officer->id, $data[0]['officer_id']);
+
+        // 2. Import Endpoint
+        $importResponse = $this->actingAs($admin)->post(route('admin.schedules.import-excel'), [
+            'excel_file' => $file,
+            'import_mode' => 'append',
+        ]);
+
+        $importResponse->assertRedirect(route('admin.schedules.index'));
+        $this->assertDatabaseHas('schedules', [
+            'title' => 'Briefing Lapangan Sensus SPKI',
+            'assignment_id' => $assignment->id,
+            'officer_id' => $officer->id,
+            'location' => 'Ruang Rapat Utama',
+        ]);
+        $this->assertDatabaseHas('schedules', [
+            'title' => 'Pencacahan Serentak Kolaka Utara',
+            'assignment_id' => $assignment->id,
+            'officer_id' => null,
+            'location' => 'Kecamatan Lasusua',
+        ]);
+    }
 }

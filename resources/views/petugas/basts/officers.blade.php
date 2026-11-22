@@ -228,9 +228,9 @@
                                     <i class="bi bi-box-seam text-primary me-0.5"></i> Tanda Terima Petugas
                                 </span>
                                 <div class="mt-1">
-                                    @if($cat === 'PELATIHAN')
+                                    @if($cat === 'PELATIHAN' || $cat === 'PERLENGKAPAN')
                                         <span class="badge border" style="font-size: 0.65rem; background: #faf5ff; color: #7e22ce; border-color: #e9d5ff !important;">
-                                            1. Perlengkapan Pelatihan
+                                            1. Perlengkapan Petugas
                                         </span>
                                     @elseif($cat === 'ATK')
                                         <span class="badge bg-primary-subtle text-primary border border-primary-subtle" style="font-size: 0.65rem;">
@@ -240,9 +240,13 @@
                                         <span class="badge bg-success-subtle text-success border border-success-subtle" style="font-size: 0.65rem;">
                                             3. Kuesioner Pendataan
                                         </span>
+                                    @elseif($cat === 'ATK_RESPONDEN' || $cat === 'RESPONDEN')
+                                        <span class="badge border" style="font-size: 0.65rem; background: #fff1f2; color: #e11d48; border-color: #fecdd3 !important;">
+                                            4. ATK &amp; Dok. Responden
+                                        </span>
                                     @elseif($cat === 'TIMBANGAN')
                                         <span class="badge bg-warning-subtle text-warning-emphasis border border-warning-subtle" style="font-size: 0.65rem;">
-                                            4. Timbangan
+                                            5. Timbangan
                                         </span>
                                     @else
                                         <span class="badge bg-secondary-subtle text-secondary border" style="font-size: 0.65rem;">
@@ -375,9 +379,9 @@
                                 <span class="badge bg-info-subtle text-info-emphasis border border-info-subtle px-1.5 py-0.5" style="font-size: 0.65rem;">
                                     <i class="bi bi-box-seam me-0.5"></i> Tanda Terima Petugas
                                 </span>
-                                @if($cat === 'PELATIHAN')
+                                @if($cat === 'PELATIHAN' || $cat === 'PERLENGKAPAN')
                                     <span class="badge border px-1.5 py-0.5" style="font-size: 0.65rem; background: #faf5ff; color: #7e22ce; border-color: #e9d5ff !important;">
-                                        1. Pelatihan
+                                        1. Perlengkapan Petugas
                                     </span>
                                 @elseif($cat === 'ATK')
                                     <span class="badge bg-primary-subtle text-primary border border-primary-subtle px-1.5 py-0.5" style="font-size: 0.65rem;">
@@ -387,9 +391,13 @@
                                     <span class="badge bg-success-subtle text-success border border-success-subtle px-1.5 py-0.5" style="font-size: 0.65rem;">
                                         3. Kuesioner
                                     </span>
+                                @elseif($cat === 'ATK_RESPONDEN' || $cat === 'RESPONDEN')
+                                    <span class="badge border px-1.5 py-0.5" style="font-size: 0.65rem; background: #fff1f2; color: #e11d48; border-color: #fecdd3 !important;">
+                                        4. ATK &amp; Dok. Responden
+                                    </span>
                                 @elseif($cat === 'TIMBANGAN')
                                     <span class="badge bg-warning-subtle text-warning-emphasis border border-warning-subtle px-1.5 py-0.5" style="font-size: 0.65rem;">
-                                        4. Timbangan
+                                        5. Timbangan
                                     </span>
                                 @else
                                     <span class="badge bg-secondary-subtle text-secondary border px-1.5 py-0.5" style="font-size: 0.65rem;">
@@ -541,14 +549,9 @@
                     <input type="text" name="notes" id="bastNotesInput" class="form-control form-control-sm" placeholder="Catatan kondisi dokumen/perlengkapan...">
                 </div>
 
-                @include('basts.partials._blanko_fields', ['officers' => $officers])
+                @include('basts.partials._blanko_fields', ['officers' => $officers, 'pegawaiList' => $pegawaiList])
 
-                <div id="terisiSingleSection" class="d-none">
-                    <div class="mb-0">
-                        <label class="form-label small fw-semibold text-secondary" style="font-size: 0.78rem;">RINCIAN DOKUMEN &amp; PERLENGKAPAN YANG DISERAHKAN <span class="text-danger">*</span></label>
-                        <textarea name="description" id="bastSingleDescriptionInput" class="form-control" rows="4" style="font-size: 0.82rem;" placeholder="Contoh:&#10;- Bundel Kuesioner Sensus/Survei yang Telah Terisi Lengkap: 120 Eksemplar&#10;- Berkas BAST Responden Bertanda Tangan: Lengkap&#10;- Pengembalian Perlengkapan Inventaris Satker: Kondisi Baik"></textarea>
-                    </div>
-                </div>
+                @include('basts.partials._terisi_fields', ['isAdminForm' => false, 'pegawaiList' => $pegawaiList])
             </div>
             <div class="modal-footer bg-light border-top sticky-bottom flex-shrink-0 py-2 px-3">
                 <button type="button" class="btn btn-light rounded-pill px-3" data-bs-dismiss="modal" style="font-size: 0.82rem;">Batal</button>

@@ -1622,6 +1622,14 @@ body {
 
 /* Petugas Mobile Responsive */
 @media (max-width: 767.98px) {
+    .sp-bottom-nav {
+        display: flex !important;
+    }
+
+    .sp-wrapper-petugas {
+        padding-bottom: 68px;
+    }
+
     .sp-main-petugas .sp-navbar {
         padding: 0 1rem !important;
     }
@@ -1696,7 +1704,8 @@ body {
 }
 
 .sp-bottom-nav-item.active {
-    color: var(--sp-blue-500);
+    color: #f37021;
+    font-weight: 700;
 }
 
 .sp-bottom-nav-item:active {

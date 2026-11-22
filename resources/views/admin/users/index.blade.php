@@ -114,6 +114,55 @@
     .bento-action-btn.btn-delete { color: #DC2626; border-color: #FECACA; background: #FEF2F2; }
     .bento-action-btn.btn-delete:hover { background: #DC2626; color: #FFFFFF; }
 
+    /* Bulk Action Buttons - Clean, Modern & Elegant */
+    .btn-bulk-action {
+        background: #ffffff;
+        border: 1px solid #e2e8f0;
+        color: #334155;
+        font-weight: 600;
+        font-size: 0.78rem;
+        padding: 0.32rem 0.8rem;
+        border-radius: 9999px;
+        display: inline-flex;
+        align-items: center;
+        gap: 0.4rem;
+        transition: all 0.15s ease;
+        box-shadow: 0 1px 2px rgba(0, 0, 0, 0.04);
+        cursor: pointer;
+    }
+    .btn-bulk-action:hover {
+        background: #f8fafc;
+        border-color: #cbd5e1;
+        color: #0f172a;
+        transform: translateY(-1px);
+        box-shadow: 0 2px 5px rgba(0, 0, 0, 0.08);
+    }
+    .btn-bulk-action-danger {
+        background: #ffffff;
+        border: 1px solid #fecaca;
+        color: #dc2626;
+        font-weight: 600;
+        font-size: 0.78rem;
+        padding: 0.32rem 0.8rem;
+        border-radius: 9999px;
+        display: inline-flex;
+        align-items: center;
+        gap: 0.4rem;
+        transition: all 0.15s ease;
+        box-shadow: 0 1px 2px rgba(0, 0, 0, 0.04);
+        cursor: pointer;
+    }
+    .btn-bulk-action-danger:hover {
+        background: #fef2f2;
+        border-color: #f87171;
+        color: #b91c1c;
+        transform: translateY(-1px);
+        box-shadow: 0 2px 5px rgba(220, 38, 38, 0.15);
+    }
+    .bento-table tbody tr.row-selected td {
+        background-color: #f0f7ff !important;
+    }
+
     @media (max-width: 767.98px) {
         .bento-table thead {
             display: none;
@@ -172,6 +221,7 @@
                     <option value="admin" {{ request('role') === 'admin' ? 'selected' : '' }}>Administrator</option>
                     <option value="pegawai" {{ request('role') === 'pegawai' ? 'selected' : '' }}>Pegawai / PML</option>
                     <option value="petugas" {{ request('role') === 'petugas' ? 'selected' : '' }}>Petugas Lapangan</option>
+                    <option value="dual_role" {{ request('role') === 'dual_role' ? 'selected' : '' }}>Dual Role (+Admin)</option>
                 </select>
             </div>
 
@@ -202,17 +252,54 @@
     <div class="d-flex flex-wrap justify-content-between align-items-center p-3 border-bottom gap-2">
         <div>
             <h5 class="fw-bold text-dark mb-0" style="font-size: 1.05rem;">Daftar Pengguna Sistem</h5>
-            <div class="d-flex align-items-center gap-1 mt-1">
+            <div class="d-flex align-items-center gap-1 mt-1 flex-wrap">
                 <span class="badge bg-light text-secondary border">Total Pengguna: {{ $totalUsers }}</span>
-                <span class="badge bg-light text-secondary border">Halaman {{ $users->currentPage() }} dari {{ $users->lastPage() ?: 1 }}</span>
+                <span class="badge bg-primary-subtle text-primary border border-primary-subtle">Pegawai: {{ $totalPegawai }}</span>
+                <span class="badge bg-warning-subtle text-warning-emphasis border border-warning-subtle">Dual Role (+Admin): {{ $totalDualRole }}</span>
+                <span class="badge bg-light text-secondary border">Petugas: {{ $totalOfficers }}</span>
+                <span class="badge bg-light text-secondary border">Admin: {{ $totalAdmins }}</span>
             </div>
         </div>
-        <div class="d-flex align-items-center gap-2">
-            <a href="{{ asset('exports/daftar_akun_petugas_simple.csv') }}" class="btn btn-outline-success rounded-pill px-3 py-1.5" style="font-size: 0.85rem;" download="daftar_akun_petugas_simple.csv" title="Unduh seluruh 366 data akun petugas beserta username dan password default">
-                <i class="bi bi-file-earmark-excel me-1"></i> Unduh Akun Petugas (.CSV)
-            </a>
+        <div class="d-flex align-items-center gap-2 flex-wrap">
+            <button type="button" class="btn btn-outline-primary rounded-pill px-3 py-1.5" data-bs-toggle="modal" data-bs-target="#managePegawaiAdminModal" style="font-size: 0.85rem;" title="Pilih pegawai sekaligus untuk diberikan atau dicabut hak akses Administrator">
+                <i class="bi bi-shield-check text-primary me-1"></i> Kelola Hak Admin Pegawai
+            </button>
+            <button type="button" class="btn btn-outline-danger rounded-pill px-3 py-1.5" data-bs-toggle="modal" data-bs-target="#revokeAllPegawaiAdminModal" style="font-size: 0.85rem;" title="Tutup seluruh akses Administrator untuk semua pegawai secara serentak">
+                <i class="bi bi-shield-slash me-1"></i> Tutup Semua Akses Admin Pegawai
+            </button>
             <button type="button" class="btn btn-bps-orange rounded-pill px-3 py-1.5" data-bs-toggle="modal" data-bs-target="#createUserModal" style="font-size: 0.85rem;">
                 <i class="bi bi-person-plus me-1"></i> Tambah Pengguna Baru
+            </button>
+        </div>
+    </div>
+
+    <!-- Bulk Action Toolbar (Modern, Bersih & Elegan) -->
+    <div id="bulkActionBar" class="d-none px-3 py-2.5 border-bottom border-top align-items-center justify-content-between flex-wrap gap-2" style="background: #f8fafc; border-color: #e2e8f0 !important;">
+        <div class="d-flex align-items-center gap-2">
+            <span class="badge rounded-pill px-3 py-1.5 fw-semibold d-inline-flex align-items-center gap-1.5" style="background: #005BAC; color: #ffffff; font-size: 0.78rem;">
+                <i class="bi bi-check2-circle fs-6"></i>
+                <span id="bulkSelectedCountBadge">0 Pengguna Dipilih</span>
+            </span>
+            <span class="text-muted small">|</span>
+            <button type="button" class="btn btn-link btn-sm text-secondary text-decoration-none p-0 d-inline-flex align-items-center gap-1" onclick="clearAllSelectedUsers()" style="font-size: 0.78rem;">
+                <i class="bi bi-x-circle text-muted"></i> Batal Pilih
+            </button>
+        </div>
+        <div class="d-flex flex-wrap align-items-center gap-2">
+            <button type="button" class="btn-bulk-action" onclick="submitBulkAction('grant_admin')" title="Berikan hak akses Administrator (Dual Role) untuk pegawai yang dicentang">
+                <i class="bi bi-shield-plus text-success fs-6"></i> Beri Akses Admin
+            </button>
+            <button type="button" class="btn-bulk-action" onclick="submitBulkAction('revoke_admin')" title="Cabut hak akses Administrator dari pengguna yang dicentang">
+                <i class="bi bi-shield-minus text-warning fs-6"></i> Cabut Akses Admin
+            </button>
+            <button type="button" class="btn-bulk-action" onclick="submitBulkAction('activate')" title="Aktifkan status akun yang dicentang">
+                <i class="bi bi-person-check text-info fs-6"></i> Aktifkan
+            </button>
+            <button type="button" class="btn-bulk-action" onclick="submitBulkAction('deactivate')" title="Nonaktifkan status akun yang dicentang">
+                <i class="bi bi-person-slash text-secondary fs-6"></i> Nonaktifkan
+            </button>
+            <button type="button" class="btn-bulk-action-danger" onclick="submitBulkAction('delete')" title="Hapus pengguna yang dicentang">
+                <i class="bi bi-trash fs-6"></i> Hapus
             </button>
         </div>
     </div>
@@ -221,12 +308,15 @@
         <table class="bento-table align-middle">
             <thead>
                 <tr>
-                    <th style="width: 25%;">PENGGUNA</th>
+                    <th style="width: 38px;" class="text-center">
+                        <input type="checkbox" id="selectAllUsersCheckbox" class="form-check-input" onchange="toggleSelectAllUsers(this)" title="Pilih Semua Pengguna di Halaman Ini">
+                    </th>
+                    <th style="width: 24%;">PENGGUNA</th>
                     <th style="width: 14%;">ROLE</th>
-                    <th style="width: 21%;">KONTAK</th>
+                    <th style="width: 20%;">KONTAK</th>
                     <th class="text-center" style="width: 11%;">STATUS AKUN</th>
                     <th style="width: 10%;">TERDAFTAR</th>
-                    <th class="text-end pe-3" style="width: 19%;">AKSI</th>
+                    <th class="text-end pe-3" style="width: 18%;">AKSI</th>
                 </tr>
             </thead>
             <tbody>
@@ -239,6 +329,17 @@
                         };
                     @endphp
                     <tr>
+                        <!-- Checkbox Pilihan -->
+                        <td class="text-center" data-label="Pilih">
+                            <input type="checkbox" 
+                                   name="user_ids[]" 
+                                   value="{{ $user->id }}" 
+                                   class="form-check-input user-row-checkbox" 
+                                   data-name="{{ $user->name }}"
+                                   data-is-master="{{ $user->isMasterAdmin() ? '1' : '0' }}"
+                                   onchange="onUserRowCheckboxChange()">
+                        </td>
+
                         <!-- Pengguna -->
                         <td data-label="Pengguna">
                             <div class="d-flex align-items-center gap-2">
@@ -265,7 +366,11 @@
 
                         <!-- Role -->
                         <td data-label="Role">
-                            @if($user->role === 'admin')
+                            @if($user->isMasterAdmin())
+                                <span class="badge rounded-pill px-2.5 py-1" style="background: linear-gradient(135deg, #FEF3C7 0%, #FDE68A 100%); color: #92400E; border: 1px solid #F59E0B; font-weight: 700; font-size: 0.72rem;">
+                                    <i class="bi bi-shield-shaded me-1 text-warning"></i> Master Admin
+                                </span>
+                            @elseif($user->role === 'admin')
                                 <span class="badge rounded-pill px-2.5 py-1" style="background: #EDE9FE; color: #6D28D9; border: 1px solid #DDD6FE; font-weight: 600; font-size: 0.72rem;">
                                     <i class="bi bi-shield-check me-1"></i> Administrator
                                 </span>
@@ -273,10 +378,24 @@
                                 <span class="badge rounded-pill px-2.5 py-1" style="background: #E0F2FE; color: #0369A1; border: 1px solid #BAE6FD; font-weight: 600; font-size: 0.72rem;">
                                     <i class="bi bi-person-badge me-1"></i> Pegawai / PML
                                 </span>
+                                @if($user->can_switch_role)
+                                    <div class="mt-1">
+                                        <span class="badge bg-warning-subtle text-warning-emphasis border border-warning-subtle rounded-pill px-2 py-0.5" style="font-size: 0.65rem;" title="Memiliki hak Dual Role (bisa beralih peran jadi Admin)">
+                                            <i class="bi bi-arrow-left-right me-0.5 text-primary"></i> Dual Role (+Admin)
+                                        </span>
+                                    </div>
+                                @endif
                             @else
                                 <span class="badge rounded-pill px-2.5 py-1" style="background: #FFF4ED; color: #C2410C; border: 1px solid #FFEDD5; font-weight: 600; font-size: 0.72rem;">
                                     <i class="bi bi-person-check me-1"></i> Petugas
                                 </span>
+                                @if($user->can_switch_role)
+                                    <div class="mt-1">
+                                        <span class="badge bg-warning-subtle text-warning-emphasis border border-warning-subtle rounded-pill px-2 py-0.5" style="font-size: 0.65rem;" title="Memiliki hak Dual Role (bisa beralih peran jadi Admin)">
+                                            <i class="bi bi-arrow-left-right me-0.5 text-primary"></i> Dual Role (+Admin)
+                                        </span>
+                                    </div>
+                                @endif
                             @endif
                         </td>
 
@@ -312,52 +431,107 @@
                         <!-- Aksi -->
                         <td class="text-end text-nowrap pe-3" data-label="Aksi">
                             <div class="d-inline-flex align-items-center justify-content-end gap-1">
-                                <!-- Edit -->
-                                <button type="button" 
-                                        class="bento-action-btn btn-edit" 
-                                        title="Edit Data Pengguna" 
-                                        data-bs-toggle="tooltip"
-                                        onclick="openEditModal({{ json_encode($user) }})">
-                                    <i class="bi bi-pencil-square"></i>
-                                </button>
-
-                                <!-- Reset Password -->
-                                <button type="button" 
-                                        class="bento-action-btn btn-key" 
-                                        title="Reset Password" 
-                                        data-bs-toggle="tooltip"
-                                        onclick="openResetPasswordModal({{ $user->id }}, '{{ addslashes($user->name) }}')">
-                                    <i class="bi bi-key"></i>
-                                </button>
-
-                                @if($user->id !== auth()->id())
-                                    <!-- Toggle Status Aktif / Nonaktif -->
-                                    <form method="POST" action="{{ route('admin.users.toggle-status', $user) }}" class="d-inline" onsubmit="return confirm('Ubah status akun {{ addslashes($user->name) }} menjadi {{ $user->isActive() ? 'Nonaktif' : 'Aktif' }}?');">
-                                        @csrf
-                                        @method('PATCH')
-                                        <button type="submit" 
-                                                class="bento-action-btn btn-toggle {{ $user->isActive() ? 'text-secondary' : 'text-success' }}" 
-                                                title="{{ $user->isActive() ? 'Nonaktifkan Akun' : 'Aktifkan Akun' }}"
-                                                data-bs-toggle="tooltip">
-                                            <i class="bi {{ $user->isActive() ? 'bi-person-slash' : 'bi-person-check' }}"></i>
+                                @if($user->isMasterAdmin())
+                                    @if(auth()->user()->isMasterAdmin())
+                                        <!-- Edit Master Admin (Hanya Master Admin Sendiri) -->
+                                        <button type="button" 
+                                                class="bento-action-btn btn-edit" 
+                                                title="Edit Data Master Admin" 
+                                                data-bs-toggle="tooltip"
+                                                onclick="openEditModal({{ json_encode($user) }})">
+                                            <i class="bi bi-pencil-square"></i>
                                         </button>
-                                    </form>
 
-                                    <!-- Hapus -->
+                                        <!-- Reset Password Master Admin -->
+                                        <button type="button" 
+                                                class="bento-action-btn btn-key" 
+                                                title="Reset Password Master Admin" 
+                                                data-bs-toggle="tooltip"
+                                                onclick="openResetPasswordModal({{ $user->id }}, '{{ addslashes($user->name) }}')">
+                                            <i class="bi bi-key"></i>
+                                        </button>
+                                    @else
+                                        <!-- Jika Dilihat Oleh Akun Admin Lain / Petugas Admin -->
+                                        <span class="badge rounded-pill px-2.5 py-1 text-muted border bg-light d-inline-flex align-items-center" style="font-size: 0.72rem;" title="Akun Master Admin Terlindungi &amp; Hak Akses Permanen">
+                                            <i class="bi bi-shield-lock-fill text-warning me-1"></i> Terlindungi
+                                        </span>
+                                    @endif
+                                @else
+                                    <!-- Edit -->
                                     <button type="button" 
-                                            class="bento-action-btn btn-delete" 
-                                            title="Hapus Pengguna" 
+                                            class="bento-action-btn btn-edit" 
+                                            title="Edit Data Pengguna" 
                                             data-bs-toggle="tooltip"
-                                            onclick="openDeleteModal({{ $user->id }}, '{{ addslashes($user->name) }}')">
-                                        <i class="bi bi-trash"></i>
+                                            onclick="openEditModal({{ json_encode($user) }})">
+                                        <i class="bi bi-pencil-square"></i>
                                     </button>
+
+                                    <!-- Reset Password -->
+                                    <button type="button" 
+                                            class="bento-action-btn btn-key" 
+                                            title="Reset Password" 
+                                            data-bs-toggle="tooltip"
+                                            onclick="openResetPasswordModal({{ $user->id }}, '{{ addslashes($user->name) }}')">
+                                        <i class="bi bi-key"></i>
+                                    </button>
+
+                                    @if($user->id !== auth()->id())
+                                        @if($user->can_switch_role || $user->role === 'admin')
+                                            <!-- Tutup Akses Administrator -->
+                                            <form method="POST" action="{{ route('admin.users.revoke-admin', $user) }}" class="d-inline" onsubmit="return confirm('Tutup akses Administrator untuk {{ addslashes($user->name) }}? Pengguna tidak akan bisa lagi mengakses atau beralih ke Mode Admin.');">
+                                                @csrf
+                                                @method('PATCH')
+                                                <button type="submit" 
+                                                        class="bento-action-btn" 
+                                                        style="color: #DC2626; border-color: #FECACA; background: #FEF2F2;"
+                                                        title="Tutup Akses Administrator" 
+                                                        data-bs-toggle="tooltip">
+                                                    <i class="bi bi-shield-slash"></i>
+                                                </button>
+                                            </form>
+                                        @else
+                                            <!-- Buka Akses Administrator (Dual Role) -->
+                                            <form method="POST" action="{{ route('admin.users.grant-admin', $user) }}" class="d-inline" onsubmit="return confirm('Buka akses Administrator (Dual Role) untuk {{ addslashes($user->name) }}? Pengguna akan dapat beralih ke Mode Admin.');">
+                                                @csrf
+                                                @method('PATCH')
+                                                <button type="submit" 
+                                                        class="bento-action-btn" 
+                                                        style="color: #059669; border-color: #A7F3D0; background: #ECFDF5;"
+                                                        title="Buka Akses Administrator (Dual Role)" 
+                                                        data-bs-toggle="tooltip">
+                                                    <i class="bi bi-shield-plus"></i>
+                                                </button>
+                                            </form>
+                                        @endif
+
+                                        <!-- Toggle Status Aktif / Nonaktif -->
+                                        <form method="POST" action="{{ route('admin.users.toggle-status', $user) }}" class="d-inline" onsubmit="return confirm('Ubah status akun {{ addslashes($user->name) }} menjadi {{ $user->isActive() ? 'Nonaktif' : 'Aktif' }}?');">
+                                            @csrf
+                                            @method('PATCH')
+                                            <button type="submit" 
+                                                    class="bento-action-btn btn-toggle {{ $user->isActive() ? 'text-secondary' : 'text-success' }}" 
+                                                    title="{{ $user->isActive() ? 'Nonaktifkan Akun' : 'Aktifkan Akun' }}"
+                                                    data-bs-toggle="tooltip">
+                                                <i class="bi {{ $user->isActive() ? 'bi-person-slash' : 'bi-person-check' }}"></i>
+                                            </button>
+                                        </form>
+
+                                        <!-- Hapus -->
+                                        <button type="button" 
+                                                class="bento-action-btn btn-delete" 
+                                                title="Hapus Pengguna" 
+                                                data-bs-toggle="tooltip"
+                                                onclick="openDeleteModal({{ $user->id }}, '{{ addslashes($user->name) }}')">
+                                            <i class="bi bi-trash"></i>
+                                        </button>
+                                    @endif
                                 @endif
                             </div>
                         </td>
                     </tr>
                 @empty
                     <tr>
-                        <td colspan="6" class="text-center py-5 text-muted">
+                        <td colspan="7" class="text-center py-5 text-muted">
                             <i class="bi bi-person-x fs-1 text-secondary opacity-50 mb-2 d-block"></i>
                             <div class="fw-semibold">Tidak ada pengguna ditemukan.</div>
                             <div class="small">Coba ubah kata kunci pencarian atau filter yang dipilih.</div>
@@ -433,7 +607,7 @@
                         </div>
                     </div>
 
-                    <div class="row g-3">
+                    <div class="row g-3 mb-3">
                         <div class="col-md-6">
                             <label class="form-label small fw-semibold text-secondary">KATA SANDI AWAL <span class="text-danger">*</span></label>
                             <input type="password" name="password" class="form-control" placeholder="Minimal 6 karakter" required>
@@ -452,6 +626,17 @@
                                 <option value="active" selected>Aktif</option>
                                 <option value="inactive">Nonaktif</option>
                             </select>
+                        </div>
+                        <div class="col-12">
+                            <div class="form-check form-switch p-2.5 ps-5 rounded-3 border" style="background: #f8fafc;">
+                                <input class="form-check-input mt-1" type="checkbox" role="switch" id="create_can_switch_role" name="can_switch_role" value="1">
+                                <label class="form-check-label fw-bold text-dark small" for="create_can_switch_role">
+                                    <i class="bi bi-arrow-left-right text-primary me-1"></i> Izinkan Dual Role (Bisa Beralih Jadi Administrator &amp; Pegawai)
+                                </label>
+                                <div class="text-muted" style="font-size: 0.72rem;">
+                                    Bila diaktifkan, pengguna dapat beralih ke Mode Administrator langsung dari menu profil di kanan atas.
+                                </div>
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -482,6 +667,16 @@
                 @csrf
                 @method('PUT')
                 <div class="modal-body p-4">
+                    <div id="edit_master_admin_notice" class="alert alert-warning d-none py-2 px-3 small border-0 mb-3 d-flex align-items-center gap-2" style="background: #FFFBEB; color: #92400E; border-radius: 12px;">
+                        <i class="bi bi-shield-lock-fill fs-5 text-warning flex-shrink-0"></i>
+                        <div>
+                            <strong>Akun Master Admin Terlindungi:</strong>
+                            Role Administrator dan status aktif dilindungi permanen untuk menjamin keamanan sistem SIMPLE.
+                        </div>
+                    </div>
+                    <input type="hidden" id="edit_role_hidden" name="role" value="admin" disabled>
+                    <input type="hidden" id="edit_status_hidden" name="status" value="active" disabled>
+
                     <div class="row g-3 mb-3">
                         <div class="col-md-6">
                             <label class="form-label small fw-semibold text-secondary">NAMA LENGKAP <span class="text-danger">*</span></label>
@@ -534,6 +729,17 @@
                                 <option value="active">Aktif</option>
                                 <option value="inactive">Nonaktif</option>
                             </select>
+                        </div>
+                        <div class="col-12">
+                            <div class="form-check form-switch p-2.5 ps-5 rounded-3 border" style="background: #f8fafc;">
+                                <input class="form-check-input mt-1" type="checkbox" role="switch" id="edit_can_switch_role" name="can_switch_role" value="1">
+                                <label class="form-check-label fw-bold text-dark small" for="edit_can_switch_role">
+                                    <i class="bi bi-arrow-left-right text-primary me-1"></i> Izinkan Dual Role (Bisa Beralih Jadi Administrator &amp; Pegawai)
+                                </label>
+                                <div class="text-muted" style="font-size: 0.72rem;">
+                                    Bila diaktifkan, pengguna dapat beralih ke Mode Administrator langsung dari menu profil di kanan atas.
+                                </div>
+                            </div>
                         </div>
                     </div>
 
@@ -618,6 +824,127 @@
         </div>
     </div>
 </div>
+
+<!-- ==============================================================
+     MODAL TUTUP SEMUA AKSES ADMIN PEGAWAI
+     ============================================================== -->
+<div class="modal fade" id="revokeAllPegawaiAdminModal" tabindex="-1" aria-labelledby="revokeAllPegawaiAdminModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered" style="max-width: 460px;">
+        <div class="modal-content border-0 shadow" style="border-radius: 20px; overflow: hidden;">
+            <div class="modal-body text-center p-4">
+                <div class="mb-3">
+                    <span class="badge rounded-circle p-3" style="background: #FEE2E2; color: #DC2626; font-size: 2.2rem;">
+                        <i class="bi bi-shield-x"></i>
+                    </span>
+                </div>
+                <h5 class="fw-bold mb-2 text-dark">Tutup Semua Akses Admin Pegawai?</h5>
+                <p class="text-muted small mb-4">
+                    Tindakan ini akan mencabut izin Administrator (Dual Role) dari <strong>seluruh akun pegawai</strong> secara serentak. Pegawai yang bersangkutan hanya akan memiliki akses sebagai Pegawai/PML biasa dan tidak dapat beralih ke Mode Admin sampai izin dibuka kembali.
+                </p>
+                <form method="POST" action="{{ route('admin.users.revoke-all-pegawai-admin') }}">
+                    @csrf
+                    <div class="d-flex gap-2 justify-content-center">
+                        <button type="button" class="btn btn-light rounded-pill px-4" data-bs-dismiss="modal">Batal</button>
+                        <button type="submit" class="btn btn-danger rounded-pill px-4 fw-semibold">
+                            <i class="bi bi-shield-slash me-1"></i> Ya, Tutup Semua Akses Admin
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- ==============================================================
+     MODAL KELOLA HAK ADMIN PEGAWAI (PILIH BANYAK / CHECKLIST)
+     ============================================================== -->
+<div class="modal fade" id="managePegawaiAdminModal" tabindex="-1" aria-labelledby="managePegawaiAdminModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered modal-lg">
+        <div class="modal-content border-0 shadow" style="border-radius: 20px; overflow: hidden;">
+            <div class="modal-header bg-light border-bottom py-3 px-4">
+                <div>
+                    <h5 class="modal-title fw-bold text-dark mb-0" id="managePegawaiAdminModalLabel">
+                        <i class="bi bi-shield-check text-warning me-2"></i> Kelola Hak Akses Admin Pegawai (Pilih Banyak)
+                    </h5>
+                    <div class="text-muted small mt-0.5">
+                        Centang pegawai yang diizinkan memiliki <strong>Dual Role (+Admin)</strong> untuk beralih jadi Administrator.
+                    </div>
+                </div>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <form method="POST" action="{{ route('admin.users.update-multiple-pegawai-admin') }}">
+                @csrf
+                <div class="modal-body p-4">
+                    <!-- Search inside modal & Quick Actions -->
+                    <div class="d-flex flex-wrap align-items-center justify-content-between gap-2 mb-3">
+                        <div class="input-group input-group-sm" style="max-width: 320px;">
+                            <span class="input-group-text bg-white"><i class="bi bi-search text-muted"></i></span>
+                            <input type="text" id="pegawaiModalSearch" class="form-control" placeholder="Cari nama atau NIP pegawai..." onkeyup="filterPegawaiModalList()">
+                        </div>
+                        <div class="d-flex gap-1.5">
+                            <button type="button" class="btn btn-xs btn-outline-primary rounded-pill px-2.5 py-1 small" onclick="toggleAllModalPegawai(true)">
+                                <i class="bi bi-check-all me-1"></i> Pilih Semua
+                            </button>
+                            <button type="button" class="btn btn-xs btn-outline-secondary rounded-pill px-2.5 py-1 small" onclick="toggleAllModalPegawai(false)">
+                                <i class="bi bi-x-circle me-1"></i> Hapus Semua Pilihan
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Checklist container -->
+                    <div class="border rounded-3 p-2 bg-light" style="max-height: 380px; overflow-y: auto;">
+                        <div class="row g-2" id="pegawaiModalList">
+                            @forelse(($allPegawai ?? []) as $peg)
+                                <div class="col-md-6 pegawai-modal-item" data-name="{{ strtolower($peg->name) }}" data-nip="{{ strtolower($peg->nik ?? '') }}">
+                                    <label class="d-flex align-items-center gap-2.5 p-2 bg-white rounded-2 border h-100 cursor-pointer shadow-xs hover-bg-light">
+                                        <input type="checkbox" name="pegawai_ids[]" value="{{ $peg->id }}" class="form-check-input flex-shrink-0 pegawai-modal-cb" {{ $peg->can_switch_role ? 'checked' : '' }}>
+                                        <div class="overflow-hidden flex-grow-1">
+                                            <div class="fw-semibold text-dark text-truncate small">{{ $peg->name }}</div>
+                                            <div class="d-flex align-items-center gap-1 text-muted" style="font-size: 0.68rem;">
+                                                <span class="font-monospace">{{ $peg->nik ?: '@'.$peg->username }}</span>
+                                                @if($peg->position)
+                                                    <span class="text-truncate">&bull; {{ $peg->position }}</span>
+                                                @endif
+                                            </div>
+                                        </div>
+                                        @if($peg->can_switch_role)
+                                            <span class="badge bg-warning-subtle text-warning-emphasis border border-warning-subtle rounded-pill px-1.5 py-0.5" style="font-size: 0.62rem;">
+                                                Aktif
+                                            </span>
+                                        @endif
+                                    </label>
+                                </div>
+                            @empty
+                                <div class="col-12 text-center text-muted py-4">
+                                    Belum ada data pegawai terdaftar.
+                                </div>
+                            @endforelse
+                        </div>
+                    </div>
+                    <div class="form-text mt-2 text-muted small">
+                        <i class="bi bi-info-circle me-1"></i> Pegawai yang dicentang akan dapat beralih ke Mode Administrator. Pegawai yang tidak dicentang akan tetap sebagai Pegawai / PML biasa.
+                    </div>
+                </div>
+                <div class="modal-footer bg-light border-top py-2.5 px-4 d-flex justify-content-between align-items-center">
+                    <span class="small text-muted" id="modalPegawaiCheckedCount">0 pegawai dipilih</span>
+                    <div class="d-flex gap-2">
+                        <button type="button" class="btn btn-light rounded-pill px-3" data-bs-dismiss="modal">Batal</button>
+                        <button type="submit" class="btn btn-bps-orange rounded-pill px-4 fw-semibold">
+                            <i class="bi bi-check2-circle me-1"></i> Simpan Hak Akses
+                        </button>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<!-- Form Tersembunyi untuk Eksekusi Aksi Massal Checkbox Tabel -->
+<form id="bulkActionForm" method="POST" action="{{ route('admin.users.bulk-action') }}" class="d-none">
+    @csrf
+    <input type="hidden" name="action" id="bulkActionInput">
+    <div id="bulkActionUserIdsContainer"></div>
+</form>
 @endsection
 
 @push('scripts')
@@ -638,8 +965,37 @@
         document.getElementById('edit_nik').value = user.nik || '';
         document.getElementById('edit_rank').value = user.rank || '';
         document.getElementById('edit_position').value = user.position || '';
-        document.getElementById('edit_role').value = user.role;
-        document.getElementById('edit_status').value = user.status;
+
+        const isMaster = Boolean(user.is_master_admin || user.username === 'admin');
+        const roleSelect = document.getElementById('edit_role');
+        const statusSelect = document.getElementById('edit_status');
+        const switchRoleCheck = document.getElementById('edit_can_switch_role');
+        const masterNotice = document.getElementById('edit_master_admin_notice');
+        const roleHidden = document.getElementById('edit_role_hidden');
+        const statusHidden = document.getElementById('edit_status_hidden');
+
+        roleSelect.value = user.role;
+        statusSelect.value = user.status;
+        switchRoleCheck.checked = Boolean(user.can_switch_role);
+
+        if (isMaster) {
+            roleSelect.value = 'admin';
+            roleSelect.disabled = true;
+            statusSelect.value = 'active';
+            statusSelect.disabled = true;
+            switchRoleCheck.checked = true;
+            switchRoleCheck.disabled = true;
+            if (roleHidden) roleHidden.disabled = false;
+            if (statusHidden) statusHidden.disabled = false;
+            if (masterNotice) masterNotice.classList.remove('d-none');
+        } else {
+            roleSelect.disabled = false;
+            statusSelect.disabled = false;
+            switchRoleCheck.disabled = false;
+            if (roleHidden) roleHidden.disabled = true;
+            if (statusHidden) statusHidden.disabled = true;
+            if (masterNotice) masterNotice.classList.add('d-none');
+        }
 
         const modal = new bootstrap.Modal(document.getElementById('editUserModal'));
         modal.show();
@@ -660,5 +1016,138 @@
         const modal = new bootstrap.Modal(document.getElementById('deleteUserModal'));
         modal.show();
     }
+
+    // ==============================================================
+    // Aksi Massal (Checkbox Multi-Select)
+    // ==============================================================
+    function toggleSelectAllUsers(master) {
+        const checkboxes = document.querySelectorAll('.user-row-checkbox');
+        checkboxes.forEach(cb => {
+            cb.checked = master.checked;
+            const tr = cb.closest('tr');
+            if (tr) {
+                if (master.checked) tr.classList.add('row-selected');
+                else tr.classList.remove('row-selected');
+            }
+        });
+        onUserRowCheckboxChange();
+    }
+
+    function onUserRowCheckboxChange() {
+        const allCheckboxes = document.querySelectorAll('.user-row-checkbox');
+        const checkedBoxes = document.querySelectorAll('.user-row-checkbox:checked');
+        const count = checkedBoxes.length;
+        const bar = document.getElementById('bulkActionBar');
+        const badge = document.getElementById('bulkSelectedCountBadge');
+        const master = document.getElementById('selectAllUsersCheckbox');
+
+        allCheckboxes.forEach(cb => {
+            const tr = cb.closest('tr');
+            if (tr) {
+                if (cb.checked) tr.classList.add('row-selected');
+                else tr.classList.remove('row-selected');
+            }
+        });
+
+        if (badge) badge.textContent = `${count} Pengguna Dipilih`;
+
+        if (count > 0) {
+            if (bar) {
+                bar.classList.remove('d-none');
+                bar.classList.add('d-flex');
+            }
+        } else {
+            if (bar) {
+                bar.classList.add('d-none');
+                bar.classList.remove('d-flex');
+            }
+            if (master) master.checked = false;
+        }
+    }
+
+    function clearAllSelectedUsers() {
+        document.querySelectorAll('.user-row-checkbox').forEach(cb => {
+            cb.checked = false;
+            const tr = cb.closest('tr');
+            if (tr) tr.classList.remove('row-selected');
+        });
+        const master = document.getElementById('selectAllUsersCheckbox');
+        if (master) master.checked = false;
+        onUserRowCheckboxChange();
+    }
+
+    function submitBulkAction(actionType) {
+        const selected = Array.from(document.querySelectorAll('.user-row-checkbox:checked')).map(cb => cb.value);
+        if (selected.length === 0) {
+            alert('Pilih minimal satu pengguna terlebih dahulu.');
+            return;
+        }
+
+        const labels = {
+            'grant_admin': 'Buka hak akses Administrator (Dual Role) untuk ' + selected.length + ' pengguna terpilih?',
+            'revoke_admin': 'Cabut hak akses Administrator dari ' + selected.length + ' pengguna terpilih?',
+            'activate': 'Aktifkan status akun ' + selected.length + ' pengguna terpilih?',
+            'deactivate': 'Nonaktifkan status akun ' + selected.length + ' pengguna terpilih?',
+            'delete': 'Hapus ' + selected.length + ' pengguna terpilih? Data akan diarsipkan menggunakan soft delete.'
+        };
+
+        const confirmMsg = labels[actionType] || 'Jalankan tindakan ini pada ' + selected.length + ' pengguna terpilih?';
+        if (!confirm(confirmMsg)) {
+            return;
+        }
+
+        const form = document.getElementById('bulkActionForm');
+        const actionInput = document.getElementById('bulkActionInput');
+        const container = document.getElementById('bulkActionUserIdsContainer');
+
+        actionInput.value = actionType;
+        container.innerHTML = '';
+        selected.forEach(id => {
+            const hidden = document.createElement('input');
+            hidden.type = 'hidden';
+            hidden.name = 'user_ids[]';
+            hidden.value = id;
+            container.appendChild(hidden);
+        });
+
+        form.submit();
+    }
+
+    // ==============================================================
+    // Modal Kelola Hak Admin Pegawai (Pilih Banyak)
+    // ==============================================================
+    function filterPegawaiModalList() {
+        const q = (document.getElementById('pegawaiModalSearch')?.value || '').toLowerCase().trim();
+        document.querySelectorAll('.pegawai-modal-item').forEach(item => {
+            const name = item.getAttribute('data-name') || '';
+            const nip = item.getAttribute('data-nip') || '';
+            if (q === '' || name.includes(q) || nip.includes(q)) {
+                item.classList.remove('d-none');
+            } else {
+                item.classList.add('d-none');
+            }
+        });
+    }
+
+    function toggleAllModalPegawai(check) {
+        document.querySelectorAll('.pegawai-modal-cb').forEach(cb => {
+            const parent = cb.closest('.pegawai-modal-item');
+            if (!parent || !parent.classList.contains('d-none')) {
+                cb.checked = check;
+            }
+        });
+        updateModalPegawaiCount();
+    }
+
+    function updateModalPegawaiCount() {
+        const count = document.querySelectorAll('.pegawai-modal-cb:checked').length;
+        const el = document.getElementById('modalPegawaiCheckedCount');
+        if (el) el.textContent = `${count} pegawai dipilih untuk hak admin`;
+    }
+
+    document.querySelectorAll('.pegawai-modal-cb').forEach(cb => {
+        cb.addEventListener('change', updateModalPegawaiCount);
+    });
+    updateModalPegawaiCount();
 </script>
 @endpush

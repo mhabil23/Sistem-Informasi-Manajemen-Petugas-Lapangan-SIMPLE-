@@ -1,6 +1,6 @@
 @extends('layouts.app')
 
-@section('title', 'Beranda Petugas Lapangan - SIMPLE')
+@section('title', 'Beranda Petugas Lapangan - SIMPEL')
 @section('page_title', 'Beranda Petugas')
 
 @push('styles')
@@ -90,46 +90,64 @@
     align-items: center;
 }
 
-/* Quick Action Bento Cards */
+/* Quick Action Bento Cards (Tactile Action Buttons) */
 .bento-action-pill {
     display: flex;
     align-items: center;
     gap: 0.85rem;
-    padding: 0.75rem 1.1rem;
+    padding: 0.85rem 1.1rem;
     border-radius: 16px;
     text-decoration: none;
-    border: 1px solid transparent;
-    transition: all 0.22s cubic-bezier(0.4, 0, 0.2, 1);
-    box-shadow: 0 4px 14px rgba(15, 23, 42, 0.02);
-    min-height: 64px;
+    border: 1px solid #E2E8F0;
+    background: #FFFFFF;
+    transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+    box-shadow: 0 3px 12px rgba(15, 23, 42, 0.04), 0 1px 3px rgba(15, 23, 42, 0.02);
+    min-height: 72px;
     height: 100%;
+    position: relative;
+    cursor: pointer;
 }
 .bento-action-pill:hover {
     transform: translateY(-2px);
-    box-shadow: 0 8px 22px rgba(15, 23, 42, 0.06);
+    box-shadow: 0 10px 24px rgba(15, 23, 42, 0.08);
+}
+.bento-action-pill:active {
+    transform: scale(0.985);
 }
 .bento-action-icon {
-    width: 40px;
-    height: 40px;
+    width: 44px;
+    height: 44px;
     border-radius: 12px;
     display: flex;
     align-items: center;
     justify-content: center;
-    font-size: 1.15rem;
+    font-size: 1.25rem;
     flex-shrink: 0;
+    transition: transform 0.2s ease;
+}
+.bento-action-pill:hover .bento-action-icon {
+    transform: scale(1.06);
 }
 .bento-action-text {
     flex-grow: 1;
     min-width: 0;
 }
 .bento-action-title {
-    font-size: 0.88rem;
+    font-size: 0.9rem;
     font-weight: 750;
     color: #0F172A;
     line-height: 1.25;
     white-space: normal;
     word-break: normal;
     display: block;
+}
+.bento-action-sub {
+    font-size: 0.72rem;
+    color: #64748B;
+    line-height: 1.3;
+    display: block;
+    margin-top: 0.2rem;
+    font-weight: 500;
 }
 .bento-action-badge {
     font-size: 0.65rem;
@@ -140,53 +158,112 @@
     line-height: 1.2;
     display: inline-block;
 }
-.bento-action-arrow {
-    color: #94A3B8;
-    font-size: 0.88rem;
-    margin-left: auto;
+.bento-action-cta {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.25rem;
+    padding: 0.38rem 0.75rem;
+    border-radius: 999px;
+    font-size: 0.75rem;
+    font-weight: 750;
+    letter-spacing: 0.01em;
     flex-shrink: 0;
-    transition: transform 0.2s ease, color 0.2s ease;
+    transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+    box-shadow: 0 2px 6px rgba(15, 23, 42, 0.08);
+    white-space: nowrap;
 }
-.bento-action-pill:hover .bento-action-arrow {
+.bento-action-pill:hover .bento-action-cta {
     transform: translateX(3px);
-    color: var(--bps-orange);
+    box-shadow: 0 4px 12px rgba(15, 23, 42, 0.18);
 }
 
-/* Specific Action Color Tints */
+/* Specific Action Color Tints & Borders */
 .bento-pill-green {
+    background: #FFFFFF;
+    border: 1.5px solid #DCFCE7;
+    border-left: 5px solid #16A34A;
+}
+.bento-pill-green:hover {
+    border-color: #86EFAC;
+    border-left-color: #16A34A;
     background: #F0FDF4;
-    border-color: #DCFCE7;
 }
 .bento-pill-green .bento-action-icon {
     background: #DCFCE7;
     color: #16A34A;
 }
+.cta-green {
+    background: #16A34A;
+    color: #FFFFFF !important;
+}
+.bento-pill-green:hover .cta-green {
+    background: #15803D;
+}
 
 .bento-pill-blue {
+    background: #FFFFFF;
+    border: 1.5px solid #E0F2FE;
+    border-left: 5px solid #0284C7;
+}
+.bento-pill-blue:hover {
+    border-color: #7DD3FC;
+    border-left-color: #0284C7;
     background: #F0F9FF;
-    border-color: #E0F2FE;
 }
 .bento-pill-blue .bento-action-icon {
     background: #E0F2FE;
     color: #0284C7;
 }
+.cta-blue {
+    background: #0284C7;
+    color: #FFFFFF !important;
+}
+.bento-pill-blue:hover .cta-blue {
+    background: #0369A1;
+}
 
 .bento-pill-purple {
+    background: #FFFFFF;
+    border: 1.5px solid #F3E8FF;
+    border-left: 5px solid #7C3AED;
+}
+.bento-pill-purple:hover {
+    border-color: #D8B4FE;
+    border-left-color: #7C3AED;
     background: #FAF5FF;
-    border-color: #F3E8FF;
 }
 .bento-pill-purple .bento-action-icon {
     background: #F3E8FF;
     color: #7C3AED;
 }
+.cta-purple {
+    background: #7C3AED;
+    color: #FFFFFF !important;
+}
+.bento-pill-purple:hover .cta-purple {
+    background: #6D28D9;
+}
 
 .bento-pill-amber {
+    background: #FFFFFF;
+    border: 1.5px solid #FEF3C7;
+    border-left: 5px solid #D97706;
+}
+.bento-pill-amber:hover {
+    border-color: #FCD34D;
+    border-left-color: #D97706;
     background: #FFFBEB;
-    border-color: #FEF3C7;
 }
 .bento-pill-amber .bento-action-icon {
     background: #FEF3C7;
     color: #D97706;
+}
+.cta-amber {
+    background: #D97706;
+    color: #FFFFFF !important;
+}
+.bento-pill-amber:hover .cta-amber {
+    background: #B45309;
 }
 
 /* Upcoming Schedules Timeline */
@@ -321,14 +398,18 @@
                         <i class="bi bi-file-earmark-check-fill"></i>
                     </div>
                     <div class="bento-action-text">
-                        <span class="bento-action-title">Tanda Terima Responden</span>
-                        <div class="mt-1">
+                        <div class="d-flex align-items-center gap-1.5 flex-wrap">
+                            <span class="bento-action-title">Tanda Terima Responden</span>
                             <span class="badge bg-success-subtle text-success border border-success-subtle bento-action-badge">
                                 {{ $totalRespondentBasts }} Terbit
                             </span>
                         </div>
+                        <span class="bento-action-sub">Input tanda tangan & serah terima responden</span>
                     </div>
-                    <i class="bi bi-chevron-right bento-action-arrow"></i>
+                    <span class="bento-action-cta cta-green">
+                        <span>Buka</span>
+                        <i class="bi bi-arrow-right-short" style="font-size: 1.15rem; line-height: 1;"></i>
+                    </span>
                 </a>
             </div>
 
@@ -339,8 +420,8 @@
                         <i class="bi bi-box-seam-fill"></i>
                     </div>
                     <div class="bento-action-text">
-                        <span class="bento-action-title">Tanda Terima Petugas</span>
-                        <div class="mt-1">
+                        <div class="d-flex align-items-center gap-1.5 flex-wrap">
+                            <span class="bento-action-title">Tanda Terima Petugas</span>
                             @if(($pendingSignBlankoBastsCount ?? 0) > 0)
                                 <span class="badge bg-danger text-white border bento-action-badge">
                                     <i class="bi bi-pen me-1"></i> {{ $pendingSignBlankoBastsCount }} TTD
@@ -351,8 +432,12 @@
                                 </span>
                             @endif
                         </div>
+                        <span class="bento-action-sub">Lihat & tandatangani tanda terima blanko</span>
                     </div>
-                    <i class="bi bi-chevron-right bento-action-arrow"></i>
+                    <span class="bento-action-cta cta-blue">
+                        <span>Buka</span>
+                        <i class="bi bi-arrow-right-short" style="font-size: 1.15rem; line-height: 1;"></i>
+                    </span>
                 </a>
             </div>
 
@@ -363,14 +448,18 @@
                         <i class="bi bi-clipboard2-check-fill"></i>
                     </div>
                     <div class="bento-action-text">
-                        <span class="bento-action-title">Laporan Perjadin</span>
-                        <div class="mt-1">
+                        <div class="d-flex align-items-center gap-1.5 flex-wrap">
+                            <span class="bento-action-title">Laporan Perjadin</span>
                             <span class="badge {{ $reportsRevision > 0 ? 'bg-danger text-white' : ($reportsApproved > 0 ? 'bg-success-subtle text-success border' : 'bg-secondary-subtle text-secondary border') }} bento-action-badge">
                                 {{ $reportsRevision > 0 ? $reportsRevision . ' Revisi' : ($reportsApproved > 0 ? $reportsApproved . ' ACC' : ($reportsSubmitted > 0 ? $reportsSubmitted . ' Menunggu' : 'Draft')) }}
                             </span>
                         </div>
+                        <span class="bento-action-sub">Ajukan & pantau persetujuan laporan perjadin</span>
                     </div>
-                    <i class="bi bi-chevron-right bento-action-arrow"></i>
+                    <span class="bento-action-cta cta-purple">
+                        <span>Buka</span>
+                        <i class="bi bi-arrow-right-short" style="font-size: 1.15rem; line-height: 1;"></i>
+                    </span>
                 </a>
             </div>
 
@@ -381,14 +470,18 @@
                         <i class="bi bi-file-earmark-arrow-up-fill"></i>
                     </div>
                     <div class="bento-action-text">
-                        <span class="bento-action-title">BAST Dokumen Terisi</span>
-                        <div class="mt-1">
+                        <div class="d-flex align-items-center gap-1.5 flex-wrap">
+                            <span class="bento-action-title">BAST Dokumen Terisi</span>
                             <span class="badge bg-warning-subtle text-warning-emphasis border border-warning-subtle bento-action-badge">
                                 {{ $totalTerisiBasts ?? 0 }} Sah
                             </span>
                         </div>
+                        <span class="bento-action-sub">Serah terima kuesioner & berkas ke kantor</span>
                     </div>
-                    <i class="bi bi-chevron-right bento-action-arrow"></i>
+                    <span class="bento-action-cta cta-amber">
+                        <span>Buka</span>
+                        <i class="bi bi-arrow-right-short" style="font-size: 1.15rem; line-height: 1;"></i>
+                    </span>
                 </a>
             </div>
         </div>

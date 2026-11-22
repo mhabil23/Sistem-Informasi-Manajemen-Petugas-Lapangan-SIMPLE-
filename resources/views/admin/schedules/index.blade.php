@@ -222,11 +222,14 @@
             </h6>
             <span class="text-muted" style="font-size: 0.7rem;">Total {{ $schedules->total() }} agenda terdaftar dalam sistem</span>
         </div>
-        <div class="d-flex align-items-center gap-2">
+        <div class="d-flex align-items-center gap-2 flex-wrap">
             <span class="badge bg-light text-secondary border px-2.5 py-1.5 rounded-pill" style="font-size: 0.7rem;">
                 Halaman {{ $schedules->currentPage() }} dari {{ max(1, $schedules->lastPage()) }}
             </span>
             @if(auth()->user()->isAdmin())
+                <button type="button" class="btn btn-outline-success rounded-pill px-3 py-1.5 shadow-sm d-inline-flex align-items-center gap-1.5" style="font-size: 0.8rem; font-weight: 600;" data-bs-toggle="modal" data-bs-target="#uploadScheduleExcelModal" title="Upload berkas Excel (.xlsx / .csv) untuk generate banyak jadwal kegiatan sekaligus">
+                    <i class="bi bi-file-earmark-excel-fill text-success"></i> Upload Excel Jadwal
+                </button>
                 <button type="button" class="btn-bps-orange shadow-sm py-1.5 px-3" style="font-size: 0.8rem;" data-bs-toggle="modal" data-bs-target="#createScheduleModal">
                     <i class="bi bi-calendar-plus-fill me-1"></i> Buat Jadwal Baru
                 </button>
@@ -392,6 +395,17 @@
             <form method="POST" action="{{ route('admin.schedules.store') }}">
                 @csrf
                 <div class="modal-body p-4">
+                    <!-- Banner Shortcut Upload Excel jika banyak data -->
+                    <div class="alert alert-info py-2 px-3 mb-3 d-flex align-items-center justify-content-between rounded-3 border-info border-opacity-25 bg-info bg-opacity-10">
+                        <div class="small text-dark">
+                            <i class="bi bi-file-earmark-excel-fill text-success me-1"></i>
+                            Punya banyak agenda kegiatan? Gunakan fitur <strong>Upload Excel Jadwal</strong> untuk meng-generate puluhan jadwal sekaligus secara otomatis tanpa input satu per satu.
+                        </div>
+                        <button type="button" class="btn btn-xs btn-success rounded-pill px-2.5 py-1 text-nowrap ms-2" style="font-size: 0.75rem;" data-bs-dismiss="modal" data-bs-toggle="modal" data-bs-target="#uploadScheduleExcelModal">
+                            <i class="bi bi-upload me-1"></i> Buka Upload Excel
+                        </button>
+                    </div>
+
                     <div class="mb-3">
                         <label class="form-label small fw-semibold text-secondary">NAMA / JUDUL AGENDA <span class="text-danger">*</span></label>
                         <input type="text" name="title" class="form-control" placeholder="Contoh: Briefing Tim & Pembagian Peta Kerja Lapangan" required>
@@ -549,6 +563,125 @@
         </div>
     </div>
 </div>
+<!-- ==============================================================
+     MODAL UPLOAD EXCEL JADWAL KEGIATAN
+     ============================================================== -->
+<div class="modal fade" id="uploadScheduleExcelModal" tabindex="-1" aria-labelledby="uploadScheduleExcelModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered modal-xl">
+        <div class="modal-content border-0 shadow" style="border-radius: 20px; overflow: hidden;">
+            <div class="modal-header border-bottom py-3 px-4 bg-light">
+                <div class="d-flex align-items-center gap-2">
+                    <div class="rounded-3 p-1.5 text-white d-flex align-items-center justify-content-center bg-success" style="width: 32px; height: 32px;">
+                        <i class="bi bi-file-earmark-excel-fill"></i>
+                    </div>
+                    <div>
+                        <h6 class="modal-title fw-bold text-dark mb-0" id="uploadScheduleExcelModalLabel">
+                            Upload &amp; Generate Massal Jadwal Kegiatan dari Excel
+                        </h6>
+                        <span class="small text-muted" style="font-size: 0.72rem;">Otomatis membaca puluhan/ratusan jadwal dan meng-generate ke database sekaligus</span>
+                    </div>
+                </div>
+                <div class="d-flex align-items-center gap-2">
+                    <a href="{{ route('admin.schedules.template.download', ['format' => 'xlsx']) }}" class="btn btn-xs btn-outline-success rounded-pill px-2.5 py-1" style="font-size: 0.75rem;" title="Unduh Format Template Excel (.xlsx)">
+                        <i class="bi bi-download me-1"></i> Template (.xlsx)
+                    </a>
+                    <a href="{{ route('admin.schedules.template.download', ['format' => 'csv']) }}" class="btn btn-xs btn-outline-secondary rounded-pill px-2.5 py-1" style="font-size: 0.75rem;" title="Unduh Format Template CSV (.csv)">
+                        <i class="bi bi-filetype-csv me-1"></i> (.csv)
+                    </a>
+                    <button type="button" class="btn-close ms-2" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+            </div>
+
+            <form id="importScheduleExcelForm" action="{{ route('admin.schedules.import-excel') }}" method="POST" enctype="multipart/form-data">
+                @csrf
+                <div class="modal-body p-4">
+                    <!-- Area Pilih File & Mode -->
+                    <div class="p-3 bg-light rounded-3 border mb-3">
+                        <div class="row g-3 align-items-center">
+                            <div class="col-md-7">
+                                <label class="form-label small fw-semibold text-secondary mb-1">
+                                    <i class="bi bi-folder2-open me-1 text-primary"></i> PILIH BERKAS EXCEL ATAU CSV <span class="text-danger">*</span>
+                                </label>
+                                <div class="input-group">
+                                    <input type="file" name="excel_file" id="scheduleExcelFileInput" class="form-control" accept=".xlsx,.xls,.csv,.txt" required>
+                                    <button type="button" id="btnPreviewScheduleExcel" class="btn btn-primary px-3" onclick="previewScheduleExcel()">
+                                        <i class="bi bi-eye-fill me-1"></i> Baca &amp; Pratinjau
+                                    </button>
+                                </div>
+                                <div class="form-text small text-muted mt-1">
+                                    Mendukung format <code>.xlsx</code>, <code>.xls</code>, atau <code>.csv</code> (Maks. 10 MB).
+                                </div>
+                            </div>
+                            <div class="col-md-5">
+                                <label class="form-label small fw-semibold text-secondary mb-1">
+                                    <i class="bi bi-gear-fill me-1 text-secondary"></i> OPSI IMPORT / GENERATE
+                                </label>
+                                <div class="p-2 bg-white rounded border">
+                                    <div class="form-check mb-1">
+                                        <input class="form-check-input" type="radio" name="import_mode" id="schedModeAppend" value="append" checked>
+                                        <label class="form-check-label small" for="schedModeAppend">
+                                            <strong>Tambahkan</strong> ke daftar jadwal yang sudah ada (Append)
+                                        </label>
+                                    </div>
+                                    <div class="form-check">
+                                        <input class="form-check-input" type="radio" name="import_mode" id="schedModeReplace" value="replace">
+                                        <label class="form-check-label small text-danger" for="schedModeReplace">
+                                            <strong>Gantikan</strong> seluruh jadwal lama (Reset)
+                                        </label>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Status Alert AJAX -->
+                        <div id="scheduleExcelStatusAlert" class="mt-2.5 alert d-none mb-0 p-2.5 small" role="alert"></div>
+                    </div>
+
+                    <!-- Panel Pratinjau Hasil Pembacaan Excel -->
+                    <div id="schedulePreviewContainer" class="d-none">
+                        <div class="d-flex justify-content-between align-items-center mb-2">
+                            <div class="d-flex align-items-center gap-2">
+                                <span class="badge bg-success rounded-pill px-2.5 py-1" id="previewCountBadge">0 Agenda Terbaca</span>
+                                <span class="small text-muted">Periksa data jadwal sebelum di-generate ke database</span>
+                            </div>
+                            <span class="small text-muted fst-italic">Format kolom terbaca otomatis</span>
+                        </div>
+
+                        <div class="table-responsive rounded-3 border" style="max-height: 320px; overflow-y: auto;">
+                            <table class="table table-sm table-hover align-middle mb-0" style="font-size: 0.8rem;">
+                                <thead class="table-light sticky-top">
+                                    <tr>
+                                        <th style="width: 45px;" class="text-center">No.</th>
+                                        <th style="min-width: 200px;">Nama Agenda</th>
+                                        <th style="min-width: 170px;">Kegiatan Terkait</th>
+                                        <th style="min-width: 150px;">Petugas</th>
+                                        <th style="min-width: 160px;">Waktu Pelaksanaan</th>
+                                        <th style="min-width: 150px;">Lokasi</th>
+                                        <th style="width: 110px;" class="text-center">Status</th>
+                                        <th style="min-width: 160px;">Catatan</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="schedulePreviewTableBody"></tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="modal-footer bg-light border-top py-2.5 px-4 d-flex justify-content-between align-items-center">
+                    <div class="small text-muted" id="scheduleImportHint">
+                        <i class="bi bi-info-circle me-1"></i> Data diproses dalam batch cepat sehingga puluhan jadwal dapat ter-generate dalam beberapa detik.
+                    </div>
+                    <div class="d-flex gap-2">
+                        <button type="button" class="btn btn-outline-secondary rounded-pill px-3 py-1.5" data-bs-dismiss="modal" style="font-size: 0.82rem;">Batal</button>
+                        <button type="submit" id="btnSubmitImportSchedule" class="btn btn-success rounded-pill px-4 py-1.5 shadow-sm" style="font-size: 0.82rem; font-weight: 600;">
+                            <i class="bi bi-lightning-charge-fill me-1 text-warning"></i> Simpan &amp; Generate Sekarang
+                        </button>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
 @endif
 @endsection
 
@@ -568,5 +701,105 @@
         const modal = new bootstrap.Modal(document.getElementById('editScheduleModal'));
         modal.show();
     }
+
+    function previewScheduleExcel() {
+        const fileInput = document.getElementById('scheduleExcelFileInput');
+        const alertBox = document.getElementById('scheduleExcelStatusAlert');
+        const btn = document.getElementById('btnPreviewScheduleExcel');
+        const previewContainer = document.getElementById('schedulePreviewContainer');
+        const tbody = document.getElementById('schedulePreviewTableBody');
+        const countBadge = document.getElementById('previewCountBadge');
+
+        if (!fileInput || !fileInput.files || fileInput.files.length === 0) {
+            alertBox.className = 'mt-2.5 alert alert-warning p-2.5 small mb-0';
+            alertBox.innerHTML = '<i class="bi bi-exclamation-triangle-fill me-1"></i> Silakan pilih berkas Excel (.xlsx) atau CSV terlebih dahulu.';
+            alertBox.classList.remove('d-none');
+            fileInput?.focus();
+            return;
+        }
+
+        const file = fileInput.files[0];
+        const formData = new FormData();
+        formData.append('excel_file', file);
+        formData.append('_token', @json(csrf_token()));
+
+        btn.disabled = true;
+        btn.innerHTML = '<span class="spinner-border spinner-border-sm me-1" role="status"></span> Membaca...';
+
+        alertBox.className = 'mt-2.5 alert alert-info p-2.5 small mb-0';
+        alertBox.innerHTML = '<span class="spinner-border spinner-border-sm text-primary me-1"></span> Sedang memproses dan membaca data jadwal dari berkas Excel...';
+        alertBox.classList.remove('d-none');
+
+        fetch(@json(route('admin.schedules.preview-excel')), {
+            method: 'POST',
+            body: formData,
+            headers: {
+                'X-Requested-With': 'XMLHttpRequest',
+                'Accept': 'application/json',
+            }
+        })
+        .then(async response => {
+            const data = await response.json();
+            if (!response.ok) {
+                throw new Error(data.message || 'Gagal membaca berkas Excel.');
+            }
+            return data;
+        })
+        .then(data => {
+            btn.disabled = false;
+            btn.innerHTML = '<i class="bi bi-eye-fill me-1"></i> Baca &amp; Pratinjau';
+
+            const schedules = data.schedules || [];
+            tbody.innerHTML = '';
+
+            schedules.forEach(item => {
+                const tr = document.createElement('tr');
+                const statusBadgeClass = item.status === 'completed' 
+                    ? 'bg-success-subtle text-success border border-success-subtle' 
+                    : (item.status === 'in_progress' ? 'bg-warning-subtle text-warning-emphasis border border-warning-subtle' : (item.status === 'cancelled' ? 'bg-danger-subtle text-danger border border-danger-subtle' : 'bg-primary-subtle text-primary border border-primary-subtle'));
+                
+                tr.innerHTML = `
+                    <td class="text-center fw-semibold text-secondary">${item.no}</td>
+                    <td><strong class="text-dark">${escapeHtmlAttr(item.title)}</strong></td>
+                    <td><span class="badge bg-light text-secondary border">${escapeHtmlAttr(item.assignment_title)}</span></td>
+                    <td><span class="small">${escapeHtmlAttr(item.officer_name)}</span></td>
+                    <td><small class="text-muted"><i class="bi bi-calendar3 me-1"></i>${escapeHtmlAttr(item.time_range_formatted)}</small></td>
+                    <td><small class="text-muted"><i class="bi bi-geo-alt me-1"></i>${escapeHtmlAttr(item.location)}</small></td>
+                    <td class="text-center"><span class="badge rounded-pill ${statusBadgeClass}">${escapeHtmlAttr(item.status_label)}</span></td>
+                    <td><small class="text-muted">${escapeHtmlAttr(item.notes || '-')}</small></td>
+                `;
+                tbody.appendChild(tr);
+            });
+
+            countBadge.textContent = `${schedules.length} Agenda Terbaca`;
+            previewContainer.classList.remove('d-none');
+
+            alertBox.className = 'mt-2.5 alert alert-success p-2.5 small mb-0';
+            alertBox.innerHTML = `<i class="bi bi-check-circle-fill text-success me-1"></i> <strong>Berhasil!</strong> ${schedules.length} agenda kegiatan berhasil dibaca. Klik tombol <strong>"Simpan & Generate Sekarang"</strong> di bawah untuk memasukkan ke database.`;
+        })
+        .catch(err => {
+            btn.disabled = false;
+            btn.innerHTML = '<i class="bi bi-eye-fill me-1"></i> Baca &amp; Pratinjau';
+            alertBox.className = 'mt-2.5 alert alert-danger p-2.5 small mb-0';
+            alertBox.innerHTML = `<i class="bi bi-x-circle-fill text-danger me-1"></i> ${escapeHtmlAttr(err.message)}`;
+        });
+    }
+
+    function escapeHtmlAttr(value) {
+        return String(value ?? '')
+            .replace(/&/g, '&amp;')
+            .replace(/"/g, '&quot;')
+            .replace(/'/g, '&#39;')
+            .replace(/</g, '&lt;')
+            .replace(/>/g, '&gt;');
+    }
+
+    document.getElementById('importScheduleExcelForm')?.addEventListener('submit', function() {
+        const btn = document.getElementById('btnSubmitImportSchedule');
+        if (btn) {
+            btn.disabled = true;
+            btn.innerHTML = '<span class="spinner-border spinner-border-sm me-1" role="status"></span> Sedang Meng-generate...';
+        }
+    });
 </script>
 @endpush

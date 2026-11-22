@@ -42,7 +42,7 @@ class RecapitulationController extends Controller
         $pdf = Pdf::loadView('pdf.recapitulation', compact('summary', 'filters'))
                   ->setPaper('a4', 'landscape');
 
-        $filename = 'Rekapitulasi-SIMPLE-' . now()->format('Ymd-His') . '.pdf';
+        $filename = 'Rekapitulasi-SIMPEL-' . now()->format('Ymd-His') . '.pdf';
 
         return $pdf->download($filename);
     }

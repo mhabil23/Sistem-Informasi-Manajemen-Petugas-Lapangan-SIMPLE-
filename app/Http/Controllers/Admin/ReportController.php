@@ -379,6 +379,52 @@ class ReportController extends Controller
         return back()->with('success', "Laporan '{$title}' berhasil dihapus.");
     }
 
+    /**
+     * Aksi massal (pilih lebih dari satu laporan perjadin via checkbox).
+     */
+    public function bulkAction(Request $request)
+    {
+        $validated = $request->validate([
+            'action' => ['required', Rule::in(['approve', 'delete'])],
+            'report_ids' => ['required', 'array', 'min:1'],
+            'report_ids.*' => ['integer', 'exists:officer_reports,id'],
+        ], [
+            'report_ids.required' => 'Pilih minimal satu laporan untuk melakukan aksi massal.',
+            'report_ids.min' => 'Pilih minimal satu laporan untuk melakukan aksi massal.',
+        ]);
+
+        $action = $validated['action'];
+        $reportIds = array_unique($validated['report_ids']);
+        $reports = OfficerReport::whereIn('id', $reportIds)->get();
+        $affectedCount = 0;
+        $msg = '';
+
+        switch ($action) {
+            case 'approve':
+                foreach ($reports as $report) {
+                    $this->applyApproval($report);
+                    $affectedCount++;
+                }
+                $msg = "Sebanyak {$affectedCount} laporan perjalanan dinas berhasil di-ACC (Disetujui)!";
+                break;
+
+            case 'delete':
+                foreach ($reports as $report) {
+                    $id = $report->id;
+                    AdminNotification::where('report_id', $id)->delete();
+                    $report->delete();
+                    if ($this->sheetService->isConfigured()) {
+                        $this->sheetService->delete('officer_reports', $id, true);
+                    }
+                    $affectedCount++;
+                }
+                $msg = "Sebanyak {$affectedCount} laporan perjalanan dinas berhasil dihapus.";
+                break;
+        }
+
+        return back()->with('success', $msg);
+    }
+
     private function applyApproval(OfficerReport $report, ?string $adminNotes = null, bool $alsoEdited = false): void
     {
         $previousStatus = $report->status;

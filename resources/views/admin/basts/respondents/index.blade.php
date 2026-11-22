@@ -19,6 +19,35 @@
     transition: all 0.22s ease;
 }
 
+/* Header Action Buttons (Modern, Ergonomic, Non-Deforming) */
+.btn-action-primary {
+    background: linear-gradient(135deg, #F37021 0%, #E05D0E 100%);
+    color: #FFFFFF !important;
+    border: none;
+    font-weight: 700;
+    font-size: 0.8rem;
+    border-radius: 12px;
+    padding: 0.52rem 1.05rem;
+    box-shadow: 0 3px 12px rgba(243, 112, 33, 0.28);
+    transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.45rem;
+    text-decoration: none;
+    white-space: nowrap;
+    cursor: pointer;
+}
+.btn-action-primary:hover {
+    background: linear-gradient(135deg, #FA7C30 0%, #E05D0E 100%);
+    color: #FFFFFF !important;
+    transform: translateY(-1.5px);
+    box-shadow: 0 6px 16px rgba(243, 112, 33, 0.38);
+}
+.btn-action-primary:active {
+    transform: scale(0.975);
+}
+
 /* Action Buttons */
 .btn-bps-orange {
     background: #F37021;
@@ -137,6 +166,29 @@
 
 /* Mobile Responsive */
 @media (max-width: 767.98px) {
+    .bento-table-header {
+        padding: 0.85rem 1rem;
+        flex-direction: column;
+        align-items: stretch;
+        gap: 0.75rem;
+    }
+    .bento-header-top {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        width: 100%;
+        gap: 0.5rem;
+    }
+    .bento-header-actions {
+        display: flex;
+        width: 100%;
+    }
+    .btn-action-primary {
+        width: 100%;
+        padding: 0.55rem 0.5rem;
+        font-size: 0.78rem;
+        border-radius: 10px;
+    }
     .bento-table-card .bento-table-fixed thead {
         display: none;
     }
@@ -175,19 +227,25 @@
 <!-- Bento Table Card (Anti-Geser, 100% Pas Layar) -->
 <div class="bento-table-card mb-4">
     <div class="bento-table-header">
-        <div>
-            <h6 class="fw-bold text-dark mb-0" style="font-size: 0.92rem;">
-                Daftar Dokumen Tanda Terima Responden
-            </h6>
-            <span class="text-muted" style="font-size: 0.7rem;">Total {{ $basts->total() }} dokumen sah terdaftar dalam sistem</span>
+        <div class="bento-header-top">
+            <div>
+                <h6 class="fw-bold text-dark mb-0" style="font-size: 0.92rem;">
+                    Daftar Dokumen Tanda Terima Responden
+                </h6>
+                <span class="text-muted" style="font-size: 0.7rem;">Total {{ $basts->total() }} dokumen sah terdaftar dalam sistem</span>
+            </div>
+            <span class="badge bg-light text-secondary border px-2 py-1 rounded-pill d-md-none flex-shrink-0" style="font-size: 0.68rem;">
+                Hal. {{ $basts->currentPage() }}/{{ max(1, $basts->lastPage()) }}
+            </span>
         </div>
-        <div class="d-flex align-items-center gap-2">
-            <span class="badge bg-light text-secondary border px-2.5 py-1.5 rounded-pill" style="font-size: 0.7rem;">
+        <div class="bento-header-actions d-flex align-items-center gap-2">
+            <span class="badge bg-light text-secondary border px-2.5 py-1.5 rounded-pill d-none d-md-inline-block" style="font-size: 0.7rem;">
                 Halaman {{ $basts->currentPage() }} dari {{ max(1, $basts->lastPage()) }}
             </span>
             @if(auth()->user()->isAdmin())
-                <button type="button" class="btn-bps-orange shadow-sm py-1.5 px-3" style="font-size: 0.8rem;" data-bs-toggle="modal" data-bs-target="#createBastModal">
-                    <i class="bi bi-file-earmark-plus-fill me-1"></i> Terbitkan Tanda Terima Baru
+                <button type="button" class="btn-action-primary" data-bs-toggle="modal" data-bs-target="#createBastModal">
+                    <i class="bi bi-file-earmark-plus-fill fs-6"></i>
+                    <span>Terbitkan<span class="d-none d-sm-inline"> Tanda Terima Baru</span></span>
                 </button>
             @endif
         </div>

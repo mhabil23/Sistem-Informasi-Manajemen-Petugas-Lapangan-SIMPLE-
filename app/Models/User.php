@@ -32,6 +32,8 @@ class User extends Authenticatable
         'education',
         'password',
         'role',
+        'can_switch_role',
+        'is_master_admin',
         'status',
         'avatar',
     ];
@@ -46,38 +48,76 @@ class User extends Authenticatable
         return [
             'email_verified_at' => 'datetime',
             'password' => 'hashed',
+            'can_switch_role' => 'boolean',
+            'is_master_admin' => 'boolean',
         ];
     }
 
-    // Role & Status Checks
+    // Role & Dual Role Capabilities
+    public function isMasterAdmin(): bool
+    {
+        return (bool) ($this->is_master_admin ?? false)
+            || $this->username === 'admin'
+            || $this->email === 'admin@simple.go.id'
+            || $this->name === 'Administrator SIMPLE';
+    }
+
+    public function canSwitchRole(): bool
+    {
+        return $this->role === 'admin' || (bool) $this->can_switch_role;
+    }
+
+    public function hasAdminPrivileges(): bool
+    {
+        return $this->role === 'admin' || (bool) $this->can_switch_role;
+    }
+
+    public function activeRole(): string
+    {
+        if (!$this->canSwitchRole()) {
+            return $this->role;
+        }
+
+        $sessionRole = session('active_role');
+        if ($sessionRole && in_array($sessionRole, ['admin', 'pegawai', 'petugas'], true)) {
+            return $sessionRole;
+        }
+
+        return $this->role;
+    }
+
     public function isAdmin(): bool
     {
-        return $this->role === 'admin';
+        return $this->activeRole() === 'admin';
     }
 
     public function isPetugas(): bool
     {
-        return $this->role === 'petugas';
+        return $this->activeRole() === 'petugas';
     }
 
     public function isPegawai(): bool
     {
-        return $this->role === 'pegawai';
+        return $this->activeRole() === 'pegawai';
     }
 
     public function isFieldStaff(): bool
     {
-        return in_array($this->role, ['petugas', 'pegawai'], true);
+        return in_array($this->activeRole(), ['petugas', 'pegawai'], true);
     }
 
     public function canAccessMonitoring(): bool
     {
-        return in_array($this->role, ['admin', 'pegawai'], true);
+        return in_array($this->activeRole(), ['admin', 'pegawai'], true);
     }
 
     public function roleLabel(): string
     {
-        return match ($this->role) {
+        if ($this->isMasterAdmin() && $this->activeRole() === 'admin') {
+            return 'Master Admin';
+        }
+
+        return match ($this->activeRole()) {
             'admin' => 'Administrator',
             'pegawai' => 'Pegawai / PML',
             default => 'Petugas',
@@ -87,6 +127,64 @@ class User extends Authenticatable
     public function scopeFieldStaff($query)
     {
         return $query->whereIn('role', ['petugas', 'pegawai']);
+    }
+
+    /**
+     * Dapatkan daftar seluruh pegawai BPS / penandatangan berkas lengkap dengan nama, NIP, jabatan, dan pangkat.
+     *
+     * @return \Illuminate\Support\Collection
+     */
+    public static function getPegawaiSigners(): \Illuminate\Support\Collection
+    {
+        $list = collect();
+
+        // 1. Baca dari database/data/pegawai_bps.json (data master pegawai BPS Kolut)
+        $jsonPath = database_path('data/pegawai_bps.json');
+        if (file_exists($jsonPath)) {
+            $data = json_decode(file_get_contents($jsonPath), true);
+            if (is_array($data)) {
+                foreach ($data as $item) {
+                    $name = trim($item['name'] ?? '');
+                    $nip = trim($item['nip'] ?? '');
+                    if ($name !== '') {
+                        $list->push([
+                            'name' => $name,
+                            'nip' => $nip,
+                            'position' => $item['position'] ?? 'Pegawai BPS',
+                            'rank' => $item['rank'] ?? '-',
+                        ]);
+                    }
+                }
+            }
+        }
+
+        // 2. Ambil dari database users (role pegawai, admin, atau yang memiliki NIP/NIK panjang)
+        $dbUsers = static::where(function ($q) {
+                $q->whereIn('role', ['pegawai', 'admin'])
+                  ->orWhereNotNull('nik');
+            })
+            ->where('status', 'active')
+            ->get(['name', 'nik', 'position', 'rank']);
+
+        foreach ($dbUsers as $user) {
+            $name = trim($user->name);
+            $nip = trim($user->nik ?? '');
+            $exists = $list->first(function ($item) use ($name, $nip) {
+                return strtolower(trim($item['name'])) === strtolower($name)
+                    || (!empty($nip) && !empty($item['nip']) && $item['nip'] === $nip);
+            });
+
+            if (!$exists && !empty($name)) {
+                $list->push([
+                    'name' => $name,
+                    'nip' => $nip,
+                    'position' => $user->position ?? 'Pegawai BPS',
+                    'rank' => $user->rank ?? '-',
+                ]);
+            }
+        }
+
+        return $list->sortBy('name')->values();
     }
 
     public function isActive(): bool

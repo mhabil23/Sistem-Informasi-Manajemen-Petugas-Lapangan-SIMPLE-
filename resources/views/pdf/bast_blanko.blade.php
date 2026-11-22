@@ -269,7 +269,16 @@
             </td>
             <td style="width: 40%;" class="maker-box">
                 <div>Pembuat Daftar</div>
-                <div class="maker-space"></div>
+                @php
+                    $makerSignBase64 = $getTrimmedSignBase64($bast->maker_signature_path);
+                @endphp
+                @if($makerSignBase64)
+                    <div style="height: 48px; line-height: 48px; text-align: center;">
+                        <img src="data:image/png;base64,{{ $makerSignBase64 }}" style="max-height: 46px; max-width: 140px; vertical-align: middle; display: inline-block;">
+                    </div>
+                @else
+                    <div class="maker-space"></div>
+                @endif
                 <div class="maker-name">{{ $bast->maker_name ?: 'Koordinator Satker BPS' }}</div>
                 @if($bast->resolved_maker_nip !== '')
                     <div>NIP. {{ $bast->resolved_maker_nip }}</div>

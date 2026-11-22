@@ -178,6 +178,55 @@
         justify-content: flex-end;
     }
 }
+
+/* Bulk Action Buttons - Clean, Modern & Elegant */
+.btn-bulk-action {
+    background: #ffffff;
+    border: 1px solid #e2e8f0;
+    color: #334155;
+    font-weight: 600;
+    font-size: 0.78rem;
+    padding: 0.32rem 0.8rem;
+    border-radius: 9999px;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.4rem;
+    transition: all 0.15s ease;
+    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.04);
+    cursor: pointer;
+}
+.btn-bulk-action:hover {
+    background: #f8fafc;
+    border-color: #cbd5e1;
+    color: #0f172a;
+    transform: translateY(-1px);
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.08);
+}
+.btn-bulk-action-danger {
+    background: #ffffff;
+    border: 1px solid #fecaca;
+    color: #dc2626;
+    font-weight: 600;
+    font-size: 0.78rem;
+    padding: 0.32rem 0.8rem;
+    border-radius: 9999px;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.4rem;
+    transition: all 0.15s ease;
+    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.04);
+    cursor: pointer;
+}
+.btn-bulk-action-danger:hover {
+    background: #fef2f2;
+    border-color: #f87171;
+    color: #b91c1c;
+    transform: translateY(-1px);
+    box-shadow: 0 2px 5px rgba(220, 38, 38, 0.15);
+}
+.bento-table-fixed tbody tr.row-selected td {
+    background-color: #f0f7ff !important;
+}
 </style>
 @endpush
 
@@ -284,22 +333,63 @@
         </div>
     </div>
 
+    @if(auth()->user()->canAccessMonitoring())
+        <!-- Bulk Action Toolbar (Modern, Bersih & Elegan) -->
+        <div id="bulkActionBar" class="d-none px-3 py-2.5 border-bottom align-items-center justify-content-between flex-wrap gap-2" style="background: #f8fafc; border-color: #e2e8f0 !important;">
+            <div class="d-flex align-items-center gap-2">
+                <span class="badge rounded-pill px-3 py-1.5 fw-semibold d-inline-flex align-items-center gap-1.5" style="background: #005BAC; color: #ffffff; font-size: 0.78rem;">
+                    <i class="bi bi-check2-circle fs-6"></i>
+                    <span id="bulkSelectedCountBadge">0 Laporan Dipilih</span>
+                </span>
+                <span class="text-muted small">|</span>
+                <button type="button" class="btn btn-link btn-sm text-secondary text-decoration-none p-0 d-inline-flex align-items-center gap-1" onclick="clearAllSelectedReports()" style="font-size: 0.78rem;">
+                    <i class="bi bi-x-circle text-muted"></i> Batal Pilih
+                </button>
+            </div>
+            <div class="d-flex flex-wrap align-items-center gap-2">
+                <button type="button" class="btn-bulk-action" onclick="submitBulkAction('approve')" title="ACC / Setujui seluruh laporan yang dicentang secara serentak">
+                    <i class="bi bi-check2-circle text-success fs-6"></i> ACC / Setujui Terpilih
+                </button>
+                @if(auth()->user()->isAdmin())
+                    <button type="button" class="btn-bulk-action-danger" onclick="submitBulkAction('delete')" title="Hapus seluruh laporan yang dicentang">
+                        <i class="bi bi-trash fs-6"></i> Hapus
+                    </button>
+                @endif
+            </div>
+        </div>
+    @endif
+
     <div class="bento-table-container-fixed">
         <table class="table bento-table-fixed align-middle mb-0">
             <thead>
                 <tr>
+                    @if(auth()->user()->canAccessMonitoring())
+                        <th style="width: 38px;" class="text-center">
+                            <input type="checkbox" id="selectAllReportsCheckbox" class="form-check-input" onchange="toggleSelectAllReports(this)" title="Pilih Semua Laporan di Halaman Ini">
+                        </th>
+                    @endif
                     <th style="width: 12%;">NOMOR LAPORAN</th>
                     <th style="width: 14%;">PETUGAS LAPANGAN</th>
                     <th style="width: 18%;">KEGIATAN &amp; TANGGAL</th>
                     <th style="width: 17%;">URAIAN SINGKAT</th>
                     <th class="text-center" style="width: 8%;">LAMPIRAN</th>
                     <th class="text-center" style="width: 10%;">STATUS</th>
-                    <th class="text-end pe-2" style="width: 21%;">AKSI</th>
+                    <th class="text-end pe-2" style="width: 18%;">AKSI</th>
                 </tr>
             </thead>
             <tbody>
                 @forelse($reports as $rep)
                     <tr>
+                        @if(auth()->user()->canAccessMonitoring())
+                            <td class="text-center" data-label="Pilih">
+                                <input type="checkbox" 
+                                       name="report_ids[]" 
+                                       value="{{ $rep->id }}" 
+                                       class="form-check-input report-row-checkbox" 
+                                       data-title="{{ $rep->activity_title }}"
+                                       onchange="onReportRowCheckboxChange()">
+                            </td>
+                        @endif
                         <td>
                             <span class="fw-bold font-monospace text-dark text-truncate d-block" style="font-size: 0.8rem;" title="{{ $rep->report_number ?? 'LAP-'.$rep->id }}">
                                 {{ $rep->report_number ?? 'LAP-'.$rep->id }}
@@ -432,7 +522,7 @@
                     </tr>
                 @empty
                     <tr>
-                        <td colspan="7" class="text-center py-5 text-muted">
+                        <td colspan="{{ auth()->user()->canAccessMonitoring() ? 8 : 7 }}" class="text-center py-5 text-muted">
                             <div class="d-inline-flex p-3 rounded-circle bg-light text-secondary mb-2">
                                 <i class="bi bi-clipboard2-check fs-1 opacity-50"></i>
                             </div>
@@ -801,7 +891,21 @@
                                     </tfoot>
                                 </table>
                             </div>
-                            <div class="row g-2 mt-2">
+                            <div class="mb-2 p-2 rounded-2 bg-light border border-primary-subtle shadow-sm mt-2">
+                                <label class="form-label small fw-bold text-primary mb-1 d-flex align-items-center justify-content-between">
+                                    <span><i class="bi bi-person-check-fill me-1"></i> PILIH PEGAWAI PPK (PENANDATANGAN)</span>
+                                    <span class="badge bg-primary-subtle text-primary border border-primary-subtle rounded-pill fw-normal" style="font-size: 0.65rem;">Otomatis Nama &amp; NIP</span>
+                                </label>
+                                <select id="adm_edit_ppk_select" class="form-select form-select-sm" onchange="onAdminReportPpkSelected(this)">
+                                    <option value="">-- Pilih Pegawai BPS atau Ketik Manual --</option>
+                                    @foreach((\App\Models\User::getPegawaiSigners()) as $p)
+                                        <option value="{{ $p['name'] }}" data-name="{{ $p['name'] }}" data-nip="{{ $p['nip'] }}">
+                                            {{ $p['name'] }} {{ $p['nip'] ? '('.$p['nip'].')' : '' }}
+                                        </option>
+                                    @endforeach
+                                </select>
+                            </div>
+                            <div class="row g-2 mt-1">
                                 <div class="col-md-6">
                                     <label class="form-label small fw-semibold text-secondary mb-1">Pejabat Pembuat Komitmen (Menyetujui)</label>
                                     <input type="text" id="adm_edit_ppk_name" name="ppk_name" class="form-control form-control-sm">
@@ -879,9 +983,110 @@
     </div>
 </div>
 @endif
+
+<!-- Form Tersembunyi untuk Eksekusi Aksi Massal Checkbox Tabel Laporan -->
+<form id="bulkActionForm" method="POST" action="{{ route('admin.reports.bulk-action') }}" class="d-none">
+    @csrf
+    <input type="hidden" name="action" id="bulkActionInput">
+    <div id="bulkActionReportIdsContainer"></div>
+</form>
 @endsection
 
 @push('scripts')
+<script>
+    // ==============================================================
+    // Aksi Massal (Checkbox Multi-Select Laporan Petugas)
+    // ==============================================================
+    function toggleSelectAllReports(master) {
+        const checkboxes = document.querySelectorAll('.report-row-checkbox');
+        checkboxes.forEach(cb => {
+            cb.checked = master.checked;
+            const tr = cb.closest('tr');
+            if (tr) {
+                if (master.checked) tr.classList.add('row-selected');
+                else tr.classList.remove('row-selected');
+            }
+        });
+        onReportRowCheckboxChange();
+    }
+
+    function onReportRowCheckboxChange() {
+        const allCheckboxes = document.querySelectorAll('.report-row-checkbox');
+        const checkedBoxes = document.querySelectorAll('.report-row-checkbox:checked');
+        const count = checkedBoxes.length;
+        const bar = document.getElementById('bulkActionBar');
+        const badge = document.getElementById('bulkSelectedCountBadge');
+        const master = document.getElementById('selectAllReportsCheckbox');
+
+        allCheckboxes.forEach(cb => {
+            const tr = cb.closest('tr');
+            if (tr) {
+                if (cb.checked) tr.classList.add('row-selected');
+                else tr.classList.remove('row-selected');
+            }
+        });
+
+        if (badge) badge.textContent = `${count} Laporan Dipilih`;
+
+        if (count > 0) {
+            if (bar) {
+                bar.classList.remove('d-none');
+                bar.classList.add('d-flex');
+            }
+        } else {
+            if (bar) {
+                bar.classList.add('d-none');
+                bar.classList.remove('d-flex');
+            }
+            if (master) master.checked = false;
+        }
+    }
+
+    function clearAllSelectedReports() {
+        document.querySelectorAll('.report-row-checkbox').forEach(cb => {
+            cb.checked = false;
+            const tr = cb.closest('tr');
+            if (tr) tr.classList.remove('row-selected');
+        });
+        const master = document.getElementById('selectAllReportsCheckbox');
+        if (master) master.checked = false;
+        onReportRowCheckboxChange();
+    }
+
+    function submitBulkAction(actionType) {
+        const selected = Array.from(document.querySelectorAll('.report-row-checkbox:checked')).map(cb => cb.value);
+        if (selected.length === 0) {
+            alert('Pilih minimal satu laporan terlebih dahulu.');
+            return;
+        }
+
+        const labels = {
+            'approve': 'ACC / Setujui ' + selected.length + ' laporan perjalanan dinas terpilih secara serentak?',
+            'delete': 'Hapus ' + selected.length + ' laporan perjalanan dinas terpilih? Data akan diarsipkan menggunakan soft delete.'
+        };
+
+        const confirmMsg = labels[actionType] || 'Jalankan tindakan ini pada ' + selected.length + ' laporan terpilih?';
+        if (!confirm(confirmMsg)) {
+            return;
+        }
+
+        const form = document.getElementById('bulkActionForm');
+        const actionInput = document.getElementById('bulkActionInput');
+        const container = document.getElementById('bulkActionReportIdsContainer');
+
+        actionInput.value = actionType;
+        container.innerHTML = '';
+        selected.forEach(id => {
+            const hidden = document.createElement('input');
+            hidden.type = 'hidden';
+            hidden.name = 'report_ids[]';
+            hidden.value = id;
+            container.appendChild(hidden);
+        });
+
+        form.submit();
+    }
+</script>
 <script>
     const ADMIN_BASIS_DEFAULTS = @json($basisSettings);
 
@@ -1052,6 +1257,21 @@
         }
     }
 
+    function onAdminReportPpkSelected(selectEl) {
+        if (!selectEl) return;
+        const opt = selectEl.options[selectEl.selectedIndex];
+        if (!opt || !opt.value) return;
+
+        const name = opt.getAttribute('data-name') || opt.value;
+        const nip = opt.getAttribute('data-nip') || '';
+
+        const nameInput = document.getElementById('adm_edit_ppk_name');
+        const nipInput = document.getElementById('adm_edit_ppk_nip');
+
+        if (nameInput) nameInput.value = name;
+        if (nipInput) nipInput.value = nip;
+    }
+
     function openAdminEditModal(rep) {
         document.getElementById('adminEditReportForm').action = '/admin/reports/' + rep.id;
 
@@ -1097,6 +1317,9 @@
 
         document.getElementById('adm_edit_ppk_name').value = rep.ppk_name || 'Hidayatullah, SE';
         document.getElementById('adm_edit_ppk_nip').value = rep.ppk_nip || '198510292011011009';
+        if (document.getElementById('adm_edit_ppk_select')) {
+            document.getElementById('adm_edit_ppk_select').value = rep.ppk_name || '';
+        }
         document.getElementById('adm_edit_signing_city').value = rep.signing_city || 'Lasusua';
         document.getElementById('adm_edit_signing_date').value = rep.resolved_signing_date || (rep.signing_date ? rep.signing_date.substring(0, 10) : '');
         document.getElementById('adm_edit_vehicle_stmt').checked = (rep.include_vehicle_statement === true || rep.include_vehicle_statement === 1);

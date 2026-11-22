@@ -30,7 +30,7 @@
                         default => 'fa-user-check',
                     };
                     $profileRoleLabel = match($user->role) {
-                        'admin' => 'Administrator SIMPLE',
+                        'admin' => 'Administrator SIMPEL',
                         'pegawai' => 'Pegawai / PML',
                         default => 'Petugas Lapangan',
                     };
@@ -199,7 +199,7 @@
                         <div>
                             <h6 class="fw-bold text-dark mb-1">Keamanan Akun Dikelola Administrator</h6>
                             <p class="text-muted small mb-0">
-                                Akun Petugas dan Pegawai / PML tidak dapat mengubah kata sandi, email, dan username secara mandiri. Untuk pembaruan kredensial akun, silakan hubungi <strong>Administrator SIMPLE</strong>.
+                                Akun Petugas dan Pegawai / PML tidak dapat mengubah kata sandi, email, dan username secara mandiri. Untuk pembaruan kredensial akun, silakan hubungi <strong>Administrator SIMPEL</strong>.
                             </p>
                         </div>
                     </div>

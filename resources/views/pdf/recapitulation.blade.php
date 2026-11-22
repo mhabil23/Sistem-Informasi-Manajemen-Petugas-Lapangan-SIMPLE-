@@ -2,7 +2,7 @@
 <html lang="id">
 <head>
     <meta charset="UTF-8">
-    <title>Rekapitulasi Administrasi & Pelaporan - SIMPLE</title>
+    <title>Rekapitulasi Administrasi & Pelaporan - SIMPEL</title>
     <style>
         @page {
             margin: 1.5cm;
@@ -142,7 +142,7 @@
     <table class="header-table">
         <tr>
             <td class="header-title">
-                <div class="instansi-utama">SISTEM INFORMASI MANAJEMEN PETUGAS LAPANGAN (SIMPLE)</div>
+                <div class="instansi-utama">SISTEM INFORMASI MANAJEMEN PELAYANAN &amp; EVALUASI LAPANGAN (SIMPEL)</div>
                 <div class="instansi-sub">LAPORAN REKAPITULASI PROGRAM TERPADU</div>
                 <div class="instansi-detail">Dicetak secara sistematis pada tanggal: {{ now()->isoFormat('D MMMM Y, HH:mm') }} WIB</div>
             </td>
@@ -252,14 +252,14 @@
         <tr>
             <td>
                 Mengetahui,<br>
-                Koordinator Wilayah Lapangan SPKRT<br>
+                Koordinator Lapangan / Pengawas BPS<br>
                 <div class="signature-line">( .................................................... )</div>
                 <div style="font-size: 8pt;">NIP: ....................................................</div>
             </td>
             <td>
                 Dibuat Pada: {{ now()->isoFormat('D MMMM Y') }}<br>
-                Administrator Pengelola Sistem SIMPLE<br>
-                <div class="signature-line">{{ auth()->user()->name ?? 'Administrator SIMPLE' }}</div>
+                Administrator Pengelola Sistem SIMPEL<br>
+                <div class="signature-line">{{ auth()->user()->name ?? 'Administrator SIMPEL' }}</div>
                 <div style="font-size: 8pt;">Administrator Sistem</div>
             </td>
         </tr>

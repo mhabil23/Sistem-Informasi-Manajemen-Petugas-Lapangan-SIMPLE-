@@ -1,6 +1,6 @@
 @extends('layouts.app')
 
-@section('title', 'Dashboard Monitoring & Evaluasi - SIMPLE BPS')
+@section('title', 'Dashboard Monitoring & Evaluasi - SIMPEL BPS')
 @section('page_title', 'Dashboard Monitoring')
 
 @section('breadcrumb')
@@ -1041,7 +1041,7 @@
         document.getElementById('modal_officer_name').innerText = name;
         document.getElementById('modal_officer_phone').innerText = phone || 'Nomor HP tidak ada';
 
-        const message = `Halo Rekan ${name},\n\nMengingatkan terkait progres penugasan SIMPLE Anda saat ini:\n• Target Responden: ${target}\n• BAST Selesai: ${completed} (${percentage}%)\n• Sisa Belum BAST: ${pending}\n• Status Laporan Kegiatan: ${reportStatus}\n\nMohon untuk segera menyelesaikan kunjungan responden & penginputan BAST serta melengkapi Laporan Perjalanan Dinas. Terima kasih.`;
+        const message = `Halo Rekan ${name},\n\nMengingatkan terkait progres penugasan SIMPEL Anda saat ini:\n• Target Responden: ${target}\n• BAST Selesai: ${completed} (${percentage}%)\n• Sisa Belum BAST: ${pending}\n• Status Laporan Kegiatan: ${reportStatus}\n\nMohon untuk segera menyelesaikan kunjungan responden & penginputan BAST serta melengkapi Laporan Perjalanan Dinas. Terima kasih.`;
         currentReminderMessage = message;
 
         document.getElementById('modal_reminder_text').value = message;

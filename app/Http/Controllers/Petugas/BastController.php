@@ -235,11 +235,13 @@ class BastController extends Controller
         $myAssignments = $assignmentsQuery->get();
 
         $officers = User::fieldStaff()->where('status', 'active')->orderBy('name')->get();
+        $pegawaiList = User::getPegawaiSigners();
 
         return view('petugas.basts.officers', compact(
             'basts',
             'myAssignments',
             'officers',
+            'pegawaiList',
             'currentType',
             'countBlanko',
             'countTerisi'
@@ -257,9 +259,24 @@ class BastController extends Controller
         ];
 
         if ($bastType === 'petugas_ke_kantor') {
-            $rules['description'] = ['required', 'string'];
+            $rules['description'] = ['nullable', 'string'];
+            $rules['document_title'] = ['nullable', 'string', 'max:255'];
+            $rules['activity_subtitle'] = ['nullable', 'string', 'max:255'];
+            $rules['institution_name'] = ['nullable', 'string', 'max:255'];
+            $rules['document_place'] = ['nullable', 'string', 'max:255'];
+            $rules['maker_name'] = ['nullable', 'string', 'max:255'];
+            $rules['maker_nip'] = ['nullable', 'string', 'max:100'];
+            $rules['first_party_position'] = ['nullable', 'string', 'max:255'];
+            $rules['first_party_address'] = ['nullable', 'string', 'max:500'];
+            $rules['second_party_nik'] = ['nullable', 'string', 'max:30'];
+            $rules['second_party_address'] = ['nullable', 'string', 'max:500'];
+            $rules['contract_number'] = ['nullable', 'string', 'max:255'];
+            $rules['contract_date'] = ['nullable', 'date'];
+            $rules['doc_count'] = ['nullable', 'max:100'];
+            $rules['activity_work_name'] = ['nullable', 'string', 'max:500'];
+            $rules['bast_number'] = ['nullable', 'string', 'max:255'];
         } else {
-            $rules['receipt_category'] = ['nullable', Rule::in(['PELATIHAN', 'ATK', 'KUES', 'TIMBANGAN'])];
+            $rules['receipt_category'] = ['nullable', Rule::in(['PELATIHAN', 'ATK', 'KUES', 'TIMBANGAN', 'ATK_RESPONDEN', 'RESPONDEN', 'PERLENGKAPAN'])];
             $rules['description'] = ['nullable', 'string'];
             $rules['document_title'] = ['nullable', 'string', 'max:255'];
             $rules['activity_subtitle'] = ['nullable', 'string', 'max:255'];
@@ -268,7 +285,10 @@ class BastController extends Controller
             $rules['maker_name'] = ['nullable', 'string', 'max:255'];
             $rules['maker_nip'] = ['nullable', 'string', 'max:100'];
             $rules['items'] = ['nullable', 'array'];
-            $rules['items.*'] = ['nullable', 'string', 'max:255'];
+            $rules['items.*'] = ['nullable'];
+            $rules['items.*.name'] = ['nullable', 'string', 'max:255'];
+            $rules['items.*.qty'] = ['nullable'];
+            $rules['items.*.unit'] = ['nullable', 'string', 'max:50'];
             $rules['recipients'] = ['nullable', 'array'];
             $rules['recipients.*.user_id'] = ['nullable', 'exists:users,id'];
             $rules['recipients.*.recipient_name'] = ['nullable', 'string', 'max:255'];
@@ -282,21 +302,41 @@ class BastController extends Controller
             'description.required' => 'Rincian serah terima dokumen/perlengkapan wajib diisi.',
         ]);
 
-        $bastNumber = OfficerBast::generateBastNumber($validated['bast_type']);
+        $bastNumber = $request->filled('bast_number')
+            ? trim($request->input('bast_number'))
+            : OfficerBast::generateBastNumber($validated['bast_type']);
         $assignment = Assignment::findOrFail($validated['assignment_id']);
         $user = Auth::user();
         $bastDate = now()->toDateString();
 
         if ($validated['bast_type'] === 'petugas_ke_kantor') {
+            $year = date('Y', strtotime($bastDate));
+            $defaultWorkName = $request->input('activity_work_name')
+                ?: ($request->input('activity_subtitle') ?: "Pendataan Lapangan {$assignment->title} Tahun {$year} pada Badan Pusat Statistik Kabupaten Kolaka Utara");
+
             $bast = OfficerBast::create([
                 'bast_number' => $bastNumber,
                 'bast_type' => 'petugas_ke_kantor',
                 'bast_date' => $bastDate,
                 'assignment_id' => $validated['assignment_id'],
                 'officer_id' => $user->id,
-                'description' => trim($validated['description']),
+                'description' => trim($request->input('description', '')) ?: "Penyerahan hasil pekerjaan {$defaultWorkName}",
                 'notes' => $validated['notes'] ?? null,
                 'status' => 'finalized',
+                'document_title' => $request->input('document_title') ?: 'BERITA ACARA SERAH TERIMA HASIL PEKERJAAN PETUGAS PENDATAAN LAPANGAN',
+                'activity_subtitle' => $request->input('activity_subtitle') ?: $assignment->title,
+                'institution_name' => $request->input('institution_name') ?: 'BPS Kabupaten Kolaka Utara',
+                'document_place' => $request->input('document_place') ?: 'Badan Pusat Statistik Kabupaten Kolaka Utara',
+                'maker_name' => $request->input('maker_name') ?: 'Hidayatullah, SE',
+                'maker_nip' => $request->input('maker_nip') ?: '198510292011011009',
+                'first_party_position' => $request->input('first_party_position') ?: 'Pejabat Pembuat Komitmen Badan Pusat Statistik Kabupaten Kolaka Utara',
+                'first_party_address' => $request->input('first_party_address') ?: 'Jalan Protokol Poros DPRD, Kec. Lasusua, Kolaka Utara Sulawesi Tenggara',
+                'second_party_nik' => $request->input('second_party_nik') ?: ($user->nik ?? ''),
+                'second_party_address' => $request->input('second_party_address') ?: ($user->address ?? 'Desa Watuliu, Kecamatan Lasusua'),
+                'contract_number' => $request->input('contract_number') ?: 'PPK 7408/06/10/2026/001',
+                'contract_date' => $request->input('contract_date') ?: $bastDate,
+                'doc_count' => $request->input('doc_count') ?: '30 Dokumen',
+                'activity_work_name' => $defaultWorkName,
             ]);
         } else {
             [$bastAttributes, $recipients] = OfficerBast::prepareCollectivePayload(

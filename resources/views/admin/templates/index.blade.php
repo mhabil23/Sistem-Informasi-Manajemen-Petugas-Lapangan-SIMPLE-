@@ -394,7 +394,7 @@
 
                     <div class="mb-3">
                         <label class="form-label small fw-semibold text-secondary">TEKS FOOTER / CATATAN KAKI (OPSIONAL)</label>
-                        <input type="text" id="create_footer" name="footer_text" class="form-control" placeholder="Dokumen ini diterbitkan sah melalui sistem SIMPLE SPKRT.">
+                        <input type="text" id="create_footer" name="footer_text" class="form-control" placeholder="Dokumen ini diterbitkan sah melalui sistem SIMPEL.">
                     </div>
                 </div>
                 <div class="modal-footer bg-light border-top">

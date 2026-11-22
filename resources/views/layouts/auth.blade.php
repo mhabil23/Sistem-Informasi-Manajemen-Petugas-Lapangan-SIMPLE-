@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="csrf-token" content="{{ csrf_token() }}">
-    <title>@yield('title', 'Masuk ke Sistem') - SIMPLE | BPS Kabupaten Kolaka Utara</title>
+    <title>@yield('title', 'Masuk ke Sistem') - SIMPEL | BPS Kabupaten Kolaka Utara</title>
     <link rel="icon" type="image/png" href="{{ asset('images/logo.png') }}">
     
     <!-- Google Font: Plus Jakarta Sans -->

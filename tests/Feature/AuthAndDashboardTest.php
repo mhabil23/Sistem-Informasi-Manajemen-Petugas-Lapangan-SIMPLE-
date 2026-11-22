@@ -21,7 +21,7 @@ class AuthAndDashboardTest extends TestCase
     {
         $response = $this->get('/login');
         $response->assertStatus(200);
-        $response->assertSee('SIMPLE');
+        $response->assertSee('SIMPEL');
         $response->assertSee('Masuk ke Sistem');
     }
 

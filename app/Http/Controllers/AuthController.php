@@ -41,10 +41,12 @@ class AuthController extends Controller
         $password = (string) $credentials['password'];
         $remember = $request->boolean('remember');
 
-        // Cari pengguna secara fleksibel: cocokkan email ATAU username (case-insensitive & trim)
+        // Cari pengguna secara fleksibel: cocokkan email, username, NIP/NIK, atau Sobat ID (case-insensitive & trim)
         $user = User::where(function ($q) use ($loginInput) {
             $q->where('email', $loginInput)
               ->orWhere('username', $loginInput)
+              ->orWhere('nik', $loginInput)
+              ->orWhere('sobat_id', $loginInput)
               ->orWhereRaw('LOWER(email) = ?', [strtolower($loginInput)])
               ->orWhereRaw('LOWER(username) = ?', [strtolower($loginInput)]);
         })->first();
@@ -66,12 +68,20 @@ class AuthController extends Controller
         if ($user && $isPasswordValid) {
             if (!$user->isActive()) {
                 return back()->withInput($request->only('login', 'remember'))->withErrors([
-                    'login' => 'Akun Anda berstatus nonaktif. Silakan hubungi Administrator SIMPLE.',
+                    'login' => 'Akun Anda berstatus nonaktif. Silakan hubungi Administrator SIMPEL.',
                 ]);
             }
 
             Auth::login($user, $remember);
             $request->session()->regenerate();
+
+            // Set initial active role in session
+            if ($user->canSwitchRole()) {
+                $defaultRole = ($user->role === 'admin' || $user->can_switch_role) ? 'admin' : $user->role;
+                session(['active_role' => $defaultRole]);
+            } else {
+                session(['active_role' => $user->role]);
+            }
 
             ActivityLog::log(
                 'login',
@@ -112,7 +122,7 @@ class AuthController extends Controller
         $request->session()->invalidate();
         $request->session()->regenerateToken();
 
-        return redirect()->route('login')->with('success', 'Anda telah berhasil keluar dari sistem SIMPLE.');
+        return redirect()->route('login')->with('success', 'Anda telah berhasil keluar dari sistem SIMPEL.');
     }
 }
 

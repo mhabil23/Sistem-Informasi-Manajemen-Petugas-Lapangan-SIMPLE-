@@ -164,7 +164,7 @@ class DashboardController extends Controller
             $cleanPhone = preg_replace('/^0/', '62', preg_replace('/[^0-9]/', '', $off->phone ?? ''));
             $waMessage = urlencode(
                 "Halo Rekan {$off->name},\n\n" .
-                "Mengingatkan terkait progres penugasan SIMPLE Anda saat ini:\n" .
+                "Mengingatkan terkait progres penugasan SIMPEL Anda saat ini:\n" .
                 "• Target Responden: {$target}\n" .
                 "• BAST Selesai: {$completed} ({$pct}%)\n" .
                 "• Sisa Belum BAST: {$pending}\n" .

@@ -4,7 +4,7 @@
 @section('page_title', 'Detail Kegiatan & Penugasan')
 
 @section('breadcrumb')
-    <li class="breadcrumb-item"><a href="{{ route('admin.dashboard') }}" class="text-decoration-none">SIMPLE</a></li>
+    <li class="breadcrumb-item"><a href="{{ route('admin.dashboard') }}" class="text-decoration-none">SIMPEL</a></li>
     <li class="breadcrumb-item"><a href="{{ route('admin.assignments.index') }}" class="text-decoration-none">Kegiatan</a></li>
     <li class="breadcrumb-item active" aria-current="page">Detail &amp; Pembagian Tugas</li>
 @endsection
@@ -370,18 +370,44 @@
             </div>
             <div>
                 <h6 class="fw-bold text-dark mb-0">Daftar Petugas &amp; Rincian Tugas</h6>
-                <span class="text-muted" style="font-size: 0.72rem;">Total {{ $assignment->assignmentOfficers->count() }} petugas ditugaskan pada kegiatan ini</span>
+                <span class="text-muted" id="officerCountText" style="font-size: 0.72rem;">Total {{ $assignment->assignmentOfficers->count() }} petugas ditugaskan pada kegiatan ini</span>
             </div>
         </div>
-        @if(auth()->user()->isAdmin())
-            <button type="button" class="btn btn-outline-primary btn-sm rounded-pill px-3 py-1" data-bs-toggle="modal" data-bs-target="#assignOfficerModal">
-                <i class="bi bi-plus-lg me-1"></i> Tambah Petugas
-            </button>
-        @endif
+        <div class="d-flex align-items-center gap-2 flex-wrap ms-auto">
+            <!-- Filter Status Tugas -->
+            <select id="filterOfficerStatus" class="form-select form-select-sm rounded-pill" style="width: 130px; font-size: 0.78rem;" onchange="filterOfficerTable()">
+                <option value="">Semua Status</option>
+                <option value="pending">Menunggu</option>
+                <option value="in_progress">Berjalan</option>
+                <option value="completed">Selesai</option>
+            </select>
+
+            <!-- Filter Nama / Nomor HP Petugas -->
+            <div class="input-group input-group-sm" style="width: 220px;">
+                <span class="input-group-text bg-white border-end-0 text-muted ps-2.5">
+                    <i class="bi bi-search"></i>
+                </span>
+                <input type="text" 
+                       id="filterOfficerName" 
+                       class="form-control border-start-0 ps-1" 
+                       placeholder="Cari nama petugas..." 
+                       style="font-size: 0.78rem;"
+                       oninput="filterOfficerTable()">
+                <button type="button" class="btn btn-outline-secondary border-start-0 text-muted" id="btnResetOfficerFilter" onclick="resetOfficerFilter()" title="Hapus pencarian" style="display: none;">
+                    <i class="bi bi-x-circle-fill"></i>
+                </button>
+            </div>
+
+            @if(auth()->user()->isAdmin())
+                <button type="button" class="btn btn-outline-primary btn-sm rounded-pill px-3 py-1 d-inline-flex align-items-center gap-1" data-bs-toggle="modal" data-bs-target="#assignOfficerModal">
+                    <i class="bi bi-plus-lg"></i> Tambah Petugas
+                </button>
+            @endif
+        </div>
     </div>
 
     <div class="bento-table-container-fixed">
-        <table class="table bento-table-fixed align-middle mb-0">
+        <table class="table bento-table-fixed align-middle mb-0" id="officersTable">
             <thead>
                 <tr>
                     <th style="width: 30%;">Petugas Lapangan</th>
@@ -395,17 +421,27 @@
             </thead>
             <tbody>
                 @forelse($assignment->assignmentOfficers as $officerAssigned)
-                    <tr>
+                    @php
+                        $officerUser = $officerAssigned->user;
+                        $officerName = $officerUser ? $officerUser->name : 'Petugas Lapangan (Dihapus / Tidak Ditemukan)';
+                        $officerPhone = $officerUser ? ($officerUser->phone ?? '-') : '-';
+                        $officerInitial = strtoupper(substr($officerName, 0, 1));
+                    @endphp
+                    <tr class="officer-table-row" 
+                        data-name="{{ strtolower($officerName) }}" 
+                        data-phone="{{ strtolower($officerPhone !== '-' ? $officerPhone : '') }}" 
+                        data-status="{{ $officerAssigned->status }}"
+                        data-task="{{ strtolower($officerAssigned->specific_task ?? '') }}">
                         <td>
                             <div class="d-flex align-items-center gap-2 overflow-hidden">
                                 <div class="user-avatar-circle">
-                                    {{ strtoupper(substr($officerAssigned->user->name, 0, 1)) }}
+                                    {{ $officerInitial }}
                                 </div>
                                 <div class="overflow-hidden">
-                                    <div class="fw-bold text-dark text-truncate" style="font-size: 0.86rem;" title="{{ $officerAssigned->user->name }}">
-                                        {{ $officerAssigned->user->name }}
+                                    <div class="fw-bold text-dark text-truncate" style="font-size: 0.86rem;" title="{{ $officerName }}">
+                                        {{ $officerName }}
                                     </div>
-                                    <div class="small text-muted text-truncate"><i class="bi bi-telephone me-1"></i> {{ $officerAssigned->user->phone ?? '-' }}</div>
+                                    <div class="small text-muted text-truncate"><i class="bi bi-telephone me-1"></i> {{ $officerPhone }}</div>
                                 </div>
                             </div>
                         </td>
@@ -450,7 +486,7 @@
                                     <form method="POST" 
                                           action="{{ route('admin.assignments.officers.remove', [$assignment, $officerAssigned]) }}" 
                                           class="d-inline" 
-                                          onsubmit="return confirm('Batalkan penugasan untuk {{ addslashes($officerAssigned->user->name) }}?');">
+                                          onsubmit="return confirm('Batalkan penugasan untuk {{ addslashes($officerName) }}?');">
                                         @csrf
                                         @method('DELETE')
                                         <button type="submit" 
@@ -469,10 +505,19 @@
                         <td colspan="{{ auth()->user()->isAdmin() ? '5' : '4' }}" class="text-center py-5 text-muted">
                             <i class="bi bi-person-x display-5 text-secondary opacity-50 d-block mb-2"></i>
                             <div class="fw-bold text-dark">Belum ada petugas yang ditugaskan pada kegiatan ini.</div>
-                            <div class="small">Klik tombol "Tugaskan Petugas Baru" di atas untuk menambahkan petugas penanggung jawab.</div>
+                            <div class="small">Klik tombol "Tambah Petugas" di atas untuk menambahkan petugas penanggung jawab.</div>
                         </td>
                     </tr>
                 @endforelse
+
+                <!-- Baris Saat Pencarian Petugas Tidak Ditemukan -->
+                <tr id="officerSearchNotFoundRow" style="display: none;">
+                    <td colspan="{{ auth()->user()->isAdmin() ? '5' : '4' }}" class="text-center py-4 text-muted">
+                        <i class="bi bi-search text-secondary opacity-50 d-block mb-1 fs-3"></i>
+                        <div class="fw-bold text-dark" style="font-size: 0.88rem;">Tidak ada petugas yang cocok</div>
+                        <div class="small text-muted">Coba ubah kata kunci pencarian nama atau filter status.</div>
+                    </td>
+                </tr>
             </tbody>
         </table>
     </div>
@@ -489,13 +534,30 @@
             </div>
             <div>
                 <h6 class="fw-bold text-dark mb-0">Responden yang Terdata pada Kegiatan Ini</h6>
-                <span class="text-muted" style="font-size: 0.72rem;">Total {{ $assignment->respondents->count() }} responden terdaftar</span>
+                <span class="text-muted" id="respondentCountText" style="font-size: 0.72rem;">Total {{ $assignment->respondents->count() }} responden terdaftar</span>
+            </div>
+        </div>
+        <div class="d-flex align-items-center gap-2 flex-wrap ms-auto">
+            <!-- Filter Nama / Alamat Responden -->
+            <div class="input-group input-group-sm" style="width: 240px;">
+                <span class="input-group-text bg-white border-end-0 text-muted ps-2.5">
+                    <i class="bi bi-search"></i>
+                </span>
+                <input type="text" 
+                       id="filterRespondentSearch" 
+                       class="form-control border-start-0 ps-1" 
+                       placeholder="Cari nama responden / alamat..." 
+                       style="font-size: 0.78rem;"
+                       oninput="filterRespondentTable()">
+                <button type="button" class="btn btn-outline-secondary border-start-0 text-muted" id="btnResetRespondentFilter" onclick="resetRespondentFilter()" title="Hapus pencarian" style="display: none;">
+                    <i class="bi bi-x-circle-fill"></i>
+                </button>
             </div>
         </div>
     </div>
 
     <div class="bento-table-container-fixed">
-        <table class="table bento-table-fixed align-middle mb-0">
+        <table class="table bento-table-fixed align-middle mb-0" id="respondentsTable">
             <thead>
                 <tr>
                     <th style="width: 25%;">Nama Responden</th>
@@ -507,7 +569,14 @@
             </thead>
             <tbody>
                 @forelse($assignment->respondents as $resp)
-                    <tr>
+                    @php
+                        $respOfficerName = $resp->officer ? $resp->officer->name : 'Petugas Tidak Diketahui';
+                    @endphp
+                    <tr class="respondent-table-row"
+                        data-name="{{ strtolower($resp->name) }}"
+                        data-agency="{{ strtolower($resp->agency ?? '') }}"
+                        data-address="{{ strtolower($resp->address ?? '') }}"
+                        data-officer="{{ strtolower($respOfficerName) }}">
                         <td>
                             <div class="fw-bold text-dark text-truncate" title="{{ $resp->name }}">{{ $resp->name }}</div>
                         </td>
@@ -522,11 +591,11 @@
                         <td>
                             <div class="small fw-semibold text-dark text-truncate d-flex align-items-center gap-1">
                                 <i class="bi bi-person text-secondary flex-shrink-0"></i>
-                                <span class="text-truncate">{{ $resp->officer->name }}</span>
+                                <span class="text-truncate">{{ $respOfficerName }}</span>
                             </div>
                         </td>
                         <td>
-                            <span class="small text-muted">{{ $resp->input_date->format('d/m/Y') }}</span>
+                            <span class="small text-muted">{{ $resp->input_date ? $resp->input_date->format('d/m/Y') : '-' }}</span>
                         </td>
                     </tr>
                 @empty
@@ -537,6 +606,15 @@
                         </td>
                     </tr>
                 @endforelse
+
+                <!-- Baris Saat Pencarian Responden Tidak Ditemukan -->
+                <tr id="respondentSearchNotFoundRow" style="display: none;">
+                    <td colspan="5" class="text-center py-4 text-muted">
+                        <i class="bi bi-search text-secondary opacity-50 d-block mb-1 fs-3"></i>
+                        <div class="fw-bold text-dark" style="font-size: 0.88rem;">Tidak ada responden yang cocok</div>
+                        <div class="small text-muted">Coba ubah kata kunci pencarian nama atau alamat.</div>
+                    </td>
+                </tr>
             </tbody>
         </table>
     </div>
@@ -661,13 +739,119 @@
 <script>
     function openEditOfficerModal(officerAssigned) {
         document.getElementById('editOfficerTaskForm').action = '/admin/assignments/{{ $assignment->id }}/officers/' + officerAssigned.id;
-        document.getElementById('edit_officer_name').value = officerAssigned.user.name;
+        document.getElementById('edit_officer_name').value = (officerAssigned.user && officerAssigned.user.name) ? officerAssigned.user.name : 'Petugas Lapangan';
         document.getElementById('edit_officer_task').value = officerAssigned.specific_task || '';
         document.getElementById('edit_officer_status').value = officerAssigned.status;
         document.getElementById('edit_officer_notes').value = officerAssigned.progress_notes || '';
 
         const modal = new bootstrap.Modal(document.getElementById('editOfficerTaskModal'));
         modal.show();
+    }
+
+    // Filter Petugas Lapangan (Nama, Telepon, Tugas, Status)
+    function filterOfficerTable() {
+        const query = (document.getElementById('filterOfficerName').value || '').toLowerCase().trim();
+        const status = (document.getElementById('filterOfficerStatus').value || '').trim();
+        const rows = document.querySelectorAll('.officer-table-row');
+        const notFoundRow = document.getElementById('officerSearchNotFoundRow');
+        const resetBtn = document.getElementById('btnResetOfficerFilter');
+        const countText = document.getElementById('officerCountText');
+        const totalCount = {{ $assignment->assignmentOfficers->count() }};
+        let visibleCount = 0;
+
+        if (resetBtn) {
+            resetBtn.style.display = (query !== '') ? 'inline-block' : 'none';
+        }
+
+        rows.forEach(row => {
+            const name = row.getAttribute('data-name') || '';
+            const phone = row.getAttribute('data-phone') || '';
+            const rowStatus = row.getAttribute('data-status') || '';
+            const task = row.getAttribute('data-task') || '';
+
+            const matchesQuery = !query || name.includes(query) || phone.includes(query) || task.includes(query);
+            const matchesStatus = !status || rowStatus === status;
+
+            if (matchesQuery && matchesStatus) {
+                row.style.display = '';
+                visibleCount++;
+            } else {
+                row.style.display = 'none';
+            }
+        });
+
+        if (notFoundRow) {
+            notFoundRow.style.display = (visibleCount === 0 && rows.length > 0) ? '' : 'none';
+        }
+
+        if (countText) {
+            if (query || status) {
+                countText.innerHTML = `Menampilkan <strong class="text-primary">${visibleCount}</strong> dari ${totalCount} petugas`;
+            } else {
+                countText.innerText = `Total ${totalCount} petugas ditugaskan pada kegiatan ini`;
+            }
+        }
+    }
+
+    function resetOfficerFilter() {
+        const input = document.getElementById('filterOfficerName');
+        if (input) {
+            input.value = '';
+            input.focus();
+        }
+        filterOfficerTable();
+    }
+
+    // Filter Responden (Nama, Instansi, Alamat, Petugas)
+    function filterRespondentTable() {
+        const query = (document.getElementById('filterRespondentSearch').value || '').toLowerCase().trim();
+        const rows = document.querySelectorAll('.respondent-table-row');
+        const notFoundRow = document.getElementById('respondentSearchNotFoundRow');
+        const resetBtn = document.getElementById('btnResetRespondentFilter');
+        const countText = document.getElementById('respondentCountText');
+        const totalCount = {{ $assignment->respondents->count() }};
+        let visibleCount = 0;
+
+        if (resetBtn) {
+            resetBtn.style.display = (query !== '') ? 'inline-block' : 'none';
+        }
+
+        rows.forEach(row => {
+            const name = row.getAttribute('data-name') || '';
+            const agency = row.getAttribute('data-agency') || '';
+            const address = row.getAttribute('data-address') || '';
+            const officer = row.getAttribute('data-officer') || '';
+
+            const matches = !query || name.includes(query) || agency.includes(query) || address.includes(query) || officer.includes(query);
+
+            if (matches) {
+                row.style.display = '';
+                visibleCount++;
+            } else {
+                row.style.display = 'none';
+            }
+        });
+
+        if (notFoundRow) {
+            notFoundRow.style.display = (visibleCount === 0 && rows.length > 0) ? '' : 'none';
+        }
+
+        if (countText) {
+            if (query) {
+                countText.innerHTML = `Menampilkan <strong class="text-teal text-success">${visibleCount}</strong> dari ${totalCount} responden`;
+            } else {
+                countText.innerText = `Total ${totalCount} responden terdaftar`;
+            }
+        }
+    }
+
+    function resetRespondentFilter() {
+        const input = document.getElementById('filterRespondentSearch');
+        if (input) {
+            input.value = '';
+            input.focus();
+        }
+        filterRespondentTable();
     }
 </script>
 @endpush

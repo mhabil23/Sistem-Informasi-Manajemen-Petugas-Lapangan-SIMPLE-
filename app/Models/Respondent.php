@@ -69,7 +69,7 @@ class Respondent extends Model
 
     public function officer(): BelongsTo
     {
-        return $this->belongsTo(User::class, 'officer_id');
+        return $this->belongsTo(User::class, 'officer_id')->withTrashed();
     }
 
     public function basts(): HasMany

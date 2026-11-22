@@ -1,11 +1,11 @@
 @extends('layouts.app')
 
-@section('title', 'Kelola Peserta Pelatihan - ' . $training->title)
-@section('page_title', 'Administrasi Peserta Pelatihan')
+@section('title', 'Daftar Hadir - ' . ($training->document_number ?: $training->title))
+@section('page_title', 'Rincian Daftar Hadir')
 
 @section('breadcrumb')
     <li class="breadcrumb-item"><a href="{{ route('admin.dashboard') }}">Admin</a></li>
-    <li class="breadcrumb-item"><a href="{{ route('admin.trainings.index') }}">Pelatihan</a></li>
+    <li class="breadcrumb-item"><a href="{{ route('admin.trainings.index') }}">Daftar Hadir</a></li>
     <li class="breadcrumb-item active" aria-current="page">{{ \Illuminate\Support\Str::limit($training->title, 25) }}</li>
 @endsection
 
@@ -221,14 +221,9 @@
 <!-- Participants Table Card -->
 <div class="bento-card mb-4">
     <div class="d-flex flex-wrap justify-content-between align-items-center p-3 border-bottom gap-2">
-        <div class="d-flex align-items-center gap-2">
-            <div class="p-2 rounded-3 text-white" style="background: linear-gradient(135deg, #0284c7 0%, #0369a1 100%);">
-                <i class="bi bi-person-lines-fill fs-5"></i>
-            </div>
-            <div>
-                <h5 class="fw-bold text-dark mb-0" style="font-size: 1.05rem;">Daftar Peserta & Presensi ({{ $participants->total() }})</h5>
-                <span class="badge bg-light text-secondary border mt-1">Halaman {{ $participants->currentPage() }} dari {{ $participants->lastPage() ?: 1 }}</span>
-            </div>
+        <div>
+            <h5 class="fw-bold text-dark mb-0" style="font-size: 1.05rem;">Daftar Peserta & Presensi ({{ $participants->total() }})</h5>
+            <span class="badge bg-light text-secondary border mt-1">Halaman {{ $participants->currentPage() }} dari {{ $participants->lastPage() ?: 1 }}</span>
         </div>
         <div class="d-flex align-items-center gap-2">
             <span class="badge bg-success-subtle text-success border border-success-subtle px-2 py-1">

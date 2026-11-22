@@ -33,6 +33,7 @@ class DatabaseSeeder extends Seeder
                 'phone' => '081234567890',
                 'password' => Hash::make('admin123'),
                 'role' => 'admin',
+                'is_master_admin' => true,
                 'status' => 'active',
             ]
         );
@@ -234,5 +235,7 @@ class DatabaseSeeder extends Seeder
             'description' => 'Inisialisasi sistem database SIMPLE dan pembuatan akun default.',
             'ip_address' => '127.0.0.1',
         ]);
+        // 10. Pegawai Organik BPS & Dual Role
+        $this->call(PegawaiSeeder::class);
     }
 }

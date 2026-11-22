@@ -1,12 +1,12 @@
 @extends('layouts.auth')
 
-@section('title', 'Masuk ke Sistem - SIMPLE BPS Kolaka Utara')
+@section('title', 'Masuk ke Sistem - SIMPEL BPS Kolaka Utara')
 
 @section('content')
 <div class="auth-bento-card">
 
     <!-- ==============================================================
-         LEFT HERO SHOWCASE PANE (IDENTITY, SIMPLE HIGHLIGHT & ACRONYM)
+         LEFT HERO SHOWCASE PANE (IDENTITY, SIMPEL HIGHLIGHT & ACRONYM)
          ============================================================== -->
     <div class="auth-hero-pane">
         <!-- Background Art Accent -->
@@ -36,10 +36,10 @@
                 </span>
             </div>
 
-            <!-- Prominent SIMPLE Title Highlight -->
+            <!-- Prominent SIMPEL Title Highlight -->
             <div class="mb-3">
                 <h1 class="display-5 fw-extrabold mb-1" style="color: #0F172A; font-weight: 850; letter-spacing: -0.025em; line-height: 1.15;">
-                    SIMPLE<span style="color: var(--bps-orange);">.</span>
+                    SIMPEL<span style="color: var(--bps-orange);">.</span>
                 </h1>
             </div>
 

@@ -29,14 +29,16 @@ class RoleMiddleware
             return redirect()->route('login')->with('error', 'Akun Anda dinonaktifkan. Hubungi Administrator.');
         }
 
-        if (!in_array($user->role, $roles)) {
+        $activeRole = $user->activeRole();
+
+        if (!in_array($activeRole, $roles, true)) {
             // If user role is not authorized, redirect to their own role dashboard
             if ($user->isAdmin()) {
-                return redirect()->route('admin.dashboard')->with('error', 'Anda tidak memiliki hak akses ke halaman tersebut.');
+                return redirect()->route('admin.dashboard')->with('error', 'Anda sedang dalam Mode Administrator. Silakan beralih ke Mode Pegawai melalui menu profil di kanan atas jika ingin mengakses halaman ini.');
             }
 
-            if ($user->isPegawai()) {
-                return redirect()->route('petugas.dashboard')->with('error', 'Halaman ini khusus untuk Administrator.');
+            if ($user->canSwitchRole()) {
+                return redirect()->route('petugas.dashboard')->with('error', 'Halaman ini khusus untuk Administrator. Beralihlah ke Mode Administrator melalui menu profil di kanan atas.');
             }
 
             return redirect()->route('petugas.dashboard')->with('error', 'Halaman ini khusus untuk Administrator.');

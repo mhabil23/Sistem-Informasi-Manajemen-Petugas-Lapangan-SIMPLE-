@@ -21,7 +21,18 @@ class TrainingParticipant extends Model
         'email',
         'attendance_status',
         'certificate_number',
+        'signature_path',
+        'signed_at',
+        'sort_order',
     ];
+
+    protected function casts(): array
+    {
+        return [
+            'signed_at' => 'datetime',
+            'sort_order' => 'integer',
+        ];
+    }
 
     public function trainingEvent(): BelongsTo
     {

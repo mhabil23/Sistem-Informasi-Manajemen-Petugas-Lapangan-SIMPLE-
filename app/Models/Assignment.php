@@ -46,6 +46,7 @@ class Assignment extends Model
     public function officers(): BelongsToMany
     {
         return $this->belongsToMany(User::class, 'assignment_officers', 'assignment_id', 'user_id')
+                    ->withTrashed()
                     ->withPivot(['id', 'specific_task', 'status', 'progress_notes'])
                     ->withTimestamps();
     }

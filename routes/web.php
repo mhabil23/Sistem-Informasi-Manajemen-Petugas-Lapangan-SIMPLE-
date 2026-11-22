@@ -25,6 +25,7 @@ Route::middleware('guest')->group(function () {
 
 Route::middleware('auth')->group(function () {
     Route::post('/logout', [AuthController::class, 'logout'])->name('logout');
+    Route::post('/switch-role', [\App\Http\Controllers\RoleSwitchController::class, 'switch'])->name('role.switch');
 
     // Profile & Password settings (accessible to both roles)
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
@@ -51,17 +52,31 @@ Route::middleware(['auth', 'role:admin'])->prefix('admin')->as('admin.')->group(
     Route::put('/users/{user}', [\App\Http\Controllers\Admin\UserController::class, 'update'])->name('users.update');
     Route::delete('/users/{user}', [\App\Http\Controllers\Admin\UserController::class, 'destroy'])->name('users.destroy');
     Route::patch('/users/{user}/toggle-status', [\App\Http\Controllers\Admin\UserController::class, 'toggleStatus'])->name('users.toggle-status');
+    Route::patch('/users/{user}/toggle-dual-role', [\App\Http\Controllers\Admin\UserController::class, 'toggleDualRole'])->name('users.toggle-dual-role');
+    Route::patch('/users/{user}/revoke-admin', [\App\Http\Controllers\Admin\UserController::class, 'revokeAdmin'])->name('users.revoke-admin');
+    Route::patch('/users/{user}/grant-admin', [\App\Http\Controllers\Admin\UserController::class, 'grantAdmin'])->name('users.grant-admin');
+    Route::post('/users/revoke-all-pegawai-admin', [\App\Http\Controllers\Admin\UserController::class, 'revokeAllPegawaiAdmin'])->name('users.revoke-all-pegawai-admin');
+    Route::post('/users/bulk-action', [\App\Http\Controllers\Admin\UserController::class, 'bulkAction'])->name('users.bulk-action');
+    Route::post('/users/update-multiple-pegawai-admin', [\App\Http\Controllers\Admin\UserController::class, 'updateMultiplePegawaiAdmin'])->name('users.update-multiple-pegawai-admin');
+    Route::post('/users/sync-pegawai', [\App\Http\Controllers\Admin\UserController::class, 'syncPegawai'])->name('users.sync-pegawai');
     Route::patch('/users/{user}/reset-password', [\App\Http\Controllers\Admin\UserController::class, 'resetPassword'])->name('users.reset-password');
 
     // Aksi Penugasan (CUD Admin)
+    Route::get('/assignments/template/download', [\App\Http\Controllers\Admin\AssignmentController::class, 'downloadTemplate'])->name('assignments.template.download');
+    Route::post('/assignments/preview-excel', [\App\Http\Controllers\Admin\AssignmentController::class, 'previewExcel'])->name('assignments.preview-excel');
+    Route::post('/assignments/import', [\App\Http\Controllers\Admin\AssignmentController::class, 'importExcel'])->name('assignments.import');
     Route::post('/assignments', [\App\Http\Controllers\Admin\AssignmentController::class, 'store'])->name('assignments.store');
     Route::put('/assignments/{assignment}', [\App\Http\Controllers\Admin\AssignmentController::class, 'update'])->name('assignments.update');
     Route::delete('/assignments/{assignment}', [\App\Http\Controllers\Admin\AssignmentController::class, 'destroy'])->name('assignments.destroy');
+    Route::post('/assignments/bulk-action', [\App\Http\Controllers\Admin\AssignmentController::class, 'bulkAction'])->name('assignments.bulk-action');
     Route::post('/assignments/{assignment}/officers', [\App\Http\Controllers\Admin\AssignmentController::class, 'assignOfficer'])->name('assignments.officers.assign');
     Route::put('/assignments/{assignment}/officers/{assignmentOfficer}', [\App\Http\Controllers\Admin\AssignmentController::class, 'updateOfficerTask'])->name('assignments.officers.update');
     Route::delete('/assignments/{assignment}/officers/{assignmentOfficer}', [\App\Http\Controllers\Admin\AssignmentController::class, 'removeOfficer'])->name('assignments.officers.remove');
 
     // Aksi Jadwal Kegiatan (CUD Admin)
+    Route::get('/schedules/template/download', [\App\Http\Controllers\Admin\ScheduleController::class, 'downloadTemplate'])->name('schedules.template.download');
+    Route::post('/schedules/preview-excel', [\App\Http\Controllers\Admin\ScheduleController::class, 'previewExcel'])->name('schedules.preview-excel');
+    Route::post('/schedules/import-excel', [\App\Http\Controllers\Admin\ScheduleController::class, 'importExcel'])->name('schedules.import-excel');
     Route::post('/schedules', [\App\Http\Controllers\Admin\ScheduleController::class, 'store'])->name('schedules.store');
     Route::put('/schedules/{schedule}', [\App\Http\Controllers\Admin\ScheduleController::class, 'update'])->name('schedules.update');
     Route::delete('/schedules/{schedule}', [\App\Http\Controllers\Admin\ScheduleController::class, 'destroy'])->name('schedules.destroy');
@@ -76,9 +91,12 @@ Route::middleware(['auth', 'role:admin'])->prefix('admin')->as('admin.')->group(
     Route::delete('/basts/respondents/{bast}', [\App\Http\Controllers\Admin\RespondentBastController::class, 'destroy'])->name('basts.respondents.destroy');
 
     // Aksi BAST Petugas (Create, Update & Delete Admin)
+    Route::get('/basts/officers/template/download', [\App\Http\Controllers\Admin\OfficerBastController::class, 'downloadTemplate'])->name('basts.officers.template.download');
+    Route::post('/basts/officers/parse-excel', [\App\Http\Controllers\Admin\OfficerBastController::class, 'parseExcelRecipients'])->name('basts.officers.parse-recipients-excel');
     Route::post('/basts/officers', [\App\Http\Controllers\Admin\OfficerBastController::class, 'store'])->name('basts.officers.store');
     Route::put('/basts/officers/{bast}', [\App\Http\Controllers\Admin\OfficerBastController::class, 'update'])->name('basts.officers.update');
     Route::delete('/basts/officers/{bast}', [\App\Http\Controllers\Admin\OfficerBastController::class, 'destroy'])->name('basts.officers.destroy');
+    Route::post('/basts/officers/bulk-action', [\App\Http\Controllers\Admin\OfficerBastController::class, 'bulkAction'])->name('basts.officers.bulk-action');
 
     // Aksi Laporan Petugas & ACC/Basis Pelaksanaan (Admin)
     Route::put('/reports/basis-settings', [\App\Http\Controllers\Admin\ReportController::class, 'updateBasisSettings'])->name('reports.basis-settings');
@@ -86,22 +104,26 @@ Route::middleware(['auth', 'role:admin'])->prefix('admin')->as('admin.')->group(
     Route::patch('/reports/{report}/approve', [\App\Http\Controllers\Admin\ReportController::class, 'approve'])->name('reports.approve');
     Route::put('/reports/{report}/review', [\App\Http\Controllers\Admin\ReportController::class, 'review'])->name('reports.review');
     Route::delete('/reports/{report}', [\App\Http\Controllers\Admin\ReportController::class, 'destroy'])->name('reports.destroy');
+    Route::post('/reports/bulk-action', [\App\Http\Controllers\Admin\ReportController::class, 'bulkAction'])->name('reports.bulk-action');
 
     // Notifikasi Admin (Laporan Perjadin Baru)
     Route::get('/notifications/poll', [\App\Http\Controllers\Admin\NotificationController::class, 'poll'])->name('notifications.poll');
     Route::post('/notifications/mark-all-read', [\App\Http\Controllers\Admin\NotificationController::class, 'markAllRead'])->name('notifications.mark-all-read');
     Route::patch('/notifications/{notification}/read', [\App\Http\Controllers\Admin\NotificationController::class, 'markAsRead'])->name('notifications.read');
 
-    // Administrasi Pelatihan SPKRT (Admin)
+    // Daftar Hadir Kegiatan & Pelatihan (Admin)
+    Route::get('/trainings/template/download', [\App\Http\Controllers\Admin\TrainingController::class, 'downloadTemplate'])->name('trainings.template.download');
+    Route::post('/trainings/parse-excel', [\App\Http\Controllers\Admin\TrainingController::class, 'parseExcelParticipants'])->name('trainings.parse-excel');
     Route::get('/trainings', [\App\Http\Controllers\Admin\TrainingController::class, 'index'])->name('trainings.index');
     Route::post('/trainings', [\App\Http\Controllers\Admin\TrainingController::class, 'store'])->name('trainings.store');
     Route::get('/trainings/{training}', [\App\Http\Controllers\Admin\TrainingController::class, 'show'])->name('trainings.show');
     Route::put('/trainings/{training}', [\App\Http\Controllers\Admin\TrainingController::class, 'update'])->name('trainings.update');
     Route::delete('/trainings/{training}', [\App\Http\Controllers\Admin\TrainingController::class, 'destroy'])->name('trainings.destroy');
+    Route::get('/trainings/{training}/preview-pdf', [\App\Http\Controllers\Admin\TrainingController::class, 'previewAttendancePdf'])->name('trainings.preview');
+    Route::get('/trainings/{training}/attendance-pdf', [\App\Http\Controllers\Admin\TrainingController::class, 'exportAttendancePdf'])->name('trainings.attendance.pdf');
     Route::post('/trainings/{training}/participants', [\App\Http\Controllers\Admin\TrainingController::class, 'storeParticipant'])->name('trainings.participants.store');
     Route::put('/trainings/{training}/participants/{participant}', [\App\Http\Controllers\Admin\TrainingController::class, 'updateParticipant'])->name('trainings.participants.update');
     Route::delete('/trainings/{training}/participants/{participant}', [\App\Http\Controllers\Admin\TrainingController::class, 'destroyParticipant'])->name('trainings.participants.destroy');
-    Route::get('/trainings/{training}/attendance-pdf', [\App\Http\Controllers\Admin\TrainingController::class, 'exportAttendancePdf'])->name('trainings.attendance.pdf');
 
     // Template Dokumen (Admin)
     Route::post('/templates/extract-word', [\App\Http\Controllers\Admin\DocumentTemplateController::class, 'extractWord'])->name('templates.extract-word');
@@ -161,6 +183,7 @@ Route::middleware(['auth', 'role:petugas,pegawai'])->prefix('petugas')->as('petu
     // Tugas Saya (Petugas Lapangan)
     Route::get('/assignments', [\App\Http\Controllers\Petugas\AssignmentController::class, 'index'])->name('assignments.index');
     Route::put('/assignments/{assignmentOfficer}/progress', [\App\Http\Controllers\Petugas\AssignmentController::class, 'updateProgress'])->name('assignments.progress.update');
+    Route::post('/assignments/bulk-progress', [\App\Http\Controllers\Petugas\AssignmentController::class, 'bulkProgress'])->name('assignments.bulk-progress');
     // Jadwal Kegiatan (Petugas Lapangan)
     Route::get('/schedules', [\App\Http\Controllers\Petugas\ScheduleController::class, 'index'])->name('schedules.index');
 

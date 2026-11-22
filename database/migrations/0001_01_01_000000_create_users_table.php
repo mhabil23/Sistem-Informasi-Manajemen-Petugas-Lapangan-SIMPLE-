@@ -19,7 +19,7 @@ return new class extends Migration
             $table->string('phone')->nullable();
             $table->timestamp('email_verified_at')->nullable();
             $table->string('password');
-            $table->enum('role', ['admin', 'petugas'])->default('petugas')->index();
+            $table->enum('role', ['admin', 'petugas', 'pegawai'])->default('petugas')->index();
             $table->enum('status', ['active', 'inactive'])->default('active')->index();
             $table->string('avatar')->nullable();
             $table->rememberToken();

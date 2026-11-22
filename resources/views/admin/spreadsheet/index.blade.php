@@ -30,7 +30,7 @@
             </div>
             <div class="sp-card-body">
                 <p class="text-secondary small mb-3">
-                    Website SIMPLE dapat membaca dan menulis seluruh data transaksi (pengguna, responden, penugasan, BAST, jadwal, hingga pelatihan) langsung ke <strong>Google Spreadsheet</strong> via Web App Apps Script.
+                    Website SIMPEL dapat membaca dan menulis seluruh data transaksi (pengguna, responden, penugasan, BAST, jadwal, hingga pelatihan) langsung ke <strong>Google Spreadsheet</strong> via Web App Apps Script.
                 </p>
 
                 <form method="POST" action="{{ route('admin.spreadsheet.update') }}" class="mb-4">
@@ -143,7 +143,7 @@
         <div class="row g-4">
             <div class="col-lg-5">
                 <ol class="small text-secondary ps-3 mb-0" style="line-height: 1.8;">
-                    <li>Buka <a href="https://drive.google.com" target="_blank" class="fw-semibold">Google Drive</a> dan buat <strong>Google Spreadsheet baru</strong> (beri nama misalnya: <code>Database SIMPLE</code>).</li>
+                    <li>Buka <a href="https://drive.google.com" target="_blank" class="fw-semibold">Google Drive</a> dan buat <strong>Google Spreadsheet baru</strong> (beri nama misalnya: <code>Database SIMPEL</code>).</li>
                     <li>Pada menu atas Spreadsheet, klik <strong>Ekstensi (Extensions)</strong> &gt; <strong>Apps Script</strong>.</li>
                     <li>Hapus kode bawaan yang ada, lalu klik tombol <strong>"Salin Kode Apps Script"</strong> di sebelah kanan dan tempelkan ke editor Apps Script.</li>
                     <li>Klik ikon <strong>Simpan</strong> (ikon disket).</li>
@@ -151,7 +151,7 @@
                     <li>Pilih jenis <strong>Aplikasi Web (Web app)</strong>:
                         <ul>
                             <li>Jalankan sebagai: <strong>Saya (Me)</strong></li>
-                            <li>Akses: <strong class="text-danger">Siapa saja (Anyone)</strong> <em>(wajib agar server web SIMPLE dapat terhubung)</em>.</li>
+                            <li>Akses: <strong class="text-danger">Siapa saja (Anyone)</strong> <em>(wajib agar server web SIMPEL dapat terhubung)</em>.</li>
                         </ul>
                     </li>
                     <li>Klik <strong>Deploy</strong>, lalu salin <strong>URL Aplikasi Web</strong> yang berakhiran <code>/exec</code>.</li>

@@ -1,7 +1,7 @@
-# Laravel Application - SIMPLE Project Guidelines
+# Laravel Application - SIMPEL Project Guidelines
 
 ## Project Overview
-Sistem Informasi Manajemen Pelayanan & Evaluasi Lapangan (SIMPLE).
+Sistem Informasi Manajemen Pelayanan & Evaluasi Lapangan (SIMPEL).
 Aplikasi terintegrasi untuk pendataan sensus / survei lapangan, administrasi dokumen Berita Acara Serah Terima (BAST Responden & Petugas), Laporan Perjalanan Dinas, dan Rekapitulasi Progres.
 
 ## Sisi Petugas (Mobile-First)

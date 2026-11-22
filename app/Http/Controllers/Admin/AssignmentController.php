@@ -7,19 +7,26 @@ use App\Models\ActivityLog;
 use App\Models\Assignment;
 use App\Models\AssignmentOfficer;
 use App\Models\OfficerReport;
+use App\Models\Respondent;
 use App\Models\User;
 use App\Services\GoogleSheetService;
+use App\Services\SimpleExcelParser;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Str;
 use Illuminate\Validation\Rule;
 
 class AssignmentController extends Controller
 {
     protected GoogleSheetService $sheetService;
+    protected SimpleExcelParser $excelParser;
 
-    public function __construct(GoogleSheetService $sheetService)
+    public function __construct(GoogleSheetService $sheetService, SimpleExcelParser $excelParser)
     {
         $this->sheetService = $sheetService;
+        $this->excelParser = $excelParser;
     }
 
     /**
@@ -102,6 +109,22 @@ class AssignmentController extends Controller
             }
         }
 
+        // If excel file was uploaded directly in the form, process & allocate respondents & officers
+        $extraMsg = '';
+        if ($request->hasFile('excel_file')) {
+            $file = $request->file('excel_file');
+            $ext = $file->getClientOriginalExtension();
+            try {
+                $parsedRows = $this->excelParser->parse($file->getRealPath(), $ext);
+                $counts = $this->processParsedRowsForAssignment($assignment, $parsedRows);
+                if ($counts['respondents'] > 0) {
+                    $extraMsg = " Sebanyak {$counts['respondents']} sampel responden dan {$counts['officers']} petugas berhasil dialokasikan dari berkas Excel.";
+                }
+            } catch (\Throwable $e) {
+                // Log and continue
+            }
+        }
+
         // Sync to Google Sheet if configured
         if ($this->sheetService->isConfigured()) {
             $this->sheetService->insert('assignments', [
@@ -125,7 +148,7 @@ class AssignmentController extends Controller
         );
 
         return redirect()->route('admin.assignments.show', $assignment)
-            ->with('success', "Kegiatan '{$assignment->title}' berhasil dibuat! Silakan tentukan pembagian tugas masing-masing petugas.");
+            ->with('success', "Kegiatan '{$assignment->title}' berhasil dibuat!{$extraMsg} Silakan tentukan pembagian tugas masing-masing petugas.");
     }
 
     /**
@@ -215,6 +238,161 @@ class AssignmentController extends Controller
         );
 
         return redirect()->route('admin.assignments.index')->with('success', "Kegiatan '{$title}' berhasil dihapus.");
+    }
+
+    /**
+     * Aksi massal (pilih lebih dari satu kegiatan via checkbox tabel).
+     */
+    public function bulkAction(Request $request)
+    {
+        $validated = $request->validate([
+            'action' => ['required', Rule::in(['set_ongoing', 'set_completed', 'set_draft', 'set_cancelled', 'delete', 'assign_officers'])],
+            'assignment_ids' => ['required', 'array', 'min:1'],
+            'assignment_ids.*' => ['integer', 'exists:assignments,id'],
+            'officer_id' => ['nullable', 'exists:users,id'],
+            'officer_ids' => ['nullable', 'array'],
+            'officer_ids.*' => ['integer', 'exists:users,id'],
+            'specific_task' => ['nullable', 'string', 'max:500'],
+        ], [
+            'assignment_ids.required' => 'Pilih minimal satu kegiatan untuk melakukan aksi massal.',
+            'assignment_ids.min' => 'Pilih minimal satu kegiatan untuk melakukan aksi massal.',
+        ]);
+
+        if ($validated['action'] === 'assign_officers' && empty($validated['officer_id']) && empty($validated['officer_ids'])) {
+            return back()->with('error', 'Pilih minimal satu petugas atau pegawai yang akan ditugaskan.');
+        }
+
+        $action = $validated['action'];
+        $assignmentIds = array_unique($validated['assignment_ids']);
+        $assignments = Assignment::whereIn('id', $assignmentIds)->get();
+        $affectedCount = 0;
+        $msg = '';
+
+        switch ($action) {
+            case 'set_ongoing':
+                foreach ($assignments as $assignment) {
+                    $assignment->update(['status' => 'ongoing']);
+                    if ($this->sheetService->isConfigured()) {
+                        $this->sheetService->update('assignments', $assignment->id, [
+                            'status' => 'ongoing',
+                            'updated_at' => now()->toISOString(),
+                        ]);
+                    }
+                    $affectedCount++;
+                }
+                $msg = "Sebanyak {$affectedCount} kegiatan berhasil diubah statusnya menjadi Sedang Berjalan (Aktif).";
+                break;
+
+            case 'set_completed':
+                foreach ($assignments as $assignment) {
+                    $assignment->update(['status' => 'completed']);
+                    if ($this->sheetService->isConfigured()) {
+                        $this->sheetService->update('assignments', $assignment->id, [
+                            'status' => 'completed',
+                            'updated_at' => now()->toISOString(),
+                        ]);
+                    }
+                    $affectedCount++;
+                }
+                $msg = "Sebanyak {$affectedCount} kegiatan berhasil diubah statusnya menjadi Selesai (Tuntas).";
+                break;
+
+            case 'set_draft':
+                foreach ($assignments as $assignment) {
+                    $assignment->update(['status' => 'draft']);
+                    if ($this->sheetService->isConfigured()) {
+                        $this->sheetService->update('assignments', $assignment->id, [
+                            'status' => 'draft',
+                            'updated_at' => now()->toISOString(),
+                        ]);
+                    }
+                    $affectedCount++;
+                }
+                $msg = "Sebanyak {$affectedCount} kegiatan berhasil diubah statusnya menjadi Draft.";
+                break;
+
+            case 'set_cancelled':
+                foreach ($assignments as $assignment) {
+                    $assignment->update(['status' => 'cancelled']);
+                    if ($this->sheetService->isConfigured()) {
+                        $this->sheetService->update('assignments', $assignment->id, [
+                            'status' => 'cancelled',
+                            'updated_at' => now()->toISOString(),
+                        ]);
+                    }
+                    $affectedCount++;
+                }
+                $msg = "Sebanyak {$affectedCount} kegiatan berhasil dibatalkan.";
+                break;
+
+            case 'delete':
+                foreach ($assignments as $assignment) {
+                    $id = $assignment->id;
+                    $assignment->delete();
+                    if ($this->sheetService->isConfigured()) {
+                        $this->sheetService->delete('assignments', $id, true);
+                    }
+                    $affectedCount++;
+                }
+                $msg = "Sebanyak {$affectedCount} kegiatan berhasil dihapus.";
+                break;
+
+            case 'assign_officers':
+                $officerIds = [];
+                if (!empty($validated['officer_ids'])) {
+                    $officerIds = array_merge($officerIds, $validated['officer_ids']);
+                }
+                if (!empty($validated['officer_id'])) {
+                    $officerIds[] = $validated['officer_id'];
+                }
+                $officerIds = array_unique(array_filter($officerIds));
+
+                $task = !empty($validated['specific_task']) ? $validated['specific_task'] : 'Pencacahan Lapangan';
+                $assignedCount = 0;
+
+                foreach ($assignments as $assignment) {
+                    foreach ($officerIds as $officerId) {
+                        $exists = AssignmentOfficer::where('assignment_id', $assignment->id)
+                            ->where('user_id', $officerId)
+                            ->exists();
+
+                        if (!$exists) {
+                            $record = AssignmentOfficer::create([
+                                'assignment_id' => $assignment->id,
+                                'user_id' => $officerId,
+                                'specific_task' => $task,
+                                'status' => 'pending',
+                            ]);
+
+                            if ($this->sheetService->isConfigured()) {
+                                $this->sheetService->insert('assignment_officers', [
+                                    'id' => $record->id,
+                                    'assignment_id' => $assignment->id,
+                                    'user_id' => $officerId,
+                                    'specific_task' => $task,
+                                    'status' => 'pending',
+                                    'progress_notes' => '',
+                                    'created_at' => now()->toISOString(),
+                                    'updated_at' => now()->toISOString(),
+                                ]);
+                            }
+                            $assignedCount++;
+                        }
+                    }
+                }
+                $countPeople = count($officerIds);
+                $msg = "Sebanyak {$countPeople} petugas/pegawai berhasil ditugaskan ke {$assignments->count()} kegiatan (total {$assignedCount} alokasi penugasan baru).";
+                $affectedCount = $assignedCount;
+                break;
+        }
+
+        ActivityLog::log(
+            'bulk_update',
+            'assignments',
+            "Melakukan aksi massal '{$action}' pada {$affectedCount} kegiatan."
+        );
+
+        return back()->with('success', $msg);
     }
 
     /**
@@ -335,6 +513,7 @@ class AssignmentController extends Controller
             'basis_st' => ['nullable', 'string', 'max:1000'],
             'target_respondents' => ['nullable', 'integer', 'min:0'],
             'status' => ['required', Rule::in(['draft', 'ongoing', 'completed', 'cancelled'])],
+            'excel_file' => ['nullable', 'file', 'extensions:xlsx,xls,csv,txt', 'max:10240'],
         ];
 
         if ($includeOfficers) {
@@ -371,6 +550,466 @@ class AssignmentController extends Controller
             'st_date' => $stDate,
             'basis_st' => $basisSt,
         ];
+    }
+
+    /**
+     * Download CSV/Excel template for bulk activity & respondent samples assignment.
+     */
+    public function downloadTemplate(Request $request)
+    {
+        // Headers matching the official BPS field officers spreadsheet: NO, Nama, Jenis Kelamin, Penugasan, Kecamatan Asal, Kelas, BANK
+        $headersList = [
+            'NO',
+            'Nama',
+            'Jenis Kelamin',
+            'Penugasan',
+            'Kecamatan Asal',
+            'Kelas',
+            'BANK',
+        ];
+
+        if ($request->query('format') === 'xlsx') {
+            $tmpPath = tempnam(sys_get_temp_dir(), 'tpl_xlsx') . '.xlsx';
+            $this->createCleanXlsxTemplate($tmpPath, $headersList);
+
+            return response()->stream(function () use ($tmpPath) {
+                readfile($tmpPath);
+                @unlink($tmpPath);
+            }, 200, [
+                'Content-Type' => 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+                'Content-Disposition' => 'attachment; filename=Template_Kegiatan_dan_Sampel_SIMPEL.xlsx',
+            ]);
+        }
+
+        $headers = [
+            'Content-Type' => 'text/csv; charset=utf-8',
+            'Content-Disposition' => 'attachment; filename=Template_Kegiatan_dan_Sampel_SIMPEL.csv',
+        ];
+
+        $callback = function () use ($headersList) {
+            $handle = fopen('php://output', 'w');
+            // Write UTF-8 BOM so Excel opens with proper encoding
+            fputs($handle, "\xEF\xBB\xBF");
+
+            // Header matching the template exactly with empty data rows
+            fputcsv($handle, $headersList);
+
+            fclose($handle);
+        };
+
+        return response()->stream($callback, 200, $headers);
+    }
+
+    /**
+     * Generate an empty XLSX template file matching the exact BPS field officers spreadsheet format.
+     */
+    protected function createCleanXlsxTemplate(string $outputPath, array $headers): void
+    {
+        $zip = new \ZipArchive();
+        if ($zip->open($outputPath, \ZipArchive::CREATE | \ZipArchive::OVERWRITE) !== true) {
+            throw new \Exception("Tidak dapat membuat berkas Excel template.");
+        }
+
+        $zip->addFromString('[Content_Types].xml', '<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<Types xmlns="http://schemas.openxmlformats.org/package/2006/content-types">
+  <Default Extension="rels" ContentType="application/vnd.openxmlformats-package.relationships+xml"/>
+  <Default Extension="xml" ContentType="application/xml"/>
+  <Override PartName="/xl/workbook.xml" ContentType="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet.main+xml"/>
+  <Override PartName="/xl/worksheets/sheet1.xml" ContentType="application/vnd.openxmlformats-officedocument.spreadsheetml.worksheet+xml"/>
+  <Override PartName="/xl/sharedStrings.xml" ContentType="application/vnd.openxmlformats-officedocument.spreadsheetml.sharedStrings+xml"/>
+</Types>');
+
+        $zip->addFromString('_rels/.rels', '<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<Relationships xmlns="http://schemas.openxmlformats.org/package/2006/relationships">
+  <Relationship Id="rId1" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/officeDocument" Target="xl/workbook.xml"/>
+</Relationships>');
+
+        $zip->addFromString('xl/_rels/workbook.xml.rels', '<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<Relationships xmlns="http://schemas.openxmlformats.org/package/2006/relationships">
+  <Relationship Id="rId1" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/worksheet" Target="worksheets/sheet1.xml"/>
+  <Relationship Id="rId2" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/sharedStrings" Target="sharedStrings.xml"/>
+</Relationships>');
+
+        $zip->addFromString('xl/workbook.xml', '<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<workbook xmlns="http://schemas.openxmlformats.org/spreadsheetml/2006/main" xmlns:r="http://schemas.openxmlformats.org/officeDocument/2006/relationships">
+  <sheets>
+    <sheet name="Daftar Petugas" sheetId="1" r:id="rId1"/>
+  </sheets>
+</workbook>');
+
+        $ssXml = '<?xml version="1.0" encoding="UTF-8" standalone="yes"?><sst xmlns="http://schemas.openxmlformats.org/spreadsheetml/2006/main" count="'.count($headers).'" uniqueCount="'.count($headers).'">';
+        foreach ($headers as $h) {
+            $ssXml .= '<si><t>' . htmlspecialchars($h, ENT_XML1) . '</t></si>';
+        }
+        $ssXml .= '</sst>';
+        $zip->addFromString('xl/sharedStrings.xml', $ssXml);
+
+        $sheetXml = '<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<worksheet xmlns="http://schemas.openxmlformats.org/spreadsheetml/2006/main">
+  <cols>
+    <col min="1" max="1" width="8" customWidth="1"/>
+    <col min="2" max="2" width="28" customWidth="1"/>
+    <col min="3" max="3" width="18" customWidth="1"/>
+    <col min="4" max="4" width="30" customWidth="1"/>
+    <col min="5" max="5" width="22" customWidth="1"/>
+    <col min="6" max="6" width="24" customWidth="1"/>
+    <col min="7" max="7" width="18" customWidth="1"/>
+  </cols>
+  <sheetData>
+    <row r="1">
+      <c r="A1" t="s"><v>0</v></c>
+      <c r="B1" t="s"><v>1</v></c>
+      <c r="C1" t="s"><v>2</v></c>
+      <c r="D1" t="s"><v>3</v></c>
+      <c r="E1" t="s"><v>4</v></c>
+      <c r="F1" t="s"><v>5</v></c>
+      <c r="G1" t="s"><v>6</v></c>
+    </row>
+  </sheetData>
+</worksheet>';
+        $zip->addFromString('xl/worksheets/sheet1.xml', $sheetXml);
+        $zip->close();
+    }
+
+    /**
+     * Preview and parse Excel/CSV content via AJAX to auto-fill the assignment creation form.
+     */
+    public function previewExcel(Request $request)
+    {
+        $request->validate([
+            'excel_file' => ['required', 'file', 'extensions:xlsx,xls,csv,txt', 'max:10240'],
+        ], [
+            'excel_file.required' => 'Pilih berkas Excel (.xlsx) atau CSV terlebih dahulu.',
+            'excel_file.extensions' => 'Format berkas harus berupa .xlsx, .xls, atau .csv.',
+            'excel_file.max' => 'Ukuran berkas maksimal 10 MB.',
+        ]);
+
+        $file = $request->file('excel_file');
+        $ext = $file->getClientOriginalExtension();
+
+        try {
+            $parsedRows = $this->excelParser->parse($file->getRealPath(), $ext);
+        } catch (\Throwable $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Gagal membaca berkas Excel: ' . $e->getMessage(),
+            ], 422);
+        }
+
+        if (empty($parsedRows)) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Berkas Excel kosong atau struktur kolom tidak sesuai dengan template.',
+            ], 422);
+        }
+
+        $firstRow = $parsedRows[0];
+        $title = trim($firstRow['nama_kegiatan'] ?? '');
+        $dipa = trim($firstRow['pembebanan_anggaran'] ?? '');
+
+        $districts = array_values(array_unique(array_filter(array_map(fn($r) => trim($r['wilayah_tugas'] ?? ''), $parsedRows))));
+        $location = !empty($districts)
+            ? 'Kecamatan ' . implode(', ', array_slice($districts, 0, 4)) . (count($districts) > 4 ? ' dll' : '')
+            : 'Kabupaten Kolaka Utara';
+
+        $officerSummary = [];
+        $sampleCount = 0;
+
+        foreach ($parsedRows as $row) {
+            $pName = trim($row['nama_petugas'] ?? '');
+            $sName = trim($row['nama_sampel'] ?? '');
+            if (!empty($sName)) {
+                $sampleCount++;
+            }
+
+            if (!empty($pName)) {
+                if (!isset($officerSummary[$pName])) {
+                    $officerSummary[$pName] = [
+                        'name' => $pName,
+                        'id_sobat' => trim((string) ($row['id_sobat'] ?? '')),
+                        'task' => trim($row['penugasan'] ?? '') ?: 'Petugas Pendataan Lapangan',
+                        'district' => trim($row['wilayah_tugas'] ?? '') ?: 'Lasusua',
+                        'gender' => trim($row['jenis_kelamin'] ?? ''),
+                        'samples' => 0,
+                    ];
+                }
+                if (!empty($sName)) {
+                    $officerSummary[$pName]['samples']++;
+                }
+            }
+        }
+
+        $allOfficers = User::fieldStaff()->get();
+        $matchedIds = [];
+        $unmatchedOfficers = [];
+
+        foreach ($officerSummary as $name => $info) {
+            $matchedUser = null;
+            if (!empty($info['id_sobat'])) {
+                $matchedUser = $allOfficers->firstWhere('sobat_id', $info['id_sobat']);
+            }
+            if (!$matchedUser) {
+                $matchedUser = $allOfficers->first(function ($u) use ($name) {
+                    return strtolower(trim($u->name)) === strtolower(trim($name));
+                });
+            }
+
+            if ($matchedUser) {
+                $matchedIds[] = $matchedUser->id;
+            } else {
+                $unmatchedOfficers[] = $name;
+            }
+        }
+
+        $officerCount = count($officerSummary);
+        $message = ($sampleCount > 0)
+            ? "Berhasil membaca berkas! Ditemukan kegiatan '{$title}', {$officerCount} petugas, dan {$sampleCount} sampel responden."
+            : "Berhasil membaca berkas! Ditemukan {$officerCount} petugas lapangan di " . count($districts) . " kecamatan asal.";
+
+        return response()->json([
+            'success' => true,
+            'title' => $title,
+            'basis_dipa' => $dipa,
+            'location' => $location,
+            'districts' => $districts,
+            'total_samples' => $sampleCount,
+            'officers' => array_values($officerSummary),
+            'matched_officer_ids' => array_values(array_unique($matchedIds)),
+            'unmatched_officers' => $unmatchedOfficers,
+            'message' => $message,
+        ]);
+    }
+
+    /**
+     * Process parsed Excel/CSV rows and attach officers and respondents to an assignment.
+     */
+    public function processParsedRowsForAssignment(Assignment $assignment, array $parsedRows): array
+    {
+        $createdOfficers = 0;
+        $assignedOfficers = 0;
+        $createdRespondents = 0;
+
+        foreach ($parsedRows as $row) {
+            $namaPetugas = trim($row['nama_petugas'] ?? '');
+            $idSobat = trim((string) ($row['id_sobat'] ?? ''));
+            $penugasan = trim($row['penugasan'] ?? '') ?: 'Petugas Pendataan Lapangan';
+            $wilayah = trim($row['wilayah_tugas'] ?? '') ?: 'Lasusua';
+            $namaSampel = trim($row['nama_sampel'] ?? '');
+
+            if (empty($namaPetugas) && empty($namaSampel)) {
+                continue;
+            }
+
+            // 1. Find or create officer
+            $officer = null;
+            if (!empty($idSobat)) {
+                $officer = User::where('sobat_id', $idSobat)->first();
+            }
+            if (!$officer && !empty($namaPetugas)) {
+                $officer = User::whereRaw('LOWER(name) = ?', [strtolower($namaPetugas)])->first();
+            }
+
+            if (!$officer && !empty($namaPetugas)) {
+                $slugBase = Str::slug($namaPetugas, '');
+                if (empty($slugBase)) {
+                    $slugBase = 'petugas' . rand(100, 999);
+                }
+                $cleanUsername = $slugBase;
+                $counter = 1;
+                while (User::where('username', $cleanUsername)->exists()) {
+                    $cleanUsername = $slugBase . $counter++;
+                }
+
+                $cleanEmail = Str::slug($namaPetugas, '.') . '@bps.go.id';
+                $emailCounter = 1;
+                while (User::where('email', $cleanEmail)->exists()) {
+                    $cleanEmail = Str::slug($namaPetugas, '.') . $emailCounter++ . '@bps.go.id';
+                }
+
+                $gender = trim($row['jenis_kelamin'] ?? '');
+                $genderVal = null;
+                if (!empty($gender)) {
+                    $genderVal = (stripos($gender, 'p') === 0 || stripos($gender, 'wanita') !== false) ? 'Perempuan' : 'Laki-Laki';
+                }
+
+                $officer = User::create([
+                    'name' => $namaPetugas,
+                    'sobat_id' => $idSobat ?: null,
+                    'username' => $cleanUsername,
+                    'email' => $cleanEmail,
+                    'password' => Hash::make('bps7408'),
+                    'role' => (stripos($penugasan, 'pml') !== false || stripos($penugasan, 'pengawas') !== false || stripos($penugasan, 'pemeriksa') !== false) ? 'pegawai' : 'petugas',
+                    'status' => 'active',
+                    'district' => $wilayah,
+                    'gender' => $genderVal,
+                ]);
+                $createdOfficers++;
+            }
+
+            // 2. Assign officer to assignment
+            if ($officer) {
+                $link = AssignmentOfficer::firstOrCreate(
+                    [
+                        'assignment_id' => $assignment->id,
+                        'user_id' => $officer->id,
+                    ],
+                    [
+                        'specific_task' => $penugasan,
+                        'status' => 'pending',
+                    ]
+                );
+                if ($link->wasRecentlyCreated) {
+                    $assignedOfficers++;
+                }
+            }
+
+            // 3. Create Sample Respondent
+            if (!empty($namaSampel)) {
+                $exists = Respondent::where('assignment_id', $assignment->id)
+                    ->where('officer_id', $officer?->id)
+                    ->where('name', $namaSampel)
+                    ->exists();
+
+                if (!$exists) {
+                    Respondent::create([
+                        'name' => $namaSampel,
+                        'family_head_name' => $namaSampel,
+                        'informant_name' => $namaSampel,
+                        'agency' => 'Rumah Tangga / KRT',
+                        'purpose' => $assignment->title,
+                        'district' => $wilayah,
+                        'address' => 'Kecamatan ' . $wilayah,
+                        'assignment_id' => $assignment->id,
+                        'officer_id' => $officer?->id,
+                        'respondent_status' => 'Belum Terdata',
+                        'input_date' => now()->toDateString(),
+                    ]);
+                    $createdRespondents++;
+                }
+            }
+        }
+
+        // Update total target respondent if respondents were imported
+        $respCount = $assignment->respondents()->count();
+        if ($respCount > 0) {
+            $assignment->update([
+                'target_respondents' => $respCount,
+            ]);
+        }
+
+        return [
+            'officers' => $assignedOfficers,
+            'new_officers' => $createdOfficers,
+            'respondents' => $createdRespondents,
+        ];
+    }
+
+    /**
+     * Bulk import assignments, officer allocations, and sample respondents from Excel / CSV.
+     */
+    public function importExcel(Request $request)
+    {
+        $request->validate([
+            'excel_file' => ['required', 'file', 'extensions:xlsx,xls,csv,txt', 'max:10240'],
+            'start_date' => ['nullable', 'date'],
+            'end_date' => ['nullable', 'date', 'after_or_equal:start_date'],
+            'st_number' => ['nullable', 'string', 'max:100'],
+            'st_date' => ['nullable', 'date'],
+        ], [
+            'excel_file.required' => 'Pilih berkas Excel (.xlsx) atau CSV yang akan diunggah.',
+            'excel_file.extensions' => 'Format berkas harus berupa .xlsx, .xls, atau .csv.',
+            'excel_file.max' => 'Ukuran berkas maksimal adalah 10 MB.',
+            'end_date.after_or_equal' => 'Tanggal selesai harus sama atau setelah tanggal mulai.',
+        ]);
+
+        $file = $request->file('excel_file');
+        $ext = $file->getClientOriginalExtension();
+
+        try {
+            $parsedRows = $this->excelParser->parse($file->getRealPath(), $ext);
+        } catch (\Throwable $e) {
+            return back()->with('error', 'Gagal memproses berkas Excel: ' . $e->getMessage());
+        }
+
+        if (empty($parsedRows)) {
+            return back()->with('error', 'Berkas Excel kosong atau kolom template tidak sesuai.');
+        }
+
+        $startDate = $request->input('start_date') ?: now()->toDateString();
+        $endDate = $request->input('end_date') ?: now()->addDays(14)->toDateString();
+        $stNumber = trim((string) $request->input('st_number'));
+        $stDate = $request->input('st_date');
+
+        $createdAssignments = 0;
+        $totalOfficers = 0;
+        $totalNewOfficers = 0;
+        $totalRespondents = 0;
+        $activityTitles = [];
+
+        DB::beginTransaction();
+        try {
+            $groupedByActivity = [];
+            foreach ($parsedRows as $row) {
+                $actTitle = trim($row['nama_kegiatan'] ?? '') ?: 'Kegiatan Pendataan Lapangan ' . now()->year;
+                $groupedByActivity[$actTitle][] = $row;
+            }
+
+            foreach ($groupedByActivity as $title => $rows) {
+                $firstRow = $rows[0];
+                $dipa = trim($firstRow['pembebanan_anggaran'] ?? '') ?: 'DIPA BPS Kabupaten Kolaka Utara';
+                $districts = array_unique(array_filter(array_map(fn($r) => trim($r['wilayah_tugas'] ?? ''), $rows)));
+                $location = !empty($districts)
+                    ? 'Kecamatan ' . implode(', ', array_slice($districts, 0, 4)) . (count($districts) > 4 ? ' dll' : '')
+                    : 'Kabupaten Kolaka Utara';
+
+                $assignment = Assignment::firstOrCreate(
+                    ['title' => $title],
+                    [
+                        'description' => 'Kegiatan dan alokasi sampel diimpor secara otomatis dari berkas Excel/Spreadsheet.',
+                        'start_date' => $startDate,
+                        'end_date' => $endDate,
+                        'location' => $location,
+                        'basis_dipa' => $dipa,
+                        'st_number' => $stNumber ?: null,
+                        'st_date' => $stDate ?: null,
+                        'basis_st' => $stNumber ? OfficerReport::formatBasisSt($stNumber, $stDate) : null,
+                        'target_respondents' => 0,
+                        'status' => 'ongoing',
+                        'created_by' => Auth::id(),
+                    ]
+                );
+
+                if ($assignment->wasRecentlyCreated) {
+                    $createdAssignments++;
+                }
+
+                $activityTitles[] = $assignment->title;
+
+                $counts = $this->processParsedRowsForAssignment($assignment, $rows);
+                $totalOfficers += $counts['officers'];
+                $totalNewOfficers += $counts['new_officers'];
+                $totalRespondents += $counts['respondents'];
+            }
+
+            DB::commit();
+
+            ActivityLog::log(
+                'import',
+                'assignment',
+                "Administrator mengimpor template Excel: {$totalRespondents} sampel responden, {$totalOfficers} penugasan petugas pada " . implode(', ', array_unique($activityTitles)) . "."
+            );
+
+            $msg = "Import berhasil! {$totalRespondents} sampel responden berhasil dialokasikan kepada petugas lapangan.";
+            if ($totalNewOfficers > 0) {
+                $msg .= " ({$totalNewOfficers} akun petugas baru otomatis dibuatkan dengan password default: bps7408).";
+            }
+
+            return back()->with('success', $msg);
+
+        } catch (\Throwable $e) {
+            DB::rollBack();
+            return back()->with('error', 'Terjadi kesalahan saat memproses data Excel: ' . $e->getMessage());
+        }
     }
 }
 
