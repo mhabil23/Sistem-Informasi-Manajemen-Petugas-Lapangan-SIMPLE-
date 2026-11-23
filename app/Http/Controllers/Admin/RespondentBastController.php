@@ -39,6 +39,10 @@ class RespondentBastController extends Controller
             $query->where('assignment_id', $assignmentId);
         }
 
+        if ($officerId = $request->input('officer_id')) {
+            $query->where('officer_id', $officerId);
+        }
+
         if ($dateFrom = $request->input('date_from')) {
             $query->whereDate('bast_date', '>=', $dateFrom);
         }
@@ -55,18 +59,131 @@ class RespondentBastController extends Controller
 
         $respondents = Respondent::with('officer')->orderBy('name')->get();
         $assignments = Assignment::orderBy('title')->get();
+        $officers = User::fieldStaff()->where('status', 'active')->orderBy('name')->get();
+        $assignmentOfficersMap = Assignment::getInvolvedOfficersMap();
 
         return view('admin.basts.respondents.index', compact(
             'basts',
             'totalBasts',
             'thisMonthBasts',
             'respondents',
-            'assignments'
+            'assignments',
+            'officers',
+            'assignmentOfficersMap'
         ));
+    }
+
+    /**
+     * Get list of respondents allocated to a specific officer/PCL within an assignment.
+     */
+    public function getRespondentsByOfficer(Request $request)
+    {
+        $assignmentId = $request->input('assignment_id');
+        $officerId = $request->input('officer_id');
+
+        $query = Respondent::with('basts');
+
+        if ($assignmentId) {
+            $query->where('assignment_id', $assignmentId);
+        }
+        if ($officerId) {
+            $query->where('officer_id', $officerId);
+        }
+
+        $respondents = $query->orderBy('name')->get()->map(function ($r) {
+            return [
+                'id' => $r->id,
+                'name' => $r->name,
+                'family_head_name' => $r->family_head_name ?: $r->name,
+                'informant_name' => $r->informant_name ?: $r->name,
+                'respondent_status' => $r->respondent_status ?: 'KRT',
+                'district' => $r->district ?: '-',
+                'address' => $r->address,
+                'agency' => $r->agency,
+                'progress_status' => $r->progress_status,
+                'progress_status_label' => $r->progress_status_label,
+                'has_bast' => $r->basts->isNotEmpty(),
+                'bast_count' => $r->basts->count(),
+            ];
+        });
+
+        return response()->json([
+            'success' => true,
+            'count' => $respondents->count(),
+            'respondents' => $respondents,
+        ]);
     }
 
     public function store(Request $request)
     {
+        // Mendukung pembuatan BAST massal/kolektif untuk seluruh responden milik PCL terpilih
+        if ($request->has('respondent_ids') && is_array($request->input('respondent_ids')) && count($request->input('respondent_ids')) > 0) {
+            $validated = $request->validate([
+                'respondent_ids' => ['required', 'array', 'min:1'],
+                'respondent_ids.*' => ['exists:respondents,id'],
+                'bast_date' => ['required', 'date'],
+                'handover_category' => ['nullable', Rule::in(['ATK', 'KUES'])],
+                'handover_items' => ['required', 'string'],
+                'notes' => ['nullable', 'string', 'max:500'],
+                'status' => ['required', Rule::in(['draft', 'finalized', 'archived'])],
+            ], [
+                'respondent_ids.required' => 'Pilih minimal satu responden untuk diterbitkan BAST.',
+                'bast_date.required' => 'Tanggal BAST wajib diisi.',
+                'handover_items.required' => 'Rincian berkas yang diserahterimakan wajib diisi.',
+            ]);
+
+            $createdCount = 0;
+            $category = strtoupper((string) ($validated['handover_category'] ?? 'KUES'));
+
+            foreach ($validated['respondent_ids'] as $idx => $rId) {
+                $resp = Respondent::find($rId);
+                if (!$resp) continue;
+
+                $bastNumber = RespondentBast::generateBastNumber();
+                $bast = RespondentBast::create([
+                    'bast_number' => $bastNumber,
+                    'bast_date' => $validated['bast_date'],
+                    'respondent_id' => $resp->id,
+                    'assignment_id' => $resp->assignment_id ?: $request->input('assignment_id'),
+                    'officer_id' => $resp->officer_id ?: Auth::id(),
+                    'respondent_number' => $idx + 1,
+                    'handover_category' => $category,
+                    'handover_items' => $validated['handover_items'],
+                    'notes' => $validated['notes'] ?? null,
+                    'status' => $validated['status'],
+                ]);
+
+                $resp->update(['progress_status' => 'selesai']);
+
+                if ($this->sheetService->isConfigured()) {
+                    $this->sheetService->insert('respondent_basts', [
+                        'id' => $bast->id,
+                        'bast_number' => $bast->bast_number,
+                        'bast_date' => $bast->bast_date->toDateString(),
+                        'respondent_id' => $bast->respondent_id,
+                        'assignment_id' => $bast->assignment_id ?? '',
+                        'officer_id' => $bast->officer_id,
+                        'handover_items' => $bast->handover_items,
+                        'notes' => $bast->notes ?? '',
+                        'status' => $bast->status,
+                        'created_at' => now()->toISOString(),
+                        'updated_at' => now()->toISOString(),
+                    ]);
+                }
+
+                $createdCount++;
+            }
+
+            ActivityLog::log(
+                'create',
+                'basts',
+                "Menerbitkan {$createdCount} BAST Responden secara kolektif untuk petugas lapangan."
+            );
+
+            return redirect()->route('admin.basts.respondents.index')
+                ->with('success', "Berhasil menerbitkan {$createdCount} dokumen Tanda Terima Responden!");
+        }
+
         $validated = $request->validate([
             'respondent_id' => ['required', 'exists:respondents,id'],
             'respondent_number' => ['nullable', 'integer', 'min:1'],

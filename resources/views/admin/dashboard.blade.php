@@ -482,10 +482,9 @@
                 </div>
 
                 <div class="mt-2 d-flex flex-wrap gap-2 align-items-center">
-                    <a href="{{ route('admin.assignments.index') }}" class="bento-hero-cta">
-                        <i class="bi bi-briefcase"></i>
-                        <span>Kelola Kegiatan & Penugasan</span>
-                    </a>
+                    <button type="button" class="btn btn-outline-success rounded-pill px-3 py-2 fw-bold" style="font-size: 0.88rem; background: #FFFFFF;" data-bs-toggle="modal" data-bs-target="#importExcelModal">
+                        <i class="bi bi-file-earmark-excel-fill text-success me-1"></i> Upload Excel Kegiatan &amp; Sampel
+                    </button>
                     <a href="{{ route('admin.recapitulation.excel') }}" class="btn btn-outline-secondary rounded-pill px-3 py-2 font-weight-bold" style="font-size: 0.88rem; background: #FFFFFF;">
                         <i class="bi bi-file-earmark-spreadsheet-fill text-success me-1"></i> Unduh Excel
                     </a>
@@ -548,6 +547,273 @@
                     <span class="fw-semibold text-dark">{{ $totalBasts }} Total Dokumen BAST</span>
                 </div>
             </div>
+        </div>
+    </div>
+
+    <!-- ==============================================================
+         5. DUA SISI MONITORING: RINGKASAN PROGRES LAPANGAN (KIRI) VS ADMINISTRASI (KANAN)
+         ============================================================== -->
+    <div class="row g-4 mb-4">
+        <!-- ================= SISI KIRI: PROGRES LAPANGAN ================= -->
+        <div class="col-lg-6">
+            <div class="bento-card h-100 border-primary border-opacity-25" style="background: linear-gradient(180deg, #FFFFFF 0%, #F8FAFC 100%);">
+                <div class="d-flex justify-content-between align-items-center mb-3 pb-2 border-bottom">
+                    <div class="d-flex align-items-center gap-2">
+                        <div class="rounded-circle d-flex align-items-center justify-content-center text-white" style="width: 36px; height: 36px; background: #005BAC;">
+                            <i class="bi bi-geo-alt-fill"></i>
+                        </div>
+                        <div>
+                            <h5 class="fw-bold text-dark mb-0" style="font-size: 0.98rem;">
+                                Ringkasan Monitoring Progres Lapangan
+                            </h5>
+                            <span class="text-muted small" style="font-size: 0.72rem;">Pencacahan sampel responden oleh petugas PCL</span>
+                        </div>
+                    </div>
+                    <span class="badge {{ $fieldPercentage >= 75 ? 'bg-success' : ($fieldPercentage >= 50 ? 'bg-warning text-dark' : 'bg-primary') }} rounded-pill px-3 py-1.5 fw-bold" style="font-size: 0.78rem;">
+                        {{ $fieldPercentage }}% Selesai
+                    </span>
+                </div>
+
+                <!-- 4 Indikator Sampel Lapangan -->
+                <div class="row g-2 mb-3">
+                    <div class="col-3">
+                        <div class="p-2 rounded-3 bg-white border text-center">
+                            <span class="d-block text-muted" style="font-size: 0.68rem; text-transform: uppercase;">Target Beban</span>
+                            <span class="fs-6 fw-bold text-dark">{{ number_format($fieldTotalSamples) }}</span>
+                        </div>
+                    </div>
+                    <div class="col-3">
+                        <div class="p-2 rounded-3 bg-white border text-center">
+                            <span class="d-block text-muted" style="font-size: 0.68rem; text-transform: uppercase;">Selesai (BAST)</span>
+                            <span class="fs-6 fw-bold text-success">{{ number_format($fieldCompletedSamples) }}</span>
+                        </div>
+                    </div>
+                    <div class="col-3">
+                        <div class="p-2 rounded-3 bg-white border text-center">
+                            <span class="d-block text-muted" style="font-size: 0.68rem; text-transform: uppercase;">Sedang Didata</span>
+                            <span class="fs-6 fw-bold text-warning">{{ number_format($fieldInProgressSamples) }}</span>
+                        </div>
+                    </div>
+                    <div class="col-3">
+                        <div class="p-2 rounded-3 bg-white border text-center">
+                            <span class="d-block text-muted" style="font-size: 0.68rem; text-transform: uppercase;">Belum Didata</span>
+                            <span class="fs-6 fw-bold text-secondary">{{ number_format($fieldPendingSamples) }}</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Progress Bar Multi-Segment -->
+                @php
+                    $pctCompleted = $fieldTotalSamples > 0 ? ($fieldCompletedSamples / $fieldTotalSamples) * 100 : 0;
+                    $pctInProgress = $fieldTotalSamples > 0 ? ($fieldInProgressSamples / $fieldTotalSamples) * 100 : 0;
+                    $pctPending = $fieldTotalSamples > 0 ? ($fieldPendingSamples / $fieldTotalSamples) * 100 : 0;
+                @endphp
+                <div class="mb-3">
+                    <div class="d-flex justify-content-between small text-muted mb-1" style="font-size: 0.72rem;">
+                        <span><i class="bi bi-circle-fill text-success me-1" style="font-size: 0.5rem;"></i> Selesai ({{ round($pctCompleted, 1) }}%)</span>
+                        <span><i class="bi bi-circle-fill text-warning me-1" style="font-size: 0.5rem;"></i> Sedang Didata ({{ round($pctInProgress, 1) }}%)</span>
+                        <span><i class="bi bi-circle-fill text-secondary me-1" style="font-size: 0.5rem;"></i> Belum ({{ round($pctPending, 1) }}%)</span>
+                    </div>
+                    <div class="progress" style="height: 8px; border-radius: 999px;">
+                        <div class="progress-bar bg-success" style="width: {{ $pctCompleted }}%"></div>
+                        <div class="progress-bar bg-warning" style="width: {{ $pctInProgress }}%"></div>
+                        <div class="progress-bar bg-secondary" style="width: {{ $pctPending }}%"></div>
+                    </div>
+                </div>
+
+                <!-- Tabel Ringkas Kinerja PCL Terlibat -->
+                <div class="d-flex justify-content-between align-items-center mb-2">
+                    <span class="fw-bold text-dark small" style="font-size: 0.78rem;">
+                        <i class="bi bi-people me-1 text-primary"></i> Kinerja Petugas Lapangan (PCL):
+                    </span>
+                    <a href="{{ route('admin.respondents.index', ['assignment_id' => $selectedAssignmentId]) }}" class="bento-card-link-sm" style="font-size: 0.72rem;">
+                        Detail Responden &rarr;
+                    </a>
+                </div>
+
+                <div class="table-responsive border rounded-3 bg-white" style="max-height: 220px; overflow-y: auto;">
+                    <table class="table table-sm table-hover align-middle mb-0" style="font-size: 0.76rem;">
+                        <thead class="table-light sticky-top">
+                            <tr>
+                                <th class="ps-2">Nama Petugas / PCL</th>
+                                <th>Wilayah</th>
+                                <th class="text-center">Target</th>
+                                <th class="text-center">BAST</th>
+                                <th class="text-center">Capaian</th>
+                                <th class="text-end pe-2">Aksi</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @forelse($filteredOfficersList->take(8) as $offItem)
+                                <tr>
+                                    <td class="ps-2 fw-semibold text-dark text-truncate" style="max-width: 140px;">{{ $offItem->name }}</td>
+                                    <td class="text-muted small text-truncate" style="max-width: 90px;">{{ $offItem->dominant_district }}</td>
+                                    <td class="text-center font-monospace">{{ $offItem->target }}</td>
+                                    <td class="text-center font-monospace text-success fw-bold">{{ $offItem->completed }}</td>
+                                    <td class="text-center">
+                                        <span class="badge {{ $offItem->badge_class }} rounded-pill" style="font-size: 0.65rem;">
+                                            {{ $offItem->percentage }}%
+                                        </span>
+                                    </td>
+                                    <td class="text-end pe-2">
+                                        @if($offItem->wa_url)
+                                            <a href="{{ $offItem->wa_url }}" target="_blank" class="btn btn-xs btn-outline-success py-0.5 px-1.5 rounded-pill" title="Kirim Pengingat WhatsApp" style="font-size: 0.68rem;">
+                                                <i class="bi bi-whatsapp"></i>
+                                            </a>
+                                        @endif
+                                        <button type="button" class="btn btn-xs btn-outline-warning text-dark py-0.5 px-1.5 rounded-pill" title="Kirim Notif SIMPEL" style="font-size: 0.68rem;" onclick="openSendNoticeModal({{ $offItem->id }}, '{{ addslashes($offItem->name) }}', 'general')">
+                                            <i class="bi bi-megaphone-fill"></i>
+                                        </button>
+                                    </td>
+                                </tr>
+                            @empty
+                                <tr>
+                                    <td colspan="6" class="text-center py-3 text-muted">Belum ada alokasi petugas pada kegiatan ini.</td>
+                                </tr>
+                            @endforelse
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <!-- ================= SISI KANAN: MONITORING ADMINISTRASI ================= -->
+        <div class="col-lg-6">
+            <div class="bento-card h-100 border-success border-opacity-25" style="background: linear-gradient(180deg, #FFFFFF 0%, #F8FAFC 100%);">
+                <div class="d-flex justify-content-between align-items-center mb-3 pb-2 border-bottom">
+                    <div class="d-flex align-items-center gap-2">
+                        <div class="rounded-circle d-flex align-items-center justify-content-center text-white" style="width: 36px; height: 36px; background: #16A34A;">
+                            <i class="bi bi-folder-check"></i>
+                        </div>
+                        <div>
+                            <h5 class="fw-bold text-dark mb-0" style="font-size: 0.98rem;">
+                                Ringkasan Monitoring Administrasi
+                            </h5>
+                            <span class="text-muted small" style="font-size: 0.72rem;">Dokumen kelengkapan SPJ, tanda terima &amp; laporan</span>
+                        </div>
+                    </div>
+                    <span class="badge bg-success-subtle text-success border border-success-subtle rounded-pill px-3 py-1.5 fw-bold" style="font-size: 0.78rem;">
+                        Administrasi Terpadu
+                    </span>
+                </div>
+
+                <!-- 5 Checklist Kartu Dokumen Administrasi -->
+                <div class="d-flex flex-column gap-2 mb-3">
+                    <!-- 1. Tanda Terima Blanko & Petugas -->
+                    <div class="p-2.5 border rounded-3 bg-white d-flex justify-content-between align-items-center">
+                        <div class="d-flex align-items-center gap-2.5">
+                            <div class="rounded-2 p-1.5 bg-primary-subtle text-primary d-flex align-items-center justify-content-center" style="width: 30px; height: 30px;">
+                                <i class="bi bi-card-checklist"></i>
+                            </div>
+                            <div>
+                                <a href="{{ route('admin.basts.officers.index', ['bast_type' => 'kantor_ke_petugas']) }}" class="fw-bold text-dark text-decoration-none small d-block">
+                                    Tanda Terima Petugas (Blanko &amp; ATK)
+                                </a>
+                                <span class="text-muted" style="font-size: 0.7rem;">Penyerahan berkas fisik kantor &rarr; petugas</span>
+                            </div>
+                        </div>
+                        <div class="text-end">
+                            <span class="badge bg-primary-subtle text-primary border rounded-pill px-2 py-0.5 fw-bold" style="font-size: 0.75rem;">
+                                {{ $adminBastBlankoCount }} Berkas
+                            </span>
+                        </div>
+                    </div>
+
+                    <!-- 2. Tanda Terima Responden -->
+                    <div class="p-2.5 border rounded-3 bg-white d-flex justify-content-between align-items-center">
+                        <div class="d-flex align-items-center gap-2.5">
+                            <div class="rounded-2 p-1.5 bg-info-subtle text-info-emphasis d-flex align-items-center justify-content-center" style="width: 30px; height: 30px;">
+                                <i class="bi bi-file-earmark-check"></i>
+                            </div>
+                            <div>
+                                <a href="{{ route('admin.basts.respondents.index') }}" class="fw-bold text-dark text-decoration-none small d-block">
+                                    Tanda Terima Responden (BAST Ruta)
+                                </a>
+                                <span class="text-muted" style="font-size: 0.7rem;">Bukti serah terima dokumen kuesioner ke responden</span>
+                            </div>
+                        </div>
+                        <div class="text-end">
+                            <span class="badge bg-info-subtle text-info-emphasis border rounded-pill px-2 py-0.5 fw-bold" style="font-size: 0.75rem;">
+                                {{ $adminBastRespondentCount }} Dokumen Sah
+                            </span>
+                        </div>
+                    </div>
+
+                    <!-- 3. Laporan Perjadin Petugas -->
+                    <div class="p-2.5 border rounded-3 bg-white d-flex justify-content-between align-items-center">
+                        <div class="d-flex align-items-center gap-2.5">
+                            <div class="rounded-2 p-1.5 bg-warning-subtle text-warning-emphasis d-flex align-items-center justify-content-center" style="width: 30px; height: 30px;">
+                                <i class="bi bi-journal-text"></i>
+                            </div>
+                            <div>
+                                <a href="{{ route('admin.reports.index') }}" class="fw-bold text-dark text-decoration-none small d-block">
+                                    Laporan Perjalanan Dinas Petugas
+                                </a>
+                                <span class="text-muted" style="font-size: 0.7rem;">{{ $officersWithReportCount }} dari {{ $totalOfficersCount }} petugas sudah lapor &bull; {{ $adminReportsApprovedCount }} di-ACC</span>
+                            </div>
+                        </div>
+                        <div class="text-end">
+                            <span class="badge {{ $officersWithoutReportCount === 0 ? 'bg-success' : 'bg-warning text-dark' }} rounded-pill px-2 py-0.5 fw-bold" style="font-size: 0.75rem;">
+                                {{ $reportSubmissionRate }}% Terkumpul
+                            </span>
+                        </div>
+                    </div>
+
+                    <!-- 4. BAST Petugas (Penyerahan Dokumen Terisi) -->
+                    <div class="p-2.5 border rounded-3 bg-white d-flex justify-content-between align-items-center">
+                        <div class="d-flex align-items-center gap-2.5">
+                            <div class="rounded-2 p-1.5 bg-success-subtle text-success d-flex align-items-center justify-content-center" style="width: 30px; height: 30px;">
+                                <i class="bi bi-box-seam"></i>
+                            </div>
+                            <div>
+                                <a href="{{ route('admin.basts.officers.index', ['bast_type' => 'petugas_ke_kantor']) }}" class="fw-bold text-dark text-decoration-none small d-block">
+                                    BAST Petugas (Hasil Sensus &rarr; Kantor)
+                                </a>
+                                <span class="text-muted" style="font-size: 0.7rem;">Penyerahan dokumen terisi &amp; tuntas dari petugas ke BPS</span>
+                            </div>
+                        </div>
+                        <div class="text-end">
+                            <span class="badge bg-success-subtle text-success border rounded-pill px-2 py-0.5 fw-bold" style="font-size: 0.75rem;">
+                                {{ $adminBastHasilCount }} Dokumen Tuntas
+                            </span>
+                        </div>
+                    </div>
+
+                    <!-- 5. Daftar Hadir Pelatihan / Briefing -->
+                    <div class="p-2.5 border rounded-3 bg-white d-flex justify-content-between align-items-center">
+                        <div class="d-flex align-items-center gap-2.5">
+                            <div class="rounded-2 p-1.5 d-flex align-items-center justify-content-center" style="width: 30px; height: 30px; background: #FAF5FF; color: #7C3AED;">
+                                <i class="bi bi-person-check-fill"></i>
+                            </div>
+                            <div>
+                                <a href="{{ route('admin.trainings.index') }}" class="fw-bold text-dark text-decoration-none small d-block">
+                                    Daftar Hadir Pelatihan / Briefing
+                                </a>
+                                <span class="text-muted" style="font-size: 0.7rem;">Presensi pelatihan &amp; briefing petugas lapangan</span>
+                            </div>
+                        </div>
+                        <div class="text-end">
+                            <span class="badge rounded-pill px-2 py-0.5 fw-bold" style="font-size: 0.75rem; background: #FAF5FF; color: #7C3AED; border: 1px solid #E9D5FF;">
+                                {{ $adminTrainingsCount }} Agenda Presensi
+                            </span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Aksi Cepat Administrasi -->
+                <div class="d-flex flex-wrap gap-2 pt-2 border-top">
+                    @if(auth()->user()->isAdmin() && $officersWithoutReports->count() > 0)
+                        <button type="button" class="btn btn-sm btn-outline-warning text-dark rounded-pill px-3 py-1.5" style="font-size: 0.76rem;" onclick="openSendNoticeModal('all_without_reports', 'Semua Petugas Belum Lapor ({{ $officersWithoutReports->count() }} Orang)', 'report')">
+                            <i class="bi bi-bell-fill me-1 text-warning"></i> Ingatkan Petugas Belum Lapor ({{ $officersWithoutReports->count() }})
+                        </button>
+                    @endif
+                    <button type="button" class="btn btn-sm btn-outline-success rounded-pill px-3 py-1.5 ms-auto" style="font-size: 0.76rem;" data-bs-toggle="modal" data-bs-target="#importExcelModal">
+                        <i class="bi bi-file-earmark-excel-fill me-1"></i> Upload Excel Kegiatan &amp; Sampel
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
         </div>
     </div>
 
@@ -862,6 +1128,7 @@
     </div>
 </div>
 @endif
+@include('admin.partials._import_excel_modal')
 @endsection
 
 @push('scripts')

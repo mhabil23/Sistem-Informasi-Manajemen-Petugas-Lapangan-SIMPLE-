@@ -48,7 +48,7 @@ class Assignment extends Model
     {
         return $this->belongsToMany(User::class, 'assignment_officers', 'assignment_id', 'user_id')
                     ->withTrashed()
-                    ->withPivot(['id', 'specific_task', 'status', 'progress_notes'])
+                    ->withPivot(['id', 'specific_task', 'activity_role', 'status', 'progress_notes'])
                     ->withTimestamps();
     }
 
@@ -94,7 +94,7 @@ class Assignment extends Model
             ->join('users', 'assignment_officers.user_id', '=', 'users.id')
             ->whereNull('users.deleted_at')
             ->where('users.status', 'active')
-            ->select('assignment_officers.assignment_id', 'users.id', 'users.name')
+            ->select('assignment_officers.assignment_id', 'users.id', 'users.name', 'assignment_officers.activity_role')
             ->get();
 
         $respOfficers = DB::table('respondents')
@@ -102,7 +102,7 @@ class Assignment extends Model
             ->whereNull('users.deleted_at')
             ->where('users.status', 'active')
             ->whereNotNull('respondents.assignment_id')
-            ->select('respondents.assignment_id', 'users.id', 'users.name')
+            ->select('respondents.assignment_id', 'users.id', 'users.name', DB::raw("'PCL' as activity_role"))
             ->distinct()
             ->get();
 
@@ -113,9 +113,11 @@ class Assignment extends Model
 
         foreach ($pivotOfficers->concat($respOfficers)->unique(fn($item) => $item->assignment_id . '_' . $item->id)->sortBy('name') as $row) {
             if (isset($map[$row->assignment_id])) {
+                $roleLabel = !empty($row->activity_role) ? ' [' . $row->activity_role . ']' : '';
                 $map[$row->assignment_id][] = [
                     'id' => (int) $row->id,
-                    'name' => $row->name,
+                    'name' => $row->name . $roleLabel,
+                    'activity_role' => $row->activity_role ?? 'PCL',
                 ];
             }
         }

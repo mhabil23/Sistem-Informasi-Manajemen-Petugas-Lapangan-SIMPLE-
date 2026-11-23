@@ -60,6 +60,37 @@ class RecapitulationController extends Controller
             fprintf($handle, chr(0xEF).chr(0xBB).chr(0xBF));
 
             switch ($type) {
+                case 'administrasi':
+                case 'spj':
+                    fputcsv($handle, ['No', 'Nama Petugas', 'ID Sobat', 'Wilayah Tugas', 'Kegiatan', 'Target Responden', 'Realisasi BAST', 'Persentase (%)', 'Status Laporan Perjadin', 'Kelengkapan SPJ']);
+                    $offQuery = User::fieldStaff()->where('status', 'active')->orderBy('name');
+                    if (!empty($filters['officer_id'])) {
+                        $offQuery->where('id', $filters['officer_id']);
+                    }
+                    $asgnTitle = !empty($filters['assignment_id']) ? (Assignment::find($filters['assignment_id'])?->title ?? 'Semua Kegiatan') : 'Semua Kegiatan BPS';
+                    foreach ($offQuery->get() as $idx => $off) {
+                        $target = Respondent::where('officer_id', $off->id)->when(!empty($filters['assignment_id']), fn($q) => $q->where('assignment_id', $filters['assignment_id']))->count();
+                        $bastCount = Respondent::where('officer_id', $off->id)->when(!empty($filters['assignment_id']), fn($q) => $q->where('assignment_id', $filters['assignment_id']))->has('basts')->count();
+                        $pct = $target > 0 ? round(($bastCount / $target) * 100, 1) : 0;
+                        $report = OfficerReport::where('user_id', $off->id)->when(!empty($filters['assignment_id']), fn($q) => $q->where('assignment_id', $filters['assignment_id']))->first();
+                        $reportStatus = $report ? ($report->status === 'approved' ? 'Sudah di-ACC' : 'Menunggu ACC') : 'Belum Lapor';
+                        $completeness = ($pct >= 100 && $report && $report->status === 'approved') ? 'Lengkap (Tuntas)' : 'Belum Lengkap';
+
+                        fputcsv($handle, [
+                            $idx + 1,
+                            $off->name,
+                            $off->sobat_id ?: '-',
+                            $off->district ?: 'Kab. Kolaka Utara',
+                            $asgnTitle,
+                            $target,
+                            $bastCount,
+                            $pct . '%',
+                            $reportStatus,
+                            $completeness,
+                        ]);
+                    }
+                    break;
+
                 case 'respondents':
                     fputcsv($handle, ['No', 'Nama Responden', 'Instansi', 'Alamat', 'Nomor HP', 'Kegiatan', 'Petugas Penginput', 'Tanggal Input']);
                     $query = Respondent::with(['assignment', 'officer']);

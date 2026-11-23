@@ -113,8 +113,12 @@ class UserController extends Controller
     /**
      * Display the specified user (redirects to index with search filter).
      */
-    public function show(User $user)
+    public function show($id)
     {
+        $user = User::find($id);
+        if (!$user) {
+            return redirect()->route('admin.users.index')->with('error', "Pengguna dengan ID #{$id} tidak ditemukan atau telah dihapus.");
+        }
         return redirect()->route('admin.users.index', ['search' => $user->sobat_id ?: $user->username]);
     }
 

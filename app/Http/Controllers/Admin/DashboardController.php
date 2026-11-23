@@ -119,6 +119,31 @@ class DashboardController extends Controller
 
         $allOfficersList = $officersQuery->orderBy('name')->get();
 
+        // 5. Statistik Detail Dua Sisi: Progres Lapangan vs Administrasi
+        $fieldTotalSamples = (clone $respondentQuery)->count();
+        $fieldCompletedSamples = (clone $respondentQuery)->where(function($q) {
+            $q->where('progress_status', 'selesai')->orHas('basts');
+        })->count();
+        $fieldInProgressSamples = (clone $respondentQuery)->where('progress_status', 'sedang_didata')->doesntHave('basts')->count();
+        $fieldPendingSamples = max(0, $fieldTotalSamples - $fieldCompletedSamples - $fieldInProgressSamples);
+        $fieldPercentage = $fieldTotalSamples > 0 ? min(100, round(($fieldCompletedSamples / $fieldTotalSamples) * 100, 1)) : 0;
+
+        // Administrasi: Blanko, Responden, Perjadin, Dokumen Hasil, Daftar Hadir
+        $adminBastBlankoCount = OfficerBast::where(function($q) {
+            $q->where('bast_type', 'kantor_ke_petugas')->orWhereNull('bast_type');
+        })->when($selectedAssignmentId, fn($q) => $q->where('assignment_id', $selectedAssignmentId))->count();
+
+        $adminBastHasilCount = OfficerBast::where('bast_type', 'petugas_ke_kantor')
+            ->when($selectedAssignmentId, fn($q) => $q->where('assignment_id', $selectedAssignmentId))->count();
+
+        $adminBastRespondentCount = RespondentBast::when($selectedAssignmentId, fn($q) => $q->where('assignment_id', $selectedAssignmentId))->count();
+
+        $adminReportsCount = OfficerReport::when($selectedAssignmentId, fn($q) => $q->where('assignment_id', $selectedAssignmentId))->count();
+        $adminReportsApprovedCount = OfficerReport::where('status', 'approved')
+            ->when($selectedAssignmentId, fn($q) => $q->where('assignment_id', $selectedAssignmentId))->count();
+
+        $adminTrainingsCount = TrainingEvent::when($selectedAssignmentId, fn($q) => $q->where('assignment_id', $selectedAssignmentId))->count();
+
         $officerMonitoringList = [];
         $slowOfficersCount = 0;
         $completedOfficersCount = 0;
@@ -302,7 +327,18 @@ class DashboardController extends Controller
             'recentAssignments',
             'monthlyLabels',
             'monthlyRespondents',
-            'monthlyBasts'
+            'monthlyBasts',
+            'fieldTotalSamples',
+            'fieldCompletedSamples',
+            'fieldInProgressSamples',
+            'fieldPendingSamples',
+            'fieldPercentage',
+            'adminBastBlankoCount',
+            'adminBastHasilCount',
+            'adminBastRespondentCount',
+            'adminReportsCount',
+            'adminReportsApprovedCount',
+            'adminTrainingsCount'
         ));
     }
 }

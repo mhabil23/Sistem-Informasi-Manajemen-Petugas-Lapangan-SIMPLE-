@@ -156,6 +156,7 @@ Route::middleware(['auth', 'role:admin,pegawai'])->prefix('admin')->as('admin.')
     Route::get('/respondents/{respondent}', [\App\Http\Controllers\Admin\RespondentController::class, 'show'])->name('respondents.show');
 
     // BAST Responden (Read/Preview/Download)
+    Route::get('/basts/respondents/get-by-officer', [\App\Http\Controllers\Admin\RespondentBastController::class, 'getRespondentsByOfficer'])->name('basts.respondents.by-officer');
     Route::get('/basts/respondents', [\App\Http\Controllers\Admin\RespondentBastController::class, 'index'])->name('basts.respondents.index');
     Route::get('/basts/respondents/{bast}/download', [\App\Http\Controllers\Admin\RespondentBastController::class, 'downloadPdf'])->name('basts.respondents.download');
     Route::get('/basts/respondents/{bast}/preview', [\App\Http\Controllers\Admin\RespondentBastController::class, 'previewPdf'])->name('basts.respondents.preview');

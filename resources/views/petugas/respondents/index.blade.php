@@ -169,9 +169,32 @@
     </div>
 </div>
 
-<!-- Filter Bar -->
+<!-- Filter Bar & Status Tabs -->
 <div class="bento-card mb-4 p-3">
+    <!-- Status Filter Pills -->
+    <div class="d-flex flex-wrap gap-2 mb-3 pb-2 border-bottom">
+        <a href="{{ route('petugas.respondents.index', array_merge(request()->except('progress_status', 'page'), [])) }}" 
+           class="btn btn-sm {{ !request('progress_status') ? 'btn-dark' : 'btn-outline-secondary' }} rounded-pill px-3 py-1 font-monospace" style="font-size: 0.78rem;">
+            Semua ({{ $totalMyRespondents }})
+        </a>
+        <a href="{{ route('petugas.respondents.index', array_merge(request()->except('progress_status', 'page'), ['progress_status' => 'belum_didata'])) }}" 
+           class="btn btn-sm {{ request('progress_status') === 'belum_didata' ? 'btn-secondary text-white' : 'btn-outline-secondary' }} rounded-pill px-3 py-1" style="font-size: 0.78rem;">
+            <i class="bi bi-clock me-1"></i> Belum Didata ({{ $totalBelumDidata }})
+        </a>
+        <a href="{{ route('petugas.respondents.index', array_merge(request()->except('progress_status', 'page'), ['progress_status' => 'sedang_didata'])) }}" 
+           class="btn btn-sm {{ request('progress_status') === 'sedang_didata' ? 'btn-warning text-dark' : 'btn-outline-warning text-dark' }} rounded-pill px-3 py-1" style="font-size: 0.78rem;">
+            <i class="bi bi-hourglass-split me-1"></i> Sedang Didata ({{ $totalSedangDidata }})
+        </a>
+        <a href="{{ route('petugas.respondents.index', array_merge(request()->except('progress_status', 'page'), ['progress_status' => 'selesai'])) }}" 
+           class="btn btn-sm {{ request('progress_status') === 'selesai' ? 'btn-success text-white' : 'btn-outline-success' }} rounded-pill px-3 py-1" style="font-size: 0.78rem;">
+            <i class="bi bi-check-circle me-1"></i> Selesai Didata ({{ $totalSelesai }})
+        </a>
+    </div>
+
     <form method="GET" action="{{ route('petugas.respondents.index') }}" class="row g-2 align-items-center">
+        @if(request('progress_status'))
+            <input type="hidden" name="progress_status" value="{{ request('progress_status') }}">
+        @endif
         <div class="col-lg-6 col-md-5">
             <div class="input-group input-group-sm">
                 <span class="input-group-text bg-white border-end-0 text-muted">
@@ -198,7 +221,7 @@
             <button type="submit" class="btn btn-sm btn-primary rounded-pill w-100 fw-semibold">
                 <i class="bi bi-filter me-1"></i> Filter
             </button>
-            @if(request('search') || request('assignment_id'))
+            @if(request('search') || request('assignment_id') || request('progress_status'))
                 <a href="{{ route('petugas.respondents.index') }}" class="btn btn-sm btn-outline-secondary rounded-pill" title="Reset Filter">
                     <i class="bi bi-arrow-counterclockwise"></i>
                 </a>
@@ -272,15 +295,14 @@
                             </span>
                         </td>
                         <td class="text-center">
-                            @if($resp->basts->isNotEmpty())
-                                <span class="badge bg-success-subtle text-success border border-success-subtle rounded-pill px-2.5 py-1 fw-bold" style="font-size: 0.72rem;">
-                                    <i class="bi bi-check2-circle me-1"></i> {{ $resp->basts->count() }} BAST
-                                </span>
-                            @else
-                                <span class="badge bg-secondary-subtle text-secondary border border-secondary-subtle rounded-pill px-2.5 py-1" style="font-size: 0.72rem;">
-                                    Belum Ada
-                                </span>
-                            @endif
+                            <div class="d-flex flex-column align-items-center gap-1">
+                                {!! $resp->progress_status_badge !!}
+                                @if($resp->basts->isNotEmpty())
+                                    <span class="badge bg-success-subtle text-success border border-success-subtle rounded-pill px-2 py-0.5" style="font-size: 0.65rem;">
+                                        <i class="bi bi-file-earmark-check-fill me-0.5"></i> {{ $resp->basts->count() }} BAST
+                                    </span>
+                                @endif
+                            </div>
                         </td>
                         <td class="text-end pe-3">
                             <div class="d-inline-flex gap-1.5 align-items-center">
@@ -377,9 +399,10 @@
                     <span class="text-muted small" style="font-size: 0.72rem;">
                         <i class="bi bi-calendar me-1"></i> {{ $resp->input_date->format('d/m/Y') }}
                     </span>
-                    <div>
+                    <div class="d-flex align-items-center gap-1.5">
+                        {!! $resp->progress_status_badge !!}
                         @if($resp->basts->isNotEmpty())
-                            <span class="badge bg-success-subtle text-success border border-success-subtle rounded-pill px-2.5 py-1 fw-bold" style="font-size: 0.72rem;">
+                            <span class="badge bg-success-subtle text-success border border-success-subtle rounded-pill px-2 py-0.5 fw-bold" style="font-size: 0.68rem;">
                                 <i class="bi bi-check2-circle me-1"></i> {{ $resp->basts->count() }} BAST Terbit
                             </span>
                         @else

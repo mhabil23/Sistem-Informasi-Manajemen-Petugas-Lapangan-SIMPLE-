@@ -16,6 +16,7 @@ class AssignmentOfficer extends Model
         'assignment_id',
         'user_id',
         'specific_task',
+        'activity_role',
         'status',
         'progress_notes',
     ];

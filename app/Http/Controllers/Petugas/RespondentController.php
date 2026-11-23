@@ -43,7 +43,14 @@ class RespondentController extends Controller
             $query->where('assignment_id', $assignmentId);
         }
 
+        if ($progressStatus = $request->input('progress_status')) {
+            $query->where('progress_status', $progressStatus);
+        }
+
         $totalMyRespondents = Respondent::where('officer_id', $userId)->count();
+        $totalBelumDidata = Respondent::where('officer_id', $userId)->where('progress_status', 'belum_didata')->count();
+        $totalSedangDidata = Respondent::where('officer_id', $userId)->where('progress_status', 'sedang_didata')->count();
+        $totalSelesai = Respondent::where('officer_id', $userId)->where('progress_status', 'selesai')->count();
         $thisMonthCount = Respondent::where('officer_id', $userId)
             ->whereMonth('input_date', now()->month)
             ->whereYear('input_date', now()->year)
@@ -64,6 +71,9 @@ class RespondentController extends Controller
         return view('petugas.respondents.index', compact(
             'respondents',
             'totalMyRespondents',
+            'totalBelumDidata',
+            'totalSedangDidata',
+            'totalSelesai',
             'thisMonthCount',
             'withBastCount',
             'myAssignments',

@@ -62,6 +62,11 @@ class RespondentController extends Controller
             }
         }
 
+        // 6. Filter by Progress Status (Belum Didata, Sedang Didata, Selesai Didata)
+        if ($progressStatus = $request->input('progress_status')) {
+            $query->where('progress_status', $progressStatus);
+        }
+
         // 6. Filter by Date
         if ($dateFrom = $request->input('date_from')) {
             $query->whereDate('input_date', '>=', $dateFrom);

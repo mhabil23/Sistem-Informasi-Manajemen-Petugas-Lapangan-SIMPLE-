@@ -357,10 +357,18 @@ class AssignmentController extends Controller
                             ->exists();
 
                         if (!$exists) {
+                            $activityRole = 'PCL';
+                            if (stripos($task, 'pml') !== false || stripos($task, 'pengawas') !== false) {
+                                $activityRole = 'PML';
+                            } elseif (stripos($task, 'psms') !== false || stripos($task, 'koseka') !== false) {
+                                $activityRole = 'PSMS';
+                            }
+
                             $record = AssignmentOfficer::create([
                                 'assignment_id' => $assignment->id,
                                 'user_id' => $officerId,
                                 'specific_task' => $task,
+                                'activity_role' => $activityRole,
                                 'status' => 'pending',
                             ]);
 
@@ -414,10 +422,23 @@ class AssignmentController extends Controller
             'specific_task.required' => 'Deskripsi tugas spesifik wajib diisi.',
         ]);
 
+        $task = $validated['specific_task'];
+        $activityRole = $request->input('activity_role');
+        if (empty($activityRole)) {
+            if (stripos($task, 'pml') !== false || stripos($task, 'pengawas') !== false) {
+                $activityRole = 'PML';
+            } elseif (stripos($task, 'psms') !== false || stripos($task, 'koseka') !== false) {
+                $activityRole = 'PSMS';
+            } else {
+                $activityRole = 'PCL';
+            }
+        }
+
         $officerRecord = AssignmentOfficer::create([
             'assignment_id' => $assignment->id,
             'user_id' => $validated['user_id'],
             'specific_task' => $validated['specific_task'],
+            'activity_role' => $activityRole,
             'status' => 'pending',
             'progress_notes' => $validated['progress_notes'] ?? null,
         ]);
@@ -848,6 +869,15 @@ class AssignmentController extends Controller
 
             // 2. Assign officer to assignment
             if ($officer) {
+                $activityRole = 'PCL';
+                if (stripos($penugasan, 'pml') !== false || stripos($penugasan, 'pengawas') !== false) {
+                    $activityRole = 'PML';
+                } elseif (stripos($penugasan, 'psms') !== false || stripos($penugasan, 'koseka') !== false) {
+                    $activityRole = 'PSMS';
+                } elseif (stripos($penugasan, 'pcl') !== false || stripos($penugasan, 'pencacah') !== false) {
+                    $activityRole = 'PCL';
+                }
+
                 $link = AssignmentOfficer::firstOrCreate(
                     [
                         'assignment_id' => $assignment->id,
@@ -855,11 +885,14 @@ class AssignmentController extends Controller
                     ],
                     [
                         'specific_task' => $penugasan,
+                        'activity_role' => $activityRole,
                         'status' => 'pending',
                     ]
                 );
                 if ($link->wasRecentlyCreated) {
                     $assignedOfficers++;
+                } elseif (empty($link->activity_role) || $link->activity_role === 'PCL') {
+                    $link->update(['activity_role' => $activityRole]);
                 }
             }
 
@@ -882,6 +915,7 @@ class AssignmentController extends Controller
                         'assignment_id' => $assignment->id,
                         'officer_id' => $officer?->id,
                         'respondent_status' => 'Belum Terdata',
+                        'progress_status' => 'belum_didata',
                         'input_date' => now()->toDateString(),
                     ]);
                     $createdRespondents++;

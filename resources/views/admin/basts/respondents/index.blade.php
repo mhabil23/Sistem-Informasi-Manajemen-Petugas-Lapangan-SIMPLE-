@@ -224,6 +224,57 @@
 @endpush
 
 @section('content')
+<!-- Bento Search & Filter Card -->
+<div class="bento-card-clean p-3 mb-3">
+    <form method="GET" action="{{ route('admin.basts.respondents.index') }}" class="row g-2 align-items-center">
+        <!-- Search Input -->
+        <div class="col-lg-3 col-md-6">
+            <div class="input-group">
+                <span class="input-group-text bg-white border-end-0 text-muted">
+                    <i class="bi bi-search"></i>
+                </span>
+                <input type="text" 
+                       name="search" 
+                       class="form-control border-start-0 ps-1" 
+                       value="{{ request('search') }}" 
+                       placeholder="Cari nomor BAST, responden, petugas...">
+            </div>
+        </div>
+
+        <!-- Filter Kegiatan -->
+        <div class="col-lg-3 col-md-6">
+            <select name="assignment_id" id="filter_bast_assignment" class="form-select" onchange="syncBastFilterOfficerDropdown()">
+                <option value="">-- Semua Kegiatan --</option>
+                @foreach($assignments as $assignment)
+                    <option value="{{ $assignment->id }}" {{ request('assignment_id') == $assignment->id ? 'selected' : '' }}>{{ $assignment->title }}</option>
+                @endforeach
+            </select>
+        </div>
+
+        <!-- Filter Petugas PCL -->
+        <div class="col-lg-3 col-md-6">
+            <select name="officer_id" id="filter_bast_officer" class="form-select">
+                <option value="">-- Semua Petugas PCL --</option>
+                @foreach($officers as $officer)
+                    <option value="{{ $officer->id }}" {{ request('officer_id') == $officer->id ? 'selected' : '' }}>{{ $officer->name }}</option>
+                @endforeach
+            </select>
+        </div>
+
+        <!-- Tombol Filter & Reset -->
+        <div class="col-lg-3 col-md-6 d-flex gap-1.5">
+            <button type="submit" class="btn btn-bps-orange flex-fill justify-content-center py-2" title="Terapkan Filter">
+                <i class="bi bi-funnel-fill me-1"></i> Filter
+            </button>
+            @if(request()->hasAny(['search', 'assignment_id', 'officer_id', 'date_from', 'date_to']))
+                <a href="{{ route('admin.basts.respondents.index') }}" class="btn btn-outline-secondary rounded-pill px-2.5 d-flex align-items-center justify-content-center" title="Reset Filter">
+                    <i class="bi bi-arrow-clockwise"></i>
+                </a>
+            @endif
+        </div>
+    </form>
+</div>
+
 <!-- Bento Table Card (Anti-Geser, 100% Pas Layar) -->
 <div class="bento-table-card mb-4">
     <div class="bento-table-header">
@@ -243,6 +294,9 @@
                 Halaman {{ $basts->currentPage() }} dari {{ max(1, $basts->lastPage()) }}
             </span>
             @if(auth()->user()->isAdmin())
+                <button type="button" class="btn btn-outline-success shadow-sm py-1.5 px-3 rounded-pill" style="font-size: 0.8rem;" data-bs-toggle="modal" data-bs-target="#importExcelModal">
+                    <i class="bi bi-file-earmark-excel-fill me-1"></i> Import Excel Kegiatan &amp; Sampel
+                </button>
                 <button type="button" class="btn-action-primary" data-bs-toggle="modal" data-bs-target="#createBastModal">
                     <i class="bi bi-file-earmark-plus-fill fs-6"></i>
                     <span>Terbitkan<span class="d-none d-sm-inline"> Tanda Terima Baru</span></span>
@@ -417,11 +471,74 @@
                 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
             <div class="modal-body p-4" style="flex: 1 1 auto; overflow-y: auto;">
-                <div class="row g-3 mb-3">
+                <div class="p-3 mb-3 rounded-3 border bg-light-subtle">
+                    <div class="row g-3">
+                        <div class="col-md-6">
+                            <label class="form-label small fw-bold text-dark mb-1">
+                                <i class="bi bi-briefcase text-primary me-1"></i> 1. PILIH KEGIATAN <span class="text-danger">*</span>
+                            </label>
+                            <select name="assignment_id" id="modal_bast_assignment" class="form-select fw-semibold" required onchange="onModalAssignmentChange()">
+                                <option value="">-- Pilih Kegiatan --</option>
+                                @foreach($assignments as $asgn)
+                                    <option value="{{ $asgn->id }}">{{ $asgn->title }}</option>
+                                @endforeach
+                            </select>
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label small fw-bold text-dark mb-1">
+                                <i class="bi bi-person-gear text-primary me-1"></i> 2. PILIH PETUGAS PCL <span class="text-danger">*</span>
+                            </label>
+                            <select name="officer_id" id="modal_bast_officer" class="form-select fw-semibold" onchange="onModalOfficerChange()">
+                                <option value="">-- Pilih Petugas PCL --</option>
+                                @foreach($officers as $off)
+                                    <option value="{{ $off->id }}">{{ $off->name }}</option>
+                                @endforeach
+                            </select>
+                            <div id="modal_officer_hint" class="form-text small text-muted">Pilih petugas PCL untuk otomatis memunculkan seluruh responden binaannya.</div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Live Container: Daftar Responden Milik PCL (Otomatis & Kolektif) -->
+                <div id="pclRespondentsSection" class="mb-3 d-none">
+                    <div class="d-flex justify-content-between align-items-center mb-2 p-2 rounded-2 bg-success-subtle border border-success-subtle">
+                        <div class="small text-success-emphasis fw-semibold">
+                            <i class="bi bi-check2-circle me-1"></i>
+                            Ditemukan <span id="respCountBadge" class="badge bg-success">0</span> responden milik <strong id="pclNameBadge">-</strong>.
+                        </div>
+                        <div class="form-check form-check-inline mb-0">
+                            <input class="form-check-input" type="checkbox" id="checkAllRespondents" checked onchange="toggleSelectAllRespondents(this)">
+                            <label class="form-check-label small fw-bold text-dark" for="checkAllRespondents">Pilih Semua Responden</label>
+                        </div>
+                    </div>
+
+                    <div class="table-responsive border rounded-3" style="max-height: 220px; overflow-y: auto;">
+                        <table class="table table-sm table-hover align-middle mb-0" style="font-size: 0.78rem;">
+                            <thead class="table-light sticky-top">
+                                <tr>
+                                    <th style="width: 40px;" class="text-center">#</th>
+                                    <th>Kepala Keluarga &amp; Responden</th>
+                                    <th>Wilayah / Alamat</th>
+                                    <th>Instansi</th>
+                                    <th class="text-center" style="width: 120px;">Status Progres</th>
+                                </tr>
+                            </thead>
+                            <tbody id="pclRespondentsTableBody">
+                                <!-- Populated dynamically by JS -->
+                            </tbody>
+                        </table>
+                    </div>
+                    <div class="form-text small text-muted mt-1">
+                        <i class="bi bi-info-circle me-1"></i> Sistem akan secara otomatis menerbitkan dokumen Tanda Terima untuk seluruh responden yang dicentang.
+                    </div>
+                </div>
+
+                <!-- Fallback / Opsi Tunggal -->
+                <div id="singleRespondentFallback" class="row g-3 mb-3">
                     <div class="col-md-7">
-                        <label class="form-label small fw-semibold text-secondary">PILIH RESPONDEN <span class="text-danger">*</span></label>
-                        <select name="respondent_id" class="form-select" required>
-                            <option value="">-- Pilih Responden --</option>
+                        <label class="form-label small fw-semibold text-secondary">ATAU PILIH RESPONDEN TUNGGAL</label>
+                        <select name="respondent_id" id="modal_single_respondent_select" class="form-select">
+                            <option value="">-- Pilih Responden Tunggal --</option>
                             @foreach($respondents as $resp)
                                 <option value="{{ $resp->id }}">{{ $resp->name }} — {{ $resp->agency }}</option>
                             @endforeach
@@ -528,10 +645,138 @@
         </div>
     </div>
 </div>
+@include('admin.partials._import_excel_modal')
 @endsection
 
 @push('scripts')
 <script>
+    const assignmentOfficersMap = @json($assignmentOfficersMap ?? []);
+    const allOfficers = @json($officers->map(fn($u) => ['id' => $u->id, 'name' => $u->name]));
+
+    function syncBastFilterOfficerDropdown() {
+        const asgnSelect = document.getElementById('filter_bast_assignment');
+        const offSelect = document.getElementById('filter_bast_officer');
+        if (!asgnSelect || !offSelect) return;
+
+        const asgnId = asgnSelect.value;
+        const currentVal = offSelect.value;
+        offSelect.innerHTML = '<option value="">-- Semua Petugas PCL --</option>';
+
+        const list = asgnId && assignmentOfficersMap[asgnId] ? assignmentOfficersMap[asgnId] : allOfficers;
+        list.forEach(off => {
+            const opt = document.createElement('option');
+            opt.value = off.id;
+            opt.textContent = off.name;
+            if (String(off.id) === String(currentVal)) opt.selected = true;
+            offSelect.appendChild(opt);
+        });
+    }
+
+    function onModalAssignmentChange() {
+        const asgnSelect = document.getElementById('modal_bast_assignment');
+        const offSelect = document.getElementById('modal_bast_officer');
+        const hint = document.getElementById('modal_officer_hint');
+        if (!asgnSelect || !offSelect) return;
+
+        const asgnId = asgnSelect.value;
+        offSelect.innerHTML = '<option value="">-- Pilih Petugas PCL --</option>';
+
+        const list = asgnId && assignmentOfficersMap[asgnId] ? assignmentOfficersMap[asgnId] : allOfficers;
+        list.forEach(off => {
+            const opt = document.createElement('option');
+            opt.value = off.id;
+            opt.textContent = off.name;
+            offSelect.appendChild(opt);
+        });
+
+        if (hint) {
+            hint.textContent = asgnId && assignmentOfficersMap[asgnId] 
+                ? `Menampilkan ${assignmentOfficersMap[asgnId].length} petugas yang terlibat pada kegiatan ini.`
+                : 'Pilih kegiatan terlebih dahulu untuk memfilter petugas.';
+        }
+
+        // Reset respondent list
+        document.getElementById('pclRespondentsSection').classList.add('d-none');
+        document.getElementById('pclRespondentsTableBody').innerHTML = '';
+        document.getElementById('singleRespondentFallback').classList.remove('d-none');
+    }
+
+    function onModalOfficerChange() {
+        const asgnSelect = document.getElementById('modal_bast_assignment');
+        const offSelect = document.getElementById('modal_bast_officer');
+        if (!offSelect.value) {
+            document.getElementById('pclRespondentsSection').classList.add('d-none');
+            document.getElementById('singleRespondentFallback').classList.remove('d-none');
+            return;
+        }
+
+        const officerId = offSelect.value;
+        const assignmentId = asgnSelect ? asgnSelect.value : '';
+        const officerName = offSelect.options[offSelect.selectedIndex]?.text || '';
+
+        const tbody = document.getElementById('pclRespondentsTableBody');
+        tbody.innerHTML = '<tr><td colspan="5" class="text-center py-3"><div class="spinner-border spinner-border-sm text-primary me-2"></div>Memuat daftar seluruh responden milik PCL...</td></tr>';
+        document.getElementById('pclRespondentsSection').classList.remove('d-none');
+        document.getElementById('pclNameBadge').textContent = officerName;
+
+        fetch(`{{ route('admin.basts.respondents.by-officer') }}?officer_id=${officerId}&assignment_id=${assignmentId}`)
+            .then(res => res.json())
+            .then(data => {
+                tbody.innerHTML = '';
+                if (!data.success || !data.respondents || data.respondents.length === 0) {
+                    tbody.innerHTML = '<tr><td colspan="5" class="text-center py-3 text-muted"><i class="bi bi-info-circle me-1"></i> Tidak ditemukan responden yang dialokasikan untuk PCL ini. Silakan gunakan opsi responden tunggal di bawah.</td></tr>';
+                    document.getElementById('respCountBadge').textContent = '0';
+                    document.getElementById('singleRespondentFallback').classList.remove('d-none');
+                    return;
+                }
+
+                document.getElementById('respCountBadge').textContent = data.count;
+                document.getElementById('singleRespondentFallback').classList.add('d-none');
+                const singleSelect = document.getElementById('modal_single_respondent_select');
+                if (singleSelect) singleSelect.required = false;
+
+                data.respondents.forEach((resp, index) => {
+                    const tr = document.createElement('tr');
+                    tr.innerHTML = `
+                        <td class="text-center">
+                            <input type="checkbox" name="respondent_ids[]" value="${resp.id}" class="form-check-input resp-item-checkbox" checked onchange="updateSelectedRespCount()">
+                        </td>
+                        <td>
+                            <div class="fw-bold text-dark">${resp.family_head_name}</div>
+                            <small class="text-muted"><i class="bi bi-person me-0.5"></i> ${resp.informant_name} (${resp.respondent_status})</small>
+                        </td>
+                        <td>
+                            <div class="text-truncate" style="max-width: 180px;" title="${resp.address}"><i class="bi bi-geo-alt-fill text-danger me-0.5"></i> ${resp.address}</div>
+                            <span class="badge bg-light text-secondary border mt-0.5">${resp.district}</span>
+                        </td>
+                        <td>
+                            <span class="badge bg-light text-primary border">${resp.agency}</span>
+                        </td>
+                        <td class="text-center">
+                            ${resp.has_bast 
+                                ? `<span class="badge bg-success-subtle text-success border border-success-subtle rounded-pill"><i class="bi bi-check-circle-fill me-0.5"></i> ${resp.bast_count} BAST</span>` 
+                                : `<span class="badge bg-secondary-subtle text-secondary border rounded-pill">${resp.progress_status_label || 'Belum Didata'}</span>`}
+                        </td>
+                    `;
+                    tbody.appendChild(tr);
+                });
+            })
+            .catch(err => {
+                tbody.innerHTML = '<tr><td colspan="5" class="text-center text-danger py-3">Gagal memuat responden: ' + err.message + '</td></tr>';
+            });
+    }
+
+    function toggleSelectAllRespondents(masterCheckbox) {
+        const checkboxes = document.querySelectorAll('.resp-item-checkbox');
+        checkboxes.forEach(cb => cb.checked = masterCheckbox.checked);
+        updateSelectedRespCount();
+    }
+
+    function updateSelectedRespCount() {
+        const total = document.querySelectorAll('.resp-item-checkbox:checked').length;
+        document.getElementById('respCountBadge').textContent = total;
+    }
+
     function previewSignatureModal(url, bastNo, name) {
         document.getElementById('sigModalImg').src = url;
         document.getElementById('sigModalBastNo').innerText = bastNo;

@@ -179,6 +179,8 @@
                     <i class="bi bi-file-earmark-excel me-1"></i> Export Excel / CSV
                 </button>
                 <ul class="dropdown-menu dropdown-menu-end shadow border-0" style="border-radius: 12px;">
+                    <li><a class="dropdown-item py-2 fw-bold text-success" href="{{ route('admin.recapitulation.excel', array_merge(request()->query(), ['dataset' => 'administrasi'])) }}"><i class="bi bi-file-earmark-spreadsheet-fill me-2 text-success"></i> Rekap Administrasi SPJ (Sederhana)</a></li>
+                    <li><hr class="dropdown-divider my-1"></li>
                     <li><a class="dropdown-item py-2" href="{{ route('admin.recapitulation.excel', array_merge(request()->query(), ['dataset' => 'respondents'])) }}"><i class="bi bi-people me-2 text-primary"></i> Data Responden</a></li>
                     <li><a class="dropdown-item py-2" href="{{ route('admin.recapitulation.excel', array_merge(request()->query(), ['dataset' => 'basts'])) }}"><i class="bi bi-file-earmark-check me-2 text-info"></i> Seluruh BAST</a></li>
                     <li><a class="dropdown-item py-2" href="{{ route('admin.recapitulation.excel', array_merge(request()->query(), ['dataset' => 'reports'])) }}"><i class="bi bi-journal-check me-2 text-warning"></i> Laporan Petugas</a></li>

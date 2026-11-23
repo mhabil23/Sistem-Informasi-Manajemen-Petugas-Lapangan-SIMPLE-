@@ -228,6 +228,16 @@
             </select>
         </div>
 
+        <!-- Filter Status Progres Lapangan -->
+        <div class="col-lg-2 col-md-4">
+            <select name="progress_status" class="form-select">
+                <option value="">-- Status Pendataan --</option>
+                <option value="belum_didata" {{ request('progress_status') === 'belum_didata' ? 'selected' : '' }}>Belum Didata</option>
+                <option value="sedang_didata" {{ request('progress_status') === 'sedang_didata' ? 'selected' : '' }}>Sedang Didata</option>
+                <option value="selesai" {{ request('progress_status') === 'selesai' ? 'selected' : '' }}>Selesai Didata</option>
+            </select>
+        </div>
+
         <!-- Tombol Filter & Reset -->
         <div class="col-lg-1 col-md-12 d-flex gap-1.5">
             <button type="submit" class="btn btn-bps-orange flex-fill justify-content-center py-2" title="Terapkan Filter">
@@ -347,15 +357,14 @@
                             </span>
                         </td>
                         <td class="text-center">
-                            @if($resp->basts->isNotEmpty())
-                                <span class="badge bg-success-subtle text-success border border-success-subtle rounded-pill px-1.5 py-0.5" style="font-size: 0.68rem;" title="Sudah terbit BAST">
-                                    <i class="bi bi-check-circle-fill me-0.5"></i> {{ $resp->basts->count() }} BAST
-                                </span>
-                            @else
-                                <span class="badge bg-secondary-subtle text-secondary border border-secondary-subtle rounded-pill px-1.5 py-0.5" style="font-size: 0.68rem;">
-                                    Belum Ada
-                                </span>
-                            @endif
+                            <div class="d-flex flex-column align-items-center gap-1">
+                                {!! $resp->progress_status_badge !!}
+                                @if($resp->basts->isNotEmpty())
+                                    <span class="badge bg-success-subtle text-success border border-success-subtle rounded-pill px-1.5 py-0.5" style="font-size: 0.65rem;" title="Sudah terbit BAST">
+                                        <i class="bi bi-file-earmark-check-fill me-0.5"></i> {{ $resp->basts->count() }} BAST
+                                    </span>
+                                @endif
+                            </div>
                         </td>
                         <td class="text-end pe-2">
                             <div class="d-flex align-items-center justify-content-end gap-1">
