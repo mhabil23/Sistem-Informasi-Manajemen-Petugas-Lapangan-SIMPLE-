@@ -48,7 +48,21 @@ class RespondentController extends Controller
             $query->where('officer_id', $officerId);
         }
 
-        // 4. Filter by Date
+        // 4. Filter by District / Wilayah
+        if ($district = $request->input('district')) {
+            $query->where('district', $district);
+        }
+
+        // 5. Filter by BAST Status
+        if ($request->filled('bast_status')) {
+            if ($request->input('bast_status') === 'with_bast') {
+                $query->has('basts');
+            } elseif ($request->input('bast_status') === 'without_bast') {
+                $query->doesntHave('basts');
+            }
+        }
+
+        // 6. Filter by Date
         if ($dateFrom = $request->input('date_from')) {
             $query->whereDate('input_date', '>=', $dateFrom);
         }
@@ -56,7 +70,7 @@ class RespondentController extends Controller
             $query->whereDate('input_date', '<=', $dateTo);
         }
 
-        // 5. Statistics
+        // 7. Statistics
         $totalRespondents = Respondent::count();
         $thisMonthCount = Respondent::whereMonth('input_date', now()->month)
                                     ->whereYear('input_date', now()->year)
@@ -68,6 +82,7 @@ class RespondentController extends Controller
 
         $assignments = Assignment::orderBy('title')->get();
         $officers = User::fieldStaff()->where('status', 'active')->orderBy('name')->get();
+        $districts = Respondent::DISTRICTS;
 
         return view('admin.respondents.index', compact(
             'respondents',
@@ -76,7 +91,8 @@ class RespondentController extends Controller
             'uniqueAgencies',
             'withBastCount',
             'assignments',
-            'officers'
+            'officers',
+            'districts'
         ));
     }
 

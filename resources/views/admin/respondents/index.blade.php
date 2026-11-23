@@ -175,7 +175,8 @@
 <!-- Bento Search & Filter Card -->
 <div class="bento-card-clean p-3 mb-3">
     <form method="GET" action="{{ route('admin.respondents.index') }}" class="row g-2 align-items-center">
-        <div class="col-lg-4 col-md-4">
+        <!-- Search Input -->
+        <div class="col-lg-3 col-md-6">
             <div class="input-group">
                 <span class="input-group-text bg-white border-end-0 text-muted">
                     <i class="bi bi-search"></i>
@@ -184,11 +185,22 @@
                        name="search" 
                        class="form-control border-start-0 ps-1" 
                        value="{{ request('search') }}" 
-                       placeholder="Cari nama, instansi, alamat, nomor HP...">
+                       placeholder="Cari nama, KRT, alamat, HP...">
             </div>
         </div>
 
-        <div class="col-lg-3 col-md-3">
+        <!-- Filter Petugas / PPL -->
+        <div class="col-lg-2 col-md-6">
+            <select name="officer_id" class="form-select">
+                <option value="">-- Semua Petugas --</option>
+                @foreach($officers as $officer)
+                    <option value="{{ $officer->id }}" {{ request('officer_id') == $officer->id ? 'selected' : '' }}>{{ $officer->name }}</option>
+                @endforeach
+            </select>
+        </div>
+
+        <!-- Filter Kegiatan -->
+        <div class="col-lg-2 col-md-4">
             <select name="assignment_id" class="form-select">
                 <option value="">-- Semua Kegiatan --</option>
                 @foreach($assignments as $assignment)
@@ -197,21 +209,32 @@
             </select>
         </div>
 
-        <div class="col-lg-3 col-md-3">
-            <select name="officer_id" class="form-select">
-                <option value="">-- Semua Petugas / PPL --</option>
-                @foreach($officers as $officer)
-                    <option value="{{ $officer->id }}" {{ request('officer_id') == $officer->id ? 'selected' : '' }}>{{ $officer->name }}</option>
+        <!-- Filter Wilayah / Kecamatan -->
+        <div class="col-lg-2 col-md-4">
+            <select name="district" class="form-select">
+                <option value="">-- Semua Kecamatan --</option>
+                @foreach($districts as $d)
+                    <option value="{{ $d }}" {{ request('district') == $d ? 'selected' : '' }}>{{ $d }}</option>
                 @endforeach
             </select>
         </div>
 
-        <div class="col-lg-2 col-md-2 d-flex gap-2">
-            <button type="submit" class="btn btn-bps-orange flex-fill justify-content-center py-2">
-                <i class="bi bi-funnel-fill"></i> Filter
+        <!-- Filter Status BAST -->
+        <div class="col-lg-2 col-md-4">
+            <select name="bast_status" class="form-select">
+                <option value="">-- Status BAST --</option>
+                <option value="with_bast" {{ request('bast_status') === 'with_bast' ? 'selected' : '' }}>Sudah Ada BAST</option>
+                <option value="without_bast" {{ request('bast_status') === 'without_bast' ? 'selected' : '' }}>Belum Ada BAST</option>
+            </select>
+        </div>
+
+        <!-- Tombol Filter & Reset -->
+        <div class="col-lg-1 col-md-12 d-flex gap-1.5">
+            <button type="submit" class="btn btn-bps-orange flex-fill justify-content-center py-2" title="Terapkan Filter">
+                <i class="bi bi-funnel-fill"></i>
             </button>
-            @if(request()->hasAny(['search', 'assignment_id', 'officer_id']))
-                <a href="{{ route('admin.respondents.index') }}" class="btn btn-outline-secondary rounded-pill px-3 d-flex align-items-center justify-content-center" title="Reset Filter">
+            @if(request()->hasAny(['search', 'assignment_id', 'officer_id', 'district', 'bast_status', 'date_from', 'date_to']))
+                <a href="{{ route('admin.respondents.index') }}" class="btn btn-outline-secondary rounded-pill px-2.5 d-flex align-items-center justify-content-center" title="Reset Filter">
                     <i class="bi bi-arrow-clockwise"></i>
                 </a>
             @endif
@@ -247,18 +270,36 @@
         <table class="table bento-table-fixed align-middle mb-0">
             <thead>
                 <tr>
-                    <th style="width: 22%;"><i class="bi bi-person-fill me-1 text-primary"></i> Kepala Keluarga &amp; Responden</th>
-                    <th style="width: 13%;"><i class="bi bi-building me-1 text-muted"></i> Instansi</th>
-                    <th style="width: 18%;"><i class="bi bi-geo-alt-fill me-1 text-danger"></i> Alamat &amp; Wilayah</th>
-                    <th style="width: 15%;"><i class="bi bi-briefcase me-1 text-muted"></i> Kegiatan Terkait</th>
-                    <th style="width: 13%;"><i class="bi bi-person-gear me-1 text-primary"></i> Petugas / PPL</th>
-                    <th class="text-center" style="width: 7%;"><i class="bi bi-patch-check me-1 text-success"></i> BAST</th>
+                    <th style="width: 16%;"><i class="bi bi-person-badge-fill me-1 text-primary"></i> Petugas / PPL</th>
+                    <th style="width: 21%;"><i class="bi bi-person-fill me-1 text-primary"></i> Kepala Keluarga &amp; Responden</th>
+                    <th style="width: 12%;"><i class="bi bi-building me-1 text-muted"></i> Instansi</th>
+                    <th style="width: 17%;"><i class="bi bi-geo-alt-fill me-1 text-danger"></i> Alamat &amp; Wilayah</th>
+                    <th style="width: 14%;"><i class="bi bi-briefcase me-1 text-muted"></i> Kegiatan Terkait</th>
+                    <th class="text-center" style="width: 8%;"><i class="bi bi-patch-check me-1 text-success"></i> BAST</th>
                     <th class="text-end pe-2" style="width: 12%;">Aksi</th>
                 </tr>
             </thead>
             <tbody>
                 @forelse($respondents as $resp)
                     <tr>
+                        <!-- 1. Petugas Lapangan / PPL -->
+                        <td>
+                            <div class="d-flex align-items-center gap-1.5">
+                                <div class="rounded-circle bg-primary-subtle text-primary fw-bold d-flex align-items-center justify-content-center flex-shrink-0" style="width: 28px; height: 28px; font-size: 0.72rem;">
+                                    {{ strtoupper(substr($resp->officer ? $resp->officer->name : 'P', 0, 1)) }}
+                                </div>
+                                <div class="overflow-hidden">
+                                    <div class="small fw-bold text-dark text-truncate" style="font-size: 0.78rem;" title="{{ $resp->officer ? $resp->officer->name : '-' }}">
+                                        {{ $resp->officer ? $resp->officer->name : '-' }}
+                                    </div>
+                                    <div class="text-muted text-truncate" style="font-size: 0.68rem;">
+                                        <i class="bi bi-calendar-event me-0.5"></i> {{ $resp->input_date ? $resp->input_date->format('d/m/Y') : '-' }}
+                                    </div>
+                                </div>
+                            </div>
+                        </td>
+
+                        <!-- 2. Kepala Keluarga & Responden -->
                         <td>
                             <div class="fw-bold text-dark text-truncate mb-0.5" style="font-size: 0.82rem;" title="{{ $resp->family_head_name ?? $resp->name }}">
                                 {{ $resp->family_head_name ?? $resp->name }}
@@ -276,11 +317,15 @@
                                 <span class="text-truncate">{{ $resp->phone ?? '-' }}</span>
                             </div>
                         </td>
+
+                        <!-- 3. Instansi -->
                         <td>
                             <span class="badge bg-light text-primary border text-truncate d-inline-block text-start w-100" style="font-size: 0.72rem;" title="{{ $resp->agency }}">
                                 {{ $resp->agency }}
                             </span>
                         </td>
+
+                        <!-- 4. Alamat & Wilayah -->
                         <td>
                             <div class="small text-secondary text-truncate d-flex align-items-center gap-1" style="font-size: 0.76rem;" title="{{ $resp->address }}">
                                 <i class="bi bi-geo-alt-fill text-danger flex-shrink-0"></i>
@@ -294,16 +339,12 @@
                                 </div>
                             @endif
                         </td>
+
+                        <!-- 5. Kegiatan Terkait -->
                         <td>
                             <span class="small fw-semibold text-dark text-truncate d-block" style="font-size: 0.76rem;" title="{{ $resp->assignment ? $resp->assignment->title : '-' }}">
                                 {{ $resp->assignment ? $resp->assignment->title : '-' }}
                             </span>
-                        </td>
-                        <td>
-                            <div class="small fw-bold text-dark text-truncate" style="font-size: 0.76rem;" title="{{ $resp->officer ? $resp->officer->name : '-' }}">
-                                {{ $resp->officer ? $resp->officer->name : '-' }}
-                            </div>
-                            <div class="text-muted" style="font-size: 0.68rem;">{{ $resp->input_date->format('d/m/Y') }}</div>
                         </td>
                         <td class="text-center">
                             @if($resp->basts->isNotEmpty())
