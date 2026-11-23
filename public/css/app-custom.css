@@ -662,7 +662,7 @@ body {
 
     .sp-page-title {
         font-size: 0.95rem;
-        max-width: 175px;
+        max-width: 240px;
         line-height: 1.2;
     }
 
@@ -834,7 +834,7 @@ body {
     }
 
     .sp-page-title {
-        max-width: 145px;
+        max-width: 220px;
     }
 
     /* Auth card on small mobile */

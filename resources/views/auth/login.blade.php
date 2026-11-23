@@ -131,9 +131,6 @@
                            required 
                            autofocus>
                 </div>
-                <div class="form-text mt-1 text-muted" style="font-size: 0.72rem;">
-                    <i class="bi bi-info-circle text-primary me-0.5"></i> Petugas/Mitra dapat masuk dengan <strong>ID SOBAT</strong> atau <strong>Email</strong> (Password bawaan: <code>bps7408</code>).
-                </div>
             </div>
 
             <!-- Password Field -->

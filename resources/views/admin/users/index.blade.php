@@ -205,140 +205,124 @@
         .bento-table thead {
             display: none !important;
         }
-        .bento-table, .bento-table tbody, .bento-table tr, .bento-table td {
-            display: block;
+        .bento-table, .bento-table tbody {
+            display: block !important;
             width: 100% !important;
         }
         .bento-table tr {
+            display: grid !important;
+            grid-template-columns: 1fr auto !important;
+            grid-template-rows: auto auto auto auto !important;
+            row-gap: 0.45rem !important;
+            column-gap: 0.6rem !important;
             position: relative;
-            margin-bottom: 0.85rem;
+            margin-bottom: 0.75rem;
             border: 1px solid #e2e8f0;
             border-radius: 14px;
-            padding: 0.85rem;
+            padding: 0.75rem 0.85rem;
             background: #ffffff;
-            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.03);
+            box-shadow: 0 1px 4px rgba(0, 0, 0, 0.04);
             text-align: left !important;
+            transition: all 0.2s ease;
         }
         .bento-table tbody tr.row-selected {
             background-color: #f0f7ff !important;
             border-color: #93c5fd !important;
+            box-shadow: 0 0 0 1px #93c5fd !important;
         }
 
-        /* Checkbox Pilihan (Top-Right of card) */
-        .bento-table td[data-label="Pilih"] {
-            position: absolute;
-            top: 0.85rem;
-            right: 0.85rem;
-            width: auto !important;
+        /* ROW 1: Pengguna (left) & Checkbox (right) */
+        .bento-table td[data-label="Pengguna"] {
+            grid-column: 1 / 2 !important;
+            grid-row: 1 / 2 !important;
             padding: 0 !important;
             border: none !important;
-            text-align: right !important;
-            z-index: 2;
-        }
-        .bento-table td[data-label="Pilih"]::before {
-            display: none !important;
-        }
-        .bento-table td[data-label="Pilih"] .form-check-input {
-            width: 1.25rem;
-            height: 1.25rem;
-            cursor: pointer;
-        }
-
-        /* Pengguna Section (Header of card) */
-        .bento-table td[data-label="Pengguna"] {
-            padding: 0 2.2rem 0.5rem 0 !important;
-            border: none !important;
-            border-bottom: 1px solid #f1f5f9 !important;
             text-align: left !important;
+            min-width: 0 !important;
         }
         .bento-table td[data-label="Pengguna"]::before {
             display: none !important;
         }
         .bento-table td[data-label="Pengguna"] .user-avatar-circle {
-            width: 38px;
-            height: 38px;
-            font-size: 0.95rem;
+            width: 36px;
+            height: 36px;
+            font-size: 0.9rem;
+            min-width: 36px;
         }
         .bento-table td[data-label="Pengguna"] .fw-bold {
             font-size: 0.92rem;
             color: #0f172a;
+            line-height: 1.25;
         }
 
-        /* Role & Status (Inline Badges Row) */
-        .bento-table td[data-label="Role"] {
-            display: inline-block !important;
+        .bento-table td[data-label="Pilih"] {
+            grid-column: 2 / 3 !important;
+            grid-row: 1 / 2 !important;
+            padding: 0 !important;
+            border: none !important;
+            display: flex !important;
+            align-items: flex-start !important;
+            justify-content: flex-end !important;
             width: auto !important;
-            padding: 0.45rem 0.4rem 0.25rem 0 !important;
+            min-width: 28px !important;
+        }
+        .bento-table td[data-label="Pilih"]::before {
+            display: none !important;
+        }
+        .bento-table td[data-label="Pilih"] .form-check-input {
+            width: 1.35rem !important;
+            height: 1.35rem !important;
+            margin: 0 !important;
+            cursor: pointer;
+            border: 2px solid #cbd5e1;
+            border-radius: 6px;
+        }
+        .bento-table td[data-label="Pilih"] .form-check-input:checked {
+            background-color: #005BAC;
+            border-color: #005BAC;
+        }
+
+        /* ROW 2: Role & Status */
+        .bento-table td[data-label="Role"] {
+            grid-column: 1 / 3 !important;
+            grid-row: 2 / 3 !important;
+            padding: 0.15rem 0 !important;
             border: none !important;
             text-align: left !important;
+            width: 100% !important;
         }
         .bento-table td[data-label="Role"]::before {
             display: none !important;
         }
 
-        .bento-table td[data-label="Status Akun"] {
-            display: inline-block !important;
-            width: auto !important;
-            padding: 0.45rem 0 0.25rem 0 !important;
-            border: none !important;
-            text-align: left !important;
-        }
-        .bento-table td[data-label="Status Akun"]::before {
-            display: none !important;
-        }
-
-        /* Kontak */
+        /* ROW 3: Kontak */
         .bento-table td[data-label="Kontak"] {
-            display: block !important;
-            padding: 0.45rem 0 !important;
-            border: none !important;
-            border-top: 1px dashed #f1f5f9 !important;
+            grid-column: 1 / 3 !important;
+            grid-row: 3 / 4 !important;
+            padding: 0.45rem 0.65rem !important;
+            background: #f8fafc !important;
+            border: 1px solid #f1f5f9 !important;
+            border-radius: 8px !important;
             text-align: left !important;
+            width: 100% !important;
             font-size: 0.78rem !important;
         }
         .bento-table td[data-label="Kontak"]::before {
             display: none !important;
         }
 
-        /* Terdaftar */
-        .bento-table td[data-label="Terdaftar"] {
-            display: flex !important;
-            align-items: center;
-            justify-content: space-between;
-            padding: 0.35rem 0 !important;
-            border: none !important;
-            border-top: 1px dashed #f1f5f9 !important;
-            font-size: 0.72rem !important;
-            color: #64748b;
-        }
-        .bento-table td[data-label="Terdaftar"]::before {
-            content: "Terdaftar:" !important;
-            font-weight: 500;
-            color: #94a3b8;
-            float: none !important;
-        }
-        .bento-table td[data-label="Terdaftar"] .small {
-            display: inline-flex;
-            gap: 0.3rem;
-            align-items: center;
-        }
-
-        /* Aksi */
+        /* ROW 4: Aksi (with Date on left and buttons on right) */
         .bento-table td[data-label="Aksi"] {
-            display: block !important;
-            padding: 0.5rem 0 0 0 !important;
+            grid-column: 1 / 3 !important;
+            grid-row: 4 / 5 !important;
+            padding: 0.45rem 0 0 0 !important;
             border: none !important;
             border-top: 1px solid #f1f5f9 !important;
-            margin-top: 0.3rem;
-            text-align: right !important;
+            margin-top: 0.15rem !important;
+            width: 100% !important;
         }
         .bento-table td[data-label="Aksi"]::before {
             display: none !important;
-        }
-        .bento-table td[data-label="Aksi"] .d-inline-flex {
-            width: 100%;
-            justify-content: flex-end;
-            gap: 0.45rem;
         }
         .bento-table td[data-label="Aksi"] .bento-action-btn {
             width: 32px;
@@ -347,13 +331,31 @@
             border-radius: 8px;
         }
 
+        /* Hidden redundant cells on mobile */
+        .bento-table td[data-label="Status Akun"] {
+            display: none !important;
+        }
+        .bento-table td[data-label="Terdaftar"] {
+            display: none !important;
+        }
+
+        /* Empty state full width */
+        .bento-table tr td[colspan] {
+            grid-column: 1 / -1 !important;
+            display: block !important;
+            width: 100% !important;
+        }
+
         /* Bulk Action Bar Mobile */
         #bulkActionBar {
             padding: 0.5rem 0.75rem !important;
         }
+        #bulkActionBar .d-flex.flex-wrap {
+            gap: 0.35rem !important;
+        }
         #bulkActionBar .btn-bulk-action,
         #bulkActionBar .btn-bulk-action-danger {
-            padding: 0.28rem 0.6rem;
+            padding: 0.28rem 0.65rem;
             font-size: 0.72rem;
         }
     }
@@ -365,7 +367,7 @@
 <div class="bento-card mb-4">
     <div class="p-3">
         <form method="GET" action="{{ route('admin.users.index') }}" class="row g-2 align-items-center">
-            <div class="col-md-5">
+            <div class="col-12 col-md-5">
                 <div class="input-group">
                     <span class="input-group-text bg-light border-end-0 text-muted">
                         <i class="bi bi-search"></i>
@@ -378,7 +380,7 @@
                 </div>
             </div>
 
-            <div class="col-md-3">
+            <div class="col-6 col-md-3">
                 <select name="role" class="form-select">
                     <option value="">-- Semua Role --</option>
                     <option value="admin" {{ request('role') === 'admin' ? 'selected' : '' }}>Administrator</option>
@@ -388,7 +390,7 @@
                 </select>
             </div>
 
-            <div class="col-md-2">
+            <div class="col-6 col-md-2">
                 <select name="status" class="form-select">
                     <option value="">-- Semua Status --</option>
                     <option value="active" {{ request('status') === 'active' ? 'selected' : '' }}>Aktif</option>
@@ -396,7 +398,7 @@
                 </select>
             </div>
 
-            <div class="col-md-2 d-flex gap-2">
+            <div class="col-12 col-md-2 d-flex gap-2">
                 <button type="submit" class="btn btn-bps-orange flex-fill">
                     <i class="bi bi-funnel me-1"></i> Filter
                 </button>
@@ -537,37 +539,48 @@
 
                         <!-- Role -->
                         <td data-label="Role">
-                            @if($user->isMasterAdmin())
-                                <span class="badge rounded-pill px-2.5 py-1" style="background: linear-gradient(135deg, #FEF3C7 0%, #FDE68A 100%); color: #92400E; border: 1px solid #F59E0B; font-weight: 700; font-size: 0.72rem;">
-                                    <i class="bi bi-shield-shaded me-1 text-warning"></i> Master Admin
-                                </span>
-                            @elseif($user->role === 'admin')
-                                <span class="badge rounded-pill px-2.5 py-1" style="background: #EDE9FE; color: #6D28D9; border: 1px solid #DDD6FE; font-weight: 600; font-size: 0.72rem;">
-                                    <i class="bi bi-shield-check me-1"></i> Administrator
-                                </span>
-                            @elseif($user->role === 'pegawai')
-                                <span class="badge rounded-pill px-2.5 py-1" style="background: #E0F2FE; color: #0369A1; border: 1px solid #BAE6FD; font-weight: 600; font-size: 0.72rem;">
-                                    <i class="bi bi-person-badge me-1"></i> Pegawai / PML
-                                </span>
-                                @if($user->can_switch_role)
-                                    <div class="mt-1">
-                                        <span class="badge bg-warning-subtle text-warning-emphasis border border-warning-subtle rounded-pill px-2 py-0.5" style="font-size: 0.65rem;" title="Memiliki hak Dual Role (bisa beralih peran jadi Admin)">
-                                            <i class="bi bi-arrow-left-right me-0.5 text-primary"></i> Dual Role (+Admin)
+                            <div class="d-flex align-items-center justify-content-between flex-wrap gap-1">
+                                <div class="d-inline-flex align-items-center gap-1 flex-wrap">
+                                    @if($user->isMasterAdmin())
+                                        <span class="badge rounded-pill px-2.5 py-1" style="background: linear-gradient(135deg, #FEF3C7 0%, #FDE68A 100%); color: #92400E; border: 1px solid #F59E0B; font-weight: 700; font-size: 0.72rem;">
+                                            <i class="bi bi-shield-shaded me-1 text-warning"></i> Master Admin
                                         </span>
-                                    </div>
-                                @endif
-                            @else
-                                <span class="badge rounded-pill px-2.5 py-1" style="background: #FFF4ED; color: #C2410C; border: 1px solid #FFEDD5; font-weight: 600; font-size: 0.72rem;">
-                                    <i class="bi bi-person-check me-1"></i> Petugas
-                                </span>
-                                @if($user->can_switch_role)
-                                    <div class="mt-1">
-                                        <span class="badge bg-warning-subtle text-warning-emphasis border border-warning-subtle rounded-pill px-2 py-0.5" style="font-size: 0.65rem;" title="Memiliki hak Dual Role (bisa beralih peran jadi Admin)">
-                                            <i class="bi bi-arrow-left-right me-0.5 text-primary"></i> Dual Role (+Admin)
+                                    @elseif($user->role === 'admin')
+                                        <span class="badge rounded-pill px-2.5 py-1" style="background: #EDE9FE; color: #6D28D9; border: 1px solid #DDD6FE; font-weight: 600; font-size: 0.72rem;">
+                                            <i class="bi bi-shield-check me-1"></i> Administrator
                                         </span>
-                                    </div>
-                                @endif
-                            @endif
+                                    @elseif($user->role === 'pegawai')
+                                        <span class="badge rounded-pill px-2.5 py-1" style="background: #E0F2FE; color: #0369A1; border: 1px solid #BAE6FD; font-weight: 600; font-size: 0.72rem;">
+                                            <i class="bi bi-person-badge me-1"></i> Pegawai / PML
+                                        </span>
+                                        @if($user->can_switch_role)
+                                            <span class="badge bg-warning-subtle text-warning-emphasis border border-warning-subtle rounded-pill px-2 py-0.5" style="font-size: 0.65rem;" title="Memiliki hak Dual Role (bisa beralih peran jadi Admin)">
+                                                <i class="bi bi-arrow-left-right me-0.5 text-primary"></i> Dual Role (+Admin)
+                                            </span>
+                                        @endif
+                                    @else
+                                        <span class="badge rounded-pill px-2.5 py-1" style="background: #FFF4ED; color: #C2410C; border: 1px solid #FFEDD5; font-weight: 600; font-size: 0.72rem;">
+                                            <i class="bi bi-person-check me-1"></i> Petugas
+                                        </span>
+                                        @if($user->can_switch_role)
+                                            <span class="badge bg-warning-subtle text-warning-emphasis border border-warning-subtle rounded-pill px-2 py-0.5" style="font-size: 0.65rem;" title="Memiliki hak Dual Role (bisa beralih peran jadi Admin)">
+                                                <i class="bi bi-arrow-left-right me-0.5 text-primary"></i> Dual Role (+Admin)
+                                            </span>
+                                        @endif
+                                    @endif
+                                </div>
+                                <div class="d-md-none ms-auto">
+                                    @if($user->isActive())
+                                        <span class="badge rounded-pill px-2 py-0.5" style="background: #DCFCE7; color: #15803D; border: 1px solid #BBF7D0; font-weight: 600; font-size: 0.7rem;">
+                                            <i class="bi bi-check-circle-fill me-1 text-success"></i> Aktif
+                                        </span>
+                                    @else
+                                        <span class="badge rounded-pill px-2 py-0.5" style="background: #FEE2E2; color: #B91C1C; border: 1px solid #FECACA; font-weight: 600; font-size: 0.7rem;">
+                                            <i class="bi bi-x-circle-fill me-1 text-danger"></i> Nonaktif
+                                        </span>
+                                    @endif
+                                </div>
+                            </div>
                         </td>
 
                         <!-- Kontak -->
@@ -581,7 +594,7 @@
                         </td>
 
                         <!-- Status Akun -->
-                        <td class="text-center" data-label="Status Akun">
+                        <td class="text-center d-none d-md-table-cell" data-label="Status Akun">
                             @if($user->isActive())
                                 <span class="badge rounded-pill px-2.5 py-1" style="background: #DCFCE7; color: #15803D; border: 1px solid #BBF7D0; font-weight: 600; font-size: 0.72rem;">
                                     <i class="bi bi-check-circle-fill me-1 text-success"></i> Aktif
@@ -594,109 +607,115 @@
                         </td>
 
                         <!-- Terdaftar -->
-                        <td data-label="Terdaftar">
+                        <td class="d-none d-md-table-cell" data-label="Terdaftar">
                             <div class="small fw-semibold text-dark">{{ $user->created_at->format('d/m/Y') }}</div>
                             <div class="text-muted" style="font-size: 0.7rem;">{{ $user->created_at->diffForHumans() }}</div>
                         </td>
 
                         <!-- Aksi -->
                         <td class="text-end text-nowrap pe-3" data-label="Aksi">
-                            <div class="d-inline-flex align-items-center justify-content-end gap-1">
-                                @if($user->isMasterAdmin())
-                                    @if(auth()->user()->isMasterAdmin())
-                                        <!-- Edit Master Admin (Hanya Master Admin Sendiri) -->
+                            <div class="d-flex align-items-center justify-content-between flex-wrap gap-1">
+                                <div class="d-md-none text-muted text-start" style="font-size: 0.72rem;">
+                                    <i class="bi bi-calendar3 me-1 text-secondary"></i><span class="fw-semibold text-dark">{{ $user->created_at->format('d/m/Y') }}</span>
+                                    <span class="text-muted ms-1" style="font-size: 0.68rem;">({{ $user->created_at->diffForHumans(null, true) }})</span>
+                                </div>
+                                <div class="d-inline-flex align-items-center justify-content-end gap-1 ms-auto">
+                                    @if($user->isMasterAdmin())
+                                        @if(auth()->user()->isMasterAdmin())
+                                            <!-- Edit Master Admin (Hanya Master Admin Sendiri) -->
+                                            <button type="button" 
+                                                    class="bento-action-btn btn-edit" 
+                                                    title="Edit Data Master Admin" 
+                                                    data-bs-toggle="tooltip"
+                                                    onclick="openEditModal({{ json_encode($user) }})">
+                                                <i class="bi bi-pencil-square"></i>
+                                            </button>
+
+                                            <!-- Reset Password Master Admin -->
+                                            <button type="button" 
+                                                    class="bento-action-btn btn-key" 
+                                                    title="Reset Password Master Admin" 
+                                                    data-bs-toggle="tooltip"
+                                                    onclick="openResetPasswordModal({{ $user->id }}, '{{ addslashes($user->name) }}')">
+                                                <i class="bi bi-key"></i>
+                                            </button>
+                                        @else
+                                            <!-- Jika Dilihat Oleh Akun Admin Lain / Petugas Admin -->
+                                            <span class="badge rounded-pill px-2.5 py-1 text-muted border bg-light d-inline-flex align-items-center" style="font-size: 0.72rem;" title="Akun Master Admin Terlindungi &amp; Hak Akses Permanen">
+                                                <i class="bi bi-shield-lock-fill text-warning me-1"></i> Terlindungi
+                                            </span>
+                                        @endif
+                                    @else
+                                        <!-- Edit -->
                                         <button type="button" 
                                                 class="bento-action-btn btn-edit" 
-                                                title="Edit Data Master Admin" 
+                                                title="Edit Data Pengguna" 
                                                 data-bs-toggle="tooltip"
                                                 onclick="openEditModal({{ json_encode($user) }})">
                                             <i class="bi bi-pencil-square"></i>
                                         </button>
 
-                                        <!-- Reset Password Master Admin -->
+                                        <!-- Reset Password -->
                                         <button type="button" 
                                                 class="bento-action-btn btn-key" 
-                                                title="Reset Password Master Admin" 
+                                                title="Reset Password" 
                                                 data-bs-toggle="tooltip"
                                                 onclick="openResetPasswordModal({{ $user->id }}, '{{ addslashes($user->name) }}')">
                                             <i class="bi bi-key"></i>
                                         </button>
-                                    @else
-                                        <!-- Jika Dilihat Oleh Akun Admin Lain / Petugas Admin -->
-                                        <span class="badge rounded-pill px-2.5 py-1 text-muted border bg-light d-inline-flex align-items-center" style="font-size: 0.72rem;" title="Akun Master Admin Terlindungi &amp; Hak Akses Permanen">
-                                            <i class="bi bi-shield-lock-fill text-warning me-1"></i> Terlindungi
-                                        </span>
-                                    @endif
-                                @else
-                                    <!-- Edit -->
-                                    <button type="button" 
-                                            class="bento-action-btn btn-edit" 
-                                            title="Edit Data Pengguna" 
-                                            data-bs-toggle="tooltip"
-                                            onclick="openEditModal({{ json_encode($user) }})">
-                                        <i class="bi bi-pencil-square"></i>
-                                    </button>
 
-                                    <!-- Reset Password -->
-                                    <button type="button" 
-                                            class="bento-action-btn btn-key" 
-                                            title="Reset Password" 
-                                            data-bs-toggle="tooltip"
-                                            onclick="openResetPasswordModal({{ $user->id }}, '{{ addslashes($user->name) }}')">
-                                        <i class="bi bi-key"></i>
-                                    </button>
+                                        @if($user->id !== auth()->id())
+                                            @if($user->can_switch_role || $user->role === 'admin')
+                                                <!-- Tutup Akses Administrator -->
+                                                <form method="POST" action="{{ route('admin.users.revoke-admin', $user) }}" class="d-inline" onsubmit="return confirm('Tutup akses Administrator untuk {{ addslashes($user->name) }}? Pengguna tidak akan bisa lagi mengakses atau beralih ke Mode Admin.');">
+                                                    @csrf
+                                                    @method('PATCH')
+                                                    <button type="submit" 
+                                                            class="bento-action-btn" 
+                                                            style="color: #DC2626; border-color: #FECACA; background: #FEF2F2;"
+                                                            title="Tutup Akses Administrator" 
+                                                            data-bs-toggle="tooltip">
+                                                        <i class="bi bi-shield-slash"></i>
+                                                    </button>
+                                                </form>
+                                            @else
+                                                <!-- Buka Akses Administrator (Dual Role) -->
+                                                <form method="POST" action="{{ route('admin.users.grant-admin', $user) }}" class="d-inline" onsubmit="return confirm('Buka akses Administrator (Dual Role) untuk {{ addslashes($user->name) }}? Pengguna akan dapat beralih ke Mode Admin.');">
+                                                    @csrf
+                                                    @method('PATCH')
+                                                    <button type="submit" 
+                                                            class="bento-action-btn" 
+                                                            style="color: #059669; border-color: #A7F3D0; background: #ECFDF5;"
+                                                            title="Buka Akses Administrator (Dual Role)" 
+                                                            data-bs-toggle="tooltip">
+                                                        <i class="bi bi-shield-plus"></i>
+                                                    </button>
+                                                </form>
+                                            @endif
 
-                                    @if($user->id !== auth()->id())
-                                        @if($user->can_switch_role || $user->role === 'admin')
-                                            <!-- Tutup Akses Administrator -->
-                                            <form method="POST" action="{{ route('admin.users.revoke-admin', $user) }}" class="d-inline" onsubmit="return confirm('Tutup akses Administrator untuk {{ addslashes($user->name) }}? Pengguna tidak akan bisa lagi mengakses atau beralih ke Mode Admin.');">
+                                            <!-- Toggle Status Aktif / Nonaktif -->
+                                            <form method="POST" action="{{ route('admin.users.toggle-status', $user) }}" class="d-inline" onsubmit="return confirm('Ubah status akun {{ addslashes($user->name) }} menjadi {{ $user->isActive() ? 'Nonaktif' : 'Aktif' }}?');">
                                                 @csrf
                                                 @method('PATCH')
                                                 <button type="submit" 
-                                                        class="bento-action-btn" 
-                                                        style="color: #DC2626; border-color: #FECACA; background: #FEF2F2;"
-                                                        title="Tutup Akses Administrator" 
+                                                        class="bento-action-btn btn-toggle {{ $user->isActive() ? 'text-secondary' : 'text-success' }}" 
+                                                        title="{{ $user->isActive() ? 'Nonaktifkan Akun' : 'Aktifkan Akun' }}"
                                                         data-bs-toggle="tooltip">
-                                                    <i class="bi bi-shield-slash"></i>
+                                                    <i class="bi {{ $user->isActive() ? 'bi-person-slash' : 'bi-person-check' }}"></i>
                                                 </button>
                                             </form>
-                                        @else
-                                            <!-- Buka Akses Administrator (Dual Role) -->
-                                            <form method="POST" action="{{ route('admin.users.grant-admin', $user) }}" class="d-inline" onsubmit="return confirm('Buka akses Administrator (Dual Role) untuk {{ addslashes($user->name) }}? Pengguna akan dapat beralih ke Mode Admin.');">
-                                                @csrf
-                                                @method('PATCH')
-                                                <button type="submit" 
-                                                        class="bento-action-btn" 
-                                                        style="color: #059669; border-color: #A7F3D0; background: #ECFDF5;"
-                                                        title="Buka Akses Administrator (Dual Role)" 
-                                                        data-bs-toggle="tooltip">
-                                                    <i class="bi bi-shield-plus"></i>
-                                                </button>
-                                            </form>
-                                        @endif
 
-                                        <!-- Toggle Status Aktif / Nonaktif -->
-                                        <form method="POST" action="{{ route('admin.users.toggle-status', $user) }}" class="d-inline" onsubmit="return confirm('Ubah status akun {{ addslashes($user->name) }} menjadi {{ $user->isActive() ? 'Nonaktif' : 'Aktif' }}?');">
-                                            @csrf
-                                            @method('PATCH')
-                                            <button type="submit" 
-                                                    class="bento-action-btn btn-toggle {{ $user->isActive() ? 'text-secondary' : 'text-success' }}" 
-                                                    title="{{ $user->isActive() ? 'Nonaktifkan Akun' : 'Aktifkan Akun' }}"
-                                                    data-bs-toggle="tooltip">
-                                                <i class="bi {{ $user->isActive() ? 'bi-person-slash' : 'bi-person-check' }}"></i>
+                                            <!-- Hapus -->
+                                            <button type="button" 
+                                                    class="bento-action-btn btn-delete" 
+                                                    title="Hapus Pengguna" 
+                                                    data-bs-toggle="tooltip"
+                                                    onclick="openDeleteModal({{ $user->id }}, '{{ addslashes($user->name) }}')">
+                                                <i class="bi bi-trash"></i>
                                             </button>
-                                        </form>
-
-                                        <!-- Hapus -->
-                                        <button type="button" 
-                                                class="bento-action-btn btn-delete" 
-                                                title="Hapus Pengguna" 
-                                                data-bs-toggle="tooltip"
-                                                onclick="openDeleteModal({{ $user->id }}, '{{ addslashes($user->name) }}')">
-                                            <i class="bi bi-trash"></i>
-                                        </button>
+                                        @endif
                                     @endif
-                                @endif
+                                </div>
                             </div>
                         </td>
                     </tr>
