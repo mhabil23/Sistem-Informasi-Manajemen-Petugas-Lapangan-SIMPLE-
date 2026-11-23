@@ -465,15 +465,6 @@
                         <span class="bento-hero-badge">
                             <i class="bi bi-graph-up-arrow"></i> Ringkasan Monitoring Wilayah
                         </span>
-                        @if($slowOfficersCount > 0)
-                            <span class="badge bg-danger text-white px-2.5 py-1 rounded-pill" style="font-size: 0.72rem;">
-                                <i class="bi bi-exclamation-triangle-fill me-1"></i> {{ $slowOfficersCount }} Petugas Lambat (&lt;50%)
-                            </span>
-                        @else
-                            <span class="badge bg-success-subtle text-success border border-success-subtle px-2.5 py-1 rounded-pill" style="font-size: 0.72rem;">
-                                <i class="bi bi-check-circle-fill me-1"></i> Seluruh Petugas On Track
-                            </span>
-                        @endif
                     </div>
 
                     @php
@@ -487,17 +478,13 @@
                     </h2>
                     <p class="bento-hero-desc">
                         <i class="bi bi-geo-alt-fill text-danger me-1"></i> <strong>{{ $activeLoc }}</strong> &bull; Total Realisasi: <strong>{{ number_format($bastCompletedCount) }}</strong> dari <strong>{{ number_format($bastTargetCount) }}</strong> responden telah memiliki Berita Acara (BAST).
-                        @if($slowOfficersCount > 0)
-                            <span class="d-block text-danger mt-1 fw-semibold"><i class="bi bi-exclamation-circle-fill me-1"></i> Tindakan diperlukan: Ingatkan petugas yang masih di bawah target kuota melalui tombol WhatsApp.</span>
-                        @endif
                     </p>
                 </div>
 
                 <div class="mt-2 d-flex flex-wrap gap-2 align-items-center">
-                    <a href="#tabelPetugas" class="bento-hero-cta">
-                        <i class="bi bi-person-gear"></i>
-                        <span>Pantau Kinerja Petugas</span>
-                        <i class="bi bi-arrow-down small ms-1"></i>
+                    <a href="{{ route('admin.assignments.index') }}" class="bento-hero-cta">
+                        <i class="bi bi-briefcase"></i>
+                        <span>Kelola Kegiatan & Penugasan</span>
                     </a>
                     <a href="{{ route('admin.recapitulation.excel') }}" class="btn btn-outline-secondary rounded-pill px-3 py-2 font-weight-bold" style="font-size: 0.88rem; background: #FFFFFF;">
                         <i class="bi bi-file-earmark-spreadsheet-fill text-success me-1"></i> Unduh Excel
@@ -705,156 +692,6 @@
         </div>
     </div>
 
-    <!-- ==============================================================
-         7. TABEL MONITORING KINERJA PETUGAS & IDENTIFIKASI PETUGAS LAMBAT
-         ============================================================== -->
-    <div class="bento-card mb-4 p-0" id="tabelPetugas">
-        <div class="d-flex flex-wrap align-items-center justify-content-between gap-2 p-3 border-bottom bg-light bg-opacity-40">
-            <div>
-                <span class="fw-bold text-dark d-block" style="font-size: 0.95rem;">
-                    <i class="bi bi-person-gear me-1.5" style="color: var(--bps-orange);"></i> Identifikasi Kinerja Petugas Lapangan / PPL
-                </span>
-                <span class="text-muted" style="font-size: 0.75rem;">Urutan prioritas: petugas dengan progres terendah berada di paling atas.</span>
-            </div>
-
-            <!-- Quick Filter Buttons -->
-            <div class="d-flex flex-wrap gap-1.5">
-                <a href="{{ route('admin.dashboard', array_merge(request()->query(), ['progress_status' => 'all'])) }}" 
-                   class="btn btn-xs rounded-pill {{ $progressFilter === 'all' ? 'btn-dark' : 'btn-outline-secondary' }}" style="font-size: 0.72rem; padding: 3px 10px;">
-                    Semua ({{ count($filteredOfficersList) }})
-                </a>
-                <a href="{{ route('admin.dashboard', array_merge(request()->query(), ['progress_status' => 'slow'])) }}" 
-                   class="btn btn-xs rounded-pill {{ $progressFilter === 'slow' ? 'btn-danger' : 'btn-outline-danger' }}" style="font-size: 0.72rem; padding: 3px 10px;">
-                    <i class="bi bi-exclamation-triangle-fill me-1"></i> Lambat ({{ $slowOfficersCount }})
-                </a>
-                <a href="{{ route('admin.dashboard', array_merge(request()->query(), ['progress_status' => 'on_track'])) }}" 
-                   class="btn btn-xs rounded-pill {{ $progressFilter === 'on_track' ? 'btn-warning' : 'btn-outline-warning' }}" style="font-size: 0.72rem; padding: 3px 10px;">
-                    On Track ({{ $onTrackOfficersCount }})
-                </a>
-                <a href="{{ route('admin.dashboard', array_merge(request()->query(), ['progress_status' => 'completed'])) }}" 
-                   class="btn btn-xs rounded-pill {{ $progressFilter === 'completed' ? 'btn-success' : 'btn-outline-success' }}" style="font-size: 0.72rem; padding: 3px 10px;">
-                    Selesai ({{ $completedOfficersCount }})
-                </a>
-            </div>
-        </div>
-
-        <div class="table-responsive">
-            <table class="table sp-table align-middle mb-0" style="font-size: 0.8125rem;">
-                <thead class="table-light">
-                    <tr>
-                        <th style="min-width: 170px;">Petugas Lapangan / PPL</th>
-                        <th style="min-width: 120px;">Wilayah Kerja</th>
-                        <th class="text-center" style="width: 70px;">Target</th>
-                        <th class="text-center" style="width: 70px;">BAST</th>
-                        <th class="text-center" style="width: 70px;">Sisa</th>
-                        <th style="min-width: 130px;">Progres</th>
-                        <th style="min-width: 120px;">Status Kinerja</th>
-                        <th class="text-center" style="width: 90px;">Laporan</th>
-                        <th class="text-end pe-3" style="min-width: 110px;">Aksi Cepat</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    @forelse($filteredOfficersList as $off)
-                        <tr class="{{ $off->category === 'slow' ? 'bg-danger-subtle bg-opacity-25' : '' }}">
-                            <td class="ps-3">
-                                <div class="d-flex align-items-center gap-2">
-                                    <div class="rounded-circle d-flex align-items-center justify-content-center text-white fw-bold {{ $off->category === 'slow' ? 'bg-danger' : ($off->category === 'completed' ? 'bg-success' : 'bg-primary') }}" 
-                                         style="width: 32px; height: 32px; font-size: 0.78rem; flex-shrink: 0;">
-                                        {{ strtoupper(substr($off->name, 0, 1)) }}
-                                    </div>
-                                    <div class="overflow-hidden">
-                                        <div class="fw-bold text-dark text-truncate" style="font-size: 0.8rem;">{{ $off->name }}</div>
-                                        <small class="text-muted d-block" style="font-size: 0.7rem;">{{ $off->phone ?? '-' }}</small>
-                                    </div>
-                                </div>
-                            </td>
-                            <td>
-                                <span class="badge bg-light text-secondary border rounded-pill" style="font-size: 0.7rem;">
-                                    {{ $off->dominant_district }}
-                                </span>
-                            </td>
-                            <td class="text-center font-monospace fw-semibold">{{ $off->target }}</td>
-                            <td class="text-center font-monospace fw-bold text-success">{{ $off->completed }}</td>
-                            <td class="text-center font-monospace fw-bold {{ $off->pending > 0 ? 'text-danger' : 'text-muted' }}">
-                                {{ $off->pending }}
-                            </td>
-                            <td>
-                                <div class="d-flex justify-content-between text-muted mb-1 font-monospace" style="font-size: 0.68rem;">
-                                    <span>{{ $off->completed }}/{{ $off->target }}</span>
-                                    <span class="fw-bold text-dark">{{ $off->percentage }}%</span>
-                                </div>
-                                <div class="progress" style="height: 5px; border-radius: 999px;">
-                                    <div class="progress-bar" 
-                                         style="width: {{ $off->percentage }}%; background: {{ $off->percentage >= 100 ? 'var(--bps-green)' : ($off->percentage >= 50 ? 'var(--bps-orange)' : '#EF4444') }};"></div>
-                                </div>
-                            </td>
-                            <td>
-                                <span class="badge {{ $off->badge_class }} py-1 px-2 rounded-pill" style="font-size: 0.68rem;">
-                                    @if($off->category === 'slow')
-                                        <i class="bi bi-exclamation-triangle-fill me-1"></i>
-                                    @elseif($off->category === 'completed')
-                                        <i class="bi bi-check2 me-1"></i>
-                                    @endif
-                                    {{ $off->status_text }}
-                                </span>
-                            </td>
-                            <td class="text-center">
-                                @if($off->has_report)
-                                    <span class="badge bg-success-subtle text-success border border-success-subtle rounded-pill" style="font-size: 0.68rem;" title="Laporan sudah diserahkan">
-                                        <i class="bi bi-check2 me-1"></i> Ada ({{ $off->reports_count }})
-                                    </span>
-                                @else
-                                    <span class="badge bg-danger-subtle text-danger border border-danger-subtle rounded-pill" style="font-size: 0.68rem;" title="Belum membuat laporan kegiatan">
-                                        <i class="bi bi-x-lg me-1"></i> Belum
-                                    </span>
-                                @endif
-                            </td>
-                            <td class="text-end text-nowrap pe-3">
-                                <div class="d-inline-flex gap-1 align-items-center">
-                                    @if(auth()->user()->isAdmin())
-                                        <button type="button" 
-                                                class="btn btn-xs rounded-pill py-1 px-2 text-white" 
-                                                style="font-size: 0.72rem; background: var(--bps-orange);"
-                                                title="Kirim Pesan ke Papan Informasi Petugas"
-                                                onclick="openSendNoticeModal({{ $off->id }}, '{{ addslashes($off->name) }}', '{{ $off->has_report ? 'bast' : 'report' }}', '{{ $off->target }}', '{{ $off->completed }}', '{{ $off->pending }}', '{{ $off->percentage }}')">
-                                            <i class="bi bi-megaphone-fill me-1"></i> Notif
-                                        </button>
-                                    @endif
-
-                                    <button type="button" 
-                                            class="btn btn-xs btn-outline-secondary rounded-pill py-1 px-1.5" 
-                                            style="font-size: 0.72rem;"
-                                            title="Lihat Draf Pesan Notifikasi"
-                                            onclick="openReminderModal('{{ $off->id }}', '{{ addslashes($off->name) }}', '{{ $off->phone ?? '-' }}', '{{ $off->target }}', '{{ $off->completed }}', '{{ $off->pending }}', '{{ $off->percentage }}', '{{ $off->has_report ? 'Sudah Diserahkan' : 'BELUM Diserahkan' }}', '{{ $off->wa_url ?? '' }}')">
-                                        <i class="bi bi-chat-dots"></i>
-                                    </button>
-
-                                    @if($off->wa_url)
-                                        <a href="{{ $off->wa_url }}" 
-                                           target="_blank" 
-                                           class="btn btn-xs btn-outline-success rounded-pill py-1 px-1.5" 
-                                           style="font-size: 0.72rem;"
-                                           title="Kirim WhatsApp Langsung">
-                                            <i class="bi bi-whatsapp"></i>
-                                        </a>
-                                    @endif
-                                </div>
-                            </td>
-                        </tr>
-                    @empty
-                        <tr>
-                            <td colspan="9" class="text-center py-4 text-muted small">
-                                <i class="bi bi-person-x display-6 mb-2 text-secondary opacity-50 d-block"></i>
-                                Tidak ada data petugas lapangan yang sesuai filter.
-                            </td>
-                        </tr>
-                    @endforelse
-                </tbody>
-            </table>
-        </div>
-    </div>
-
-    <!-- ==============================================================
          8. GRAFIK TREN BULANAN & LOG AKTIVITAS (BENTO CARDS)
          ============================================================== -->
     <div class="row g-4 mb-2 align-items-stretch">
