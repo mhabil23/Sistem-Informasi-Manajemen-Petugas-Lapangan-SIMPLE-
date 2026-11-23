@@ -111,6 +111,14 @@ class UserController extends Controller
     }
 
     /**
+     * Display the specified user (redirects to index with search filter).
+     */
+    public function show(User $user)
+    {
+        return redirect()->route('admin.users.index', ['search' => $user->sobat_id ?: $user->username]);
+    }
+
+    /**
      * Store a newly created user in storage.
      */
     public function store(Request $request)
