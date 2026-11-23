@@ -655,17 +655,17 @@ class UserController extends Controller
     }
 
     /**
-     * Import daftar mitra lapangan dari berkas Excel (.xlsx / .csv).
-     * Password bawaan: bps7408, login dapat menggunakan ID SOBAT atau Email.
+     * Pratinjau dan ekstrak data mitra lapangan dari berkas Excel/CSV via AJAX.
+     * Mengembalikan daftar mitra yang terbaca beserta status deteksi (Akun Baru / Akun Terdaftar).
      */
-    public function importMitra(Request $request)
+    public function previewMitra(Request $request)
     {
         $request->validate([
             'excel_file' => ['required', 'file', 'extensions:xlsx,xls,csv,txt', 'max:20480'],
         ], [
-            'excel_file.required' => 'Pilih berkas Excel (.xlsx) atau CSV daftar mitra yang akan diunggah.',
+            'excel_file.required' => 'Pilih berkas Excel (.xlsx) atau CSV terlebih dahulu.',
             'excel_file.extensions' => 'Format berkas harus berupa .xlsx, .xls, atau .csv.',
-            'excel_file.max' => 'Ukuran berkas maksimal adalah 20 MB.',
+            'excel_file.max' => 'Ukuran berkas maksimal 20 MB.',
         ]);
 
         $file = $request->file('excel_file');
@@ -674,11 +674,121 @@ class UserController extends Controller
         try {
             $parsedMitra = $this->excelParser->parseMitraRows($file->getRealPath(), $ext);
         } catch (\Throwable $e) {
-            return back()->with('error', 'Gagal memproses berkas Excel: ' . $e->getMessage());
+            return response()->json([
+                'success' => false,
+                'message' => 'Gagal membaca berkas Excel: ' . $e->getMessage(),
+            ], 422);
         }
 
         if (empty($parsedMitra)) {
-            return back()->with('error', 'Tidak ada data mitra yang valid ditemukan dalam berkas Excel.');
+            return response()->json([
+                'success' => false,
+                'message' => 'Berkas Excel kosong atau tidak ada data mitra yang valid ditemukan.',
+            ], 422);
+        }
+
+        // Cache existing users in memory for instant matching
+        $existingBySobat = User::whereNotNull('sobat_id')
+            ->where('sobat_id', '!=', '')
+            ->get()
+            ->keyBy('sobat_id');
+
+        $existingByEmail = User::whereNotNull('email')
+            ->where('email', '!=', '')
+            ->get()
+            ->keyBy(fn ($u) => strtolower($u->email));
+
+        $previewList = [];
+        $newCount = 0;
+        $existingCount = 0;
+
+        foreach ($parsedMitra as $idx => $row) {
+            $sobatId = $row['sobat_id'] ?: null;
+            $email = $row['email'] ?: null;
+
+            $matchedUser = null;
+            if ($sobatId && isset($existingBySobat[$sobatId])) {
+                $matchedUser = $existingBySobat[$sobatId];
+            } elseif ($email && isset($existingByEmail[strtolower($email)])) {
+                $matchedUser = $existingByEmail[strtolower($email)];
+            }
+
+            $isExisting = $matchedUser !== null;
+            if ($isExisting) {
+                $existingCount++;
+            } else {
+                $newCount++;
+            }
+
+            $previewList[] = [
+                'index' => $idx,
+                'name' => $row['name'],
+                'sobat_id' => $row['sobat_id'] ?: '',
+                'nik' => $row['nik'] ?: '',
+                'email' => $row['email'] ?: '',
+                'phone' => $row['phone'] ?: '',
+                'district' => $row['district'] ?: '',
+                'village' => $row['village'] ?: '',
+                'address' => $row['address'] ?: '',
+                'gender' => $row['gender'] ?: '',
+                'birth_info' => $row['birth_info'] ?: '',
+                'education' => $row['education'] ?: '',
+                'position' => $row['position'] ?: 'Mitra Pendataan',
+                'is_existing' => $isExisting,
+                'existing_id' => $matchedUser?->id,
+                'existing_name' => $matchedUser?->name,
+                'existing_username' => $matchedUser?->username,
+            ];
+        }
+
+        return response()->json([
+            'success' => true,
+            'count' => count($previewList),
+            'new_count' => $newCount,
+            'existing_count' => $existingCount,
+            'mitra' => $previewList,
+        ]);
+    }
+
+    /**
+     * Import daftar mitra lapangan dari berkas Excel (.xlsx / .csv) atau daftar terpilih.
+     * Password bawaan: bps7408, login dapat menggunakan ID SOBAT atau Email.
+     */
+    public function importMitra(Request $request)
+    {
+        $parsedMitra = [];
+
+        // 1. Cek apakah ada data mitra terpilih (dari checklist pratinjau modal)
+        $selectedJson = $request->input('selected_mitra_json');
+        if (!empty($selectedJson)) {
+            $decoded = json_decode($selectedJson, true);
+            if (is_array($decoded) && !empty($decoded)) {
+                $parsedMitra = $decoded;
+            }
+        }
+
+        // 2. Fallback: jika belum ada seleksi, baca langsung dari berkas excel_file
+        if (empty($parsedMitra)) {
+            $request->validate([
+                'excel_file' => ['required', 'file', 'extensions:xlsx,xls,csv,txt', 'max:20480'],
+            ], [
+                'excel_file.required' => 'Pilih berkas Excel (.xlsx) atau CSV daftar mitra yang akan diunggah.',
+                'excel_file.extensions' => 'Format berkas harus berupa .xlsx, .xls, atau .csv.',
+                'excel_file.max' => 'Ukuran berkas maksimal adalah 20 MB.',
+            ]);
+
+            $file = $request->file('excel_file');
+            $ext = $file->getClientOriginalExtension();
+
+            try {
+                $parsedMitra = $this->excelParser->parseMitraRows($file->getRealPath(), $ext);
+            } catch (\Throwable $e) {
+                return back()->with('error', 'Gagal memproses berkas Excel: ' . $e->getMessage());
+            }
+        }
+
+        if (empty($parsedMitra)) {
+            return back()->with('error', 'Tidak ada data mitra yang dipilih atau valid untuk diimpor.');
         }
 
         // Cache existing users in memory for instant matching without N+1 queries

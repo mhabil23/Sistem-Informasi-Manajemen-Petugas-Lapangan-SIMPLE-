@@ -748,7 +748,7 @@
      MODAL IMPORT EXCEL MITRA LAPANGAN
      ============================================================== -->
 <div class="modal fade" id="importMitraModal" tabindex="-1" aria-labelledby="importMitraModalLabel" aria-hidden="true">
-    <div class="modal-dialog modal-dialog-centered modal-lg">
+    <div class="modal-dialog modal-dialog-centered modal-xl modal-dialog-scrollable">
         <div class="modal-content border-0 shadow" style="border-radius: 20px; overflow: hidden;">
             <div class="modal-header bg-light border-bottom px-4 py-3">
                 <div class="d-flex align-items-center gap-2">
@@ -870,14 +870,87 @@
                         </label>
                         <input type="file" 
                                name="excel_file" 
+                               id="importMitraFileInput"
                                class="form-control @error('excel_file') is-invalid @enderror" 
                                accept=".xlsx,.xls,.csv" 
+                               onchange="previewMitraExcelFile()"
                                required>
+                        <input type="hidden" name="selected_mitra_json" id="selectedMitraJson" value="">
                         @error('excel_file')
                             <div class="invalid-feedback">{{ $message }}</div>
                         @enderror
                         <div class="form-text text-muted" style="font-size: 0.72rem;">
                             Ukuran berkas maksimal 20 MB. Sistem akan membaca otomatis kolom profil mitra termasuk ID SOBAT, nama, wilayah tugas, dan kontak.
+                        </div>
+                    </div>
+
+                    <!-- Loading State -->
+                    <div id="importMitraLoading" class="text-center py-4 my-2 text-muted rounded-3 border bg-light-subtle" style="display: none;">
+                        <div class="spinner-border spinner-border-sm text-success me-2" role="status"></div>
+                        <span class="fw-semibold" style="font-size: 0.85rem;">Membaca dan memvalidasi data Excel mitra...</span>
+                    </div>
+
+                    <!-- Error State -->
+                    <div id="importMitraError" class="alert alert-danger py-2.5 px-3 my-2 rounded-3" style="display: none; font-size: 0.82rem;">
+                        <i class="bi bi-exclamation-triangle-fill me-1"></i> <span id="importMitraErrorMessage"></span>
+                    </div>
+
+                    <!-- Preview & Checklist Container -->
+                    <div id="importMitraPreviewContainer" style="display: none;" class="mt-3">
+                        <!-- Toolbar -->
+                        <div class="p-3 mb-2 rounded-3 border bg-light d-flex flex-wrap align-items-center justify-content-between gap-2">
+                            <div>
+                                <div class="d-flex align-items-center gap-2">
+                                    <i class="bi bi-person-check-fill text-success fs-5"></i>
+                                    <span class="fw-bold text-dark" style="font-size: 0.9rem;">Pratinjau Data Mitra &amp; Pilihan Checklist</span>
+                                </div>
+                                <div class="d-flex align-items-center gap-1.5 mt-1 flex-wrap">
+                                    <span class="badge bg-success-subtle text-success border border-success-subtle" id="previewTotalCountBadge">0 Mitra Terbaca</span>
+                                    <span class="badge bg-primary-subtle text-primary border border-primary-subtle" id="previewNewCountBadge">0 Akun Baru</span>
+                                    <span class="badge bg-info-subtle text-info border border-info-subtle" id="previewExistingCountBadge">0 Perbarui Profil</span>
+                                </div>
+                            </div>
+                            <div class="d-flex align-items-center gap-2 flex-wrap ms-auto">
+                                <div class="input-group input-group-sm" style="width: 220px;">
+                                    <span class="input-group-text bg-white border-end-0 text-muted"><i class="bi bi-search"></i></span>
+                                    <input type="text" id="previewSearchInput" class="form-control border-start-0 ps-0" placeholder="Cari di pratinjau..." oninput="filterPreviewMitra(this.value)">
+                                </div>
+                                <button type="button" class="btn btn-sm btn-outline-secondary rounded-pill px-2.5" onclick="toggleSelectAllPreviewMitra(true)">
+                                    Pilih Semua
+                                </button>
+                                <button type="button" class="btn btn-sm btn-outline-secondary rounded-pill px-2.5" onclick="toggleSelectAllPreviewMitra(false)">
+                                    Batal Semua
+                                </button>
+                            </div>
+                        </div>
+
+                        <!-- Table Checklist -->
+                        <div class="table-responsive border rounded-3 mb-2" style="max-height: 340px; overflow-y: auto;">
+                            <table class="table table-hover table-sm align-middle mb-0" style="font-size: 0.8rem;">
+                                <thead class="table-light sticky-top" style="z-index: 1;">
+                                    <tr>
+                                        <th style="width: 44px;" class="text-center">
+                                            <input type="checkbox" id="selectAllPreviewMitraCheckbox" class="form-check-input" checked onchange="onMasterPreviewCheckboxChange(this)" title="Pilih / Batal Semua">
+                                        </th>
+                                        <th style="width: 30%;">NAMA &amp; IDENTITAS</th>
+                                        <th style="width: 25%;">KONTAK</th>
+                                        <th style="width: 25%;">WILAYAH TUGAS</th>
+                                        <th style="width: 16%;" class="text-center">STATUS</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="importMitraPreviewTbody"></tbody>
+                            </table>
+                        </div>
+
+                        <!-- Counter Info Bar -->
+                        <div class="d-flex align-items-center justify-content-between p-2 rounded-2 bg-light text-muted small" style="font-size: 0.76rem;">
+                            <div>
+                                <i class="bi bi-info-circle text-primary me-1"></i>
+                                Hanya baris dengan <strong>tanda centang (ceklis)</strong> yang akan diimpor ke sistem.
+                            </div>
+                            <div class="fw-bold text-dark" id="previewSelectedCounterText">
+                                0 dari 0 dipilih
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -887,7 +960,7 @@
                         Batal
                     </button>
                     <button type="submit" class="btn btn-success rounded-pill px-4 py-1.5 shadow-sm fw-semibold" id="btnSubmitImportMitra" style="font-size: 0.85rem;">
-                        <i class="bi bi-cloud-arrow-up-fill me-1"></i> Unggah &amp; Import Mitra
+                        <i class="bi bi-cloud-arrow-up-fill me-1"></i> <span id="btnSubmitImportMitraText">Unggah &amp; Import Mitra</span>
                     </button>
                 </div>
             </form>
@@ -1490,5 +1563,225 @@
         cb.addEventListener('change', updateModalPegawaiCount);
     });
     updateModalPegawaiCount();
+
+    // ==============================================================
+    // Modal Import Mitra Lapangan (Pratinjau & Checklist Interaktif)
+    // ==============================================================
+    let parsedMitraRows = [];
+
+    function escapeHtml(str) {
+        if (!str) return '';
+        return String(str)
+            .replace(/&/g, '&amp;')
+            .replace(/</g, '&lt;')
+            .replace(/>/g, '&gt;')
+            .replace(/"/g, '&quot;')
+            .replace(/'/g, '&#039;');
+    }
+
+    function previewMitraExcelFile() {
+        const input = document.getElementById('importMitraFileInput');
+        if (!input.files || input.files.length === 0) {
+            const container = document.getElementById('importMitraPreviewContainer');
+            if (container) container.style.display = 'none';
+            return;
+        }
+
+        const file = input.files[0];
+        const formData = new FormData();
+        formData.append('excel_file', file);
+        formData.append('_token', '{{ csrf_token() }}');
+
+        const loading = document.getElementById('importMitraLoading');
+        const container = document.getElementById('importMitraPreviewContainer');
+        const errorBox = document.getElementById('importMitraError');
+        const errorMsg = document.getElementById('importMitraErrorMessage');
+        const submitBtn = document.getElementById('btnSubmitImportMitra');
+
+        if (loading) loading.style.display = 'block';
+        if (container) container.style.display = 'none';
+        if (errorBox) errorBox.style.display = 'none';
+        if (submitBtn) submitBtn.disabled = true;
+
+        fetch('{{ route("admin.users.preview-mitra") }}', {
+            method: 'POST',
+            body: formData,
+            headers: {
+                'X-Requested-With': 'XMLHttpRequest'
+            }
+        })
+        .then(res => res.json())
+        .then(data => {
+            if (loading) loading.style.display = 'none';
+            if (data.success && data.mitra && data.mitra.length > 0) {
+                parsedMitraRows = data.mitra;
+                renderMitraPreview(parsedMitraRows);
+                const totalBadge = document.getElementById('previewTotalCountBadge');
+                if (totalBadge) totalBadge.textContent = `${data.count} Mitra Terbaca`;
+                const newBadge = document.getElementById('previewNewCountBadge');
+                if (newBadge) newBadge.textContent = `${data.new_count} Akun Baru`;
+                const existBadge = document.getElementById('previewExistingCountBadge');
+                if (existBadge) existBadge.textContent = `${data.existing_count} Perbarui Profil`;
+                if (container) container.style.display = 'block';
+                if (submitBtn) submitBtn.disabled = false;
+            } else {
+                if (errorMsg) errorMsg.textContent = data.message || 'Gagal membaca berkas Excel atau format tidak sesuai.';
+                if (errorBox) errorBox.style.display = 'block';
+                if (submitBtn) submitBtn.disabled = false;
+            }
+        })
+        .catch(err => {
+            if (loading) loading.style.display = 'none';
+            if (errorMsg) errorMsg.textContent = 'Terjadi kesalahan saat memproses berkas Excel: ' + err.message;
+            if (errorBox) errorBox.style.display = 'block';
+            if (submitBtn) submitBtn.disabled = false;
+        });
+    }
+
+    function renderMitraPreview(rows) {
+        const tbody = document.getElementById('importMitraPreviewTbody');
+        if (!tbody) return;
+        tbody.innerHTML = '';
+
+        rows.forEach(item => {
+            const tr = document.createElement('tr');
+            tr.className = 'preview-mitra-row';
+            tr.dataset.index = item.index;
+            tr.dataset.name = (item.name || '').toLowerCase();
+            tr.dataset.sobat = (item.sobat_id || '').toLowerCase();
+            tr.dataset.email = (item.email || '').toLowerCase();
+            tr.dataset.district = (item.district || '').toLowerCase();
+
+            const badgeHtml = item.is_existing 
+                ? `<span class="badge rounded-pill bg-info-subtle text-info border border-info-subtle px-2 py-0.5" style="font-size: 0.68rem;" title="Akun sudah ada di sistem, profil akan diperbarui"><i class="bi bi-arrow-repeat me-0.5"></i>Perbarui</span>`
+                : `<span class="badge rounded-pill bg-success-subtle text-success border border-success-subtle px-2 py-0.5" style="font-size: 0.68rem;" title="Akun baru akan dibuat"><i class="bi bi-plus-circle me-0.5"></i>Akun Baru</span>`;
+
+            tr.innerHTML = `
+                <td class="text-center">
+                    <input type="checkbox" class="form-check-input preview-item-checkbox" data-index="${item.index}" checked onchange="onPreviewItemCheckboxChange()">
+                </td>
+                <td>
+                    <div class="fw-bold text-dark text-truncate" title="${escapeHtml(item.name)}">${escapeHtml(item.name)}</div>
+                    <div class="d-flex align-items-center gap-1 flex-wrap mt-0.5">
+                        ${item.sobat_id ? `<span class="badge bg-light text-success border font-monospace px-1.5 py-0.2" style="font-size: 0.65rem;">SOBAT: ${escapeHtml(item.sobat_id)}</span>` : ''}
+                        ${item.nik ? `<span class="badge bg-light text-secondary border font-monospace px-1.5 py-0.2" style="font-size: 0.65rem;">NIK: ${escapeHtml(item.nik)}</span>` : ''}
+                    </div>
+                </td>
+                <td>
+                    <div class="text-dark small text-truncate" title="${escapeHtml(item.email)}"><i class="bi bi-envelope text-muted me-1"></i>${escapeHtml(item.email || '-')}</div>
+                    <div class="text-muted small text-truncate"><i class="bi bi-telephone text-muted me-1"></i>${escapeHtml(item.phone || '-')}</div>
+                </td>
+                <td>
+                    <div class="text-dark small"><i class="bi bi-geo-alt text-primary me-1"></i>${escapeHtml(item.district || '-')}</div>
+                    <div class="text-muted small">${escapeHtml(item.village || '-')}</div>
+                </td>
+                <td class="text-center">
+                    ${badgeHtml}
+                </td>
+            `;
+            tbody.appendChild(tr);
+        });
+
+        updateSelectedMitraCount();
+    }
+
+    function onMasterPreviewCheckboxChange(master) {
+        const checkboxes = document.querySelectorAll('.preview-item-checkbox');
+        checkboxes.forEach(cb => {
+            const row = cb.closest('.preview-mitra-row');
+            if (!row || row.style.display !== 'none') {
+                cb.checked = master.checked;
+            }
+        });
+        updateSelectedMitraCount();
+    }
+
+    function toggleSelectAllPreviewMitra(check) {
+        const checkboxes = document.querySelectorAll('.preview-item-checkbox');
+        checkboxes.forEach(cb => {
+            cb.checked = check;
+        });
+        const master = document.getElementById('selectAllPreviewMitraCheckbox');
+        if (master) master.checked = check;
+        updateSelectedMitraCount();
+    }
+
+    function onPreviewItemCheckboxChange() {
+        updateSelectedMitraCount();
+    }
+
+    function filterPreviewMitra(q) {
+        const search = (q || '').toLowerCase().trim();
+        const rows = document.querySelectorAll('.preview-mitra-row');
+        rows.forEach(tr => {
+            const name = tr.dataset.name || '';
+            const sobat = tr.dataset.sobat || '';
+            const email = tr.dataset.email || '';
+            const dist = tr.dataset.district || '';
+            if (search === '' || name.includes(search) || sobat.includes(search) || email.includes(search) || dist.includes(search)) {
+                tr.style.display = '';
+            } else {
+                tr.style.display = 'none';
+            }
+        });
+    }
+
+    function updateSelectedMitraCount() {
+        const all = document.querySelectorAll('.preview-item-checkbox');
+        const checked = document.querySelectorAll('.preview-item-checkbox:checked');
+        const total = all.length;
+        const selected = checked.length;
+
+        const counterText = document.getElementById('previewSelectedCounterText');
+        if (counterText) {
+            counterText.textContent = `${selected} dari ${total} dipilih`;
+        }
+
+        const master = document.getElementById('selectAllPreviewMitraCheckbox');
+        if (master) {
+            master.checked = total > 0 && selected === total;
+        }
+
+        const submitBtn = document.getElementById('btnSubmitImportMitra');
+        const submitBtnText = document.getElementById('btnSubmitImportMitraText');
+        if (submitBtn) {
+            if (selected === 0 && total > 0) {
+                submitBtn.disabled = true;
+                if (submitBtnText) submitBtnText.textContent = 'Pilih Minimal 1 Mitra';
+            } else {
+                submitBtn.disabled = false;
+                if (submitBtnText) submitBtnText.textContent = selected > 0 ? `Unggah & Import ${selected} Mitra Terpilih` : 'Unggah & Import Mitra';
+            }
+        }
+
+        // Simpan hanya data mitra yang dicentang ke dalam hidden input JSON
+        const selectedIndices = Array.from(checked).map(cb => parseInt(cb.dataset.index, 10));
+        const selectedRows = parsedMitraRows.filter(r => selectedIndices.includes(r.index));
+        const hidden = document.getElementById('selectedMitraJson');
+        if (hidden) {
+            hidden.value = selectedRows.length > 0 ? JSON.stringify(selectedRows) : '';
+        }
+    }
+
+    const importModalEl = document.getElementById('importMitraModal');
+    if (importModalEl) {
+        importModalEl.addEventListener('hidden.bs.modal', function () {
+            parsedMitraRows = [];
+            const fileInput = document.getElementById('importMitraFileInput');
+            if (fileInput) fileInput.value = '';
+            const hidden = document.getElementById('selectedMitraJson');
+            if (hidden) hidden.value = '';
+            const container = document.getElementById('importMitraPreviewContainer');
+            if (container) container.style.display = 'none';
+            const loading = document.getElementById('importMitraLoading');
+            if (loading) loading.style.display = 'none';
+            const errorBox = document.getElementById('importMitraError');
+            if (errorBox) errorBox.style.display = 'none';
+            const submitBtnText = document.getElementById('btnSubmitImportMitraText');
+            if (submitBtnText) submitBtnText.textContent = 'Unggah & Import Mitra';
+            const submitBtn = document.getElementById('btnSubmitImportMitra');
+            if (submitBtn) submitBtn.disabled = false;
+        });
+    }
 </script>
 @endpush

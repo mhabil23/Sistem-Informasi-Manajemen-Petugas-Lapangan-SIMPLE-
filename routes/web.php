@@ -50,6 +50,7 @@ Route::middleware(['auth', 'role:admin'])->prefix('admin')->as('admin.')->group(
     Route::get('/users', [\App\Http\Controllers\Admin\UserController::class, 'index'])->name('users.index');
     Route::post('/users', [\App\Http\Controllers\Admin\UserController::class, 'store'])->name('users.store');
     Route::post('/users/import-mitra', [\App\Http\Controllers\Admin\UserController::class, 'importMitra'])->name('users.import-mitra');
+    Route::post('/users/preview-mitra', [\App\Http\Controllers\Admin\UserController::class, 'previewMitra'])->name('users.preview-mitra');
     Route::get('/users/template-mitra', [\App\Http\Controllers\Admin\UserController::class, 'downloadMitraTemplate'])->name('users.template-mitra');
     Route::put('/users/{user}', [\App\Http\Controllers\Admin\UserController::class, 'update'])->name('users.update');
     Route::delete('/users/{user}', [\App\Http\Controllers\Admin\UserController::class, 'destroy'])->name('users.destroy');

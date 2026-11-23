@@ -133,4 +133,69 @@ class MitraExcelImportTest extends TestCase
 
         $response->assertRedirect(route('petugas.dashboard'));
     }
+
+    public function test_admin_can_preview_mitra_from_excel_or_csv(): void
+    {
+        $csvContent = "\xEF\xBB\xBF" .
+            "SOBAT ID,Nama Lengkap,Email,No Telp,Posisi,Alamat Kecamatan,Alamat Desa/Kel\n" .
+            "740822020003,Ahmad Fauzi,ahmadfauziliwang@gmail.com,082188167081,Mitra Pendataan,Lasusua,Lasusua\n" .
+            "740822020099,Abd. Muis,muismustaming@gmail.com,085242771288,Mitra Pendataan,Pakue Utara,Pakue\n";
+
+        $file = UploadedFile::fake()->createWithContent('daftar_mitra_preview.csv', $csvContent);
+
+        $response = $this->actingAs($this->admin)->postJson(route('admin.users.preview-mitra'), [
+            'excel_file' => $file,
+        ]);
+
+        $response->assertStatus(200);
+        $response->assertJson([
+            'success' => true,
+            'count' => 2,
+            'new_count' => 1,
+            'existing_count' => 1,
+        ]);
+
+        $mitraList = $response->json('mitra');
+        $this->assertCount(2, $mitraList);
+        $this->assertEquals('Ahmad Fauzi', $mitraList[0]['name']);
+        $this->assertFalse($mitraList[0]['is_existing']);
+        $this->assertEquals('Abd. Muis', $mitraList[1]['name']);
+        $this->assertTrue($mitraList[1]['is_existing']);
+    }
+
+    public function test_admin_can_import_only_selected_mitra_from_preview_checklist(): void
+    {
+        // Hanya memilih 1 mitra untuk diimpor, mitra kedua tidak dicentang
+        $selectedMitra = [
+            [
+                'name' => 'Bambang Sudirman',
+                'sobat_id' => '740822020088',
+                'email' => 'bambang.sudirman@gmail.com',
+                'phone' => '081234567888',
+                'district' => 'Kodeoha',
+                'village' => 'Meletumbo',
+                'position' => 'Mitra Pendataan',
+                'nik' => '7408021010900001',
+                'address' => '',
+                'gender' => '',
+                'birth_info' => '',
+                'education' => '',
+            ]
+        ];
+
+        $response = $this->actingAs($this->admin)->post(route('admin.users.import-mitra'), [
+            'selected_mitra_json' => json_encode($selectedMitra),
+        ]);
+
+        $response->assertSessionHas('success');
+        $response->assertRedirect();
+
+        // Bambang harus berhasil dibuat
+        $this->assertDatabaseHas('users', [
+            'sobat_id' => '740822020088',
+            'name' => 'Bambang Sudirman',
+            'email' => 'bambang.sudirman@gmail.com',
+            'role' => 'petugas',
+        ]);
+    }
 }
