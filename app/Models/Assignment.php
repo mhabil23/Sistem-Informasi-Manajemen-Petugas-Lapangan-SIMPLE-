@@ -8,6 +8,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\SoftDeletes;
+use Illuminate\Support\Facades\DB;
 
 class Assignment extends Model
 {
@@ -79,6 +80,47 @@ class Assignment extends Model
     public function schedules(): HasMany
     {
         return $this->hasMany(Schedule::class, 'assignment_id');
+    }
+
+    /**
+     * Get a map of assignment_id => array of active involved officers ['id', 'name'].
+     * Combines officers from assignment_officers and respondents table.
+     */
+    public static function getInvolvedOfficersMap(): array
+    {
+        $assignments = static::orderBy('title')->get();
+
+        $pivotOfficers = DB::table('assignment_officers')
+            ->join('users', 'assignment_officers.user_id', '=', 'users.id')
+            ->whereNull('users.deleted_at')
+            ->where('users.status', 'active')
+            ->select('assignment_officers.assignment_id', 'users.id', 'users.name')
+            ->get();
+
+        $respOfficers = DB::table('respondents')
+            ->join('users', 'respondents.officer_id', '=', 'users.id')
+            ->whereNull('users.deleted_at')
+            ->where('users.status', 'active')
+            ->whereNotNull('respondents.assignment_id')
+            ->select('respondents.assignment_id', 'users.id', 'users.name')
+            ->distinct()
+            ->get();
+
+        $map = [];
+        foreach ($assignments as $a) {
+            $map[$a->id] = [];
+        }
+
+        foreach ($pivotOfficers->concat($respOfficers)->unique(fn($item) => $item->assignment_id . '_' . $item->id)->sortBy('name') as $row) {
+            if (isset($map[$row->assignment_id])) {
+                $map[$row->assignment_id][] = [
+                    'id' => (int) $row->id,
+                    'name' => $row->name,
+                ];
+            }
+        }
+
+        return $map;
     }
 }
 

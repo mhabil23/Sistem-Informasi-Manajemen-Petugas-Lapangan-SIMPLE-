@@ -189,22 +189,22 @@
             </div>
         </div>
 
-        <!-- Filter Petugas / PPL -->
+        <!-- Filter Kegiatan -->
         <div class="col-lg-2 col-md-6">
-            <select name="officer_id" class="form-select">
-                <option value="">-- Semua Petugas --</option>
-                @foreach($officers as $officer)
-                    <option value="{{ $officer->id }}" {{ request('officer_id') == $officer->id ? 'selected' : '' }}>{{ $officer->name }}</option>
+            <select name="assignment_id" id="filter_resp_assignment" class="form-select" onchange="syncRespondentOfficerDropdown('filter_resp_assignment', 'filter_resp_officer', null)">
+                <option value="">-- Semua Kegiatan --</option>
+                @foreach($assignments as $assignment)
+                    <option value="{{ $assignment->id }}" {{ request('assignment_id') == $assignment->id ? 'selected' : '' }}>{{ $assignment->title }}</option>
                 @endforeach
             </select>
         </div>
 
-        <!-- Filter Kegiatan -->
-        <div class="col-lg-2 col-md-4">
-            <select name="assignment_id" class="form-select">
-                <option value="">-- Semua Kegiatan --</option>
-                @foreach($assignments as $assignment)
-                    <option value="{{ $assignment->id }}" {{ request('assignment_id') == $assignment->id ? 'selected' : '' }}>{{ $assignment->title }}</option>
+        <!-- Filter Petugas / PPL -->
+        <div class="col-lg-2 col-md-6">
+            <select name="officer_id" id="filter_resp_officer" class="form-select">
+                <option value="">-- Semua Petugas --</option>
+                @foreach($officers as $officer)
+                    <option value="{{ $officer->id }}" {{ request('officer_id') == $officer->id ? 'selected' : '' }}>{{ $officer->name }}</option>
                 @endforeach
             </select>
         </div>
@@ -598,7 +598,7 @@
                             <label class="form-label small fw-semibold text-secondary">
                                 <i class="bi bi-briefcase text-muted me-1"></i> KEGIATAN TERKAIT
                             </label>
-                            <select id="admin_create_assignment" name="assignment_id" class="form-select" onchange="autoFillPurpose(this, 'admin_create_purpose')">
+                            <select id="admin_create_assignment" name="assignment_id" class="form-select" onchange="autoFillPurpose(this, 'admin_create_purpose'); syncRespondentOfficerDropdown('admin_create_assignment', 'admin_create_officer', 'admin_create_officer_hint')">
                                 <option value="">-- Pilih Kegiatan --</option>
                                 @foreach($assignments as $assignment)
                                     <option value="{{ $assignment->id }}" data-title="{{ $assignment->title }}">{{ $assignment->title }}</option>
@@ -640,13 +640,13 @@
                             <label class="form-label small fw-semibold text-secondary">
                                 <i class="bi bi-person-gear text-primary me-1"></i> PETUGAS LAPANGAN / PPL (ALOKASI SAMPEL) <span class="text-danger">*</span>
                             </label>
-                            <select name="officer_id" class="form-select" required>
+                            <select name="officer_id" id="admin_create_officer" class="form-select" required>
                                 <option value="">-- Pilih Petugas Lapangan / PPL --</option>
                                 @foreach($officers as $officer)
                                     <option value="{{ $officer->id }}" {{ $officer->id === auth()->id() ? 'selected' : '' }}>{{ $officer->name }}</option>
                                 @endforeach
                             </select>
-                            <div class="form-text small">Petugas lapangan yang ditugaskan mencacah responden ini.</div>
+                            <div id="admin_create_officer_hint" class="form-text small">Petugas lapangan yang ditugaskan mencacah responden ini.</div>
                         </div>
                         <div class="col-md-5">
                             <label class="form-label small fw-semibold text-secondary">TANGGAL INPUT <span class="text-danger">*</span></label>
@@ -750,7 +750,7 @@
                             <label class="form-label small fw-semibold text-secondary">
                                 <i class="bi bi-briefcase text-muted me-1"></i> KEGIATAN TERKAIT
                             </label>
-                            <select id="edit_resp_assignment" name="assignment_id" class="form-select" onchange="autoFillPurpose(this, 'edit_resp_purpose')">
+                            <select id="edit_resp_assignment" name="assignment_id" class="form-select" onchange="autoFillPurpose(this, 'edit_resp_purpose'); syncRespondentOfficerDropdown('edit_resp_assignment', 'edit_resp_officer', 'edit_resp_officer_hint')">
                                 <option value="">-- Tidak Terikat Kegiatan Tertentu --</option>
                                 @foreach($assignments as $assignment)
                                     <option value="{{ $assignment->id }}" data-title="{{ $assignment->title }}">{{ $assignment->title }}</option>
@@ -797,6 +797,7 @@
                                     <option value="{{ $officer->id }}">{{ $officer->name }}</option>
                                 @endforeach
                             </select>
+                            <div id="edit_resp_officer_hint" class="form-text small">Petugas lapangan yang ditugaskan mencacah responden ini.</div>
                         </div>
                         <div class="col-md-5">
                             <label class="form-label small fw-semibold text-secondary">TANGGAL INPUT <span class="text-danger">*</span></label>
@@ -938,6 +939,104 @@
         }
     });
 
+    const assignmentOfficersMap = @json($assignmentOfficersMap ?? []);
+    const allOfficers = @json($officers->map(fn($u) => ['id' => $u->id, 'name' => $u->name]));
+
+    function syncRespondentOfficerDropdown(assignmentSelectId, officerSelectId, hintId, selectedOfficerId = null) {
+        const assignmentSelect = document.getElementById(assignmentSelectId);
+        const officerSelect = document.getElementById(officerSelectId);
+        const hintEl = hintId ? document.getElementById(hintId) : null;
+
+        if (!assignmentSelect || !officerSelect) return;
+
+        const assignmentId = assignmentSelect.value;
+        const currentOfficerVal = selectedOfficerId !== null && selectedOfficerId !== undefined 
+            ? String(selectedOfficerId) 
+            : officerSelect.value;
+
+        // Clear existing options
+        officerSelect.innerHTML = '';
+
+        if (!assignmentId) {
+            // No specific assignment chosen: show all active officers
+            const defaultOpt = document.createElement('option');
+            defaultOpt.value = '';
+            defaultOpt.textContent = officerSelectId.startsWith('filter_') 
+                ? '-- Semua Petugas --' 
+                : '-- Pilih Petugas Lapangan / PPL --';
+            officerSelect.appendChild(defaultOpt);
+
+            allOfficers.forEach(off => {
+                const opt = document.createElement('option');
+                opt.value = off.id;
+                opt.textContent = off.name;
+                if (String(off.id) === String(currentOfficerVal)) {
+                    opt.selected = true;
+                }
+                officerSelect.appendChild(opt);
+            });
+
+            if (hintEl) {
+                hintEl.className = 'form-text small text-muted';
+                hintEl.textContent = 'Petugas lapangan yang ditugaskan mencacah responden ini.';
+            }
+        } else {
+            // Specific assignment chosen: show ONLY officers involved in this assignment
+            const involved = assignmentOfficersMap[assignmentId] || [];
+
+            if (involved.length > 0) {
+                const defaultOpt = document.createElement('option');
+                defaultOpt.value = '';
+                defaultOpt.textContent = officerSelectId.startsWith('filter_')
+                    ? '-- Semua Petugas Terlibat (' + involved.length + ') --'
+                    : '-- Pilih Petugas Terlibat (' + involved.length + ') --';
+                officerSelect.appendChild(defaultOpt);
+
+                let officerFound = false;
+                involved.forEach(off => {
+                    const opt = document.createElement('option');
+                    opt.value = off.id;
+                    opt.textContent = off.name;
+                    if (String(off.id) === String(currentOfficerVal)) {
+                        opt.selected = true;
+                        officerFound = true;
+                    }
+                    officerSelect.appendChild(opt);
+                });
+
+                if (currentOfficerVal && !officerFound && officerSelect.required) {
+                    officerSelect.value = '';
+                }
+
+                if (hintEl) {
+                    hintEl.className = 'form-text small text-success';
+                    hintEl.innerHTML = `<i class="bi bi-check-circle-fill me-1"></i> Menampilkan <strong>${involved.length} petugas</strong> yang terlibat pada kegiatan ini.`;
+                }
+            } else {
+                // If no officers are assigned to this activity yet, show all officers with a notice
+                const defaultOpt = document.createElement('option');
+                defaultOpt.value = '';
+                defaultOpt.textContent = '-- Belum Ada Petugas Terlibat (Pilih Semua Petugas) --';
+                officerSelect.appendChild(defaultOpt);
+
+                allOfficers.forEach(off => {
+                    const opt = document.createElement('option');
+                    opt.value = off.id;
+                    opt.textContent = off.name;
+                    if (String(off.id) === String(currentOfficerVal)) {
+                        opt.selected = true;
+                    }
+                    officerSelect.appendChild(opt);
+                });
+
+                if (hintEl) {
+                    hintEl.className = 'form-text small text-warning';
+                    hintEl.innerHTML = '<i class="bi bi-exclamation-triangle-fill me-1"></i> Kegiatan ini belum memiliki alokasi petugas. Menampilkan seluruh petugas.';
+                }
+            }
+        }
+    }
+
     function openEditRespondentModal(resp) {
         document.getElementById('editRespondentForm').action = '/admin/respondents/' + resp.id;
         document.getElementById('edit_resp_name').value = resp.family_head_name || resp.name || '';
@@ -946,15 +1045,25 @@
         document.getElementById('edit_resp_phone').value = resp.phone || '';
         document.getElementById('edit_resp_agency').value = resp.agency || 'Rumah Tangga';
         document.getElementById('edit_resp_assignment').value = resp.assignment_id || '';
+        
+        syncRespondentOfficerDropdown('edit_resp_assignment', 'edit_resp_officer', 'edit_resp_officer_hint', resp.officer_id);
+
         document.getElementById('edit_resp_address').value = resp.address;
         document.getElementById('edit_resp_district').value = resp.district || '';
         document.getElementById('edit_resp_purpose').value = resp.purpose || '';
-        document.getElementById('edit_resp_officer').value = resp.officer_id;
         document.getElementById('edit_resp_date').value = resp.input_date ? resp.input_date.substring(0, 10) : '';
 
         const modal = new bootstrap.Modal(document.getElementById('editRespondentModal'));
         modal.show();
     }
+
+    // Auto sync on page load for filter
+    document.addEventListener('DOMContentLoaded', function() {
+        const filterAssignment = document.getElementById('filter_resp_assignment');
+        if (filterAssignment && filterAssignment.value) {
+            syncRespondentOfficerDropdown('filter_resp_assignment', 'filter_resp_officer', null, @json(request('officer_id')));
+        }
+    });
 
     function openDetailRespondentModal(resp) {
         document.getElementById('det_name').innerText = resp.family_head_name || resp.name || '-';

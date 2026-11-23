@@ -181,7 +181,28 @@
             </div>
         </div>
 
-        <div class="col-lg-3 col-md-3">
+        <!-- Filter Kegiatan -->
+        <div class="col-lg-3 col-md-6">
+            <select name="assignment_id" id="filter_sched_assignment" class="form-select" onchange="syncScheduleOfficerDropdown('filter_sched_assignment', 'filter_sched_officer', null)">
+                <option value="">-- Semua Kegiatan --</option>
+                @foreach($assignments as $assignment)
+                    <option value="{{ $assignment->id }}" {{ request('assignment_id') == $assignment->id ? 'selected' : '' }}>{{ $assignment->title }}</option>
+                @endforeach
+            </select>
+        </div>
+
+        <!-- Filter Petugas -->
+        <div class="col-lg-2 col-md-4">
+            <select name="officer_id" id="filter_sched_officer" class="form-select">
+                <option value="">-- Semua Petugas --</option>
+                @foreach($officers as $officer)
+                    <option value="{{ $officer->id }}" {{ request('officer_id') == $officer->id ? 'selected' : '' }}>{{ $officer->name }}</option>
+                @endforeach
+            </select>
+        </div>
+
+        <!-- Filter Status -->
+        <div class="col-lg-2 col-md-4">
             <select name="status" class="form-select">
                 <option value="">-- Semua Status --</option>
                 <option value="scheduled" {{ request('status') === 'scheduled' ? 'selected' : '' }}>Terjadwal</option>
@@ -191,20 +212,12 @@
             </select>
         </div>
 
-        <div class="col-lg-2 col-md-2">
-            <select name="officer_id" class="form-select">
-                <option value="">-- Semua Petugas --</option>
-                @foreach($officers as $officer)
-                    <option value="{{ $officer->id }}" {{ request('officer_id') == $officer->id ? 'selected' : '' }}>{{ $officer->name }}</option>
-                @endforeach
-            </select>
-        </div>
-
-        <div class="col-lg-2 col-md-2 d-flex gap-2">
-            <button type="submit" class="btn btn-bps-orange flex-fill justify-content-center py-2">
+        <!-- Tombol Filter & Reset -->
+        <div class="col-lg-2 col-md-4 d-flex gap-2">
+            <button type="submit" class="btn btn-bps-orange flex-fill justify-content-center py-2" title="Terapkan Filter">
                 <i class="bi bi-funnel-fill"></i> Filter
             </button>
-            @if(request()->hasAny(['search', 'status', 'officer_id']))
+            @if(request()->hasAny(['search', 'status', 'officer_id', 'assignment_id']))
                 <a href="{{ route('admin.schedules.index') }}" class="btn btn-outline-secondary rounded-pill px-3 d-flex align-items-center justify-content-center" title="Reset Filter">
                     <i class="bi bi-arrow-clockwise"></i>
                 </a>
@@ -414,7 +427,7 @@
                     <div class="row g-3 mb-3">
                         <div class="col-md-6">
                             <label class="form-label small fw-semibold text-secondary">KEGIATAN TERKAIT</label>
-                            <select name="assignment_id" class="form-select">
+                            <select name="assignment_id" id="create_sched_assignment" class="form-select" onchange="syncScheduleOfficerDropdown('create_sched_assignment', 'create_sched_officer', 'create_sched_officer_hint')">
                                 <option value="">-- Tidak Terikat Kegiatan Tertentu --</option>
                                 @foreach($assignments as $assignment)
                                     <option value="{{ $assignment->id }}">{{ $assignment->title }}</option>
@@ -422,13 +435,19 @@
                             </select>
                         </div>
                         <div class="col-md-6">
-                            <label class="form-label small fw-semibold text-secondary">PETUGAS TERKAIT</label>
-                            <select name="officer_id" class="form-select">
+                            <div class="d-flex justify-content-between align-items-center mb-1">
+                                <label class="form-label small fw-semibold text-secondary mb-0">PETUGAS TERKAIT</label>
+                                <span id="create_sched_officer_badge" class="badge bg-light text-secondary border" style="font-size: 0.68rem;">Semua Petugas</span>
+                            </div>
+                            <select name="officer_id" id="create_sched_officer" class="form-select">
                                 <option value="">-- Seluruh Petugas (Umum) --</option>
                                 @foreach($officers as $officer)
                                     <option value="{{ $officer->id }}">{{ $officer->name }}</option>
                                 @endforeach
                             </select>
+                            <div id="create_sched_officer_hint" class="form-text small text-muted" style="font-size: 0.72rem;">
+                                <i class="bi bi-people me-1"></i> Menampilkan seluruh petugas (jadwal umum BPS).
+                            </div>
                         </div>
                     </div>
 
@@ -503,7 +522,7 @@
                     <div class="row g-3 mb-3">
                         <div class="col-md-6">
                             <label class="form-label small fw-semibold text-secondary">KEGIATAN TERKAIT</label>
-                            <select id="edit_sched_assignment" name="assignment_id" class="form-select">
+                            <select id="edit_sched_assignment" name="assignment_id" class="form-select" onchange="syncScheduleOfficerDropdown('edit_sched_assignment', 'edit_sched_officer', 'edit_sched_officer_hint')">
                                 <option value="">-- Tidak Terikat Kegiatan Tertentu --</option>
                                 @foreach($assignments as $assignment)
                                     <option value="{{ $assignment->id }}">{{ $assignment->title }}</option>
@@ -511,13 +530,19 @@
                             </select>
                         </div>
                         <div class="col-md-6">
-                            <label class="form-label small fw-semibold text-secondary">PETUGAS TERKAIT</label>
+                            <div class="d-flex justify-content-between align-items-center mb-1">
+                                <label class="form-label small fw-semibold text-secondary mb-0">PETUGAS TERKAIT</label>
+                                <span id="edit_sched_officer_badge" class="badge bg-light text-secondary border" style="font-size: 0.68rem;">Semua Petugas</span>
+                            </div>
                             <select id="edit_sched_officer" name="officer_id" class="form-select">
                                 <option value="">-- Seluruh Petugas (Umum) --</option>
                                 @foreach($officers as $officer)
                                     <option value="{{ $officer->id }}">{{ $officer->name }}</option>
                                 @endforeach
                             </select>
+                            <div id="edit_sched_officer_hint" class="form-text small text-muted" style="font-size: 0.72rem;">
+                                <i class="bi bi-people me-1"></i> Menampilkan seluruh petugas (jadwal umum BPS).
+                            </div>
                         </div>
                     </div>
 
@@ -687,11 +712,111 @@
 
 @push('scripts')
 <script>
+    const assignmentOfficersMap = @json($assignmentOfficersMap ?? []);
+    const allOfficers = @json($officers->map(fn($u) => ['id' => $u->id, 'name' => $u->name]));
+
+    function syncScheduleOfficerDropdown(assignmentSelectId, officerSelectId, hintId, selectedOfficerId = null) {
+        const assignmentSelect = document.getElementById(assignmentSelectId);
+        const officerSelect = document.getElementById(officerSelectId);
+        const hintEl = hintId ? document.getElementById(hintId) : null;
+        const badgeEl = document.getElementById(officerSelectId.replace('_officer', '_officer_badge'));
+
+        if (!assignmentSelect || !officerSelect) return;
+
+        const assignmentId = assignmentSelect.value;
+        const currentOfficerVal = selectedOfficerId !== null && selectedOfficerId !== undefined 
+            ? String(selectedOfficerId) 
+            : officerSelect.value;
+
+        // Clear options
+        officerSelect.innerHTML = '';
+
+        if (!assignmentId) {
+            // General / No specific assignment: show all officers
+            const defaultOpt = document.createElement('option');
+            defaultOpt.value = '';
+            defaultOpt.textContent = '-- Seluruh Petugas (Umum) --';
+            officerSelect.appendChild(defaultOpt);
+
+            allOfficers.forEach(off => {
+                const opt = document.createElement('option');
+                opt.value = off.id;
+                opt.textContent = off.name;
+                if (String(off.id) === String(currentOfficerVal)) {
+                    opt.selected = true;
+                }
+                officerSelect.appendChild(opt);
+            });
+
+            if (hintEl) {
+                hintEl.className = 'form-text small text-muted';
+                hintEl.innerHTML = '<i class="bi bi-people me-1"></i> Menampilkan seluruh petugas (jadwal umum BPS).';
+            }
+            if (badgeEl) {
+                badgeEl.className = 'badge bg-light text-secondary border';
+                badgeEl.textContent = 'Semua Petugas';
+            }
+        } else {
+            // Specific assignment chosen: show ONLY officers involved in this assignment
+            const involved = assignmentOfficersMap[assignmentId] || [];
+
+            if (involved.length > 0) {
+                const defaultOpt = document.createElement('option');
+                defaultOpt.value = '';
+                defaultOpt.textContent = '-- Seluruh Petugas di Kegiatan Ini (Umum) --';
+                officerSelect.appendChild(defaultOpt);
+
+                let officerFound = false;
+                involved.forEach(off => {
+                    const opt = document.createElement('option');
+                    opt.value = off.id;
+                    opt.textContent = off.name;
+                    if (String(off.id) === String(currentOfficerVal)) {
+                        opt.selected = true;
+                        officerFound = true;
+                    }
+                    officerSelect.appendChild(opt);
+                });
+
+                if (currentOfficerVal && !officerFound) {
+                    officerSelect.value = '';
+                }
+
+                if (hintEl) {
+                    hintEl.className = 'form-text small text-success';
+                    hintEl.innerHTML = `<i class="bi bi-check-circle-fill me-1"></i> Menampilkan <strong>${involved.length} petugas</strong> yang terlibat pada kegiatan ini.`;
+                }
+                if (badgeEl) {
+                    badgeEl.className = 'badge bg-success-subtle text-success border border-success-subtle';
+                    badgeEl.textContent = `${involved.length} Petugas Terlibat`;
+                }
+            } else {
+                // No officers assigned to this activity yet
+                const emptyOpt = document.createElement('option');
+                emptyOpt.value = '';
+                emptyOpt.textContent = '-- Belum Ada Petugas Terdaftar di Kegiatan Ini --';
+                officerSelect.appendChild(emptyOpt);
+
+                if (hintEl) {
+                    hintEl.className = 'form-text small text-warning';
+                    hintEl.innerHTML = '<i class="bi bi-exclamation-triangle-fill me-1"></i> Belum ada petugas yang dialokasikan pada kegiatan ini.';
+                }
+                if (badgeEl) {
+                    badgeEl.className = 'badge bg-warning-subtle text-warning border border-warning-subtle';
+                    badgeEl.textContent = '0 Petugas Terlibat';
+                }
+            }
+        }
+    }
+
     function openEditScheduleModal(item) {
         document.getElementById('editScheduleForm').action = '/admin/schedules/' + item.id;
         document.getElementById('edit_sched_title').value = item.title;
         document.getElementById('edit_sched_assignment').value = item.assignment_id || '';
-        document.getElementById('edit_sched_officer').value = item.officer_id || '';
+        
+        // Sync officer dropdown based on the schedule's assignment and set selected officer
+        syncScheduleOfficerDropdown('edit_sched_assignment', 'edit_sched_officer', 'edit_sched_officer_hint', item.officer_id || '');
+
         document.getElementById('edit_sched_start').value = item.start_time.substring(0, 16);
         document.getElementById('edit_sched_end').value = item.end_time.substring(0, 16);
         document.getElementById('edit_sched_location').value = item.location;
@@ -701,6 +826,21 @@
         const modal = new bootstrap.Modal(document.getElementById('editScheduleModal'));
         modal.show();
     }
+
+    // Auto sync on page load for filters & create modal listener
+    document.addEventListener('DOMContentLoaded', function() {
+        const filterAssignment = document.getElementById('filter_sched_assignment');
+        if (filterAssignment && filterAssignment.value) {
+            syncScheduleOfficerDropdown('filter_sched_assignment', 'filter_sched_officer', null, @json(request('officer_id')));
+        }
+
+        const createModal = document.getElementById('createScheduleModal');
+        if (createModal) {
+            createModal.addEventListener('show.bs.modal', function() {
+                syncScheduleOfficerDropdown('create_sched_assignment', 'create_sched_officer', 'create_sched_officer_hint');
+            });
+        }
+    });
 
     function previewScheduleExcel() {
         const fileInput = document.getElementById('scheduleExcelFileInput');

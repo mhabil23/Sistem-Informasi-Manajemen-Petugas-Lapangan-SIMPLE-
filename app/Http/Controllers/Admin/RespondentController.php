@@ -83,6 +83,7 @@ class RespondentController extends Controller
         $assignments = Assignment::orderBy('title')->get();
         $officers = User::fieldStaff()->where('status', 'active')->orderBy('name')->get();
         $districts = Respondent::DISTRICTS;
+        $assignmentOfficersMap = Assignment::getInvolvedOfficersMap();
 
         return view('admin.respondents.index', compact(
             'respondents',
@@ -92,7 +93,8 @@ class RespondentController extends Controller
             'withBastCount',
             'assignments',
             'officers',
-            'districts'
+            'districts',
+            'assignmentOfficersMap'
         ));
     }
 

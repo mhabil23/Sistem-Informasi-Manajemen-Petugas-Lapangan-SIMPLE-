@@ -42,6 +42,10 @@ class ScheduleController extends Controller
             $query->where('status', $status);
         }
 
+        if ($assignmentId = $request->input('assignment_id')) {
+            $query->where('assignment_id', $assignmentId);
+        }
+
         if ($officerId = $request->input('officer_id')) {
             $query->where('officer_id', $officerId);
         }
@@ -55,6 +59,7 @@ class ScheduleController extends Controller
 
         $assignments = Assignment::orderBy('title')->get();
         $officers = User::fieldStaff()->where('status', 'active')->orderBy('name')->get();
+        $assignmentOfficersMap = Assignment::getInvolvedOfficersMap();
 
         return view('admin.schedules.index', compact(
             'schedules',
@@ -63,7 +68,8 @@ class ScheduleController extends Controller
             'totalInProgress',
             'totalCompleted',
             'assignments',
-            'officers'
+            'officers',
+            'assignmentOfficersMap'
         ));
     }
 
