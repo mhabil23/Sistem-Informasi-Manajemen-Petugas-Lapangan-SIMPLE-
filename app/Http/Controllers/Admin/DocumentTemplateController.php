@@ -5,7 +5,12 @@ namespace App\Http\Controllers\Admin;
 use App\Http\Controllers\Controller;
 use App\Models\ActivityLog;
 use App\Models\DocumentTemplate;
+use App\Models\OfficerBast;
+use App\Models\OfficerReport;
+use App\Models\RespondentBast;
+use App\Models\TrainingEvent;
 use App\Services\WordDocumentService;
+use Barryvdh\DomPDF\Facade\Pdf;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
@@ -226,6 +231,90 @@ class DocumentTemplateController extends Controller
         );
 
         return back()->with('success', "Template '{$name}' telah dihapus.");
+    }
+
+    /**
+     * Preview dokumen PDF resmi atau contoh format cetak untuk template ini.
+     */
+    public function previewPdf(DocumentTemplate $template)
+    {
+        switch ($template->code) {
+            case 'bast_officer':
+                $bast = OfficerBast::where('bast_type', 'petugas_ke_kantor')->with(['officer', 'assignment', 'recipients'])->latest()->first();
+                if ($bast) {
+                    return Pdf::loadView('pdf.bast_officer', compact('bast'))
+                        ->setPaper('a4', 'portrait')
+                        ->stream('Contoh-BAST-Petugas.pdf');
+                }
+                break;
+
+            case 'bast_blanko':
+                $bast = OfficerBast::where('bast_type', 'kantor_ke_petugas')->with(['officer', 'assignment', 'recipients'])->latest()->first();
+                if ($bast) {
+                    return Pdf::loadView('pdf.bast_blanko', compact('bast'))
+                        ->setPaper('a4', 'portrait')
+                        ->stream('Contoh-BAST-Blanko.pdf');
+                }
+                break;
+
+            case 'bast_respondent':
+                $bast = RespondentBast::with(['respondent', 'officer', 'assignment'])->latest()->first();
+                if ($bast) {
+                    return Pdf::loadView('pdf.bast_respondent', compact('bast'))
+                        ->setPaper('a4', 'portrait')
+                        ->stream('Contoh-BAST-Responden.pdf');
+                }
+                break;
+
+            case 'officer_report':
+                $report = OfficerReport::with(['officer', 'assignment'])->latest()->first();
+                if ($report) {
+                    return Pdf::loadView('pdf.officer_report', compact('report'))
+                        ->setPaper('a4', 'portrait')
+                        ->stream('Contoh-Laporan-Perjalanan-Dinas.pdf');
+                }
+                break;
+
+            case 'training_attendance':
+                $training = TrainingEvent::with(['creator', 'assignment', 'participants'])->latest()->first();
+                if ($training) {
+                    return Pdf::loadView('pdf.training_attendance', compact('training'))
+                        ->setPaper('a4', 'portrait')
+                        ->stream('Contoh-Daftar-Hadir.pdf');
+                }
+                break;
+        }
+
+        // Generic fallback preview jika belum ada data riil atau template kustom baru
+        $sampleText = str_replace(
+            ['{KEGIATAN}', '{NOMOR_KONTRAK}', '{TANGGAL_KONTRAK}', '{JUMLAH_DOKUMEN}', '{INSTANSI}', '{LOKASI}', '{TANGGAL}', '{NAMA}', '{NAMA_PETUGAS}', '{NOMOR_DOKUMEN}'],
+            ['Pendataan Lapangan 2026', 'SPK/7408/2026/001', date('d F Y'), '30 Dokumen', 'Badan Pusat Statistik Kabupaten Kolaka Utara', 'Kecamatan Lasusua', date('d F Y'), 'Nama Lengkap Responden', 'Petugas Lapangan BPS', 'DOC/7408/2026/0001'],
+            $template->content ?: ''
+        );
+
+        $html = "<!DOCTYPE html>
+<html>
+<head>
+    <meta charset='utf-8'>
+    <title>Pratinjau {$template->name}</title>
+    <style>
+        @page { size: A4 portrait; margin: 2cm; }
+        body { font-family: 'Times New Roman', serif; font-size: 11pt; line-height: 1.5; color: #111; }
+        .header { text-align: center; font-weight: bold; border-bottom: 2px solid #000; padding-bottom: 8px; margin-bottom: 20px; text-transform: uppercase; }
+        .title { text-align: center; font-weight: bold; font-size: 13pt; margin-bottom: 15px; text-transform: uppercase; }
+        .content { text-align: justify; margin-bottom: 25px; }
+        .footer { font-style: italic; font-size: 10pt; color: #555; border-top: 1px dashed #ccc; padding-top: 8px; margin-top: 30px; }
+    </style>
+</head>
+<body>
+    " . (!empty($template->header_text) ? "<div class='header'>{$template->header_text}</div>" : "") . "
+    <div class='title'>{$template->name}</div>
+    <div class='content'>{$sampleText}</div>
+    " . (!empty($template->footer_text) ? "<div class='footer'>{$template->footer_text}</div>" : "") . "
+</body>
+</html>";
+
+        return Pdf::loadHTML($html)->setPaper('a4', 'portrait')->stream(Str::slug($template->name) . '.pdf');
     }
 }
 

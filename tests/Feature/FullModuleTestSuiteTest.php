@@ -159,6 +159,11 @@ class FullModuleTestSuiteTest extends TestCase
         $indexResponse = $this->actingAs($this->admin)->get(route('admin.templates.index'));
         $indexResponse->assertStatus(200);
         $indexResponse->assertSee('bast_serah_terima_v1');
+
+        $tpl = DocumentTemplate::where('code', 'bast_serah_terima_v1')->first();
+        $previewResponse = $this->actingAs($this->admin)->get(route('admin.templates.preview-pdf', $tpl));
+        $previewResponse->assertStatus(200);
+        $previewResponse->assertHeader('content-type', 'application/pdf');
     }
 
     public function test_recapitulation_and_exports()

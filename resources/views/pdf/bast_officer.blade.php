@@ -241,27 +241,52 @@
 
     <!-- PERNYATAAN (5 POIN) -->
     <p style="margin: 0 0 6px 0;">Dengan ini menyatakan:</p>
-    <ol class="ol-pernyataan">
-        <li>
-            <strong>PIHAK KEDUA</strong> telah melaksanakan pekerjaan {{ $workName }} berdasarkan Perjanjian Kerja Petugas Pendataan Lapangan {{ $workName }} Nomor {{ $contractNumber }}, tanggal {{ $contractDateStr }}.
-        </li>
-        <li>
-            <strong>PIHAK KEDUA</strong> telah menyelesaikan pekerjaan {{ $workName }} berdasarkan hasil pemeriksaan dan evaluasi pekerjaan sebagaimana tercantum dalam lampiran.
-        </li>
-        <li>
-            Berdasarkan angka 2 tersebut di atas, <strong>PIHAK KEDUA</strong> menyerahkan hasil pekerjaan {{ $workName }} kepada <strong>PIHAK PERTAMA</strong>, dan <strong>PIHAK PERTAMA</strong> menerima hasil pekerjaan tersebut yang telah sesuai dengan seharusnya.
-        </li>
-        <li>
-            Hasil pekerjaan {{ $workName }} sebagaimana dimaksud dalam angka 3 di atas, berupa data hasil {{ $workName }}, sejumlah {{ $docCount }}.
-        </li>
-        <li>
-            Untuk hasil pendataan lapangan sebagaimana dimaksud pada angka 4 yang memerlukan pemeriksaan lanjutan, akan dilakukan pengecekan, perubahan, dan/atau kunjungan kembali ke lapangan merujuk pada perjanjian yang ditandatangani oleh PARA PIHAK.
-        </li>
-    </ol>
+    @php
+        $activeTpl = \App\Models\DocumentTemplate::where('code', 'bast_officer')->where('is_active', true)->first();
+        $customPernyataan = null;
+        if ($activeTpl && !empty($activeTpl->content)) {
+            $rawContent = $activeTpl->content;
+            $replacements = [
+                '{KEGIATAN}' => $workName,
+                '{NOMOR_KONTRAK}' => $contractNumber,
+                '{TANGGAL_KONTRAK}' => $contractDateStr,
+                '{JUMLAH_DOKUMEN}' => $docCount,
+                '{INSTANSI}' => $institutionName,
+                '{NOMOR_DOKUMEN}' => $bast->bast_number,
+                '{NAMA_PETUGAS}' => $secondPartyName,
+                '{TANGGAL}' => $contractDateStr,
+            ];
+            $customPernyataan = str_replace(array_keys($replacements), array_values($replacements), $rawContent);
+        }
+    @endphp
+
+    @if($customPernyataan && (str_contains($customPernyataan, '<li>') || str_contains($customPernyataan, '<p>') || str_contains($customPernyataan, '1.')))
+        <div style="margin: 0; padding-left: 20px; text-align: justify; line-height: 1.4;">
+            {!! $customPernyataan !!}
+        </div>
+    @else
+        <ol class="ol-pernyataan">
+            <li>
+                <strong>PIHAK KEDUA</strong> telah melaksanakan pekerjaan {{ $workName }} berdasarkan Perjanjian Kerja Petugas Pendataan Lapangan {{ $workName }} Nomor {{ $contractNumber }}, tanggal {{ $contractDateStr }}.
+            </li>
+            <li>
+                <strong>PIHAK KEDUA</strong> telah menyelesaikan pekerjaan {{ $workName }} berdasarkan hasil pemeriksaan dan evaluasi pekerjaan sebagaimana tercantum dalam lampiran.
+            </li>
+            <li>
+                Berdasarkan angka 2 tersebut di atas, <strong>PIHAK KEDUA</strong> menyerahkan hasil pekerjaan {{ $workName }} kepada <strong>PIHAK PERTAMA</strong>, dan <strong>PIHAK PERTAMA</strong> menerima hasil pekerjaan tersebut yang telah sesuai dengan seharusnya.
+            </li>
+            <li>
+                Hasil pekerjaan {{ $workName }} sebagaimana dimaksud dalam angka 3 di atas, berupa data hasil {{ $workName }}, sejumlah {{ $docCount }}.
+            </li>
+            <li>
+                Untuk hasil pendataan lapangan sebagaimana dimaksud pada angka 4 yang memerlukan pemeriksaan lanjutan, akan dilakukan pengecekan, perubahan, dan/atau kunjungan kembali ke lapangan merujuk pada perjanjian yang ditandatangani oleh PARA PIHAK.
+            </li>
+        </ol>
+    @endif
 
     <!-- PENUTUP -->
     <p style="text-align: justify; margin: 12px 0 18px 0;">
-        Demikian Berita Acara ini dibuat dengan sebenarnya dalam rangkap 2 (dua) dan menjadi sah berlaku setelah ditandatangani oleh PARA PIHAK.
+        {{ ($activeTpl && !empty($activeTpl->footer_text)) ? $activeTpl->footer_text : 'Demikian Berita Acara ini dibuat dengan sebenarnya dalam rangkap 2 (dua) dan menjadi sah berlaku setelah ditandatangani oleh PARA PIHAK.' }}
     </p>
 
     <!-- TANDA TANGAN PARA PIHAK -->

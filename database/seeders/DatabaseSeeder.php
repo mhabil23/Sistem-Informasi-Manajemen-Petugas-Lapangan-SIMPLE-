@@ -63,29 +63,7 @@ class DatabaseSeeder extends Seeder
         );
 
         // 2. Document Templates
-        DocumentTemplate::firstOrCreate(
-            ['code' => 'bast_respondent'],
-            [
-                'name' => 'Template BAST Responden',
-                'type' => 'bast_respondent',
-                'header_text' => 'PEMERINTAH REPUBLIK INDONESIA - SISTEM INFORMASI SIMPLE',
-                'footer_text' => 'Dokumen resmi diterbitkan melalui Sistem Administrasi SIMPLE.',
-                'content' => '<p>Pada hari ini tanggal {TANGGAL}, bertempat di {LOKASI}, telah dilaksanakan serah terima dokumen/kegiatan antara pihak Petugas SIMPLE dengan pihak Responden terkait.</p>',
-                'is_active' => true,
-            ]
-        );
-
-        DocumentTemplate::firstOrCreate(
-            ['code' => 'bast_officer'],
-            [
-                'name' => 'Template BAST Petugas',
-                'type' => 'bast_officer',
-                'header_text' => 'BERITA ACARA SERAH TERIMA PETUGAS LAPANGAN SIMPLE',
-                'footer_text' => 'Dokumen sah hasil verifikasi dan penugasan resmi.',
-                'content' => '<p>Berita Acara ini menyatakan bahwa Petugas Lapangan telah menyelesaikan penugasan kegiatan {KEGIATAN} dan menyerahkan seluruh berkas administrasi kepada koordinator kegiatan.</p>',
-                'is_active' => true,
-            ]
-        );
+        $this->call(DocumentTemplateSeeder::class);
 
         // 3. Sample Assignment & Assignment Officers
         $assignment = Assignment::create([

@@ -132,6 +132,7 @@ Route::middleware(['auth', 'role:admin'])->prefix('admin')->as('admin.')->group(
     // Template Dokumen (Admin)
     Route::post('/templates/extract-word', [\App\Http\Controllers\Admin\DocumentTemplateController::class, 'extractWord'])->name('templates.extract-word');
     Route::get('/templates/{template}/download-file', [\App\Http\Controllers\Admin\DocumentTemplateController::class, 'downloadFile'])->name('templates.download-file');
+    Route::get('/templates/{template}/preview-pdf', [\App\Http\Controllers\Admin\DocumentTemplateController::class, 'previewPdf'])->name('templates.preview-pdf');
     Route::get('/templates', [\App\Http\Controllers\Admin\DocumentTemplateController::class, 'index'])->name('templates.index');
     Route::post('/templates', [\App\Http\Controllers\Admin\DocumentTemplateController::class, 'store'])->name('templates.store');
     Route::get('/templates/{template}', [\App\Http\Controllers\Admin\DocumentTemplateController::class, 'show'])->name('templates.show');

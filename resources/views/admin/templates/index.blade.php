@@ -94,6 +94,8 @@
     .bento-action-btn.btn-delete:hover { background: #DC2626; color: #FFFFFF; }
     .bento-action-btn.btn-word { color: #2563EB; border-color: #BFDBFE; background: #EFF6FF; }
     .bento-action-btn.btn-word:hover { background: #2563EB; color: #FFFFFF; }
+    .bento-action-btn.btn-pdf { color: #DC2626; border-color: #FECACA; background: #FEF2F2; }
+    .bento-action-btn.btn-pdf:hover { background: #DC2626; color: #FFFFFF; }
     @media (max-width: 767.98px) {
         .bento-table thead {
             display: none;
@@ -129,22 +131,59 @@
 @endpush
 
 @section('content')
-<!-- Quick Tag Cheatsheet -->
-<div class="bento-card mb-3 p-3 bg-light border-info-subtle">
-    <div class="d-flex align-items-center mb-1">
-        <i class="bi bi-tags text-primary me-2 fs-5"></i>
-        <strong class="text-dark small">Panduan Tag Variabel Dinamis (Placeholders):</strong>
+<!-- Guidance & Cheatsheet Card -->
+<div class="row g-3 mb-4">
+    <div class="col-lg-7">
+        <div class="bento-card p-3 h-100 bg-white border-primary-subtle shadow-sm">
+            <div class="d-flex align-items-center mb-2">
+                <div class="rounded-circle bg-primary-subtle text-primary p-2 me-2 d-flex align-items-center justify-content-center" style="width: 32px; height: 32px;">
+                    <i class="bi bi-info-circle-fill"></i>
+                </div>
+                <strong class="text-dark" style="font-size: 0.95rem;">Panduan Solusi Perubahan Template Setelah Hosting</strong>
+            </div>
+            <p class="text-secondary small mb-2" style="line-height: 1.5;">
+                Aplikasi SIMPEL memiliki <strong>5 Template Dokumen Resmi</strong> yang aktif digunakan oleh generator PDF (BAST Petugas, BAST Blanko, BAST Responden, Laporan Perjalanan Dinas, &amp; Presensi Pelatihan).
+            </p>
+            <div class="d-flex flex-column gap-2 small text-muted">
+                <div class="p-2 rounded bg-light border">
+                    <strong class="text-success d-block mb-1"><i class="bi bi-pencil-square me-1"></i> 1. Solusi Cepat: Edit Teks via Web (Tanpa Akses Server)</strong>
+                    Admin dapat mengubah redaksi teks/klausul pernyataan langsung melalui tombol <span class="badge bg-warning-subtle text-warning-emphasis border"><i class="bi bi-pencil-square"></i> Edit</span> di bawah atau unggah berkas Word (<code>.docx</code>). Dokumen cetak PDF akan langsung mengikuti perubahan teks tersebut.
+                </div>
+                <div class="p-2 rounded bg-light border">
+                    <strong class="text-primary d-block mb-1"><i class="bi bi-file-earmark-code me-1"></i> 2. Solusi Layout Presisi: Edit Berkas Blade di Hosting</strong>
+                    Jika memerlukan perubahan tata letak presisi (margin kertas dinas, posisi logo BPS, garis tabel ganda, posisi tanda tangan ganda), berkas template terletak di folder <code>resources/views/pdf/*.blade.php</code>. Di server hosting dapat di-update melalui <strong>Git (<code>git pull</code>)</strong> atau <strong>cPanel File Manager</strong>.
+                </div>
+            </div>
+        </div>
     </div>
-    <div class="small text-secondary" style="font-size: 0.75rem;">
-        Gunakan tag berikut di dalam isi template agar terisi otomatis saat generate dokumen:
-        <span class="badge bg-white text-primary border mx-1"><code>{NAMA}</code></span>
-        <span class="badge bg-white text-primary border mx-1"><code>{NIP}</code></span>
-        <span class="badge bg-white text-primary border mx-1"><code>{INSTANSI}</code></span>
-        <span class="badge bg-white text-primary border mx-1"><code>{TANGGAL}</code></span>
-        <span class="badge bg-white text-primary border mx-1"><code>{NOMOR_DOKUMEN}</code></span>
-        <span class="badge bg-white text-primary border mx-1"><code>{NAMA_PETUGAS}</code></span>
-        <span class="badge bg-white text-primary border mx-1"><code>{LOKASI}</code></span>
-        <span class="badge bg-white text-primary border mx-1"><code>{URAIAN}</code></span>
+    <div class="col-lg-5">
+        <div class="bento-card p-3 h-100 bg-light border-info-subtle shadow-sm">
+            <div class="d-flex align-items-center mb-2">
+                <i class="bi bi-tags text-primary me-2 fs-5"></i>
+                <strong class="text-dark small">Panduan Tag Variabel Dinamis (Placeholders):</strong>
+            </div>
+            <div class="small text-secondary mb-2" style="font-size: 0.75rem;">
+                Gunakan tag berikut di dalam isi template agar terisi otomatis saat generate dokumen:
+            </div>
+            <div class="d-flex flex-wrap gap-1 mb-3">
+                <span class="badge bg-white text-primary border" title="Judul Kegiatan Lapangan"><code>{KEGIATAN}</code></span>
+                <span class="badge bg-white text-primary border" title="Nomor SPK / Perjanjian Kerja"><code>{NOMOR_KONTRAK}</code></span>
+                <span class="badge bg-white text-primary border" title="Tanggal Kontrak Kerja"><code>{TANGGAL_KONTRAK}</code></span>
+                <span class="badge bg-white text-primary border" title="Jumlah Dokumen Hasil Lapangan"><code>{JUMLAH_DOKUMEN}</code></span>
+                <span class="badge bg-white text-primary border" title="Nama Satuan Kerja BPS"><code>{INSTANSI}</code></span>
+                <span class="badge bg-white text-primary border" title="Tanggal Kegiatan / Dokumen"><code>{TANGGAL}</code></span>
+                <span class="badge bg-white text-primary border" title="Nama Responden / Pihak Kedua"><code>{NAMA}</code></span>
+                <span class="badge bg-white text-primary border" title="Nama Petugas Lapangan"><code>{NAMA_PETUGAS}</code></span>
+                <span class="badge bg-white text-primary border" title="Nomor Resmi Dokumen"><code>{NOMOR_DOKUMEN}</code></span>
+                <span class="badge bg-white text-primary border" title="Lokasi / Wilayah Tugas"><code>{LOKASI}</code></span>
+            </div>
+            <div class="p-2 rounded bg-white border border-info-subtle small">
+                <i class="bi bi-lightbulb text-warning me-1"></i>
+                <span class="text-secondary" style="font-size: 0.73rem;">
+                    Klik ikon <i class="bi bi-file-earmark-pdf text-danger"></i> pada kolom aksi untuk melihat langsung dokumen cetak PDF resmi dari masing-masing template.
+                </span>
+            </div>
+        </div>
     </div>
 </div>
 
@@ -181,6 +220,13 @@
                             <span class="badge bg-light text-primary font-monospace border px-2 py-1">
                                 {{ $tpl->code }}
                             </span>
+                            @if(in_array($tpl->code, ['bast_officer', 'bast_blanko', 'bast_respondent', 'officer_report', 'training_attendance']))
+                                <div class="mt-1">
+                                    <span class="badge bg-primary-subtle text-primary border border-primary-subtle font-monospace" style="font-size: 0.65rem;" title="Terhubung langsung dengan generator berkas PDF resmi">
+                                        <i class="bi bi-file-earmark-pdf-fill me-0.5"></i> PDF RESMI
+                                    </span>
+                                </div>
+                            @endif
                         </td>
                         <td data-label="Nama Template">
                             <div class="fw-bold text-dark text-truncate">{{ $tpl->name }}</div>
@@ -226,10 +272,19 @@
                                     </a>
                                 @endif
 
+                                <!-- Preview PDF Asli -->
+                                <a href="{{ route('admin.templates.preview-pdf', $tpl) }}" 
+                                   target="_blank" 
+                                   class="bento-action-btn btn-pdf" 
+                                   title="Buka Pratinjau Dokumen PDF Cetak Resmi" 
+                                   data-bs-toggle="tooltip">
+                                    <i class="bi bi-file-earmark-pdf"></i>
+                                </a>
+
                                 <!-- Preview Modal -->
                                 <button type="button" 
                                         class="bento-action-btn btn-view" 
-                                        title="Pratinjau Isi Template" 
+                                        title="Pratinjau Isi Teks Template" 
                                         data-bs-toggle="tooltip"
                                         onclick="openPreviewModal({{ json_encode($tpl) }})">
                                     <i class="bi bi-eye"></i>
