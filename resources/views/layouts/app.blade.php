@@ -94,14 +94,29 @@
                             @endif
                         </a>
 
-                        <div class="sp-nav-heading">Tanda Terima &amp; Presensi</div>
-                        <a href="{{ route('admin.basts.officers.index') }}" class="sp-nav-link {{ request()->routeIs('admin.basts.officers.*') ? 'active' : '' }}">
-                            <i class="bi bi-shield-check sp-nav-icon"></i>
-                            <span>Tanda Terima Petugas</span>
-                        </a>
+                        <div class="sp-nav-heading">Administrasi</div>
                         <a href="{{ route('admin.trainings.index') }}" class="sp-nav-link {{ request()->routeIs('admin.trainings.*') ? 'active' : '' }}">
                             <i class="bi bi-person-check sp-nav-icon"></i>
                             <span>Daftar Hadir</span>
+                        </a>
+                        <a href="{{ route('admin.basts.officers.index', ['bast_type' => 'kantor_ke_petugas']) }}" class="sp-nav-link {{ request()->routeIs('admin.basts.officers.*') && request('bast_type') !== 'petugas_ke_kantor' ? 'active' : '' }}">
+                            <i class="bi bi-box-seam sp-nav-icon"></i>
+                            <span>Tanda Terima Petugas</span>
+                        </a>
+                        <a href="{{ route('admin.basts.respondents.index') }}" class="sp-nav-link {{ request()->routeIs('admin.basts.respondents.*') ? 'active' : '' }}">
+                            <i class="bi bi-file-earmark-check sp-nav-icon"></i>
+                            <span>Tanda Terima Responden</span>
+                        </a>
+                        <a href="{{ route('admin.reports.index') }}" class="sp-nav-link {{ request()->routeIs('admin.reports.*') ? 'active' : '' }}">
+                            <i class="bi bi-journal-text sp-nav-icon"></i>
+                            <span>Laporan Perjadin Petugas</span>
+                            @if($sidebarReportBadge > 0)
+                                <span class="badge bg-warning text-dark sp-nav-badge">{{ $sidebarReportBadge }}</span>
+                            @endif
+                        </a>
+                        <a href="{{ route('admin.basts.officers.index', ['bast_type' => 'petugas_ke_kantor']) }}" class="sp-nav-link {{ request()->routeIs('admin.basts.officers.*') && request('bast_type') === 'petugas_ke_kantor' ? 'active' : '' }}">
+                            <i class="bi bi-shield-check sp-nav-icon"></i>
+                            <span>BAST Petugas</span>
                         </a>
 
                         <div class="sp-nav-heading">Laporan &amp; Rekapitulasi</div>
@@ -157,10 +172,29 @@
                             @endif
                         </a>
 
-                        <div class="sp-nav-heading">Tanda Terima &amp; Presensi</div>
-                        <a href="{{ route('admin.basts.officers.index') }}" class="sp-nav-link {{ request()->routeIs('admin.basts.officers.*') ? 'active' : '' }}">
-                            <i class="bi bi-shield-check sp-nav-icon"></i>
+                        <div class="sp-nav-heading">Administrasi</div>
+                        <a href="{{ route('admin.trainings.index') }}" class="sp-nav-link {{ request()->routeIs('admin.trainings.*') ? 'active' : '' }}">
+                            <i class="bi bi-person-check sp-nav-icon"></i>
+                            <span>Daftar Hadir</span>
+                        </a>
+                        <a href="{{ route('admin.basts.officers.index', ['bast_type' => 'kantor_ke_petugas']) }}" class="sp-nav-link {{ request()->routeIs('admin.basts.officers.*') && request('bast_type') !== 'petugas_ke_kantor' ? 'active' : '' }}">
+                            <i class="bi bi-box-seam sp-nav-icon"></i>
                             <span>Tanda Terima Petugas</span>
+                        </a>
+                        <a href="{{ route('admin.basts.respondents.index') }}" class="sp-nav-link {{ request()->routeIs('admin.basts.respondents.*') ? 'active' : '' }}">
+                            <i class="bi bi-file-earmark-check sp-nav-icon"></i>
+                            <span>Tanda Terima Responden</span>
+                        </a>
+                        <a href="{{ route('admin.reports.index') }}" class="sp-nav-link {{ request()->routeIs('admin.reports.*') ? 'active' : '' }}">
+                            <i class="bi bi-journal-text sp-nav-icon"></i>
+                            <span>Laporan Perjadin Petugas</span>
+                            @if($sidebarReportBadge > 0)
+                                <span class="badge bg-warning text-dark sp-nav-badge">{{ $sidebarReportBadge }}</span>
+                            @endif
+                        </a>
+                        <a href="{{ route('admin.basts.officers.index', ['bast_type' => 'petugas_ke_kantor']) }}" class="sp-nav-link {{ request()->routeIs('admin.basts.officers.*') && request('bast_type') === 'petugas_ke_kantor' ? 'active' : '' }}">
+                            <i class="bi bi-shield-check sp-nav-icon"></i>
+                            <span>BAST Petugas</span>
                         </a>
 
                         <div class="sp-nav-heading">Laporan &amp; Rekapitulasi</div>

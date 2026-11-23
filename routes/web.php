@@ -115,16 +115,12 @@ Route::middleware(['auth', 'role:admin'])->prefix('admin')->as('admin.')->group(
     Route::post('/notifications/mark-all-read', [\App\Http\Controllers\Admin\NotificationController::class, 'markAllRead'])->name('notifications.mark-all-read');
     Route::patch('/notifications/{notification}/read', [\App\Http\Controllers\Admin\NotificationController::class, 'markAsRead'])->name('notifications.read');
 
-    // Daftar Hadir Kegiatan & Pelatihan (Admin)
+    // Daftar Hadir Kegiatan & Pelatihan (CUD Admin)
     Route::get('/trainings/template/download', [\App\Http\Controllers\Admin\TrainingController::class, 'downloadTemplate'])->name('trainings.template.download');
     Route::post('/trainings/parse-excel', [\App\Http\Controllers\Admin\TrainingController::class, 'parseExcelParticipants'])->name('trainings.parse-excel');
-    Route::get('/trainings', [\App\Http\Controllers\Admin\TrainingController::class, 'index'])->name('trainings.index');
     Route::post('/trainings', [\App\Http\Controllers\Admin\TrainingController::class, 'store'])->name('trainings.store');
-    Route::get('/trainings/{training}', [\App\Http\Controllers\Admin\TrainingController::class, 'show'])->name('trainings.show');
     Route::put('/trainings/{training}', [\App\Http\Controllers\Admin\TrainingController::class, 'update'])->name('trainings.update');
     Route::delete('/trainings/{training}', [\App\Http\Controllers\Admin\TrainingController::class, 'destroy'])->name('trainings.destroy');
-    Route::get('/trainings/{training}/preview-pdf', [\App\Http\Controllers\Admin\TrainingController::class, 'previewAttendancePdf'])->name('trainings.preview');
-    Route::get('/trainings/{training}/attendance-pdf', [\App\Http\Controllers\Admin\TrainingController::class, 'exportAttendancePdf'])->name('trainings.attendance.pdf');
     Route::post('/trainings/{training}/participants', [\App\Http\Controllers\Admin\TrainingController::class, 'storeParticipant'])->name('trainings.participants.store');
     Route::put('/trainings/{training}/participants/{participant}', [\App\Http\Controllers\Admin\TrainingController::class, 'updateParticipant'])->name('trainings.participants.update');
     Route::delete('/trainings/{training}/participants/{participant}', [\App\Http\Controllers\Admin\TrainingController::class, 'destroyParticipant'])->name('trainings.participants.destroy');
@@ -174,6 +170,12 @@ Route::middleware(['auth', 'role:admin,pegawai'])->prefix('admin')->as('admin.')
     Route::get('/reports/{report}', [\App\Http\Controllers\Admin\ReportController::class, 'show'])->name('reports.show');
     Route::get('/reports/{report}/download', [\App\Http\Controllers\Admin\ReportController::class, 'downloadPdf'])->name('reports.download');
     Route::get('/reports/{report}/preview', [\App\Http\Controllers\Admin\ReportController::class, 'previewPdf'])->name('reports.preview');
+
+    // Daftar Hadir Kegiatan & Pelatihan (Read/Preview/Download)
+    Route::get('/trainings', [\App\Http\Controllers\Admin\TrainingController::class, 'index'])->name('trainings.index');
+    Route::get('/trainings/{training}', [\App\Http\Controllers\Admin\TrainingController::class, 'show'])->name('trainings.show');
+    Route::get('/trainings/{training}/preview-pdf', [\App\Http\Controllers\Admin\TrainingController::class, 'previewAttendancePdf'])->name('trainings.preview');
+    Route::get('/trainings/{training}/attendance-pdf', [\App\Http\Controllers\Admin\TrainingController::class, 'exportAttendancePdf'])->name('trainings.attendance.pdf');
 
     // Rekapitulasi & Export
     Route::get('/recapitulation', [\App\Http\Controllers\Admin\RecapitulationController::class, 'index'])->name('recapitulation.index');
