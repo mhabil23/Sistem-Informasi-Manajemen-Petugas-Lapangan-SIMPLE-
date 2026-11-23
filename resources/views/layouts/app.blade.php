@@ -72,14 +72,26 @@
                             <span>Jadwal Kegiatan</span>
                         </a>
 
-                        <div class="sp-nav-heading">Pendataan Responden</div>
+                        <div class="sp-nav-heading">Monitoring Progres</div>
                         <a href="{{ route('admin.respondents.index') }}" class="sp-nav-link {{ request()->routeIs('admin.respondents.*') ? 'active' : '' }}">
                             <i class="bi bi-person-vcard sp-nav-icon"></i>
                             <span>Data Responden</span>
                         </a>
                         <a href="{{ route('admin.basts.respondents.index') }}" class="sp-nav-link {{ request()->routeIs('admin.basts.respondents.*') ? 'active' : '' }}">
                             <i class="bi bi-file-earmark-check sp-nav-icon"></i>
-                            <span>Tanda Terima Responden</span>
+                            <span>Progres Pendataan Lapangan</span>
+                        </a>
+                        <a href="{{ route('admin.reports.index') }}" class="sp-nav-link {{ request()->routeIs('admin.reports.*') ? 'active' : '' }}">
+                            <i class="bi bi-clipboard2-data sp-nav-icon"></i>
+                            <span>Progres Pengolahan Dokumen</span>
+                            @php
+                                $sidebarReportBadge = max((int) ($adminPendingReportsCount ?? 0), (int) ($adminUnreadNotifCount ?? 0));
+                            @endphp
+                            @if($sidebarReportBadge > 0)
+                                <span id="sidebarReportBadge" class="badge bg-warning text-dark sp-nav-badge">{{ $sidebarReportBadge }}</span>
+                            @else
+                                <span id="sidebarReportBadge" class="badge bg-warning text-dark sp-nav-badge d-none">0</span>
+                            @endif
                         </a>
 
                         <div class="sp-nav-heading">Tanda Terima &amp; Presensi</div>
@@ -93,18 +105,6 @@
                         </a>
 
                         <div class="sp-nav-heading">Laporan &amp; Rekapitulasi</div>
-                        <a href="{{ route('admin.reports.index') }}" class="sp-nav-link {{ request()->routeIs('admin.reports.*') ? 'active' : '' }}">
-                            <i class="bi bi-clipboard2-data sp-nav-icon"></i>
-                            <span>Laporan Petugas</span>
-                            @php
-                                $sidebarReportBadge = max((int) ($adminPendingReportsCount ?? 0), (int) ($adminUnreadNotifCount ?? 0));
-                            @endphp
-                            @if($sidebarReportBadge > 0)
-                                <span id="sidebarReportBadge" class="badge bg-warning text-dark sp-nav-badge">{{ $sidebarReportBadge }}</span>
-                            @else
-                                <span id="sidebarReportBadge" class="badge bg-warning text-dark sp-nav-badge d-none">0</span>
-                            @endif
-                        </a>
                         <a href="{{ route('admin.recapitulation.index') }}" class="sp-nav-link {{ request()->routeIs('admin.recapitulation.*') ? 'active' : '' }}">
                             <i class="bi bi-pie-chart sp-nav-icon"></i>
                             <span>Rekapitulasi &amp; Export</span>
@@ -137,14 +137,24 @@
                             <span>Jadwal Kegiatan</span>
                         </a>
 
-                        <div class="sp-nav-heading">Pendataan Responden</div>
+                        <div class="sp-nav-heading">Monitoring Progres</div>
                         <a href="{{ route('admin.respondents.index') }}" class="sp-nav-link {{ request()->routeIs('admin.respondents.*') ? 'active' : '' }}">
                             <i class="bi bi-person-vcard sp-nav-icon"></i>
                             <span>Data Responden</span>
                         </a>
                         <a href="{{ route('admin.basts.respondents.index') }}" class="sp-nav-link {{ request()->routeIs('admin.basts.respondents.*') ? 'active' : '' }}">
                             <i class="bi bi-file-earmark-check sp-nav-icon"></i>
-                            <span>Tanda Terima Responden</span>
+                            <span>Progres Pendataan Lapangan</span>
+                        </a>
+                        <a href="{{ route('admin.reports.index') }}" class="sp-nav-link {{ request()->routeIs('admin.reports.*') ? 'active' : '' }}">
+                            <i class="bi bi-clipboard2-data sp-nav-icon"></i>
+                            <span>Progres Pengolahan Dokumen</span>
+                            @php
+                                $sidebarReportBadge = max((int) ($adminPendingReportsCount ?? 0), (int) ($adminUnreadNotifCount ?? 0));
+                            @endphp
+                            @if($sidebarReportBadge > 0)
+                                <span id="sidebarReportBadge" class="badge bg-warning text-dark sp-nav-badge">{{ $sidebarReportBadge }}</span>
+                            @endif
                         </a>
 
                         <div class="sp-nav-heading">Tanda Terima &amp; Presensi</div>
@@ -154,16 +164,6 @@
                         </a>
 
                         <div class="sp-nav-heading">Laporan &amp; Rekapitulasi</div>
-                        <a href="{{ route('admin.reports.index') }}" class="sp-nav-link {{ request()->routeIs('admin.reports.*') ? 'active' : '' }}">
-                            <i class="bi bi-clipboard2-data sp-nav-icon"></i>
-                            <span>Laporan Petugas</span>
-                            @php
-                                $sidebarReportBadge = max((int) ($adminPendingReportsCount ?? 0), (int) ($adminUnreadNotifCount ?? 0));
-                            @endphp
-                            @if($sidebarReportBadge > 0)
-                                <span id="sidebarReportBadge" class="badge bg-warning text-dark sp-nav-badge">{{ $sidebarReportBadge }}</span>
-                            @endif
-                        </a>
                         <a href="{{ route('admin.recapitulation.index') }}" class="sp-nav-link {{ request()->routeIs('admin.recapitulation.*') ? 'active' : '' }}">
                             <i class="bi bi-pie-chart sp-nav-icon"></i>
                             <span>Rekapitulasi &amp; Export</span>
@@ -326,7 +326,7 @@
                                 </div>
                                 <div class="px-3 py-2 bg-light border-top text-center">
                                     <a href="{{ route('admin.reports.index') }}" class="small fw-semibold text-decoration-none">
-                                        Buka Halaman Laporan Petugas &rarr;
+                                        Buka Halaman Progres Pengolahan Dokumen &rarr;
                                     </a>
                                 </div>
                             </div>

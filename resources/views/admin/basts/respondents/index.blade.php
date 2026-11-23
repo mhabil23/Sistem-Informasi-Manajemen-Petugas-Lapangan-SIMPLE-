@@ -1,11 +1,11 @@
 @extends('layouts.app')
 
-@section('title', 'Tanda Terima Responden')
-@section('page_title', 'Tanda Terima Responden')
+@section('title', 'Progres Pendataan Lapangan')
+@section('page_title', 'Progres Pendataan Lapangan (Tanda Terima Responden)')
 
 @section('breadcrumb')
     <li class="breadcrumb-item"><a href="{{ route('admin.dashboard') }}" class="text-decoration-none">Admin</a></li>
-    <li class="breadcrumb-item active" aria-current="page">Tanda Terima Responden</li>
+    <li class="breadcrumb-item active" aria-current="page">Progres Pendataan Lapangan</li>
 @endsection
 
 @push('styles')
