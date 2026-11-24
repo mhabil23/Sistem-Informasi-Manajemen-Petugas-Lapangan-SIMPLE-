@@ -814,10 +814,6 @@
             </div>
         </div>
     </div>
-        </div>
-    </div>
-
-
 
     <!-- ==============================================================
          6. TWO COLUMNS BENTO: REKAP KECAMATAN (LEFT) & KEPATUHAN LAPORAN (RIGHT)
@@ -958,6 +954,7 @@
         </div>
     </div>
 
+    <!-- ==============================================================
          8. GRAFIK TREN BULANAN & LOG AKTIVITAS (BENTO CARDS)
          ============================================================== -->
     <div class="row g-4 mb-2 align-items-stretch">
