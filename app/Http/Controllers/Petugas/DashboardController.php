@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Petugas;
 
 use App\Http\Controllers\Controller;
+use App\Models\Assignment;
 use App\Models\AssignmentOfficer;
 use App\Models\OfficerBast;
 use App\Models\OfficerNotice;
@@ -10,6 +11,9 @@ use App\Models\OfficerReport;
 use App\Models\Respondent;
 use App\Models\RespondentBast;
 use App\Models\Schedule;
+use App\Models\SpkrtPeriod;
+use App\Services\AssignmentVisibilityService;
+use App\Services\BerandaMenuVisibilityService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 
@@ -34,12 +38,12 @@ class DashboardController extends Controller
         $progressPercentage = $targetRespondents > 0 ? min(100, round(($totalRespondents / $targetRespondents) * 100)) : 0;
         $remainingRespondents = max(0, $targetRespondents - $totalRespondents);
 
-        // Nearest Active Task with Deadline
+        // Nearest Active Task with Deadline (only from visible assignments)
         $nearestTaskDeadline = AssignmentOfficer::with('assignment')
             ->where('user_id', $user->id)
             ->whereIn('status', ['pending', 'in_progress'])
             ->whereHas('assignment', function ($q) {
-                $q->whereNotNull('end_date');
+                $q->whereNotNull('end_date')->visibleToOfficer();
             })
             ->get()
             ->sortBy(function ($task) {
@@ -103,10 +107,17 @@ class DashboardController extends Controller
             ->take(5)
             ->get();
 
-        // 6. Active Assigned Tasks with Details
+        // 6. Active Assigned Tasks with Details (Controlled by Admin & Period visibility rule)
+        $visibilityService = app(AssignmentVisibilityService::class);
+        $isAssignmentPortalEnabled = $visibilityService->isGlobalEnabled();
+        $assignmentEmptyMessage = $visibilityService->getEmptyMessage();
+
         $activeTasks = AssignmentOfficer::with('assignment')
             ->where('user_id', $user->id)
             ->whereIn('status', ['pending', 'in_progress'])
+            ->whereHas('assignment', function ($q) {
+                $q->visibleToOfficer();
+            })
             ->latest()
             ->take(5)
             ->get();
@@ -123,6 +134,14 @@ class DashboardController extends Controller
             ->latest()
             ->take(5)
             ->get();
+
+        // 9. Status Periode Pengisian SPKRT
+        $currentPeriod = SpkrtPeriod::currentPeriod();
+
+        // 10. Kontrol Tampil Menu Beranda (Periode Aktif ATAU Dinyalakan Admin)
+        $berandaMenuService = app(BerandaMenuVisibilityService::class);
+        $showBerandaMenus = $berandaMenuService->shouldShowMenus();
+        $berandaMenuState = $berandaMenuService->getState();
 
         return view('petugas.dashboard', compact(
             'user',
@@ -150,7 +169,12 @@ class DashboardController extends Controller
             'upcomingSchedules',
             'activeTasks',
             'recentReports',
-            'officerNotices'
+            'officerNotices',
+            'currentPeriod',
+            'isAssignmentPortalEnabled',
+            'assignmentEmptyMessage',
+            'showBerandaMenus',
+            'berandaMenuState'
         ));
     }
 }

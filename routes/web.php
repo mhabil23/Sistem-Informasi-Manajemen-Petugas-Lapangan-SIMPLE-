@@ -69,8 +69,11 @@ Route::middleware(['auth', 'role:admin'])->prefix('admin')->as('admin.')->group(
     Route::get('/assignments/template/download', [\App\Http\Controllers\Admin\AssignmentController::class, 'downloadTemplate'])->name('assignments.template.download');
     Route::post('/assignments/preview-excel', [\App\Http\Controllers\Admin\AssignmentController::class, 'previewExcel'])->name('assignments.preview-excel');
     Route::post('/assignments/import', [\App\Http\Controllers\Admin\AssignmentController::class, 'importExcel'])->name('assignments.import');
+    Route::patch('/assignments/global-toggle', [\App\Http\Controllers\Admin\AssignmentController::class, 'toggleGlobalVisibility'])->name('assignments.global-toggle');
     Route::post('/assignments', [\App\Http\Controllers\Admin\AssignmentController::class, 'store'])->name('assignments.store');
     Route::put('/assignments/{assignment}', [\App\Http\Controllers\Admin\AssignmentController::class, 'update'])->name('assignments.update');
+    Route::patch('/assignments/{assignment}/toggle-admin', [\App\Http\Controllers\Admin\AssignmentController::class, 'toggleAdminEnabled'])->name('assignments.toggle-admin');
+    Route::patch('/assignments/{assignment}/period', [\App\Http\Controllers\Admin\AssignmentController::class, 'updatePeriod'])->name('assignments.update-period');
     Route::delete('/assignments/{assignment}', [\App\Http\Controllers\Admin\AssignmentController::class, 'destroy'])->name('assignments.destroy');
     Route::post('/assignments/bulk-action', [\App\Http\Controllers\Admin\AssignmentController::class, 'bulkAction'])->name('assignments.bulk-action');
     Route::post('/assignments/{assignment}/officers', [\App\Http\Controllers\Admin\AssignmentController::class, 'assignOfficer'])->name('assignments.officers.assign');
@@ -84,6 +87,18 @@ Route::middleware(['auth', 'role:admin'])->prefix('admin')->as('admin.')->group(
     Route::post('/schedules', [\App\Http\Controllers\Admin\ScheduleController::class, 'store'])->name('schedules.store');
     Route::put('/schedules/{schedule}', [\App\Http\Controllers\Admin\ScheduleController::class, 'update'])->name('schedules.update');
     Route::delete('/schedules/{schedule}', [\App\Http\Controllers\Admin\ScheduleController::class, 'destroy'])->name('schedules.destroy');
+
+    // Periode Pengisian SPKRT (Admin CUD & Toggle)
+    Route::get('/spkrt-periods', [\App\Http\Controllers\Admin\SpkrtPeriodController::class, 'index'])->name('spkrt-periods.index');
+    Route::post('/spkrt-periods', [\App\Http\Controllers\Admin\SpkrtPeriodController::class, 'store'])->name('spkrt-periods.store');
+    Route::put('/spkrt-periods/{spkrtPeriod}', [\App\Http\Controllers\Admin\SpkrtPeriodController::class, 'update'])->name('spkrt-periods.update');
+    Route::patch('/spkrt-periods/{spkrtPeriod}/toggle-status', [\App\Http\Controllers\Admin\SpkrtPeriodController::class, 'toggleStatus'])->name('spkrt-periods.toggle-status');
+    Route::delete('/spkrt-periods/{spkrtPeriod}', [\App\Http\Controllers\Admin\SpkrtPeriodController::class, 'destroy'])->name('spkrt-periods.destroy');
+
+    // Kontrol Tampil & Periode Menu Beranda Petugas (Admin)
+    Route::get('/beranda-menus', [\App\Http\Controllers\Admin\BerandaMenuController::class, 'index'])->name('beranda-menus.index');
+    Route::patch('/beranda-menus/toggle', [\App\Http\Controllers\Admin\BerandaMenuController::class, 'toggle'])->name('beranda-menus.toggle');
+    Route::patch('/beranda-menus/period', [\App\Http\Controllers\Admin\BerandaMenuController::class, 'updatePeriod'])->name('beranda-menus.update-period');
 
     // Aksi Data Responden (CUD Admin)
     Route::post('/respondents', [\App\Http\Controllers\Admin\RespondentController::class, 'store'])->name('respondents.store');
@@ -146,6 +161,7 @@ Route::middleware(['auth', 'role:admin,pegawai'])->prefix('admin')->as('admin.')
 
     // Kegiatan & Penugasan (Read/Monitoring)
     Route::get('/assignments', [\App\Http\Controllers\Admin\AssignmentController::class, 'index'])->name('assignments.index');
+    Route::get('/assignments/history', [\App\Http\Controllers\Admin\AssignmentController::class, 'history'])->name('assignments.history');
     Route::get('/assignments/{assignment}', [\App\Http\Controllers\Admin\AssignmentController::class, 'show'])->name('assignments.show');
 
     // Jadwal Kegiatan (Read/Monitoring)

@@ -381,28 +381,145 @@
 
 
     <!-- ==============================================================
-         3. MENU AKSI LAPANGAN (4 TOMBOL UTAMA)
+         2. STATUS PERIODE PENGISIAN SPKRT (Req 4, 5, 6, 8, 10)
          ============================================================== -->
+    @php
+        $periodStatus = isset($currentPeriod) && $currentPeriod ? $currentPeriod->currentStatus() : 'closed';
+        $periodMessage = isset($currentPeriod) && $currentPeriod ? $currentPeriod->status_message : 'Periode pengisian telah ditutup';
+        $isPeriodOpen = isset($currentPeriod) && $currentPeriod && $currentPeriod->isOpen();
+        $today = \Carbon\Carbon::today();
+    @endphp
+
     <div class="mb-4">
-        <div class="d-flex justify-content-between align-items-center mb-2">
+        <div class="bento-card p-3.5 border" style="border-radius: 20px; {{ $periodStatus === 'active' ? 'border-color: #86EFAC !important; background: linear-gradient(135deg, #FFFFFF 0%, #F0FDF4 100%);' : ($periodStatus === 'not_started' ? 'border-color: #FDE68A !important; background: linear-gradient(135deg, #FFFFFF 0%, #FFFBEB 100%);' : 'border-color: #FECACA !important; background: linear-gradient(135deg, #FFFFFF 0%, #FEF2F2 100%);') }}">
+            <div class="d-flex flex-wrap align-items-center justify-content-between gap-3">
+                <div class="d-flex align-items-center gap-3">
+                    <div class="rounded-4 p-2.5 text-center text-white flex-shrink-0" style="width: 52px; height: 52px; display: flex; align-items: center; justify-content: center; background: {{ $periodStatus === 'active' ? '#16A34A' : ($periodStatus === 'not_started' ? '#D97706' : '#DC2626') }}; box-shadow: 0 4px 12px {{ $periodStatus === 'active' ? 'rgba(22, 163, 74, 0.25)' : ($periodStatus === 'not_started' ? 'rgba(217, 119, 6, 0.25)' : 'rgba(220, 38, 38, 0.25)') }};">
+                        @if($periodStatus === 'active')
+                            <i class="bi bi-calendar-check-fill fs-4"></i>
+                        @elseif($periodStatus === 'not_started')
+                            <i class="bi bi-clock-history fs-4"></i>
+                        @else
+                            <i class="bi bi-lock-fill fs-4"></i>
+                        @endif
+                    </div>
+                    <div>
+                        <div class="d-flex align-items-center gap-2 flex-wrap mb-1">
+                            <span class="badge text-uppercase fw-bold px-2.5 py-1 rounded-pill" style="font-size: 0.72rem; letter-spacing: 0.03em; background: {{ $periodStatus === 'active' ? '#16A34A' : ($periodStatus === 'not_started' ? '#D97706' : '#DC2626') }}; color: #FFFFFF;">
+                                @if($periodStatus === 'active')
+                                    <i class="bi bi-check-circle-fill me-1"></i> {{ $periodMessage }}
+                                @elseif($periodStatus === 'not_started')
+                                    <i class="bi bi-hourglass-split me-1"></i> {{ $periodMessage }}
+                                @else
+                                    <i class="bi bi-x-circle-fill me-1"></i> {{ $periodMessage }}
+                                @endif
+                            </span>
+                            @if(isset($currentPeriod) && $currentPeriod)
+                                <span class="fw-bolder text-dark" style="font-size: 0.95rem;">
+                                    {{ $currentPeriod->activity_name }}
+                                </span>
+                            @else
+                                <span class="fw-bolder text-dark" style="font-size: 0.95rem;">
+                                    Periode Pengisian SPKRT
+                                </span>
+                            @endif
+                        </div>
+
+                        <div class="text-secondary small d-flex flex-wrap align-items-center gap-2" style="font-size: 0.78rem;">
+                            @if(isset($currentPeriod) && $currentPeriod)
+                                <span>
+                                    <i class="bi bi-calendar-range me-1 text-primary"></i>
+                                    Jadwal: <strong>{{ $currentPeriod->start_date ? $currentPeriod->start_date->format('d M Y') : '-' }}</strong> s.d. <strong>{{ $currentPeriod->end_date ? $currentPeriod->end_date->format('d M Y') : '-' }}</strong>
+                                </span>
+                                @if($periodStatus === 'active')
+                                    <span class="text-success fw-bold">
+                                        &bull; Sisa waktu: {{ $today->diffInDays($currentPeriod->end_date, false) }} hari lagi
+                                    </span>
+                                @elseif($periodStatus === 'not_started')
+                                    <span class="text-warning-emphasis fw-bold">
+                                        &bull; Dibuka dalam {{ $today->diffInDays($currentPeriod->start_date) }} hari lagi
+                                    </span>
+                                @else
+                                    <span class="text-danger fw-bold">
+                                        &bull; Sistem otomatis mengunci formulir
+                                    </span>
+                                @endif
+                            @else
+                                <span>Belum ada jadwal periode pengisian aktif yang ditetapkan oleh Administrator.</span>
+                            @endif
+                        </div>
+                    </div>
+                </div>
+
+                <div class="d-flex align-items-center gap-2">
+                    @if($isPeriodOpen)
+                        <a href="{{ route('petugas.basts.respondents.index') }}" class="btn btn-sm btn-success rounded-pill px-3 py-1.5 fw-bold d-inline-flex align-items-center gap-1.5 shadow-sm">
+                            <i class="bi bi-pencil-square"></i>
+                            <span>Buka Formulir SPKRT</span>
+                        </a>
+                    @else
+                        <span class="badge bg-light text-secondary border px-3 py-2 rounded-pill small">
+                            <i class="bi bi-lock-fill me-1 text-danger"></i> Formulir Dikunci
+                        </span>
+                    @endif
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ==============================================================
+         3. MENU AKSI LAPANGAN (DIKONTROL PER MENU OLEH ADMIN / PERIODE)
+         ============================================================== -->
+    @php
+        $berandaMenusMap = $berandaMenuState['menus'] ?? [];
+        $showRespondenMenu = (bool) ($berandaMenusMap['tanda_terima_responden']['is_visible'] ?? false);
+        $showPetugasBastMenu = (bool) ($berandaMenusMap['tanda_terima_petugas']['is_visible'] ?? false);
+        $showLaporanPerjadinMenu = (bool) ($berandaMenusMap['laporan_perjadin']['is_visible'] ?? false);
+        $showJadwalMenu = (bool) ($berandaMenusMap['jadwal_agenda']['is_visible'] ?? false);
+
+        $visibleMenuCount = (int) $showRespondenMenu + (int) $showPetugasBastMenu + (int) $showLaporanPerjadinMenu + (int) $showJadwalMenu;
+        $showMenuAksiLapangan = $visibleMenuCount > 0;
+        $hiddenDashboardMenus = ['BAST Dokumen Terisi'];
+        $actionCardColClass = match ($visibleMenuCount) {
+            1 => 'col-12',
+            2 => 'col-12 col-md-6',
+            3 => 'col-12 col-lg-4',
+            default => 'col-12 col-sm-6 col-lg-3',
+        };
+    @endphp
+    @if($showMenuAksiLapangan)
+    <div class="mb-4">
+        <div class="d-flex justify-content-between align-items-center mb-2 flex-wrap gap-2">
             <h5 class="bento-card-title-sm mb-0">
                 <i class="bi bi-lightning-charge-fill me-1.5" style="color: var(--bps-orange);"></i> Menu Aksi Lapangan
             </h5>
+            @if(!empty($berandaMenuState['status_label']))
+                <span class="badge {{ $berandaMenuState['status_badge_class'] ?? 'bg-success-subtle text-success' }} rounded-pill px-2.5 py-1" style="font-size: 0.68rem;">
+                    {{ $berandaMenuState['status_label'] }}
+                </span>
+            @endif
         </div>
 
         <div class="row g-2 g-lg-3">
-            <!-- 1. Tanda Terima Responden -->
-            <div class="col-12 col-lg-3">
+            {{-- 1. Tanda Terima Responden (BAST) --}}
+            @php $cardTitle = 'Tanda Terima Responden'; @endphp
+            @if($showRespondenMenu && !in_array($cardTitle, $hiddenDashboardMenus))
+            <div class="{{ $actionCardColClass }}">
                 <a href="{{ route('petugas.basts.respondents.index') }}" class="bento-action-pill bento-pill-green">
                     <div class="bento-action-icon">
                         <i class="bi bi-file-earmark-check-fill"></i>
                     </div>
                     <div class="bento-action-text">
                         <div class="d-flex align-items-center gap-1.5 flex-wrap">
-                            <span class="bento-action-title">Tanda Terima Responden</span>
+                            <span class="bento-action-title">Tanda Terima Responden (BAST)</span>
                             <span class="badge bg-success-subtle text-success border border-success-subtle bento-action-badge">
                                 {{ $totalRespondentBasts }} Terbit
                             </span>
+                            @if(!$isPeriodOpen)
+                                <span class="badge bg-danger-subtle text-danger border border-danger-subtle bento-action-badge">
+                                    <i class="bi bi-lock-fill"></i> Terkunci
+                                </span>
+                            @endif
                         </div>
                         <span class="bento-action-sub">Input tanda tangan & serah terima responden</span>
                     </div>
@@ -412,27 +529,30 @@
                     </span>
                 </a>
             </div>
+            @endif
 
-            <!-- 2. Tanda Terima Petugas -->
-            <div class="col-12 col-lg-3">
-                <a href="{{ route('petugas.basts.officers.index', ['type' => 'kantor_ke_petugas']) }}" class="bento-action-pill bento-pill-blue">
+            {{-- 2. Tanda Terima & BAST Petugas (Mencakup Blanko & Dokumen Terisi) --}}
+            @php $cardTitle = 'Tanda Terima Petugas'; @endphp
+            @if($showPetugasBastMenu && !in_array($cardTitle, $hiddenDashboardMenus))
+            <div class="{{ $actionCardColClass }}">
+                <a href="{{ route('petugas.basts.officers.index') }}" class="bento-action-pill bento-pill-blue">
                     <div class="bento-action-icon">
                         <i class="bi bi-box-seam-fill"></i>
                     </div>
                     <div class="bento-action-text">
                         <div class="d-flex align-items-center gap-1.5 flex-wrap">
-                            <span class="bento-action-title">Tanda Terima Petugas</span>
+                            <span class="bento-action-title">Tanda Terima &amp; BAST Petugas</span>
                             @if(($pendingSignBlankoBastsCount ?? 0) > 0)
                                 <span class="badge bg-danger text-white border bento-action-badge">
                                     <i class="bi bi-pen me-1"></i> {{ $pendingSignBlankoBastsCount }} TTD
                                 </span>
                             @else
                                 <span class="badge bg-primary-subtle text-primary border border-primary-subtle bento-action-badge">
-                                    {{ $totalBlankoBasts }} Sah
+                                    {{ $totalOfficerBasts }} Sah
                                 </span>
                             @endif
                         </div>
-                        <span class="bento-action-sub">Lihat & tandatangani tanda terima blanko</span>
+                        <span class="bento-action-sub">Tanda terima blanko &amp; BAST dokumen terisi</span>
                     </div>
                     <span class="bento-action-cta cta-blue">
                         <span>Buka</span>
@@ -440,9 +560,12 @@
                     </span>
                 </a>
             </div>
+            @endif
 
-            <!-- 3. Laporan Perjadin -->
-            <div class="col-12 col-lg-3">
+            {{-- 3. Laporan Perjadin --}}
+            @php $cardTitle = 'Laporan Perjadin'; @endphp
+            @if($showLaporanPerjadinMenu && !in_array($cardTitle, $hiddenDashboardMenus))
+            <div class="{{ $actionCardColClass }}">
                 <a href="{{ route('petugas.reports.index') }}" class="bento-action-pill bento-pill-purple">
                     <div class="bento-action-icon">
                         <i class="bi bi-clipboard2-check-fill"></i>
@@ -462,9 +585,39 @@
                     </span>
                 </a>
             </div>
+            @endif
 
-            <!-- 4. BAST Dokumen Terisi -->
-            <div class="col-12 col-lg-3">
+            {{-- 4. Jadwal & Agenda BPS --}}
+            @php $cardTitle = 'Jadwal & Agenda BPS'; @endphp
+            @if($showJadwalMenu && !in_array($cardTitle, $hiddenDashboardMenus))
+            <div class="{{ $actionCardColClass }}">
+                <a href="{{ route('petugas.schedules.index') }}" class="bento-action-pill bento-pill-amber">
+                    <div class="bento-action-icon">
+                        <i class="bi bi-calendar3"></i>
+                    </div>
+                    <div class="bento-action-text">
+                        <div class="d-flex align-items-center gap-1.5 flex-wrap">
+                            <span class="bento-action-title">Jadwal &amp; Agenda BPS</span>
+                            @if(isset($upcomingSchedules) && $upcomingSchedules->count() > 0)
+                                <span class="badge bg-warning-subtle text-warning-emphasis border border-warning-subtle bento-action-badge">
+                                    {{ $upcomingSchedules->count() }} Agenda
+                                </span>
+                            @endif
+                        </div>
+                        <span class="bento-action-sub">Kalender kegiatan &amp; jadwal lapangan</span>
+                    </div>
+                    <span class="bento-action-cta cta-amber">
+                        <span>Buka</span>
+                        <i class="bi bi-arrow-right-short" style="font-size: 1.15rem; line-height: 1;"></i>
+                    </span>
+                </a>
+            </div>
+            @endif
+
+            {{-- 5. BAST Dokumen Terisi (Digabungkan ke Tanda Terima & BAST Petugas) --}}
+            @php $cardTitle = 'BAST Dokumen Terisi'; @endphp
+            @if(!in_array($cardTitle, $hiddenDashboardMenus))
+            <div class="{{ $actionCardColClass }}">
                 <a href="{{ route('petugas.basts.officers.index', ['type' => 'petugas_ke_kantor']) }}" class="bento-action-pill bento-pill-amber">
                     <div class="bento-action-icon">
                         <i class="bi bi-file-earmark-arrow-up-fill"></i>
@@ -484,23 +637,30 @@
                     </span>
                 </a>
             </div>
+            @endif
         </div>
     </div>
+    @endif
 
     <!-- ==============================================================
-         5. BOTTOM ROW: KEGIATAN AKTIF (LEFT) & AGENDA / TIMELINE (RIGHT)
+         5. BOTTOM ROW: KEGIATAN AKTIF & AGENDA (AGENDA TAMPIL SAAT MENU JADWAL AKTIF)
          ============================================================== -->
+    @php
+        $showJadwalAgenda = $showJadwalMenu;
+    @endphp
     <div class="row g-4">
-        <!-- Kiri: Penugasan Lapangan Aktif (col-lg-7) -->
-        <div class="col-lg-7">
+        <!-- Penugasan Lapangan Aktif -->
+        <div class="{{ $showJadwalAgenda ? 'col-lg-7' : 'col-12' }}">
             <div class="bento-card h-100">
                 <div class="bento-card-header-sm">
                     <h5 class="bento-card-title-sm">
                         <i class="bi bi-list-check me-1.5" style="color: var(--bps-orange);"></i> Penugasan Lapangan Anda
                     </h5>
-                    <a href="{{ route('petugas.assignments.index') }}" class="bento-card-link-sm">
-                        Semua Penugasan &rarr;
-                    </a>
+                    <div class="d-flex align-items-center gap-3 flex-wrap">
+                        <a href="{{ route('petugas.assignments.index') }}" class="bento-card-link-sm">
+                            Semua Penugasan &rarr;
+                        </a>
+                    </div>
                 </div>
 
                 @if(isset($activeTasks) && $activeTasks->isNotEmpty())
@@ -522,6 +682,11 @@
                                     </div>
                                 </div>
                                 <div class="d-flex align-items-center gap-2">
+                                    @if($task->assignment)
+                                        <span class="badge {{ $task->assignment->visibility_status_badge_class }} px-2 py-1" style="font-size: 0.68rem;">
+                                            {{ $task->assignment->visibility_status_label }}
+                                        </span>
+                                    @endif
                                     <span class="badge {{ $task->status === 'completed' ? 'bg-success' : 'bg-primary-subtle text-primary border border-primary-subtle' }} px-2 py-1" style="font-size: 0.72rem;">
                                         {{ ucfirst($task->status) }}
                                     </span>
@@ -534,15 +699,24 @@
                     </div>
                 @else
                     <div class="text-center py-4 text-muted">
-                        <i class="bi bi-clipboard2-check display-6 mb-2 text-secondary opacity-50 d-block"></i>
-                        <div class="small fw-semibold">Belum ada penugasan lapangan yang aktif saat ini.</div>
-                        <div class="text-muted" style="font-size: 0.72rem;">Penugasan baru yang dialokasikan oleh Administrator akan otomatis muncul di sini.</div>
+                        <i class="bi {{ isset($isAssignmentPortalEnabled) && !$isAssignmentPortalEnabled ? 'bi-lock-fill text-danger' : 'bi-clipboard2-check text-secondary' }} display-6 mb-2 opacity-50 d-block"></i>
+                        <div class="small fw-semibold text-dark">
+                            {{ $assignmentEmptyMessage ?? 'Belum ada penugasan lapangan yang tersedia saat ini.' }}
+                        </div>
+                        <div class="text-muted mt-1" style="font-size: 0.72rem;">
+                            @if(isset($isAssignmentPortalEnabled) && !$isAssignmentPortalEnabled)
+                                Silakan tunggu konfirmasi dari Administrator untuk membuka akses penugasan lapangan.
+                            @else
+                                Penugasan baru akan tampil otomatis ketika diaktifkan Admin atau periode penugasan sedang berjalan.
+                            @endif
+                        </div>
                     </div>
                 @endif
             </div>
         </div>
 
         <!-- Kanan: Timeline Jadwal & Agenda Lapangan BPS (col-lg-5) -->
+        @if($showJadwalAgenda)
         <div class="col-lg-5">
             <div class="bento-card h-100 d-flex flex-column justify-content-between">
                 <div>
@@ -593,6 +767,7 @@
                 </div>
             </div>
         </div>
+        @endif
     </div>
 
 </div>

@@ -7,6 +7,7 @@ use App\Models\ActivityLog;
 use App\Models\Assignment;
 use App\Models\AssignmentOfficer;
 use App\Models\Respondent;
+use App\Models\SpkrtPeriod;
 use App\Services\GoogleSheetService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -67,6 +68,7 @@ class RespondentController extends Controller
         $assignedTargetSum = (int) $myAssignments->sum('target_respondents');
         $targetQuota = $assignedTargetSum > 0 ? $assignedTargetSum : 120;
         $remainingTarget = max(0, $targetQuota - $totalMyRespondents);
+        $currentPeriod = SpkrtPeriod::currentPeriod();
 
         return view('petugas.respondents.index', compact(
             'respondents',
@@ -78,12 +80,19 @@ class RespondentController extends Controller
             'withBastCount',
             'myAssignments',
             'targetQuota',
-            'remainingTarget'
+            'remainingTarget',
+            'currentPeriod'
         ));
     }
 
     public function store(Request $request)
     {
+        // Validasi Periode SPKRT
+        $currentPeriod = SpkrtPeriod::currentPeriod();
+        if (!$currentPeriod || !$currentPeriod->isOpen()) {
+            $periodMsg = $currentPeriod ? $currentPeriod->status_message : 'Periode pengisian telah ditutup';
+            return back()->withInput()->with('error', $periodMsg);
+        }
         $validated = $request->validate([
             'name' => ['nullable', 'string', 'max:255'],
             'family_head_name' => ['nullable', 'string', 'max:255'],

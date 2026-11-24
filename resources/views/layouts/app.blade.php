@@ -71,6 +71,14 @@
                             <i class="bi bi-calendar3 sp-nav-icon"></i>
                             <span>Jadwal Kegiatan</span>
                         </a>
+                        <a href="{{ route('admin.spkrt-periods.index') }}" class="sp-nav-link {{ request()->routeIs('admin.spkrt-periods.*') ? 'active' : '' }}">
+                            <i class="bi bi-calendar-range sp-nav-icon"></i>
+                            <span>Periode SPKRT</span>
+                        </a>
+                        <a href="{{ route('admin.beranda-menus.index') }}" class="sp-nav-link {{ request()->routeIs('admin.beranda-menus.*') ? 'active' : '' }}">
+                            <i class="bi bi-sliders sp-nav-icon"></i>
+                            <span>Kontrol Menu Beranda</span>
+                        </a>
 
                         <div class="sp-nav-heading">Monitoring Progres</div>
                         <a href="{{ route('admin.respondents.index') }}" class="sp-nav-link {{ request()->routeIs('admin.respondents.*') ? 'active' : '' }}">
@@ -150,6 +158,10 @@
                         <a href="{{ route('admin.schedules.index') }}" class="sp-nav-link {{ request()->routeIs('admin.schedules.*') ? 'active' : '' }}">
                             <i class="bi bi-calendar3 sp-nav-icon"></i>
                             <span>Jadwal Kegiatan</span>
+                        </a>
+                        <a href="{{ route('admin.spkrt-periods.index') }}" class="sp-nav-link {{ request()->routeIs('admin.spkrt-periods.*') ? 'active' : '' }}">
+                            <i class="bi bi-calendar-range sp-nav-icon"></i>
+                            <span>Periode SPKRT</span>
                         </a>
 
                         <div class="sp-nav-heading">Monitoring Progres</div>
@@ -538,28 +550,41 @@
     </div>
 
     @if(auth()->user()->isPetugas())
-        <!-- Mobile Bottom Navigation for Petugas (HP View) -->
+        <!-- Mobile Bottom Navigation for Petugas (HP View - 3 Menu Utama) -->
+        @php
+            $hiddenBottomNavMenus = ['BAST', 'Tanda Terima'];
+        @endphp
         <nav class="sp-bottom-nav" aria-label="Navigasi Bawah Petugas">
+            @if(!in_array('Beranda', $hiddenBottomNavMenus))
             <a href="{{ route('petugas.dashboard') }}" class="sp-bottom-nav-item {{ request()->routeIs('petugas.dashboard') ? 'active' : '' }}">
                 <i class="bi bi-house-door-fill"></i>
                 <span>Beranda</span>
             </a>
+            @endif
+            @if(!in_array('Tugas', $hiddenBottomNavMenus))
             <a href="{{ route('petugas.assignments.index') }}" class="sp-bottom-nav-item {{ request()->routeIs('petugas.assignments.*') ? 'active' : '' }}">
                 <i class="bi bi-check2-square"></i>
                 <span>Tugas</span>
             </a>
+            @endif
+            @if(!in_array('BAST', $hiddenBottomNavMenus))
             <a href="{{ route('petugas.basts.respondents.index') }}" class="sp-bottom-nav-item {{ request()->routeIs('petugas.basts.respondents.*') ? 'active' : '' }}">
                 <i class="bi bi-file-earmark-check-fill"></i>
                 <span>BAST</span>
             </a>
+            @endif
+            @if(!in_array('Tanda Terima', $hiddenBottomNavMenus))
             <a href="{{ route('petugas.basts.officers.index') }}" class="sp-bottom-nav-item {{ request()->routeIs('petugas.basts.officers.*') ? 'active' : '' }}">
                 <i class="bi bi-shield-check"></i>
                 <span>Tanda Terima</span>
             </a>
+            @endif
+            @if(!in_array('Perjadin', $hiddenBottomNavMenus))
             <a href="{{ route('petugas.reports.index') }}" class="sp-bottom-nav-item {{ request()->routeIs('petugas.reports.*') ? 'active' : '' }}">
                 <i class="bi bi-clipboard2-check-fill"></i>
                 <span>Perjadin</span>
             </a>
+            @endif
         </nav>
     @endif
 

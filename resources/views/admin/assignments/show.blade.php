@@ -189,8 +189,16 @@
         </a>
         <h4 class="fw-bold text-dark mb-0" style="letter-spacing: -0.015em;">{{ $assignment->title }}</h4>
     </div>
-    <div class="d-flex gap-2">
+    <div class="d-flex flex-wrap gap-2">
         @if(auth()->user()->isAdmin())
+            <form method="POST" action="{{ route('admin.assignments.toggle-admin', $assignment) }}" class="d-inline">
+                @csrf
+                @method('PATCH')
+                <button type="submit" class="btn btn-sm {{ $assignment->is_enabled_by_admin ? 'btn-success' : 'btn-outline-secondary' }} rounded-pill px-3 py-1.5 fw-semibold">
+                    <i class="bi {{ $assignment->is_enabled_by_admin ? 'bi-toggle-on' : 'bi-toggle-off' }} me-1"></i>
+                    {{ $assignment->is_enabled_by_admin ? 'Nonaktifkan Penugasan (ON)' : 'Aktifkan Penugasan (OFF)' }}
+                </button>
+            </form>
             <button type="button" class="btn-bps-orange shadow-sm" data-bs-toggle="modal" data-bs-target="#assignOfficerModal">
                 <i class="bi bi-person-plus-fill me-1"></i> Tugaskan Petugas Baru
             </button>
@@ -213,7 +221,10 @@
                         <span class="text-muted" style="font-size: 0.72rem;">Detail jadwal, cakupan wilayah, dan dasar pelaksanaan</span>
                     </div>
                 </div>
-                <div>
+                <div class="d-flex flex-wrap align-items-center gap-1.5">
+                    <span class="badge {{ $assignment->visibility_status_badge_class }} px-3 py-1.5 rounded-pill" style="font-size: 0.74rem;">
+                        <i class="bi bi-eye-fill me-1"></i> {{ $assignment->visibility_status_label }}
+                    </span>
                     @if($assignment->status === 'ongoing')
                         <span class="badge bg-warning-subtle text-warning-emphasis border border-warning-subtle px-3 py-1.5 rounded-pill" style="font-size: 0.74rem;">
                             <i class="bi bi-play-circle-fill me-1"></i> Sedang Berjalan

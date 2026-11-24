@@ -221,10 +221,73 @@
 @endpush
 
 @section('content')
+@if(auth()->user()->isAdmin())
+<!-- Panel Kontrol Visibilitas Penugasan Lapangan (Admin) -->
+<div class="bento-card-clean p-3.5 mb-3 border" style="{{ $globalAssignmentEnabled ? 'border-color: #86EFAC !important; background: linear-gradient(135deg, #FFFFFF 0%, #F0FDF4 100%);' : 'border-color: #FECACA !important; background: linear-gradient(135deg, #FFFFFF 0%, #FEF2F2 100%);' }}">
+    <div class="d-flex flex-wrap align-items-center justify-content-between gap-3">
+        <div class="d-flex align-items-center gap-3">
+            <div class="rounded-4 d-flex align-items-center justify-content-center text-white flex-shrink-0" style="width: 48px; height: 48px; background: {{ $globalAssignmentEnabled ? '#16A34A' : '#DC2626' }}; box-shadow: 0 4px 12px {{ $globalAssignmentEnabled ? 'rgba(22, 163, 74, 0.25)' : 'rgba(220, 38, 38, 0.25)' }};">
+                <i class="bi {{ $globalAssignmentEnabled ? 'bi-broadcast' : 'bi-eye-slash-fill' }} fs-4"></i>
+            </div>
+            <div>
+                <div class="d-flex flex-wrap align-items-center gap-2 mb-1">
+                    <span class="fw-bold text-dark" style="font-size: 0.95rem;">Kontrol Tampil Penugasan Lapangan (Dashboard Petugas)</span>
+                    @if($globalAssignmentEnabled)
+                        <span class="badge bg-success text-white rounded-pill px-2.5 py-1" style="font-size: 0.72rem;">
+                            <i class="bi bi-check-circle-fill me-1"></i> Status Global: AKTIF
+                        </span>
+                    @else
+                        <span class="badge bg-danger text-white rounded-pill px-2.5 py-1" style="font-size: 0.72rem;">
+                            <i class="bi bi-lock-fill me-1"></i> Status Global: NONAKTIF
+                        </span>
+                    @endif
+                </div>
+                <div class="text-secondary small" style="font-size: 0.78rem;">
+                    @if($globalAssignmentEnabled)
+                        Penugasan muncul ke petugas jika <strong>Aktif Manual (Admin)</strong> ATAU <strong>Periode Sedang Aktif</strong>.
+                        (<span class="fw-semibold text-success">{{ $totalVisibleToOfficers }} tampil ke petugas</span> &bull; {{ $totalManualActive }} Aktif Manual &bull; {{ $totalPeriodActive }} Aktif Periode)
+                    @else
+                        <strong>Seluruh penugasan sedang disembunyikan</strong> dari dashboard &amp; portal petugas. Aktifkan kembali untuk menampilkan sesuai aturan sistem.
+                    @endif
+                </div>
+            </div>
+        </div>
+
+        <div class="d-flex flex-wrap align-items-center gap-2">
+            <form method="POST" action="{{ route('admin.assignments.global-toggle') }}" class="d-inline">
+                @csrf
+                @method('PATCH')
+                <input type="hidden" name="enabled" value="1">
+                <button type="submit" class="btn btn-sm {{ $globalAssignmentEnabled ? 'btn-success' : 'btn-outline-success' }} rounded-pill px-3 py-1.5 fw-semibold" {{ $globalAssignmentEnabled ? 'disabled' : '' }}>
+                    <i class="bi bi-play-circle-fill me-1"></i> Aktifkan Penugasan
+                </button>
+            </form>
+            <form method="POST" action="{{ route('admin.assignments.global-toggle') }}" class="d-inline">
+                @csrf
+                @method('PATCH')
+                <input type="hidden" name="enabled" value="0">
+                <button type="submit" class="btn btn-sm {{ !$globalAssignmentEnabled ? 'btn-danger' : 'btn-outline-danger' }} rounded-pill px-3 py-1.5 fw-semibold" {{ !$globalAssignmentEnabled ? 'disabled' : '' }}>
+                    <i class="bi bi-pause-circle-fill me-1"></i> Nonaktifkan Penugasan
+                </button>
+            </form>
+            <a href="{{ route('admin.assignments.history') }}" class="btn btn-sm btn-outline-secondary rounded-pill px-3 py-1.5 fw-semibold">
+                <i class="bi bi-clock-history me-1"></i> Riwayat Penugasan
+            </a>
+        </div>
+    </div>
+</div>
+@else
+<div class="d-flex justify-content-end mb-3">
+    <a href="{{ route('admin.assignments.history') }}" class="btn btn-sm btn-outline-secondary rounded-pill px-3 py-1.5 fw-semibold">
+        <i class="bi bi-clock-history me-1"></i> Riwayat Penugasan
+    </a>
+</div>
+@endif
+
 <!-- Bento Search & Filter Card -->
 <div class="bento-card-clean p-3 mb-3">
     <form method="GET" action="{{ route('admin.assignments.index') }}" class="row g-2 align-items-center">
-        <div class="col-lg-7 col-md-6">
+        <div class="col-lg-5 col-md-12">
             <div class="input-group">
                 <span class="input-group-text bg-white border-end-0 text-muted">
                     <i class="bi bi-search"></i>
@@ -237,9 +300,9 @@
             </div>
         </div>
 
-        <div class="col-lg-3 col-md-4">
+        <div class="col-lg-2 col-md-4">
             <select name="status" class="form-select">
-                <option value="">-- Semua Status --</option>
+                <option value="">-- Status Kegiatan --</option>
                 <option value="ongoing" {{ request('status') === 'ongoing' ? 'selected' : '' }}>Sedang Berjalan</option>
                 <option value="completed" {{ request('status') === 'completed' ? 'selected' : '' }}>Selesai</option>
                 <option value="draft" {{ request('status') === 'draft' ? 'selected' : '' }}>Draft</option>
@@ -247,11 +310,21 @@
             </select>
         </div>
 
-        <div class="col-lg-2 col-md-2 d-flex gap-2">
+        <div class="col-lg-3 col-md-4">
+            <select name="visibility_status" class="form-select">
+                <option value="">-- Status Tampil (Petugas) --</option>
+                <option value="manual_active" {{ request('visibility_status') === 'manual_active' ? 'selected' : '' }}>Aktif Manual (Admin)</option>
+                <option value="period_active" {{ request('visibility_status') === 'period_active' ? 'selected' : '' }}>Aktif Periode</option>
+                <option value="inactive" {{ request('visibility_status') === 'inactive' ? 'selected' : '' }}>Nonaktif</option>
+                <option value="ended" {{ request('visibility_status') === 'ended' ? 'selected' : '' }}>Berakhir</option>
+            </select>
+        </div>
+
+        <div class="col-lg-2 col-md-4 d-flex gap-2">
             <button type="submit" class="btn btn-bps-orange flex-fill justify-content-center py-2">
                 <i class="bi bi-funnel-fill"></i> Filter
             </button>
-            @if(request()->hasAny(['search', 'status']))
+            @if(request()->hasAny(['search', 'status', 'visibility_status']))
                 <a href="{{ route('admin.assignments.index') }}" class="btn btn-outline-secondary rounded-pill px-3 d-flex align-items-center justify-content-center" title="Reset Filter">
                     <i class="bi bi-arrow-clockwise"></i>
                 </a>
@@ -311,6 +384,12 @@
                     <i class="bi bi-person-plus text-info fs-6"></i> Tugaskan Petugas / Pegawai
                 </button>
                 @if(auth()->user()->isAdmin())
+                    <button type="button" class="btn-bulk-action" onclick="submitBulkAction('enable_admin')" title="Aktifkan penugasan secara manual untuk seluruh item terpilih">
+                        <i class="bi bi-toggle-on text-success fs-6"></i> Aktifkan Manual
+                    </button>
+                    <button type="button" class="btn-bulk-action" onclick="submitBulkAction('disable_admin')" title="Nonaktifkan aktif manual untuk seluruh item terpilih">
+                        <i class="bi bi-toggle-off text-secondary fs-6"></i> Nonaktifkan Manual
+                    </button>
                     <button type="button" class="btn-bulk-action-danger" onclick="submitBulkAction('delete')" title="Hapus seluruh kegiatan yang dicentang">
                         <i class="bi bi-trash fs-6"></i> Hapus
                     </button>
@@ -328,13 +407,13 @@
                             <input type="checkbox" id="selectAllAssignmentsCheckbox" class="form-check-input" onchange="toggleSelectAllAssignments(this)" title="Pilih Semua Kegiatan di Halaman Ini">
                         </th>
                     @endif
-                    <th style="width: 24%;"><i class="bi bi-journal-text me-1 text-muted"></i> Kegiatan</th>
-                    <th style="width: 16%;"><i class="bi bi-calendar3 me-1 text-muted"></i> Jadwal</th>
-                    <th style="width: 13%;"><i class="bi bi-geo-alt-fill me-1 text-danger"></i> Wilayah</th>
-                    <th class="text-center" style="width: 8%;"><i class="bi bi-people-fill me-1 text-primary"></i> Petugas</th>
-                    <th class="text-center" style="width: 10%;"><i class="bi bi-pie-chart-fill me-1 text-success"></i> Responden</th>
-                    <th class="text-center" style="width: 10%;"><i class="bi bi-activity me-1 text-warning"></i> Status</th>
-                    <th class="text-end pe-3" style="width: 15%;">Aksi</th>
+                    <th style="width: 21%;"><i class="bi bi-journal-text me-1 text-muted"></i> Kegiatan</th>
+                    <th style="width: 15%;"><i class="bi bi-calendar3 me-1 text-muted"></i> Periode</th>
+                    <th style="width: 12%;"><i class="bi bi-geo-alt-fill me-1 text-danger"></i> Wilayah</th>
+                    <th class="text-center" style="width: 7%;"><i class="bi bi-people-fill me-1 text-primary"></i> Petugas</th>
+                    <th class="text-center" style="width: 9%;"><i class="bi bi-pie-chart-fill me-1 text-success"></i> Sampel</th>
+                    <th class="text-center" style="width: 15%;"><i class="bi bi-activity me-1 text-warning"></i> Status Tampil</th>
+                    <th class="text-end pe-3" style="width: 17%;">Aksi</th>
                 </tr>
             </thead>
             <tbody>
@@ -394,26 +473,37 @@
                             @endif
                         </td>
                         <td class="text-center">
-                            @if($item->status === 'ongoing')
-                                <span class="badge bg-warning-subtle text-warning-emphasis border border-warning-subtle px-2 py-0.5 rounded-pill" style="font-size: 0.68rem;">
-                                    <i class="bi bi-play-circle-fill me-0.5"></i> Aktif
-                                </span>
-                            @elseif($item->status === 'completed')
-                                <span class="badge bg-success-subtle text-success border border-success-subtle px-2 py-0.5 rounded-pill" style="font-size: 0.68rem;">
-                                    <i class="bi bi-check-circle-fill me-0.5"></i> Tuntas
-                                </span>
-                            @elseif($item->status === 'draft')
-                                <span class="badge bg-secondary-subtle text-secondary border border-secondary-subtle px-2 py-0.5 rounded-pill" style="font-size: 0.68rem;">
-                                    <i class="bi bi-pencil-square me-0.5"></i> Draft
-                                </span>
-                            @else
-                                <span class="badge bg-danger-subtle text-danger border border-danger-subtle px-2 py-0.5 rounded-pill" style="font-size: 0.68rem;">
-                                    Batal
-                                </span>
+                            @php
+                                $visStatus = $item->visibilityStatus();
+                                $visLabel = $item->visibility_status_label;
+                                $visBadgeClass = $item->visibility_status_badge_class;
+                            @endphp
+                            <span class="badge {{ $visBadgeClass }} px-2 py-0.5 rounded-pill d-inline-block mb-1" style="font-size: 0.68rem;">
+                                @if($visStatus === 'manual_active')
+                                    <i class="bi bi-toggle-on me-0.5"></i>
+                                @elseif($visStatus === 'period_active')
+                                    <i class="bi bi-calendar-check me-0.5"></i>
+                                @elseif($visStatus === 'ended')
+                                    <i class="bi bi-calendar-x me-0.5"></i>
+                                @else
+                                    <i class="bi bi-pause-circle me-0.5"></i>
+                                @endif
+                                {{ $visLabel }}
+                            </span>
+                            @if(auth()->user()->isAdmin())
+                                <div>
+                                    <form method="POST" action="{{ route('admin.assignments.toggle-admin', $item) }}" class="d-inline">
+                                        @csrf
+                                        @method('PATCH')
+                                        <button type="submit" class="btn btn-xs {{ $item->is_enabled_by_admin ? 'btn-success' : 'btn-outline-secondary' }} rounded-pill py-0 px-2" style="font-size: 0.64rem;" title="{{ $item->is_enabled_by_admin ? 'Nonaktifkan kontrol manual Admin' : 'Aktifkan penugasan secara manual (ON)' }}">
+                                            {{ $item->is_enabled_by_admin ? 'ON (Manual)' : 'OFF (Periode)' }}
+                                        </button>
+                                    </form>
+                                </div>
                             @endif
                         </td>
                         <td class="text-end pe-3">
-                            <div class="d-inline-flex gap-1.5 align-items-center justify-content-end">
+                            <div class="d-inline-flex gap-1 align-items-center justify-content-end">
                                 <!-- Detail & Pembagian Petugas -->
                                 <a href="{{ route('admin.assignments.show', $item) }}" 
                                    class="bento-action-btn btn-view" 
@@ -423,6 +513,15 @@
                                 </a>
 
                                 @if(auth()->user()->isAdmin())
+                                    <!-- Atur Periode Penugasan -->
+                                    <button type="button" 
+                                            class="bento-action-btn text-primary" 
+                                            title="Atur Periode &amp; Kontrol Admin" 
+                                            data-bs-toggle="tooltip"
+                                            onclick="openEditPeriodModal({{ json_encode($item) }})">
+                                        <i class="bi bi-calendar-range"></i>
+                                    </button>
+
                                     <!-- Edit -->
                                     <button type="button" 
                                             class="bento-action-btn btn-edit" 
@@ -590,6 +689,18 @@
                     <div class="mb-3">
                         <label class="form-label small fw-bold text-dark mb-1">URAIAN / DESKRIPSI KEGIATAN</label>
                         <textarea name="description" class="form-control" rows="3" placeholder="Tuliskan tujuan, sasaran responden, dan instruksi umum kegiatan..."></textarea>
+                    </div>
+
+                    <div class="p-3 mb-3 rounded-4 border bg-light-subtle">
+                        <div class="form-check form-switch">
+                            <input class="form-check-input" type="checkbox" name="is_enabled_by_admin" value="1" id="create_is_enabled_by_admin">
+                            <label class="form-check-label small fw-bold text-dark" for="create_is_enabled_by_admin">
+                                Aktifkan Secara Manual (Admin ON)
+                            </label>
+                        </div>
+                        <div class="text-muted mt-1" style="font-size: 0.72rem;">
+                            Jika diaktifkan (ON), penugasan langsung tampil ke petugas meskipun di luar rentang tanggal mulai–selesai. Jika OFF, penugasan tampil otomatis hanya saat periode tanggal aktif.
+                        </div>
                     </div>
 
                     <div class="p-3 bg-light rounded-4 border">
@@ -802,6 +913,19 @@
                         <textarea id="edit_description" name="description" class="form-control" rows="3"></textarea>
                     </div>
 
+                    <div class="p-3 mb-3 rounded-4 border bg-light-subtle">
+                        <input type="hidden" name="is_enabled_by_admin" value="0">
+                        <div class="form-check form-switch">
+                            <input class="form-check-input" type="checkbox" name="is_enabled_by_admin" value="1" id="edit_is_enabled_by_admin">
+                            <label class="form-check-label small fw-bold text-dark" for="edit_is_enabled_by_admin">
+                                Aktifkan Secara Manual (Admin ON)
+                            </label>
+                        </div>
+                        <div class="text-muted mt-1" style="font-size: 0.72rem;">
+                            Centang untuk menampilkan penugasan secara manual ke dashboard petugas meskipun di luar periode tanggal.
+                        </div>
+                    </div>
+
                     @include('admin.partials._basis_fields', ['prefix' => 'edit_asgn', 'defaults' => [], 'required' => false])
                 </div>
                 <div class="modal-footer bg-light border-top px-4 py-3">
@@ -923,6 +1047,60 @@
     </div>
 </div>
 
+<!-- ==============================================================
+     MODAL ATUR PERIODE & KONTROL ADMIN PENUGASAN
+     ============================================================== -->
+<div class="modal fade" id="editPeriodModal" tabindex="-1" aria-labelledby="editPeriodModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content border-0 shadow" style="border-radius: 20px; overflow: hidden;">
+            <div class="modal-header bg-light border-bottom px-4 py-3">
+                <h6 class="modal-title fw-bold text-dark d-flex align-items-center gap-2" id="editPeriodModalLabel">
+                    <i class="bi bi-calendar-range text-primary"></i> Atur Periode &amp; Kontrol Penugasan
+                </h6>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <form id="editPeriodForm" method="POST">
+                @csrf
+                @method('PATCH')
+                <div class="modal-body p-4">
+                    <div class="mb-3">
+                        <label class="form-label small fw-bold text-dark mb-1">NAMA PENUGASAN</label>
+                        <input type="text" id="period_title" class="form-control bg-light" readonly disabled>
+                    </div>
+                    <div class="row g-3 mb-3">
+                        <div class="col-6">
+                            <label class="form-label small fw-bold text-dark mb-1">TANGGAL MULAI <span class="text-danger">*</span></label>
+                            <input type="date" id="period_start_date" name="start_date" class="form-control" required>
+                        </div>
+                        <div class="col-6">
+                            <label class="form-label small fw-bold text-dark mb-1">TANGGAL SELESAI <span class="text-danger">*</span></label>
+                            <input type="date" id="period_end_date" name="end_date" class="form-control" required>
+                        </div>
+                    </div>
+                    <div class="p-3 rounded-4 border bg-light-subtle">
+                        <input type="hidden" name="is_enabled_by_admin" value="0">
+                        <div class="form-check form-switch">
+                            <input class="form-check-input" type="checkbox" name="is_enabled_by_admin" value="1" id="period_is_enabled_by_admin">
+                            <label class="form-check-label small fw-bold text-dark" for="period_is_enabled_by_admin">
+                                Aktifkan Manual oleh Admin (ON)
+                            </label>
+                        </div>
+                        <div class="text-muted mt-1" style="font-size: 0.72rem;">
+                            Penugasan tampil ke Petugas jika Admin ON <strong>ATAU</strong> tanggal hari ini berada di dalam rentang periode di atas.
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer bg-light border-top px-4 py-2.5">
+                    <button type="button" class="btn btn-light rounded-pill px-3" data-bs-dismiss="modal">Batal</button>
+                    <button type="submit" class="btn-bps-orange">
+                        <i class="bi bi-check2-circle me-1"></i> Simpan Pengaturan
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
 <!-- Form Tersembunyi untuk Eksekusi Aksi Massal Checkbox Tabel -->
 <form id="bulkActionForm" method="POST" action="{{ route('admin.assignments.bulk-action') }}" class="d-none">
     @csrf
@@ -952,6 +1130,8 @@
         document.getElementById('edit_target_respondents').value = item.target_respondents || 0;
         document.getElementById('edit_status').value = item.status;
         document.getElementById('edit_description').value = item.description || '';
+        const editAdminCb = document.getElementById('edit_is_enabled_by_admin');
+        if (editAdminCb) editAdminCb.checked = Boolean(item.is_enabled_by_admin);
 
         document.getElementById('edit_asgn_basis_dipa').value = item.basis_dipa || ADMIN_BASIS_DEFAULTS.basis_dipa || '';
         document.getElementById('edit_asgn_st_number').value = item.st_number || ADMIN_BASIS_DEFAULTS.st_number || '';
@@ -985,6 +1165,17 @@
                 item.style.display = 'none';
             }
         });
+    }
+
+    function openEditPeriodModal(item) {
+        document.getElementById('editPeriodForm').action = '/admin/assignments/' + item.id + '/period';
+        document.getElementById('period_title').value = item.title || '';
+        document.getElementById('period_start_date').value = item.start_date ? item.start_date.substring(0, 10) : '';
+        document.getElementById('period_end_date').value = item.end_date ? item.end_date.substring(0, 10) : '';
+        document.getElementById('period_is_enabled_by_admin').checked = Boolean(item.is_enabled_by_admin);
+
+        const modal = new bootstrap.Modal(document.getElementById('editPeriodModal'));
+        modal.show();
     }
 
     function openDeleteAssignmentModal(id, title) {
@@ -1165,6 +1356,8 @@
             'set_ongoing': 'Ubah status ' + selected.length + ' kegiatan menjadi Sedang Berjalan (Aktif)?',
             'set_completed': 'Ubah status ' + selected.length + ' kegiatan menjadi Selesai (Tuntas)?',
             'set_draft': 'Ubah status ' + selected.length + ' kegiatan menjadi Draft?',
+            'enable_admin': 'Aktifkan secara manual (Admin ON) untuk ' + selected.length + ' penugasan terpilih?',
+            'disable_admin': 'Nonaktifkan aktif manual untuk ' + selected.length + ' penugasan terpilih?',
             'delete': 'Hapus ' + selected.length + ' kegiatan terpilih? Data akan diarsipkan menggunakan soft delete.'
         };
 

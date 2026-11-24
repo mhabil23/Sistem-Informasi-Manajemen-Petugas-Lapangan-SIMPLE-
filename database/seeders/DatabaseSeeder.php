@@ -215,5 +215,17 @@ class DatabaseSeeder extends Seeder
         ]);
         // 10. Pegawai Organik BPS & Dual Role
         $this->call(PegawaiSeeder::class);
+
+        // 11. Periode Pengisian SPKRT
+        \App\Models\SpkrtPeriod::firstOrCreate(
+            ['activity_name' => 'Survei Pertanian Terintegrasi (SPKRT) 2026'],
+            [
+                'start_date' => now()->startOfMonth(),
+                'end_date' => now()->endOfMonth(),
+                'is_active' => true,
+                'description' => 'Periode pengisian Berita Acara Serah Terima (BAST) dan pendataan responden Kepala Rumah Tangga (KRT).',
+                'created_by' => $admin->id,
+            ]
+        );
     }
 }
