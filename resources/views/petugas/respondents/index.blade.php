@@ -99,6 +99,103 @@
 @endpush
 
 @section('content')
+@php
+    $isPeriodOpen = isset($currentPeriod) && $currentPeriod && $currentPeriod->isOpen();
+    $periodStatusMsg = isset($currentPeriod) && $currentPeriod ? $currentPeriod->status_message : 'Periode pengisian telah ditutup';
+    $periodStatus = isset($currentPeriod) && $currentPeriod ? $currentPeriod->currentStatus() : 'closed';
+@endphp
+
+@if(session('success'))
+    <div class="alert alert-success alert-dismissible fade show rounded-4 border-0 shadow-sm mb-4" role="alert">
+        <i class="bi bi-check-circle-fill me-1 text-success"></i> {{ session('success') }}
+        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+    </div>
+@endif
+
+@if(session('error'))
+    <div class="alert alert-danger alert-dismissible fade show rounded-4 border-0 shadow-sm mb-4" role="alert">
+        <i class="bi bi-exclamation-triangle-fill me-1 text-danger"></i> {{ session('error') }}
+        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+    </div>
+@endif
+
+<!-- Status Periode Pengisian SPKRT (Req 3, 4, 5, 6, 8) -->
+<div class="mb-4">
+    @if($periodStatus === 'active')
+        <div class="p-3 rounded-4 shadow-sm border border-success-subtle bg-white d-flex flex-wrap align-items-center justify-content-between gap-3">
+            <div class="d-flex align-items-center gap-3">
+                <div class="rounded-3 p-2 text-white text-center" style="background: #16A34A; width: 44px; height: 44px; display: flex; align-items: center; justify-content: center;">
+                    <i class="bi bi-calendar-check-fill fs-5"></i>
+                </div>
+                <div>
+                    <div class="d-flex align-items-center gap-2 mb-0.5">
+                        <span class="badge bg-success text-white px-2.5 py-1 rounded-pill" style="font-size: 0.72rem;">
+                            <i class="bi bi-check-circle-fill me-1"></i> {{ $periodStatusMsg }}
+                        </span>
+                        <span class="fw-bold text-dark small">{{ $currentPeriod->activity_name }}</span>
+                    </div>
+                    <div class="text-muted" style="font-size: 0.76rem;">
+                        Jadwal: {{ $currentPeriod->start_date->format('d M Y') }} s.d. {{ $currentPeriod->end_date->format('d M Y') }}
+                        &bull; <span class="text-success fw-bold">Pengisian Dibuka</span>
+                    </div>
+                </div>
+            </div>
+            <div class="badge bg-success-subtle text-success border border-success-subtle rounded-pill px-3 py-1.5 small">
+                <i class="bi bi-unlock-fill me-1"></i> Pengisian Dibuka
+            </div>
+        </div>
+    @elseif($periodStatus === 'not_started')
+        <div class="p-3 rounded-4 shadow-sm border border-warning-subtle bg-white d-flex flex-wrap align-items-center justify-content-between gap-3">
+            <div class="d-flex align-items-center gap-3">
+                <div class="rounded-3 p-2 text-dark text-center" style="background: #FEF3C7; width: 44px; height: 44px; display: flex; align-items: center; justify-content: center;">
+                    <i class="bi bi-hourglass-split fs-5 text-warning-emphasis"></i>
+                </div>
+                <div>
+                    <div class="d-flex align-items-center gap-2 mb-0.5">
+                        <span class="badge bg-warning text-dark px-2.5 py-1 rounded-pill" style="font-size: 0.72rem;">
+                            <i class="bi bi-clock-history me-1"></i> {{ $periodStatusMsg }}
+                        </span>
+                        <span class="fw-bold text-dark small">{{ $currentPeriod->activity_name }}</span>
+                    </div>
+                    <div class="text-muted" style="font-size: 0.76rem;">
+                        Pengisian baru dibuka pada tanggal <strong>{{ $currentPeriod->start_date->format('d M Y') }}</strong> s.d. {{ $currentPeriod->end_date->format('d M Y') }}.
+                    </div>
+                </div>
+            </div>
+            <div class="badge bg-warning-subtle text-warning-emphasis border border-warning-subtle rounded-pill px-3 py-1.5 small">
+                <i class="bi bi-lock-fill me-1"></i> Formulir Terkunci
+            </div>
+        </div>
+    @else
+        <div class="p-3 rounded-4 shadow-sm border border-danger-subtle bg-white d-flex flex-wrap align-items-center justify-content-between gap-3">
+            <div class="d-flex align-items-center gap-3">
+                <div class="rounded-3 p-2 text-white text-center" style="background: #DC2626; width: 44px; height: 44px; display: flex; align-items: center; justify-content: center;">
+                    <i class="bi bi-lock-fill fs-5"></i>
+                </div>
+                <div>
+                    <div class="d-flex align-items-center gap-2 mb-0.5">
+                        <span class="badge bg-danger text-white px-2.5 py-1 rounded-pill" style="font-size: 0.72rem;">
+                            <i class="bi bi-x-circle-fill me-1"></i> {{ $periodStatusMsg }}
+                        </span>
+                        @if(isset($currentPeriod) && $currentPeriod)
+                            <span class="fw-bold text-dark small">{{ $currentPeriod->activity_name }}</span>
+                        @endif
+                    </div>
+                    <div class="text-muted" style="font-size: 0.76rem;">
+                        @if(isset($currentPeriod) && $currentPeriod)
+                            Batas waktu pengisian telah berakhir pada <strong>{{ $currentPeriod->end_date->format('d M Y') }}</strong> atau dinonaktifkan Admin.
+                        @else
+                            Belum ada periode pengisian SPKRT yang aktif. Silakan hubungi Administrator.
+                        @endif
+                    </div>
+                </div>
+            </div>
+            <div class="badge bg-danger-subtle text-danger border border-danger-subtle rounded-pill px-3 py-1.5 small">
+                <i class="bi bi-lock-fill me-1"></i> Formulir Terkunci
+            </div>
+        </div>
+    @endif
+</div>
 <!-- Header -->
 <div class="d-flex flex-wrap align-items-center justify-content-between gap-3 mb-4">
     <div>

@@ -2,6 +2,9 @@
 
 namespace App\Models;
 
+use App\Services\AssignmentVisibilityService;
+use Carbon\Carbon;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -26,6 +29,7 @@ class Assignment extends Model
         'basis_st',
         'target_respondents',
         'status',
+        'is_enabled_by_admin',
         'created_by',
     ];
 
@@ -36,7 +40,53 @@ class Assignment extends Model
             'end_date' => 'date',
             'st_date' => 'date',
             'target_respondents' => 'integer',
+            'is_enabled_by_admin' => 'boolean',
         ];
+    }
+
+    public static function visibilityService(): AssignmentVisibilityService
+    {
+        return app(AssignmentVisibilityService::class);
+    }
+
+    public static function isGlobalPortalEnabled(): bool
+    {
+        return static::visibilityService()->isGlobalEnabled();
+    }
+
+    public static function setGlobalPortalEnabled(bool $enabled): void
+    {
+        static::visibilityService()->setGlobalEnabled($enabled);
+    }
+
+    public function isPeriodActive(?Carbon $date = null): bool
+    {
+        return static::visibilityService()->isPeriodActive($this, $date);
+    }
+
+    public function shouldBeShownToOfficer(?Carbon $date = null): bool
+    {
+        return static::visibilityService()->shouldShowToOfficer($this, $date);
+    }
+
+    public function scopeVisibleToOfficer(Builder $query, ?Carbon $date = null): Builder
+    {
+        return static::visibilityService()->applyVisibilityScope($query, $date);
+    }
+
+    public function visibilityStatus(?Carbon $date = null): string
+    {
+        return static::visibilityService()->getVisibilityStatus($this, $date);
+    }
+
+    public function getVisibilityStatusLabelAttribute(): string
+    {
+        return static::visibilityService()->getVisibilityStatusLabel($this);
+    }
+
+    public function getVisibilityStatusBadgeClassAttribute(): string
+    {
+        return static::visibilityService()->getVisibilityStatusBadgeClass($this);
     }
 
     public function creator(): BelongsTo

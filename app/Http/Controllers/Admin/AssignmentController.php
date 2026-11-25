@@ -52,11 +52,43 @@ class AssignmentController extends Controller
             $query->where('status', $status);
         }
 
+        // Filter visibility status (Aktif Manual (Admin), Aktif Periode, Nonaktif, Berakhir)
+        if ($visStatus = $request->input('visibility_status')) {
+            $todayStr = now()->toDateString();
+            if ($visStatus === 'manual_active') {
+                $query->where('status', '!=', 'cancelled')
+                      ->where('is_enabled_by_admin', true);
+            } elseif ($visStatus === 'period_active') {
+                $query->where('status', '!=', 'cancelled')
+                      ->where('is_enabled_by_admin', false)
+                      ->whereDate('start_date', '<=', $todayStr)
+                      ->whereDate('end_date', '>=', $todayStr);
+            } elseif ($visStatus === 'ended') {
+                $query->where('status', '!=', 'cancelled')
+                      ->where('is_enabled_by_admin', false)
+                      ->whereDate('end_date', '<', $todayStr);
+            } elseif ($visStatus === 'inactive') {
+                $query->where(function ($iq) use ($todayStr) {
+                    $iq->where('status', 'cancelled')
+                       ->orWhere(function ($sub) use ($todayStr) {
+                           $sub->where('is_enabled_by_admin', false)
+                               ->whereDate('start_date', '>', $todayStr);
+                       });
+                });
+            }
+        }
+
         // Stats
         $totalAssignments = Assignment::count();
         $totalOngoing = Assignment::where('status', 'ongoing')->count();
         $totalCompleted = Assignment::where('status', 'completed')->count();
         $totalDraft = Assignment::where('status', 'draft')->count();
+        $globalAssignmentEnabled = Assignment::isGlobalPortalEnabled();
+
+        $allForVis = Assignment::all();
+        $totalManualActive = $allForVis->filter(fn($a) => $a->visibilityStatus() === 'manual_active')->count();
+        $totalPeriodActive = $allForVis->filter(fn($a) => $a->visibilityStatus() === 'period_active')->count();
+        $totalVisibleToOfficers = $allForVis->filter(fn($a) => $a->shouldBeShownToOfficer())->count();
 
         $assignments = $query->latest()->paginate(10)->withQueryString();
 
@@ -70,6 +102,10 @@ class AssignmentController extends Controller
             'totalOngoing',
             'totalCompleted',
             'totalDraft',
+            'globalAssignmentEnabled',
+            'totalManualActive',
+            'totalPeriodActive',
+            'totalVisibleToOfficers',
             'officers',
             'basisDefaults'
         ));
@@ -95,6 +131,7 @@ class AssignmentController extends Controller
             'basis_st' => $basis['basis_st'],
             'target_respondents' => $validated['target_respondents'] ?? 0,
             'status' => $validated['status'],
+            'is_enabled_by_admin' => $request->boolean('is_enabled_by_admin', false),
             'created_by' => Auth::id(),
         ]);
 
@@ -196,6 +233,9 @@ class AssignmentController extends Controller
             'basis_st' => $basis['basis_st'],
             'target_respondents' => $validated['target_respondents'] ?? 0,
             'status' => $validated['status'],
+            'is_enabled_by_admin' => $request->has('is_enabled_by_admin')
+                ? $request->boolean('is_enabled_by_admin')
+                : $assignment->is_enabled_by_admin,
         ]);
 
         if ($this->sheetService->isConfigured()) {
@@ -247,7 +287,7 @@ class AssignmentController extends Controller
     public function bulkAction(Request $request)
     {
         $validated = $request->validate([
-            'action' => ['required', Rule::in(['set_ongoing', 'set_completed', 'set_draft', 'set_cancelled', 'delete', 'assign_officers'])],
+            'action' => ['required', Rule::in(['set_ongoing', 'set_completed', 'set_draft', 'set_cancelled', 'enable_admin', 'disable_admin', 'delete', 'assign_officers'])],
             'assignment_ids' => ['required', 'array', 'min:1'],
             'assignment_ids.*' => ['integer', 'exists:assignments,id'],
             'officer_id' => ['nullable', 'exists:users,id'],
@@ -324,6 +364,22 @@ class AssignmentController extends Controller
                     $affectedCount++;
                 }
                 $msg = "Sebanyak {$affectedCount} kegiatan berhasil dibatalkan.";
+                break;
+
+            case 'enable_admin':
+                foreach ($assignments as $assignment) {
+                    $assignment->update(['is_enabled_by_admin' => true]);
+                    $affectedCount++;
+                }
+                $msg = "Sebanyak {$affectedCount} penugasan diaktifkan secara manual oleh Admin (Aktif Manual).";
+                break;
+
+            case 'disable_admin':
+                foreach ($assignments as $assignment) {
+                    $assignment->update(['is_enabled_by_admin' => false]);
+                    $affectedCount++;
+                }
+                $msg = "Aktif manual untuk {$affectedCount} penugasan dinonaktifkan (mengikuti aturan periode tanggal).";
                 break;
 
             case 'delete':
@@ -535,6 +591,7 @@ class AssignmentController extends Controller
             'basis_st' => ['nullable', 'string', 'max:1000'],
             'target_respondents' => ['nullable', 'integer', 'min:0'],
             'status' => ['required', Rule::in(['draft', 'ongoing', 'completed', 'cancelled'])],
+            'is_enabled_by_admin' => ['nullable', 'boolean'],
             'excel_file' => ['nullable', 'file', 'extensions:xlsx,xls,csv,txt', 'max:10240'],
         ];
 
@@ -1081,6 +1138,140 @@ class AssignmentController extends Controller
             DB::rollBack();
             return back()->with('error', 'Terjadi kesalahan saat memproses data Excel: ' . $e->getMessage());
         }
+    }
+
+    /**
+     * Global Admin control: Enable or Disable all assignments visibility for Petugas.
+     */
+    public function toggleGlobalVisibility(Request $request)
+    {
+        $newState = $request->has('enabled')
+            ? $request->boolean('enabled')
+            : !Assignment::isGlobalPortalEnabled();
+
+        Assignment::setGlobalPortalEnabled($newState);
+
+        $label = $newState ? 'DIAKTIFKAN' : 'DINONAKTIFKAN';
+        ActivityLog::log(
+            'toggle_global',
+            'assignments',
+            "Administrator mengubah status global Penugasan Lapangan menjadi: {$label}."
+        );
+
+        $msg = $newState
+            ? 'Penugasan Lapangan berhasil DIAKTIFKAN. Penugasan tampil di dashboard petugas sesuai aturan Admin & Periode.'
+            : 'Penugasan Lapangan berhasil DINONAKTIFKAN. Seluruh penugasan kini disembunyikan dari dashboard petugas.';
+
+        return back()->with('success', $msg);
+    }
+
+    /**
+     * Per-assignment Admin toggle: Aktifkan / Nonaktifkan is_enabled_by_admin.
+     */
+    public function toggleAdminEnabled(Request $request, Assignment $assignment)
+    {
+        $newState = $request->has('is_enabled_by_admin')
+            ? $request->boolean('is_enabled_by_admin')
+            : !$assignment->is_enabled_by_admin;
+
+        $assignment->update(['is_enabled_by_admin' => $newState]);
+
+        $statusDesc = $newState ? 'Aktif Manual (Admin)' : 'Nonaktif Manual (Mengikuti Periode)';
+        ActivityLog::log(
+            'toggle_admin',
+            'assignments',
+            "Administrator mengubah kontrol manual penugasan '{$assignment->title}' menjadi: {$statusDesc}."
+        );
+
+        $msg = $newState
+            ? "Penugasan '{$assignment->title}' diaktifkan secara manual (Aktif Manual Admin)."
+            : "Aktif manual untuk penugasan '{$assignment->title}' dinonaktifkan. Status tampil mengikuti periode tanggal.";
+
+        return back()->with('success', $msg);
+    }
+
+    /**
+     * Update assignment period (start_date, end_date) & optional admin flag.
+     */
+    public function updatePeriod(Request $request, Assignment $assignment)
+    {
+        $validated = $request->validate([
+            'start_date' => ['required', 'date'],
+            'end_date' => ['required', 'date', 'after_or_equal:start_date'],
+            'is_enabled_by_admin' => ['nullable', 'boolean'],
+        ], [
+            'start_date.required' => 'Tanggal mulai periode penugasan wajib diisi.',
+            'end_date.required' => 'Tanggal selesai periode penugasan wajib diisi.',
+            'end_date.after_or_equal' => 'Tanggal selesai harus sama atau setelah tanggal mulai.',
+        ]);
+
+        $payload = [
+            'start_date' => $validated['start_date'],
+            'end_date' => $validated['end_date'],
+        ];
+
+        if ($request->has('is_enabled_by_admin')) {
+            $payload['is_enabled_by_admin'] = $request->boolean('is_enabled_by_admin');
+        }
+
+        $assignment->update($payload);
+
+        if ($this->sheetService->isConfigured()) {
+            $this->sheetService->update('assignments', $assignment->id, [
+                'start_date' => $assignment->start_date->toDateString(),
+                'end_date' => $assignment->end_date->toDateString(),
+                'updated_at' => now()->toISOString(),
+            ]);
+        }
+
+        ActivityLog::log(
+            'update_period',
+            'assignments',
+            "Memperbarui periode penugasan '{$assignment->title}' menjadi {$assignment->start_date->format('d/m/Y')} s.d. {$assignment->end_date->format('d/m/Y')}."
+        );
+
+        return back()->with('success', "Periode penugasan '{$assignment->title}' berhasil diperbarui!");
+    }
+
+    /**
+     * Assignment History (Riwayat Penugasan & Log Kontrol Admin/Periode).
+     */
+    public function history(Request $request)
+    {
+        $todayStr = now()->toDateString();
+
+        $historyQuery = Assignment::withTrashed()
+            ->withCount(['officers', 'respondents'])
+            ->with('creator')
+            ->where(function ($q) use ($todayStr) {
+                $q->whereNotNull('deleted_at')
+                  ->orWhere('status', 'completed')
+                  ->orWhere('status', 'cancelled')
+                  ->orWhereDate('end_date', '<', $todayStr);
+            });
+
+        if ($search = $request->input('search')) {
+            $historyQuery->where(function ($q) use ($search) {
+                $q->where('title', 'like', "%{$search}%")
+                  ->orWhere('location', 'like', "%{$search}%");
+            });
+        }
+
+        $historicalAssignments = $historyQuery->latest('end_date')->paginate(10, ['*'], 'history_page')->withQueryString();
+
+        $activityLogs = ActivityLog::with('user')
+            ->whereIn('module', ['assignments', 'assignment'])
+            ->latest()
+            ->paginate(15, ['*'], 'log_page')
+            ->withQueryString();
+
+        $globalAssignmentEnabled = Assignment::isGlobalPortalEnabled();
+
+        return view('admin.assignments.history', compact(
+            'historicalAssignments',
+            'activityLogs',
+            'globalAssignmentEnabled'
+        ));
     }
 }
 

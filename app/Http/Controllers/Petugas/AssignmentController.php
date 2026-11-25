@@ -4,7 +4,9 @@ namespace App\Http\Controllers\Petugas;
 
 use App\Http\Controllers\Controller;
 use App\Models\ActivityLog;
+use App\Models\Assignment;
 use App\Models\AssignmentOfficer;
+use App\Services\AssignmentVisibilityService;
 use App\Services\GoogleSheetService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -25,23 +27,31 @@ class AssignmentController extends Controller
     public function index()
     {
         $userId = Auth::id();
+        $visibilityService = app(AssignmentVisibilityService::class);
+        $isAssignmentPortalEnabled = $visibilityService->isGlobalEnabled();
+        $assignmentEmptyMessage = $visibilityService->getEmptyMessage();
 
-        $assignedTasks = AssignmentOfficer::with(['assignment.creator'])
-            ->where('user_id', $userId)
+        $visibleBaseQuery = AssignmentOfficer::where('user_id', $userId)
+            ->whereHas('assignment', fn($q) => $q->visibleToOfficer());
+
+        $assignedTasks = (clone $visibleBaseQuery)
+            ->with(['assignment.creator'])
             ->latest()
             ->paginate(10);
 
-        $totalTasks = AssignmentOfficer::where('user_id', $userId)->count();
-        $inProgressTasks = AssignmentOfficer::where('user_id', $userId)->where('status', 'in_progress')->count();
-        $completedTasks = AssignmentOfficer::where('user_id', $userId)->where('status', 'completed')->count();
-        $pendingTasks = AssignmentOfficer::where('user_id', $userId)->where('status', 'pending')->count();
+        $totalTasks = (clone $visibleBaseQuery)->count();
+        $inProgressTasks = (clone $visibleBaseQuery)->where('status', 'in_progress')->count();
+        $completedTasks = (clone $visibleBaseQuery)->where('status', 'completed')->count();
+        $pendingTasks = (clone $visibleBaseQuery)->where('status', 'pending')->count();
 
         return view('petugas.assignments.index', compact(
             'assignedTasks',
             'totalTasks',
             'inProgressTasks',
             'completedTasks',
-            'pendingTasks'
+            'pendingTasks',
+            'isAssignmentPortalEnabled',
+            'assignmentEmptyMessage'
         ));
     }
 

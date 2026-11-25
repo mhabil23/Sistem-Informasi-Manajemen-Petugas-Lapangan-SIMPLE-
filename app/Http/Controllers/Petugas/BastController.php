@@ -9,6 +9,7 @@ use App\Models\AssignmentOfficer;
 use App\Models\OfficerBast;
 use App\Models\Respondent;
 use App\Models\RespondentBast;
+use App\Models\SpkrtPeriod;
 use App\Models\User;
 use App\Services\GoogleSheetService;
 use Barryvdh\DomPDF\Facade\Pdf;
@@ -47,12 +48,19 @@ class BastController extends Controller
 
         $completedCount = $myRespondents->filter(fn($r) => $r->basts->isNotEmpty())->count();
         $pendingCount = $myRespondents->filter(fn($r) => $r->basts->isEmpty())->count();
+        $currentPeriod = SpkrtPeriod::currentPeriod();
 
-        return view('petugas.basts.respondents', compact('basts', 'myRespondents', 'completedCount', 'pendingCount'));
+        return view('petugas.basts.respondents', compact('basts', 'myRespondents', 'completedCount', 'pendingCount', 'currentPeriod'));
     }
 
     public function storeRespondent(Request $request)
     {
+        // Validasi Periode Pengisian SPKRT (Req 3, 4, 5, 6, 8)
+        $currentPeriod = SpkrtPeriod::currentPeriod();
+        if (!$currentPeriod || !$currentPeriod->isOpen()) {
+            $periodMsg = $currentPeriod ? $currentPeriod->status_message : 'Periode pengisian telah ditutup';
+            return back()->withInput()->with('error', $periodMsg);
+        }
         $validated = $request->validate([
             'respondent_id' => ['required', 'exists:respondents,id'],
             'respondent_number' => ['nullable', 'integer', 'min:1'],

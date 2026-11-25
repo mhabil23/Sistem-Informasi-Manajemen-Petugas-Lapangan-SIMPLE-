@@ -266,10 +266,16 @@
     @empty
         <div class="col-12">
             <div class="bento-card text-center py-5">
-                <i class="bi bi-folder2-open display-5 text-secondary opacity-50 mb-3 d-block"></i>
-                <h6 class="fw-bold text-dark">Belum Ada Penugasan Aktif</h6>
+                <i class="bi {{ isset($isAssignmentPortalEnabled) && !$isAssignmentPortalEnabled ? 'bi-lock-fill text-danger' : 'bi-folder2-open text-secondary' }} display-5 opacity-50 mb-3 d-block"></i>
+                <h6 class="fw-bold text-dark">
+                    {{ $assignmentEmptyMessage ?? 'Belum ada penugasan lapangan yang tersedia saat ini.' }}
+                </h6>
                 <p class="text-muted small max-w-md mx-auto mb-0">
-                    Administrator belum memberikan penugasan baru untuk akun Anda. Silakan hubungi admin atau periksa kembali secara berkala.
+                    @if(isset($isAssignmentPortalEnabled) && !$isAssignmentPortalEnabled)
+                        Administrator saat ini menonaktifkan tampilan penugasan lapangan. Silakan hubungi admin atau periksa kembali nanti.
+                    @else
+                        Penugasan hanya tampil apabila diaktifkan Admin atau periode tanggal penugasan sedang berlangsung.
+                    @endif
                 </p>
             </div>
         </div>
