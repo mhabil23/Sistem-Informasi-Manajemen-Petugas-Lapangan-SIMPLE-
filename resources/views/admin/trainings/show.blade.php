@@ -155,16 +155,50 @@
                     <p class="text-muted small mt-2 mb-0">{{ $training->description }}</p>
                 @endif
             </div>
-            <div class="col-lg-4 text-lg-end mt-3 mt-lg-0">
+            <div class="col-lg-5 text-lg-end mt-3 mt-lg-0">
                 <div class="d-flex flex-wrap justify-content-lg-end gap-2">
+                    <button type="button" class="btn btn-outline-primary rounded-pill px-3 py-1.5 fw-semibold d-inline-flex align-items-center gap-1.5" data-bs-toggle="modal" data-bs-target="#shareLinkModal" style="font-size: 0.85rem;">
+                        <i class="bi bi-qr-code-scan"></i> Link &amp; QR Presensi
+                    </button>
                     <button type="button" class="btn btn-bps-orange rounded-pill px-3 py-1.5" data-bs-toggle="modal" data-bs-target="#createParticipantModal" style="font-size: 0.85rem;">
                         <i class="bi bi-person-plus me-1"></i> Tambah Peserta
                     </button>
                     <a href="{{ route('admin.trainings.attendance.pdf', $training) }}" class="btn btn-outline-danger rounded-pill px-3 py-1.5" style="font-size: 0.85rem;">
-                        <i class="bi bi-file-earmark-pdf me-1"></i> Cetak Daftar Hadir PDF
+                        <i class="bi bi-file-earmark-pdf me-1"></i> Cetak PDF
                     </a>
                 </div>
             </div>
+        </div>
+    </div>
+</div>
+
+<!-- Banner Link Presensi Online Peserta (WhatsApp & Proyektor) -->
+<div class="bento-card mb-4 border shadow-sm p-3.5" style="border-radius: 20px; background: linear-gradient(135deg, #FFFFFF 0%, #F0FDF4 100%); border-color: #BBF7D0 !important;">
+    <div class="d-flex flex-wrap align-items-center justify-content-between gap-3">
+        <div class="d-flex align-items-center gap-3">
+            <div class="rounded-4 d-flex align-items-center justify-content-center text-white flex-shrink-0 shadow-sm" style="width: 46px; height: 46px; background: #16A34A;">
+                <i class="bi bi-link-45deg fs-4"></i>
+            </div>
+            <div>
+                <div class="d-flex align-items-center gap-2 mb-0.5">
+                    <span class="fw-bold text-dark" style="font-size: 0.94rem;">Link Presensi &amp; Tanda Tangan Digital Peserta</span>
+                    <span class="badge bg-success text-white rounded-pill px-2.5 py-0.5" style="font-size: 0.68rem;">Siap Dibagikan</span>
+                </div>
+                <div class="text-secondary small font-monospace text-truncate" style="font-size: 0.78rem; max-width: 480px;">
+                    {{ $training->public_attendance_url }}
+                </div>
+            </div>
+        </div>
+        <div class="d-flex flex-wrap align-items-center gap-2">
+            <button type="button" class="btn btn-sm btn-outline-success rounded-pill px-3 py-1.5 fw-semibold d-inline-flex align-items-center gap-1.5" onclick="copyAttendanceLink('{{ $training->public_attendance_url }}')">
+                <i class="bi bi-clipboard2-check"></i> <span id="copyBtnText">Salin Link</span>
+            </button>
+            <button type="button" class="btn btn-sm btn-primary rounded-pill px-3 py-1.5 fw-semibold d-inline-flex align-items-center gap-1.5" data-bs-toggle="modal" data-bs-target="#shareLinkModal">
+                <i class="bi bi-qr-code"></i> Tampilkan QR Code
+            </button>
+            <a href="{{ $training->public_attendance_url }}" target="_blank" class="btn btn-sm btn-outline-secondary rounded-pill px-3 py-1.5" title="Buka Halaman Presensi di Tab Baru">
+                <i class="bi bi-box-arrow-up-right me-1"></i> Buka Link
+            </a>
         </div>
     </div>
 </div>
@@ -285,16 +319,26 @@
                         </td>
                         <td class="text-center" data-label="Presensi">
                             @if($p->attendance_status === 'present')
-                                <span class="badge bg-success-subtle text-success border border-success-subtle px-2 py-1">
-                                    <i class="bi bi-check2 me-1"></i> Hadir
-                                </span>
+                                <div class="d-flex flex-column align-items-center gap-1">
+                                    <span class="badge bg-success-subtle text-success border border-success-subtle px-2 py-0.5" style="font-size: 0.7rem;">
+                                        <i class="bi bi-check2-circle me-1"></i> Hadir
+                                    </span>
+                                    @if($p->signature_path && file_exists(storage_path('app/public/' . $p->signature_path)))
+                                        <div class="border rounded bg-white px-1 py-0.5 shadow-xs" style="max-width: 70px;" title="Tanda tangan digital peserta">
+                                            <img src="{{ asset('storage/' . $p->signature_path) }}" alt="TTD" style="max-height: 20px; max-width: 60px;">
+                                        </div>
+                                    @endif
+                                    @if($p->signed_at)
+                                        <span class="text-muted" style="font-size: 0.65rem;">{{ $p->signed_at->format('H:i') }} WITA</span>
+                                    @endif
+                                </div>
                             @elseif($p->attendance_status === 'excused')
                                 <span class="badge bg-warning-subtle text-warning-emphasis border border-warning-subtle px-2 py-1">
                                     <i class="bi bi-clock me-1"></i> Izin
                                 </span>
                             @else
-                                <span class="badge bg-danger-subtle text-danger border border-danger-subtle px-2 py-1">
-                                    <i class="bi bi-x me-1"></i> Alpa
+                                <span class="badge bg-secondary-subtle text-secondary border px-2 py-0.5" style="font-size: 0.7rem;">
+                                    Belum Hadir
                                 </span>
                             @endif
                         </td>
@@ -507,10 +551,100 @@
         </div>
     </div>
 </div>
+
+<!-- ==============================================================
+     MODAL SHARE LINK & QR CODE PRESENSI ONLINE
+     ============================================================== -->
+<div class="modal fade" id="shareLinkModal" tabindex="-1" aria-labelledby="shareLinkModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content border-0 shadow-lg" style="border-radius: 24px; overflow: hidden;">
+            <div class="modal-header bg-primary text-white border-0 px-4 py-3">
+                <div class="d-flex align-items-center gap-2">
+                    <div class="bg-white bg-opacity-25 rounded-circle p-2 d-flex align-items-center justify-content-center" style="width: 36px; height: 36px;">
+                        <i class="bi bi-qr-code text-white"></i>
+                    </div>
+                    <div>
+                        <h6 class="modal-title fw-bold mb-0" id="shareLinkModalLabel">QR Code & Link Presensi</h6>
+                        <small class="text-white-50">Tanda tangan digital langsung dari HP peserta</small>
+                    </div>
+                </div>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body p-4 text-center">
+                <div class="mb-3">
+                    <span class="badge bg-primary-subtle text-primary border border-primary-subtle px-3 py-1 rounded-pill small fw-bold">
+                        {{ Str::limit($training->title, 40) }}
+                    </span>
+                </div>
+
+                <!-- QR Code Box -->
+                <div class="p-3 bg-light rounded-4 d-inline-block border shadow-sm mb-3">
+                    <img src="https://api.qrserver.com/v1/create-qr-code/?size=220x220&margin=10&data={{ urlencode($training->public_attendance_url) }}" 
+                         alt="QR Code Presensi {{ $training->title }}" 
+                         class="img-fluid rounded-3" 
+                         style="width: 220px; height: 220px;"
+                         loading="lazy">
+                    <div class="small text-muted mt-2">
+                        <i class="bi bi-camera me-1"></i> Pindai kamera HP untuk mengisi
+                    </div>
+                </div>
+
+                <!-- Link Input Copy -->
+                <div class="text-start mb-3">
+                    <label class="form-label small fw-bold text-secondary text-uppercase mb-1">
+                        <i class="bi bi-link-45deg me-1"></i> Tautan / Link Presensi Langsung
+                    </label>
+                    <div class="input-group">
+                        <input type="text" id="publicAttendanceUrlInput" class="form-control form-control-sm font-monospace bg-light border-end-0" 
+                               value="{{ $training->public_attendance_url }}" readonly>
+                        <button class="btn btn-primary btn-sm px-3 fw-bold" type="button" onclick="copyAttendanceLink('{{ $training->public_attendance_url }}')">
+                            <i class="bi bi-clipboard me-1"></i> Salin
+                        </button>
+                    </div>
+                    <div class="form-text small text-muted">
+                        Bisa dibagikan ke WhatsApp grup peserta atau ditampilkan di proyektor ruangan.
+                    </div>
+                </div>
+
+                <div class="alert alert-info py-2 px-3 text-start small mb-0 rounded-3 border-0 bg-info-subtle text-info-emphasis">
+                    <i class="bi bi-info-circle-fill me-1 text-info"></i>
+                    <strong>Cara Kerja:</strong> Peserta membuka tautan, memilih nama mereka, menandatangani langsung di layar HP (touchscreen), lalu tanda tangan otomatis tercetak di format PDF BPS.
+                </div>
+            </div>
+            <div class="modal-footer bg-light border-top px-4 py-2.5 d-flex justify-content-between">
+                <a href="{{ $training->public_attendance_url }}" target="_blank" class="btn btn-sm btn-outline-secondary rounded-pill px-3">
+                    <i class="bi bi-box-arrow-up-right me-1"></i> Tes Buka Form
+                </a>
+                <button type="button" class="btn btn-sm btn-secondary rounded-pill px-4" data-bs-dismiss="modal">Tutup</button>
+            </div>
+        </div>
+    </div>
+</div>
 @endsection
 
 @push('scripts')
 <script>
+    function copyAttendanceLink(url) {
+        if (navigator.clipboard && navigator.clipboard.writeText) {
+            navigator.clipboard.writeText(url).then(() => {
+                alert('Tautan presensi berhasil disalin ke clipboard!\n\nAnda dapat membagikannya ke WhatsApp grup peserta atau membukanya di browser.');
+            }).catch(() => {
+                fallbackCopy(url);
+            });
+        } else {
+            fallbackCopy(url);
+        }
+    }
+
+    function fallbackCopy(text) {
+        const input = document.getElementById('publicAttendanceUrlInput') || document.getElementById('publicLinkInput');
+        if (input) {
+            input.select();
+            document.execCommand('copy');
+            alert('Tautan presensi berhasil disalin!');
+        }
+    }
+
     function openEditParticipantModal(p) {
         document.getElementById('editParticipantForm').action = '/admin/trainings/{{ $training->id }}/participants/' + p.id;
         document.getElementById('edit_part_name').value = p.name;

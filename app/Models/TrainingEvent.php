@@ -29,6 +29,7 @@ class TrainingEvent extends Model
         'notes',
         'quota',
         'status',
+        'public_token',
         'assignment_id',
         'created_by',
     ];
@@ -45,6 +46,30 @@ class TrainingEvent extends Model
     public function creator(): BelongsTo
     {
         return $this->belongsTo(User::class, 'created_by');
+    }
+
+    protected static function booted(): void
+    {
+        static::creating(function ($event) {
+            if (empty($event->public_token)) {
+                $event->public_token = \Illuminate\Support\Str::random(24);
+            }
+        });
+    }
+
+    public function ensurePublicToken(): string
+    {
+        if (empty($this->public_token)) {
+            $this->public_token = \Illuminate\Support\Str::random(24);
+            $this->save();
+        }
+
+        return $this->public_token;
+    }
+
+    public function getPublicAttendanceUrlAttribute(): string
+    {
+        return route('attendance.public.show', $this->ensurePublicToken());
     }
 
     public function assignment(): BelongsTo

@@ -175,4 +175,78 @@ class AttendanceSheetTest extends TestCase
             'name' => 'Dewi Lestari',
         ]);
     }
+
+    public function test_public_user_can_access_attendance_page_via_token(): void
+    {
+        $training = TrainingEvent::create([
+            'title' => 'Pelatihan Petugas SPKRT 2026',
+            'start_date' => now()->toDateString(),
+            'end_date' => now()->addDays(2)->toDateString(),
+            'location' => 'Aula BPS Kab. Kolaka',
+            'created_by' => $this->admin->id,
+        ]);
+
+        $p1 = TrainingParticipant::create([
+            'training_event_id' => $training->id,
+            'name' => 'Peserta Test 1',
+            'category' => 'PCL',
+            'attendance_status' => 'absent',
+        ]);
+
+        $response = $this->get(route('attendance.public.show', $training->public_token));
+        $response->assertStatus(200);
+        $response->assertSee('Pelatihan Petugas SPKRT 2026');
+        $response->assertSee('Peserta Test 1');
+    }
+
+    public function test_public_participant_can_submit_signature(): void
+    {
+        $training = TrainingEvent::create([
+            'title' => 'Pelatihan Petugas SPKRT 2026',
+            'start_date' => now()->toDateString(),
+            'end_date' => now()->addDays(2)->toDateString(),
+            'location' => 'Aula BPS Kab. Kolaka',
+            'created_by' => $this->admin->id,
+        ]);
+
+        $participant = TrainingParticipant::create([
+            'training_event_id' => $training->id,
+            'name' => 'Peserta Hadir Langsung',
+            'category' => 'PCL',
+            'attendance_status' => 'absent',
+        ]);
+
+        // 1x1 transparent PNG base64
+        $dummySignature = 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mNkYAAAAAYAAjCB0C8AAAAASUVORK5CYII=';
+
+        $response = $this->post(route('attendance.public.submit', $training->public_token), [
+            'participant_id' => $participant->id,
+            'signature_data' => $dummySignature,
+        ]);
+
+        $response->assertRedirect(route('attendance.public.success', [
+            'token' => $training->public_token,
+            'p' => $participant->id,
+        ]));
+
+        $participant->refresh();
+        $this->assertEquals('present', $participant->attendance_status);
+        $this->assertNotNull($participant->signature_path);
+        $this->assertNotNull($participant->signed_at);
+
+        // Success page check
+        $successResponse = $this->get(route('attendance.public.success', [
+            'token' => $training->public_token,
+            'p' => $participant->id,
+        ]));
+        $successResponse->assertStatus(200);
+        $successResponse->assertSee('PRESENSI BERHASIL TERCATAT');
+        $successResponse->assertSee('Peserta Hadir Langsung');
+    }
+
+    public function test_public_attendance_returns_404_for_invalid_token(): void
+    {
+        $response = $this->get('/presensi/token-palsu-ngawur-123');
+        $response->assertStatus(404);
+    }
 }

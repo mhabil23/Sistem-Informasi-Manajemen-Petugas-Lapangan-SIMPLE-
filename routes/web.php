@@ -23,6 +23,11 @@ Route::middleware('guest')->group(function () {
     Route::post('/login', [AuthController::class, 'login'])->name('login.post');
 });
 
+// Presensi & Tanda Tangan Daftar Hadir Publik via Link / QR Code (Bisa diakses peserta tanpa login)
+Route::get('/presensi/{token}', [\App\Http\Controllers\PublicAttendanceController::class, 'show'])->name('attendance.public.show');
+Route::post('/presensi/{token}', [\App\Http\Controllers\PublicAttendanceController::class, 'submit'])->name('attendance.public.submit');
+Route::get('/presensi/{token}/sukses', [\App\Http\Controllers\PublicAttendanceController::class, 'success'])->name('attendance.public.success');
+
 Route::middleware('auth')->group(function () {
     Route::post('/logout', [AuthController::class, 'logout'])->name('logout');
     Route::post('/switch-role', [\App\Http\Controllers\RoleSwitchController::class, 'switch'])->name('role.switch');
