@@ -89,6 +89,8 @@
     }
     .bento-action-btn.btn-view { color: #0284C7; border-color: #BAE6FD; background: #F0F9FF; }
     .bento-action-btn.btn-view:hover { background: #0284C7; color: #FFFFFF; }
+    .bento-action-btn.btn-qr { color: #4F46E5; border-color: #C7D2FE; background: #EEF2FF; }
+    .bento-action-btn.btn-qr:hover { background: #4F46E5; color: #FFFFFF; }
     .bento-action-btn.btn-download { color: #0D9488; border-color: #99F6E4; background: #F0FDFA; }
     .bento-action-btn.btn-download:hover { background: #0D9488; color: #FFFFFF; }
     .bento-action-btn.btn-edit { color: #D97706; border-color: #FDE68A; background: #FFFBEB; }
@@ -181,12 +183,12 @@
         <table class="table bento-table-fixed align-middle mb-0">
             <thead>
                 <tr>
-                    <th style="width: 18%; min-width: 160px;"><i class="bi bi-file-earmark-text me-1 text-primary"></i> Nomor &amp; Tanggal Dokumen</th>
+                    <th style="width: 17%; min-width: 150px;"><i class="bi bi-file-earmark-text me-1 text-primary"></i> Nomor &amp; Tanggal Dokumen</th>
                     <th style="width: 24%; min-width: 190px;"><i class="bi bi-briefcase me-1 text-muted"></i> Judul &amp; Kegiatan Terkait</th>
-                    <th style="width: 17%; min-width: 140px;"><i class="bi bi-geo-alt-fill text-danger me-1"></i> Tempat Pelaksanaan</th>
-                    <th style="width: 15%; min-width: 130px;"><i class="bi bi-people-fill me-1 text-primary"></i> Peserta Hadir</th>
-                    <th style="width: 12%; min-width: 120px;"><i class="bi bi-person-badge me-1 text-info"></i> Penanggung Jawab</th>
-                    <th class="text-end pe-3" style="width: 14%; min-width: 145px;">Aksi</th>
+                    <th style="width: 16%; min-width: 130px;"><i class="bi bi-geo-alt-fill text-danger me-1"></i> Tempat Pelaksanaan</th>
+                    <th style="width: 14%; min-width: 120px;"><i class="bi bi-people-fill me-1 text-primary"></i> Peserta Hadir</th>
+                    <th style="width: 12%; min-width: 110px;"><i class="bi bi-person-badge me-1 text-info"></i> Penanggung Jawab</th>
+                    <th class="text-end pe-3" style="width: 17%; min-width: 175px;">Aksi</th>
                 </tr>
             </thead>
             <tbody>
@@ -219,6 +221,19 @@
                                     {{ $tr->document_title }}
                                 </div>
                             @endif
+                            <div class="mt-1 d-flex align-items-center gap-1.5 flex-wrap">
+                                <button type="button" 
+                                        class="btn btn-xs btn-primary rounded-pill py-0.5 px-2 fw-semibold d-inline-flex align-items-center gap-1 shadow-2xs" 
+                                        style="font-size: 0.68rem;" 
+                                        onclick="openShareLinkModal('{{ $tr->public_attendance_url }}', '{{ addslashes($tr->activity_subtitle ?: $tr->title) }}')">
+                                    <i class="bi bi-qr-code"></i> Link &amp; QR Presensi
+                                </button>
+                                <a href="{{ route('admin.trainings.show', $tr) }}" 
+                                   class="btn btn-xs btn-light text-secondary border rounded-pill py-0.5 px-2 fw-semibold d-inline-flex align-items-center gap-1" 
+                                   style="font-size: 0.68rem;">
+                                    <i class="bi bi-people"></i> Detail Peserta
+                                </a>
+                            </div>
                         </td>
                         <td>
                             <div class="small fw-semibold text-dark text-truncate" style="font-size: 0.78rem;" title="{{ $tr->document_place ?: $tr->location }}">
@@ -262,6 +277,23 @@
                         </td>
                         <td class="text-end pe-3">
                             <div class="d-flex align-items-center justify-content-end gap-1 flex-nowrap">
+                                <!-- Link & QR Presensi Online -->
+                                <button type="button" 
+                                        class="bento-action-btn btn-qr" 
+                                        title="Link &amp; QR Presensi Online" 
+                                        data-bs-toggle="tooltip"
+                                        onclick="openShareLinkModal('{{ $tr->public_attendance_url }}', '{{ addslashes($tr->activity_subtitle ?: $tr->title) }}')">
+                                    <i class="bi bi-qr-code"></i>
+                                </button>
+
+                                <!-- Detail Peserta & TTD -->
+                                <a href="{{ route('admin.trainings.show', $tr) }}" 
+                                   class="bento-action-btn btn-view" 
+                                   title="Detail Peserta &amp; Tanda Tangan" 
+                                   data-bs-toggle="tooltip">
+                                    <i class="bi bi-people"></i>
+                                </a>
+
                                 <!-- Unduh PDF -->
                                 <a href="{{ route('admin.trainings.attendance.pdf', $tr) }}" 
                                    class="bento-action-btn btn-download" 
@@ -650,8 +682,110 @@
     </div>
 </div>
 
+<!-- ==============================================================
+     MODAL SHARE LINK & QR CODE PRESENSI ONLINE
+     ============================================================== -->
+<div class="modal fade" id="shareLinkModal" tabindex="-1" aria-labelledby="shareLinkModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content border-0 shadow-lg" style="border-radius: 24px; overflow: hidden;">
+            <div class="modal-header bg-primary text-white border-0 px-4 py-3">
+                <div class="d-flex align-items-center gap-2">
+                    <div class="bg-white bg-opacity-25 rounded-circle p-2 d-flex align-items-center justify-content-center" style="width: 36px; height: 36px;">
+                        <i class="bi bi-qr-code text-white"></i>
+                    </div>
+                    <div>
+                        <h6 class="modal-title fw-bold mb-0" id="shareLinkModalLabel">QR Code & Link Presensi</h6>
+                        <small class="text-white-50">Tanda tangan digital langsung dari HP peserta</small>
+                    </div>
+                </div>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body p-4 text-center">
+                <div class="mb-3">
+                    <span id="shareModalActivityTitle" class="badge bg-primary-subtle text-primary border border-primary-subtle px-3 py-1 rounded-pill small fw-bold text-truncate" style="max-width: 90%;">
+                        -
+                    </span>
+                </div>
+
+                <!-- QR Code Box -->
+                <div class="p-3 bg-light rounded-4 d-inline-block border shadow-sm mb-3">
+                    <img id="shareModalQrImage" src="" 
+                         alt="QR Code Presensi" 
+                         class="img-fluid rounded-3" 
+                         style="width: 220px; height: 220px;"
+                         loading="lazy">
+                    <div class="small text-muted mt-2">
+                        <i class="bi bi-camera me-1"></i> Pindai kamera HP untuk mengisi presensi
+                    </div>
+                </div>
+
+                <!-- Link Input Copy -->
+                <div class="text-start mb-3">
+                    <label class="form-label small fw-bold text-secondary text-uppercase mb-1">
+                        <i class="bi bi-link-45deg me-1"></i> Tautan / Link Presensi Langsung
+                    </label>
+                    <div class="input-group">
+                        <input type="text" id="publicAttendanceUrlInput" class="form-control form-control-sm font-monospace bg-light border-end-0" 
+                               value="" readonly>
+                        <button class="btn btn-primary btn-sm px-3 fw-bold" type="button" onclick="copyModalAttendanceLink()">
+                            <i class="bi bi-clipboard me-1"></i> Salin
+                        </button>
+                    </div>
+                    <div class="form-text small text-muted">
+                        Bisa dibagikan ke WhatsApp grup peserta atau ditampilkan di proyektor ruangan.
+                    </div>
+                </div>
+
+                <div class="alert alert-info py-2 px-3 text-start small mb-0 rounded-3 border-0 bg-info-subtle text-info-emphasis">
+                    <i class="bi bi-info-circle-fill me-1 text-info"></i>
+                    <strong>Cara Kerja:</strong> Peserta membuka tautan, memilih nama mereka, menandatangani langsung di layar HP (touchscreen), lalu tanda tangan otomatis tercetak di format PDF BPS.
+                </div>
+            </div>
+            <div class="modal-footer bg-light border-top px-4 py-2.5 d-flex justify-content-between">
+                <a id="shareModalDirectLink" href="#" target="_blank" class="btn btn-sm btn-outline-secondary rounded-pill px-3">
+                    <i class="bi bi-box-arrow-up-right me-1"></i> Tes Buka Form
+                </a>
+                <button type="button" class="btn btn-sm btn-secondary rounded-pill px-4" data-bs-dismiss="modal">Tutup</button>
+            </div>
+        </div>
+    </div>
+</div>
+
 @push('scripts')
 <script>
+    function openShareLinkModal(url, title) {
+        document.getElementById('shareModalActivityTitle').textContent = title || 'Daftar Hadir';
+        document.getElementById('shareModalQrImage').src = 'https://api.qrserver.com/v1/create-qr-code/?size=220x220&margin=10&data=' + encodeURIComponent(url);
+        document.getElementById('publicAttendanceUrlInput').value = url;
+        document.getElementById('shareModalDirectLink').href = url;
+
+        const modal = new bootstrap.Modal(document.getElementById('shareLinkModal'));
+        modal.show();
+    }
+
+    function copyModalAttendanceLink() {
+        const url = document.getElementById('publicAttendanceUrlInput').value;
+        if (!url) return;
+
+        if (navigator.clipboard && navigator.clipboard.writeText) {
+            navigator.clipboard.writeText(url).then(() => {
+                alert('Tautan presensi berhasil disalin ke clipboard!\n\nAnda dapat membagikannya ke WhatsApp grup peserta atau membukanya di browser.');
+            }).catch(() => {
+                fallbackCopyUrl(url);
+            });
+        } else {
+            fallbackCopyUrl(url);
+        }
+    }
+
+    function fallbackCopyUrl(url) {
+        const input = document.getElementById('publicAttendanceUrlInput');
+        if (input) {
+            input.select();
+            document.execCommand('copy');
+            alert('Tautan presensi berhasil disalin!');
+        }
+    }
     // Database Assignments & Officers Cache
     const assignmentsCache = @json($assignments);
     const officersCache = @json($officers);
