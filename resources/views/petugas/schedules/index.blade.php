@@ -99,19 +99,31 @@
                         <i class="bi bi-calendar-date me-1"></i>
                         {{ $item->start_time->translatedFormat('l, d F Y') }}
                     </span>
-                    @if($item->status === 'completed')
-                        <span class="badge bg-success-subtle text-success border border-success-subtle rounded-pill px-2.5 py-1 fw-bold">
-                            <i class="bi bi-check-circle-fill me-1"></i> Selesai
-                        </span>
-                    @elseif($item->status === 'in_progress')
-                        <span class="badge bg-warning-subtle text-warning-emphasis border border-warning-subtle rounded-pill px-2.5 py-1 fw-bold">
-                            <i class="bi bi-hourglass-split me-1"></i> Berlangsung
-                        </span>
-                    @else
-                        <span class="badge bg-primary-subtle text-primary border border-primary-subtle rounded-pill px-2.5 py-1 fw-bold">
-                            <i class="bi bi-clock me-1"></i> Terjadwal
-                        </span>
-                    @endif
+                    <div class="d-flex align-items-center gap-1.5">
+                        @if(($item->officer_status ?? 'active') === 'inactive')
+                            <span class="badge bg-danger-subtle text-danger border border-danger-subtle rounded-pill px-2 py-1 fw-bold" style="font-size: 0.72rem;" title="Status Penugasan Anda: Tidak Aktif">
+                                <i class="bi bi-person-x-fill me-1"></i> Tidak Aktif
+                            </span>
+                        @else
+                            <span class="badge bg-success-subtle text-success border border-success-subtle rounded-pill px-2 py-1 fw-bold" style="font-size: 0.72rem;" title="Status Penugasan Anda: Aktif Bertugas">
+                                <i class="bi bi-person-check-fill me-1"></i> Aktif Bertugas
+                            </span>
+                        @endif
+
+                        @if($item->status === 'completed')
+                            <span class="badge bg-success-subtle text-success border border-success-subtle rounded-pill px-2.5 py-1 fw-bold">
+                                <i class="bi bi-check-circle-fill me-1"></i> Selesai
+                            </span>
+                        @elseif($item->status === 'in_progress')
+                            <span class="badge bg-warning-subtle text-warning-emphasis border border-warning-subtle rounded-pill px-2.5 py-1 fw-bold">
+                                <i class="bi bi-hourglass-split me-1"></i> Berlangsung
+                            </span>
+                        @else
+                            <span class="badge bg-primary-subtle text-primary border border-primary-subtle rounded-pill px-2.5 py-1 fw-bold">
+                                <i class="bi bi-clock me-1"></i> Terjadwal
+                            </span>
+                        @endif
+                    </div>
                 </div>
 
                 <h5 class="fw-bold text-dark mb-2" style="font-size: 1.02rem;">{{ $item->title }}</h5>

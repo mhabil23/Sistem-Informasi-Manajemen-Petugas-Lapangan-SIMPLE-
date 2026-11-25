@@ -1,11 +1,12 @@
 @extends('layouts.app')
 
-@section('title', 'Progres Pendataan Lapangan')
-@section('page_title', 'Progres Pendataan Lapangan (Tanda Terima Responden)')
+@section('title', 'Tanda Terima Responden - SIMPEL')
+@section('page_title', 'Tanda Terima Responden (Dokumen BAST)')
 
 @section('breadcrumb')
     <li class="breadcrumb-item"><a href="{{ route('admin.dashboard') }}" class="text-decoration-none">Admin</a></li>
-    <li class="breadcrumb-item active" aria-current="page">Progres Pendataan Lapangan</li>
+    <li class="breadcrumb-item">Administrasi</li>
+    <li class="breadcrumb-item active" aria-current="page">Tanda Terima Responden</li>
 @endsection
 
 @push('styles')
@@ -228,7 +229,7 @@
 <div class="bento-card-clean p-3 mb-3">
     <form method="GET" action="{{ route('admin.basts.respondents.index') }}" class="row g-2 align-items-center">
         <!-- Search Input -->
-        <div class="col-lg-3 col-md-6">
+        <div class="col-xl-3 col-lg-3 col-md-6">
             <div class="input-group">
                 <span class="input-group-text bg-white border-end-0 text-muted">
                     <i class="bi bi-search"></i>
@@ -242,19 +243,39 @@
         </div>
 
         <!-- Filter Kegiatan -->
-        <div class="col-lg-3 col-md-6">
+        <div class="col-xl-3 col-lg-3 col-md-6">
             <select name="assignment_id" id="filter_bast_assignment" class="form-select" onchange="syncBastFilterOfficerDropdown()">
-                <option value="">-- Semua Kegiatan --</option>
+                <option value="">-- Pilih Kegiatan --</option>
                 @foreach($assignments as $assignment)
                     <option value="{{ $assignment->id }}" {{ request('assignment_id') == $assignment->id ? 'selected' : '' }}>{{ $assignment->title }}</option>
                 @endforeach
             </select>
         </div>
 
+        <!-- Filter Tim Responden / Pengawas PML -->
+        <div class="col-xl-2 col-lg-2 col-md-6">
+            <select name="team_id" id="filter_bast_team" class="form-select">
+                <option value="">-- Pilih Tim Responden --</option>
+                <optgroup label="Kategori Peran Regu">
+                    <option value="role_pcl" {{ request('team_id') === 'role_pcl' ? 'selected' : '' }}>Tim Pencacah (PCL / Mitra)</option>
+                    <option value="role_pml" {{ request('team_id') === 'role_pml' ? 'selected' : '' }}>Tim Pengawas (PML / Organik)</option>
+                </optgroup>
+                @if(isset($teams) && count($teams) > 0)
+                    <optgroup label="Tim Pengawas (PML)">
+                        @foreach($teams as $t)
+                            <option value="{{ $t->id }}" {{ request('team_id') == $t->id ? 'selected' : '' }}>
+                                Tim {{ $t->name }} (PML{{ $t->district ? ' - ' . $t->district : '' }})
+                            </option>
+                        @endforeach
+                    </optgroup>
+                @endif
+            </select>
+        </div>
+
         <!-- Filter Petugas PCL -->
-        <div class="col-lg-3 col-md-6">
+        <div class="col-xl-2 col-lg-2 col-md-6">
             <select name="officer_id" id="filter_bast_officer" class="form-select">
-                <option value="">-- Semua Petugas PCL --</option>
+                <option value="">-- Pilih Petugas PCL --</option>
                 @foreach($officers as $officer)
                     <option value="{{ $officer->id }}" {{ request('officer_id') == $officer->id ? 'selected' : '' }}>{{ $officer->name }}</option>
                 @endforeach
@@ -262,11 +283,11 @@
         </div>
 
         <!-- Tombol Filter & Reset -->
-        <div class="col-lg-3 col-md-6 d-flex gap-1.5">
+        <div class="col-xl-2 col-lg-2 col-md-12 d-flex gap-1.5">
             <button type="submit" class="btn btn-bps-orange flex-fill justify-content-center py-2" title="Terapkan Filter">
                 <i class="bi bi-funnel-fill me-1"></i> Filter
             </button>
-            @if(request()->hasAny(['search', 'assignment_id', 'officer_id', 'date_from', 'date_to']))
+            @if(request()->hasAny(['search', 'assignment_id', 'team_id', 'officer_id', 'date_from', 'date_to']))
                 <a href="{{ route('admin.basts.respondents.index') }}" class="btn btn-outline-secondary rounded-pill px-2.5 d-flex align-items-center justify-content-center" title="Reset Filter">
                     <i class="bi bi-arrow-clockwise"></i>
                 </a>
@@ -660,7 +681,7 @@
 
         const asgnId = asgnSelect.value;
         const currentVal = offSelect.value;
-        offSelect.innerHTML = '<option value="">-- Semua Petugas PCL --</option>';
+        offSelect.innerHTML = '<option value="">-- Pilih Petugas PCL --</option>';
 
         const list = asgnId && assignmentOfficersMap[asgnId] ? assignmentOfficersMap[asgnId] : allOfficers;
         list.forEach(off => {

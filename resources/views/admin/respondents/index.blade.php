@@ -96,9 +96,9 @@
 
 /* Action buttons in table */
 .bento-action-btn {
-    width: 28px;
-    height: 28px;
-    border-radius: 8px;
+    width: 26px;
+    height: 26px;
+    border-radius: 7px;
     display: inline-flex;
     align-items: center;
     justify-content: center;
@@ -106,7 +106,7 @@
     background: #FFFFFF;
     transition: all 0.15s ease;
     text-decoration: none;
-    font-size: 0.78rem;
+    font-size: 0.74rem;
     flex-shrink: 0;
 }
 .bento-action-btn:hover {
@@ -175,24 +175,10 @@
 <!-- Bento Search & Filter Card -->
 <div class="bento-card-clean p-3 mb-3">
     <form method="GET" action="{{ route('admin.respondents.index') }}" class="row g-2 align-items-center">
-        <!-- Search Input -->
-        <div class="col-lg-3 col-md-6">
-            <div class="input-group">
-                <span class="input-group-text bg-white border-end-0 text-muted">
-                    <i class="bi bi-search"></i>
-                </span>
-                <input type="text" 
-                       name="search" 
-                       class="form-control border-start-0 ps-1" 
-                       value="{{ request('search') }}" 
-                       placeholder="Cari nama, KRT, alamat, HP...">
-            </div>
-        </div>
-
         <!-- Filter Kegiatan -->
-        <div class="col-lg-2 col-md-6">
+        <div class="col-xl-2 col-lg-4 col-md-6">
             <select name="assignment_id" id="filter_resp_assignment" class="form-select" onchange="syncRespondentOfficerDropdown('filter_resp_assignment', 'filter_resp_officer', null)">
-                <option value="">-- Semua Kegiatan --</option>
+                <option value="">-- Pilih Kegiatan --</option>
                 @foreach($assignments as $assignment)
                     <option value="{{ $assignment->id }}" {{ request('assignment_id') == $assignment->id ? 'selected' : '' }}>{{ $assignment->title }}</option>
                 @endforeach
@@ -200,9 +186,9 @@
         </div>
 
         <!-- Filter Petugas / PPL -->
-        <div class="col-lg-2 col-md-6">
+        <div class="col-xl-2 col-lg-4 col-md-6">
             <select name="officer_id" id="filter_resp_officer" class="form-select">
-                <option value="">-- Semua Petugas --</option>
+                <option value="">-- Pilih Petugas --</option>
                 @foreach($officers as $officer)
                     <option value="{{ $officer->id }}" {{ request('officer_id') == $officer->id ? 'selected' : '' }}>{{ $officer->name }}</option>
                 @endforeach
@@ -210,9 +196,9 @@
         </div>
 
         <!-- Filter Wilayah / Kecamatan -->
-        <div class="col-lg-2 col-md-4">
+        <div class="col-xl-2 col-lg-4 col-md-4">
             <select name="district" class="form-select">
-                <option value="">-- Semua Kecamatan --</option>
+                <option value="">-- Pilih Kecamatan --</option>
                 @foreach($districts as $d)
                     <option value="{{ $d }}" {{ request('district') == $d ? 'selected' : '' }}>{{ $d }}</option>
                 @endforeach
@@ -220,16 +206,16 @@
         </div>
 
         <!-- Filter Status BAST -->
-        <div class="col-lg-2 col-md-4">
-            <select name="bast_status" class="form-select">
+        <div class="col-xl-1 col-lg-3 col-md-4">
+            <select name="bast_status" class="form-select px-2">
                 <option value="">-- Status BAST --</option>
-                <option value="with_bast" {{ request('bast_status') === 'with_bast' ? 'selected' : '' }}>Sudah Ada BAST</option>
-                <option value="without_bast" {{ request('bast_status') === 'without_bast' ? 'selected' : '' }}>Belum Ada BAST</option>
+                <option value="with_bast" {{ request('bast_status') === 'with_bast' ? 'selected' : '' }}>Ada BAST</option>
+                <option value="without_bast" {{ request('bast_status') === 'without_bast' ? 'selected' : '' }}>Belum BAST</option>
             </select>
         </div>
 
         <!-- Filter Status Progres Lapangan -->
-        <div class="col-lg-2 col-md-4">
+        <div class="col-xl-2 col-lg-3 col-md-4">
             <select name="progress_status" class="form-select">
                 <option value="">-- Status Pendataan --</option>
                 <option value="belum_didata" {{ request('progress_status') === 'belum_didata' ? 'selected' : '' }}>Belum Didata</option>
@@ -238,16 +224,20 @@
             </select>
         </div>
 
-        <!-- Tombol Filter & Reset -->
-        <div class="col-lg-1 col-md-12 d-flex gap-1.5">
-            <button type="submit" class="btn btn-bps-orange flex-fill justify-content-center py-2" title="Terapkan Filter">
-                <i class="bi bi-funnel-fill"></i>
-            </button>
-            @if(request()->hasAny(['search', 'assignment_id', 'officer_id', 'district', 'bast_status', 'date_from', 'date_to']))
-                <a href="{{ route('admin.respondents.index') }}" class="btn btn-outline-secondary rounded-pill px-2.5 d-flex align-items-center justify-content-center" title="Reset Filter">
-                    <i class="bi bi-arrow-clockwise"></i>
-                </a>
-            @endif
+        <!-- Cari Responden & Tombol Aksi (Persis seperti Progres Pendataan Lapangan) -->
+        <div class="col-xl-3 col-lg-6 col-md-12">
+            <div class="input-group">
+                <input type="text" name="search" class="form-control" placeholder="Cari nama, KRT, HP, alamat..." value="{{ $search ?? request('search') }}">
+                <button type="submit" class="btn text-white fw-bold px-3 d-flex align-items-center gap-1" style="background: var(--bps-orange, #F37021);" title="Terapkan Pencarian">
+                    <i class="bi bi-search"></i>
+                    <span>Cari</span>
+                </button>
+                @if(request()->hasAny(['search', 'assignment_id', 'officer_id', 'district', 'bast_status', 'progress_status', 'date_from', 'date_to']))
+                    <a href="{{ route('admin.respondents.index') }}" class="btn btn-outline-secondary px-2.5 d-flex align-items-center justify-content-center" title="Reset Semua Filter">
+                        <i class="bi bi-arrow-clockwise"></i>
+                    </a>
+                @endif
+            </div>
         </div>
     </form>
 </div>
@@ -280,19 +270,51 @@
         <table class="table bento-table-fixed align-middle mb-0">
             <thead>
                 <tr>
-                    <th style="width: 16%;"><i class="bi bi-person-badge-fill me-1 text-primary"></i> Petugas / PPL</th>
-                    <th style="width: 21%;"><i class="bi bi-person-fill me-1 text-primary"></i> Kepala Keluarga &amp; Responden</th>
-                    <th style="width: 12%;"><i class="bi bi-building me-1 text-muted"></i> Instansi</th>
-                    <th style="width: 17%;"><i class="bi bi-geo-alt-fill me-1 text-danger"></i> Alamat &amp; Wilayah</th>
-                    <th style="width: 14%;"><i class="bi bi-briefcase me-1 text-muted"></i> Kegiatan Terkait</th>
-                    <th class="text-center" style="width: 8%;"><i class="bi bi-patch-check me-1 text-success"></i> BAST</th>
-                    <th class="text-end pe-2" style="width: 12%;">Aksi</th>
+                    <th style="width: 12%;"><i class="bi bi-person-check-fill me-1 text-success"></i> Pengawas / PML</th>
+                    <th style="width: 13%;"><i class="bi bi-person-badge-fill me-1 text-primary"></i> Petugas / PPL</th>
+                    <th style="width: 18%;"><i class="bi bi-person-fill me-1 text-primary"></i> Kepala Keluarga &amp; Responden</th>
+                    <th style="width: 9%;"><i class="bi bi-building me-1 text-muted"></i> Instansi</th>
+                    <th style="width: 15%;"><i class="bi bi-geo-alt-fill me-1 text-danger"></i> Alamat &amp; Wilayah</th>
+                    <th style="width: 12%;"><i class="bi bi-briefcase me-1 text-muted"></i> Kegiatan Terkait</th>
+                    <th class="text-center" style="width: 11%;"><i class="bi bi-patch-check me-1 text-success"></i> Status &amp; BAST</th>
+                    <th class="text-end pe-2" style="width: 10%;">Aksi</th>
                 </tr>
             </thead>
             <tbody>
                 @forelse($respondents as $resp)
                     <tr>
-                        <!-- 1. Petugas Lapangan / PPL -->
+                        <!-- 1. Pengawas / PML -->
+                        <td>
+                            @php
+                                $pml = $resp->pml_officer;
+                            @endphp
+                            @if($pml)
+                                <div class="d-flex align-items-center gap-1.5">
+                                    <div class="rounded-circle bg-success-subtle text-success fw-bold d-flex align-items-center justify-content-center flex-shrink-0" style="width: 28px; height: 28px; font-size: 0.72rem;" title="Pengawas Lapangan (PML)">
+                                        {{ strtoupper(substr($pml->name, 0, 1)) }}
+                                    </div>
+                                    <div class="overflow-hidden">
+                                        <div class="small fw-bold text-dark text-truncate" style="font-size: 0.78rem;" title="{{ $pml->name }}">
+                                            {{ $pml->name }}
+                                        </div>
+                                        <div class="text-muted text-truncate" style="font-size: 0.68rem;">
+                                            <span class="badge bg-success-subtle text-success border border-success-subtle px-1.5 py-0.2" style="font-size: 0.62rem;">
+                                                PML
+                                            </span>
+                                        </div>
+                                    </div>
+                                </div>
+                            @else
+                                <div class="d-flex align-items-center gap-1.5 text-muted">
+                                    <div class="rounded-circle bg-light text-secondary border d-flex align-items-center justify-content-center flex-shrink-0" style="width: 28px; height: 28px; font-size: 0.72rem;">
+                                        -
+                                    </div>
+                                    <span class="small text-muted" style="font-size: 0.75rem;">-</span>
+                                </div>
+                            @endif
+                        </td>
+
+                        <!-- 2. Petugas Lapangan / PPL -->
                         <td>
                             <div class="d-flex align-items-center gap-1.5">
                                 <div class="rounded-circle bg-primary-subtle text-primary fw-bold d-flex align-items-center justify-content-center flex-shrink-0" style="width: 28px; height: 28px; font-size: 0.72rem;">
@@ -357,10 +379,10 @@
                             </span>
                         </td>
                         <td class="text-center">
-                            <div class="d-flex flex-column align-items-center gap-1">
+                            <div class="d-flex flex-column align-items-center justify-content-center gap-1">
                                 {!! $resp->progress_status_badge !!}
                                 @if($resp->basts->isNotEmpty())
-                                    <span class="badge bg-success-subtle text-success border border-success-subtle rounded-pill px-1.5 py-0.5" style="font-size: 0.65rem;" title="Sudah terbit BAST">
+                                    <span class="badge bg-success-subtle text-success border border-success-subtle rounded-pill px-2 py-0.5 text-nowrap" style="font-size: 0.64rem;" title="Sudah terbit {{ $resp->basts->count() }} BAST">
                                         <i class="bi bi-file-earmark-check-fill me-0.5"></i> {{ $resp->basts->count() }} BAST
                                     </span>
                                 @endif
@@ -404,7 +426,7 @@
                     </tr>
                 @empty
                     <tr>
-                        <td colspan="7" class="text-center py-5 text-muted">
+                        <td colspan="8" class="text-center py-5 text-muted">
                             <div class="d-inline-flex p-3 rounded-circle bg-light text-secondary mb-2">
                                 <i class="bi bi-people fs-1 opacity-50"></i>
                             </div>
@@ -481,6 +503,43 @@
                         </label>
                         <input type="file" name="excel_file" class="form-control" accept=".xlsx,.xls,.csv" required>
                         <div class="form-text" style="font-size: 0.72rem;">Mendukung format <code>.xlsx</code> (Excel modern seperti Google Sheets SPKRT) dan <code>.csv</code>. Maksimal 10 MB.</div>
+                    </div>
+
+                    @php
+                        $modalAssignments = $assignments ?? \App\Models\Assignment::orderBy('title')->get();
+                        $modalAgendas = $agendas ?? \App\Models\Schedule::orderBy('start_time', 'desc')->get();
+                    @endphp
+
+                    <!-- Pilihan Kegiatan & Agenda (Wajib) -->
+                    <div class="row g-3 mb-3">
+                        <div class="col-md-6">
+                            <label class="form-label small fw-bold text-dark mb-1">
+                                PILIH KEGIATAN <span class="text-danger">*</span>
+                            </label>
+                            <select name="assignment_id" id="import_resp_assignment" class="form-select" required onchange="filterImportAgendas(this.value, 'import_resp_schedule')">
+                                <option value="">-- Pilih Kegiatan Sensus / Survei * --</option>
+                                @foreach($modalAssignments as $asgn)
+                                    <option value="{{ $asgn->id }}" {{ request('assignment_id') == $asgn->id ? 'selected' : '' }}>
+                                        {{ $asgn->title }}
+                                    </option>
+                                @endforeach
+                            </select>
+                            <div class="form-text" style="font-size: 0.72rem;">Wajib dipilih untuk menentukan kegiatan dari data responden.</div>
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label small fw-bold text-dark mb-1">
+                                PILIH AGENDA <span class="text-danger">*</span>
+                            </label>
+                            <select name="schedule_id" id="import_resp_schedule" class="form-select" required>
+                                <option value="">-- Pilih Agenda / Jadwal Kegiatan * --</option>
+                                @foreach($modalAgendas as $ag)
+                                    <option value="{{ $ag->id }}" data-assignment="{{ $ag->assignment_id }}">
+                                        {{ $ag->title }} @if($ag->start_time)({{ \Carbon\Carbon::parse($ag->start_time)->format('d M Y') }})@endif
+                                    </option>
+                                @endforeach
+                            </select>
+                            <div class="form-text" style="font-size: 0.72rem;">Wajib dipilih untuk menautkan data dengan agenda jadwal lapangan.</div>
+                        </div>
                     </div>
 
                     <!-- Jadwal Pelaksanaan (Opsional) -->
@@ -971,7 +1030,7 @@
             const defaultOpt = document.createElement('option');
             defaultOpt.value = '';
             defaultOpt.textContent = officerSelectId.startsWith('filter_') 
-                ? '-- Semua Petugas --' 
+                ? '-- Pilih Petugas --' 
                 : '-- Pilih Petugas Lapangan / PPL --';
             officerSelect.appendChild(defaultOpt);
 
@@ -997,7 +1056,7 @@
                 const defaultOpt = document.createElement('option');
                 defaultOpt.value = '';
                 defaultOpt.textContent = officerSelectId.startsWith('filter_')
-                    ? '-- Semua Petugas Terlibat (' + involved.length + ') --'
+                    ? '-- Pilih Petugas Terlibat (' + involved.length + ') --'
                     : '-- Pilih Petugas Terlibat (' + involved.length + ') --';
                 officerSelect.appendChild(defaultOpt);
 
@@ -1064,6 +1123,22 @@
 
         const modal = new bootstrap.Modal(document.getElementById('editRespondentModal'));
         modal.show();
+    }
+
+    // Filter agenda dropdown in import modal by chosen assignment
+    function filterImportAgendas(assignmentId, scheduleSelectId = 'import_resp_schedule') {
+        const scheduleSelect = document.getElementById(scheduleSelectId);
+        if (!scheduleSelect) return;
+        const options = scheduleSelect.querySelectorAll('option');
+        options.forEach(opt => {
+            if (!opt.value) return;
+            const optAssignment = opt.getAttribute('data-assignment');
+            if (!assignmentId || !optAssignment || optAssignment === assignmentId) {
+                opt.style.display = '';
+            } else {
+                opt.style.display = 'none';
+            }
+        });
     }
 
     // Auto sync on page load for filter

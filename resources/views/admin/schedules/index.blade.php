@@ -183,28 +183,38 @@
 
         <!-- Filter Kegiatan -->
         <div class="col-lg-3 col-md-6">
-            <select name="assignment_id" id="filter_sched_assignment" class="form-select" onchange="syncScheduleOfficerDropdown('filter_sched_assignment', 'filter_sched_officer', null)">
-                <option value="">-- Semua Kegiatan --</option>
+            <select name="assignment_id" id="filter_sched_assignment" class="form-select">
+                <option value="">-- Pilih Kegiatan --</option>
                 @foreach($assignments as $assignment)
                     <option value="{{ $assignment->id }}" {{ request('assignment_id') == $assignment->id ? 'selected' : '' }}>{{ $assignment->title }}</option>
                 @endforeach
             </select>
         </div>
 
-        <!-- Filter Petugas -->
-        <div class="col-lg-2 col-md-4">
-            <select name="officer_id" id="filter_sched_officer" class="form-select">
-                <option value="">-- Semua Petugas --</option>
-                @foreach($officers as $officer)
-                    <option value="{{ $officer->id }}" {{ request('officer_id') == $officer->id ? 'selected' : '' }}>{{ $officer->name }}</option>
-                @endforeach
+        <!-- Filter Peran Petugas -->
+        <div class="col-xl-2 col-lg-2 col-md-4">
+            <select name="officer_role" id="filter_sched_officer_role" class="form-select">
+                <option value="" {{ request('officer_role') === '' || request('officer_role') === null ? 'selected' : '' }}>Seluruh petugas</option>
+                <option value="PCL" {{ request('officer_role') === 'PCL' ? 'selected' : '' }}>Hanya PCL</option>
+                <option value="PML" {{ request('officer_role') === 'PML' ? 'selected' : '' }}>Hanya PML</option>
+                <option value="PPL" {{ request('officer_role') === 'PPL' ? 'selected' : '' }}>Hanya PPL</option>
+                <option value="PPL_PML" {{ request('officer_role') === 'PPL_PML' ? 'selected' : '' }}>PPL &amp; PML</option>
             </select>
         </div>
 
-        <!-- Filter Status -->
-        <div class="col-lg-2 col-md-4">
+        <!-- Filter Status Petugas -->
+        <div class="col-xl-2 col-lg-2 col-md-4">
+            <select name="officer_status" class="form-select">
+                <option value="">-- Pilih Status Petugas --</option>
+                <option value="active" {{ request('officer_status') === 'active' ? 'selected' : '' }}>Petugas Aktif</option>
+                <option value="inactive" {{ request('officer_status') === 'inactive' ? 'selected' : '' }}>Petugas Tidak Aktif</option>
+            </select>
+        </div>
+
+        <!-- Filter Status Jadwal -->
+        <div class="col-xl-2 col-lg-2 col-md-4">
             <select name="status" class="form-select">
-                <option value="">-- Semua Status --</option>
+                <option value="">-- Pilih Status Jadwal --</option>
                 <option value="scheduled" {{ request('status') === 'scheduled' ? 'selected' : '' }}>Terjadwal</option>
                 <option value="in_progress" {{ request('status') === 'in_progress' ? 'selected' : '' }}>Sedang Berlangsung</option>
                 <option value="completed" {{ request('status') === 'completed' ? 'selected' : '' }}>Selesai</option>
@@ -213,11 +223,11 @@
         </div>
 
         <!-- Tombol Filter & Reset -->
-        <div class="col-lg-2 col-md-4 d-flex gap-2">
+        <div class="col-xl-1 col-lg-1 col-md-4 d-flex gap-2">
             <button type="submit" class="btn btn-bps-orange flex-fill justify-content-center py-2" title="Terapkan Filter">
-                <i class="bi bi-funnel-fill"></i> Filter
+                <i class="bi bi-funnel-fill"></i>
             </button>
-            @if(request()->hasAny(['search', 'status', 'officer_id', 'assignment_id']))
+            @if(request()->hasAny(['search', 'status', 'officer_status', 'officer_role', 'assignment_id']))
                 <a href="{{ route('admin.schedules.index') }}" class="btn btn-outline-secondary rounded-pill px-3 d-flex align-items-center justify-content-center" title="Reset Filter">
                     <i class="bi bi-arrow-clockwise"></i>
                 </a>
@@ -297,9 +307,23 @@
                         </td>
                         <td>
                             @if($item->officer)
-                                <span class="badge bg-light text-primary border rounded-pill px-2 py-0.5 text-truncate d-inline-block" style="font-size: 0.72rem; max-width: 100%;" title="{{ $item->officer->name }}">
-                                    <i class="bi bi-person-fill me-1"></i> {{ $item->officer->name }}
-                                </span>
+                                <div class="d-flex flex-column gap-1">
+                                    <span class="badge bg-light text-primary border rounded-pill px-2 py-0.5 text-truncate d-inline-block" style="font-size: 0.72rem; max-width: 100%;" title="{{ $item->officer->name }} ({{ $item->officer->field_role ?? 'PCL' }})">
+                                        <i class="bi bi-person-fill me-1"></i> {{ $item->officer->name }}
+                                        <span class="badge {{ ($item->officer->field_role ?? 'PCL') === 'PML' ? 'bg-info-subtle text-info-emphasis border border-info-subtle' : 'bg-primary-subtle text-primary border border-primary-subtle' }} rounded-pill ms-1" style="font-size: 0.62rem;">{{ $item->officer->field_role ?? 'PCL' }}</span>
+                                    </span>
+                                    <div>
+                                        @if(($item->officer_status ?? 'active') === 'inactive')
+                                            <span class="badge bg-danger-subtle text-danger border border-danger-subtle rounded-pill px-2 py-0.5" style="font-size: 0.65rem;" title="Status Petugas pada agenda ini: Tidak Aktif">
+                                                <i class="bi bi-person-x-fill me-1"></i> Tidak Aktif
+                                            </span>
+                                        @else
+                                            <span class="badge bg-success-subtle text-success border border-success-subtle rounded-pill px-2 py-0.5" style="font-size: 0.65rem;" title="Status Petugas pada agenda ini: Aktif Bertugas">
+                                                <i class="bi bi-person-check-fill me-1"></i> Aktif
+                                            </span>
+                                        @endif
+                                    </div>
+                                </div>
                             @else
                                 <span class="badge bg-light text-secondary border rounded-pill px-2 py-0.5" style="font-size: 0.72rem;">
                                     <i class="bi bi-people-fill me-1"></i> Seluruh Petugas
@@ -442,7 +466,7 @@
                             <select name="officer_id" id="create_sched_officer" class="form-select">
                                 <option value="">-- Seluruh Petugas (Umum) --</option>
                                 @foreach($officers as $officer)
-                                    <option value="{{ $officer->id }}">{{ $officer->name }}</option>
+                                    <option value="{{ $officer->id }}">{{ $officer->name }} ({{ $officer->field_role }})</option>
                                 @endforeach
                             </select>
                             <div id="create_sched_officer_hint" class="form-text small text-muted" style="font-size: 0.72rem;">
@@ -463,16 +487,23 @@
                     </div>
 
                     <div class="row g-3 mb-3">
-                        <div class="col-md-8">
+                        <div class="col-md-6">
                             <label class="form-label small fw-semibold text-secondary">LOKASI / RUANG PERTEMUAN <span class="text-danger">*</span></label>
                             <input type="text" name="location" class="form-control" placeholder="Contoh: Ruang Rapat Kantor Wilayah & Zoom Meeting" required>
                         </div>
-                        <div class="col-md-4">
+                        <div class="col-md-3">
                             <label class="form-label small fw-semibold text-secondary">STATUS JADWAL <span class="text-danger">*</span></label>
                             <select name="status" class="form-select" required>
                                 <option value="scheduled" selected>Terjadwal</option>
                                 <option value="in_progress">Sedang Berlangsung</option>
                                 <option value="completed">Selesai</option>
+                            </select>
+                        </div>
+                        <div class="col-md-3">
+                            <label class="form-label small fw-semibold text-secondary">STATUS PETUGAS <span class="text-danger">*</span></label>
+                            <select name="officer_status" class="form-select" required>
+                                <option value="active" selected>Aktif</option>
+                                <option value="inactive">Tidak Aktif</option>
                             </select>
                         </div>
                     </div>
@@ -537,7 +568,7 @@
                             <select id="edit_sched_officer" name="officer_id" class="form-select">
                                 <option value="">-- Seluruh Petugas (Umum) --</option>
                                 @foreach($officers as $officer)
-                                    <option value="{{ $officer->id }}">{{ $officer->name }}</option>
+                                    <option value="{{ $officer->id }}">{{ $officer->name }} ({{ $officer->field_role }})</option>
                                 @endforeach
                             </select>
                             <div id="edit_sched_officer_hint" class="form-text small text-muted" style="font-size: 0.72rem;">
@@ -558,17 +589,24 @@
                     </div>
 
                     <div class="row g-3 mb-3">
-                        <div class="col-md-8">
+                        <div class="col-md-6">
                             <label class="form-label small fw-semibold text-secondary">LOKASI / RUANG PERTEMUAN <span class="text-danger">*</span></label>
                             <input type="text" id="edit_sched_location" name="location" class="form-control" required>
                         </div>
-                        <div class="col-md-4">
+                        <div class="col-md-3">
                             <label class="form-label small fw-semibold text-secondary">STATUS JADWAL <span class="text-danger">*</span></label>
                             <select id="edit_sched_status" name="status" class="form-select" required>
                                 <option value="scheduled">Terjadwal</option>
                                 <option value="in_progress">Sedang Berlangsung</option>
                                 <option value="completed">Selesai</option>
                                 <option value="cancelled">Dibatalkan</option>
+                            </select>
+                        </div>
+                        <div class="col-md-3">
+                            <label class="form-label small fw-semibold text-secondary">STATUS PETUGAS <span class="text-danger">*</span></label>
+                            <select id="edit_sched_officer_status" name="officer_status" class="form-select" required>
+                                <option value="active">Aktif</option>
+                                <option value="inactive">Tidak Aktif</option>
                             </select>
                         </div>
                     </div>
@@ -713,7 +751,7 @@
 @push('scripts')
 <script>
     const assignmentOfficersMap = @json($assignmentOfficersMap ?? []);
-    const allOfficers = @json($officers->map(fn($u) => ['id' => $u->id, 'name' => $u->name]));
+    const allOfficers = @json($officers->map(fn($u) => ['id' => $u->id, 'name' => $u->name . ' (' . ($u->field_role ?? 'PCL') . ')']));
 
     function syncScheduleOfficerDropdown(assignmentSelectId, officerSelectId, hintId, selectedOfficerId = null) {
         const assignmentSelect = document.getElementById(assignmentSelectId);
@@ -821,19 +859,15 @@
         document.getElementById('edit_sched_end').value = item.end_time.substring(0, 16);
         document.getElementById('edit_sched_location').value = item.location;
         document.getElementById('edit_sched_status').value = item.status;
+        document.getElementById('edit_sched_officer_status').value = item.officer_status || 'active';
         document.getElementById('edit_sched_notes').value = item.notes || '';
 
         const modal = new bootstrap.Modal(document.getElementById('editScheduleModal'));
         modal.show();
     }
 
-    // Auto sync on page load for filters & create modal listener
+    // Create modal listener for auto syncing officers based on assignment
     document.addEventListener('DOMContentLoaded', function() {
-        const filterAssignment = document.getElementById('filter_sched_assignment');
-        if (filterAssignment && filterAssignment.value) {
-            syncScheduleOfficerDropdown('filter_sched_assignment', 'filter_sched_officer', null, @json(request('officer_id')));
-        }
-
         const createModal = document.getElementById('createScheduleModal');
         if (createModal) {
             createModal.addEventListener('show.bs.modal', function() {
@@ -902,7 +936,10 @@
                     <td class="text-center fw-semibold text-secondary">${item.no}</td>
                     <td><strong class="text-dark">${escapeHtmlAttr(item.title)}</strong></td>
                     <td><span class="badge bg-light text-secondary border">${escapeHtmlAttr(item.assignment_title)}</span></td>
-                    <td><span class="small">${escapeHtmlAttr(item.officer_name)}</span></td>
+                    <td>
+                        <span class="small">${escapeHtmlAttr(item.officer_name)}</span>
+                        ${item.officer_status === 'inactive' ? '<span class="badge bg-danger-subtle text-danger border border-danger-subtle rounded-pill px-1.5 py-0.5 ms-1" style="font-size:0.65rem;">Tidak Aktif</span>' : '<span class="badge bg-success-subtle text-success border border-success-subtle rounded-pill px-1.5 py-0.5 ms-1" style="font-size:0.65rem;">Aktif</span>'}
+                    </td>
                     <td><small class="text-muted"><i class="bi bi-calendar3 me-1"></i>${escapeHtmlAttr(item.time_range_formatted)}</small></td>
                     <td><small class="text-muted"><i class="bi bi-geo-alt me-1"></i>${escapeHtmlAttr(item.location)}</small></td>
                     <td class="text-center"><span class="badge rounded-pill ${statusBadgeClass}">${escapeHtmlAttr(item.status_label)}</span></td>

@@ -239,7 +239,7 @@
 
         <div class="col-lg-3 col-md-4">
             <select name="status" class="form-select">
-                <option value="">-- Semua Status --</option>
+                <option value="">-- Pilih Status --</option>
                 <option value="ongoing" {{ request('status') === 'ongoing' ? 'selected' : '' }}>Sedang Berjalan</option>
                 <option value="completed" {{ request('status') === 'completed' ? 'selected' : '' }}>Selesai</option>
                 <option value="draft" {{ request('status') === 'draft' ? 'selected' : '' }}>Draft</option>
@@ -684,6 +684,43 @@
                         </label>
                         <input type="file" name="excel_file" class="form-control" accept=".xlsx,.xls,.csv" required>
                         <div class="form-text" style="font-size: 0.72rem;">Mendukung format <code>.xlsx</code> (Excel modern seperti Google Sheets SPKRT) dan <code>.csv</code>. Maksimal 10 MB.</div>
+                    </div>
+
+                    @php
+                        $modalAssignments = $assignments ?? \App\Models\Assignment::orderBy('title')->get();
+                        $modalAgendas = $agendas ?? \App\Models\Schedule::orderBy('start_time', 'desc')->get();
+                    @endphp
+
+                    <!-- Pilihan Kegiatan & Agenda (Wajib) -->
+                    <div class="row g-3 mb-3">
+                        <div class="col-md-6">
+                            <label class="form-label small fw-bold text-dark mb-1">
+                                PILIH KEGIATAN <span class="text-danger">*</span>
+                            </label>
+                            <select name="assignment_id" id="import_asgn_assignment" class="form-select" required>
+                                <option value="">-- Pilih Kegiatan Sensus / Survei * --</option>
+                                @foreach($modalAssignments as $asgn)
+                                    <option value="{{ $asgn->id }}">
+                                        {{ $asgn->title }}
+                                    </option>
+                                @endforeach
+                            </select>
+                            <div class="form-text" style="font-size: 0.72rem;">Wajib dipilih untuk menentukan kegiatan dari data responden.</div>
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label small fw-bold text-dark mb-1">
+                                PILIH AGENDA <span class="text-danger">*</span>
+                            </label>
+                            <select name="schedule_id" id="import_asgn_schedule" class="form-select" required>
+                                <option value="">-- Pilih Agenda / Jadwal Kegiatan * --</option>
+                                @foreach($modalAgendas as $ag)
+                                    <option value="{{ $ag->id }}" data-assignment="{{ $ag->assignment_id }}">
+                                        {{ $ag->title }} @if($ag->start_time)({{ \Carbon\Carbon::parse($ag->start_time)->format('d M Y') }})@endif
+                                    </option>
+                                @endforeach
+                            </select>
+                            <div class="form-text" style="font-size: 0.72rem;">Wajib dipilih untuk menautkan data dengan agenda jadwal lapangan.</div>
+                        </div>
                     </div>
 
                     <!-- Jadwal Pelaksanaan (Opsional) -->

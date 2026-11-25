@@ -20,11 +20,13 @@
     }
     .bento-table-container-fixed {
         width: 100%;
-        overflow: hidden;
+        overflow-x: auto;
+        -webkit-overflow-scrolling: touch;
     }
     .bento-table-fixed {
         table-layout: fixed;
         width: 100%;
+        min-width: 960px;
         margin-bottom: 0;
         border-collapse: separate;
         border-spacing: 0;
@@ -132,7 +134,7 @@
 
             <div class="col-md-4">
                 <select name="assignment_id" class="form-select">
-                    <option value="">-- Semua Kegiatan Terkait --</option>
+                    <option value="">-- Pilih Kegiatan Terkait --</option>
                     @foreach($assignments as $assign)
                         <option value="{{ $assign->id }}" {{ request('assignment_id') == $assign->id ? 'selected' : '' }}>
                             {{ \Illuminate\Support\Str::limit($assign->title, 45) }}
@@ -179,12 +181,12 @@
         <table class="table bento-table-fixed align-middle mb-0">
             <thead>
                 <tr>
-                    <th style="width: 20%;"><i class="bi bi-file-earmark-text me-1 text-primary"></i> Nomor &amp; Tanggal Dokumen</th>
-                    <th style="width: 25%;"><i class="bi bi-briefcase me-1 text-muted"></i> Judul &amp; Kegiatan Terkait</th>
-                    <th style="width: 18%;"><i class="bi bi-geo-alt-fill text-danger me-1"></i> Tempat Pelaksanaan</th>
-                    <th style="width: 17%;"><i class="bi bi-people-fill me-1 text-primary"></i> Peserta Hadir</th>
-                    <th style="width: 12%;"><i class="bi bi-person-badge me-1 text-info"></i> Penanggung Jawab</th>
-                    <th class="text-end pe-3" style="width: 8%;">Aksi</th>
+                    <th style="width: 18%; min-width: 160px;"><i class="bi bi-file-earmark-text me-1 text-primary"></i> Nomor &amp; Tanggal Dokumen</th>
+                    <th style="width: 24%; min-width: 190px;"><i class="bi bi-briefcase me-1 text-muted"></i> Judul &amp; Kegiatan Terkait</th>
+                    <th style="width: 17%; min-width: 140px;"><i class="bi bi-geo-alt-fill text-danger me-1"></i> Tempat Pelaksanaan</th>
+                    <th style="width: 15%; min-width: 130px;"><i class="bi bi-people-fill me-1 text-primary"></i> Peserta Hadir</th>
+                    <th style="width: 12%; min-width: 120px;"><i class="bi bi-person-badge me-1 text-info"></i> Penanggung Jawab</th>
+                    <th class="text-end pe-3" style="width: 14%; min-width: 145px;">Aksi</th>
                 </tr>
             </thead>
             <tbody>
@@ -259,7 +261,7 @@
                             @endif
                         </td>
                         <td class="text-end pe-3">
-                            <div class="d-inline-flex align-items-center justify-content-end gap-1">
+                            <div class="d-flex align-items-center justify-content-end gap-1 flex-nowrap">
                                 <!-- Unduh PDF -->
                                 <a href="{{ route('admin.trainings.attendance.pdf', $tr) }}" 
                                    class="bento-action-btn btn-download" 
@@ -289,7 +291,7 @@
                                 <!-- Hapus Dokumen -->
                                 <form method="POST" 
                                       action="{{ route('admin.trainings.destroy', $tr) }}" 
-                                      class="d-inline"
+                                      class="d-inline m-0 p-0"
                                       onsubmit="return confirm('Apakah Anda yakin ingin menghapus lembar Daftar Hadir nomor {{ addslashes($docNum) }}?');">
                                     @csrf
                                     @method('DELETE')
@@ -322,8 +324,11 @@
      ============================================================== -->
 <div class="modal fade" id="attendanceSheetModal" tabindex="-1" aria-labelledby="attendanceSheetModalLabel" aria-hidden="true" data-bs-backdrop="static">
     <div class="modal-dialog modal-xl modal-dialog-centered modal-dialog-scrollable">
-        <div class="modal-content border-0 shadow-lg" style="border-radius: 20px; overflow: hidden;">
-            <div class="modal-header bg-light border-bottom px-4 py-3">
+        <form id="attendanceSheetForm" method="POST" action="{{ route('admin.trainings.store') }}" class="modal-content border-0 shadow-lg" style="border-radius: 20px; max-height: calc(100vh - 3.5rem); display: flex; flex-direction: column;">
+            @csrf
+            <div id="attendanceMethodSpoof"></div>
+
+            <div class="modal-header bg-light border-bottom px-4 py-3 flex-shrink-0">
                 <div class="d-flex align-items-center gap-2">
                     <div class="rounded-3 p-1.5 text-white d-flex align-items-center justify-content-center" style="background: #F37021; width: 34px; height: 34px;">
                         <i class="bi bi-pencil-square"></i>
@@ -338,11 +343,7 @@
                 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
 
-            <form id="attendanceSheetForm" method="POST" action="{{ route('admin.trainings.store') }}">
-                @csrf
-                <div id="attendanceMethodSpoof"></div>
-
-                <div class="modal-body p-4">
+            <div class="modal-body p-4" style="overflow-y: auto; flex: 1 1 auto;">
                     <!-- HEADER CETAK (4 BARIS RESMI) -->
                     <div class="card border bg-light-subtle mb-3 rounded-3">
                         <div class="card-header bg-white py-2 px-3 d-flex justify-content-between align-items-center">
@@ -499,14 +500,13 @@
                     </div>
                 </div>
 
-                <div class="modal-footer bg-light border-top px-4 py-3 d-flex justify-content-between">
+                <div class="modal-footer bg-light border-top px-4 py-3 d-flex justify-content-between flex-shrink-0">
                     <button type="button" class="btn btn-light rounded-pill px-3.5" data-bs-dismiss="modal">Batal</button>
-                    <button type="submit" class="btn btn-bps-orange px-4 py-2 shadow-sm">
+                    <button type="submit" class="btn btn-bps-orange px-4 py-2 shadow-sm" id="btnSubmitAttendance">
                         <i class="bi bi-file-earmark-pdf-fill me-1"></i> Simpan &amp; Buat Dokumen PDF
                     </button>
                 </div>
-            </form>
-        </div>
+        </form>
     </div>
 </div>
 
@@ -760,7 +760,7 @@
         updateParticipantCountBadge();
         clearSignaturePad();
 
-        const modal = new bootstrap.Modal(document.getElementById('attendanceSheetModal'));
+        const modal = bootstrap.Modal.getOrCreateInstance(document.getElementById('attendanceSheetModal'));
         modal.show();
         setTimeout(() => {
             if (canvas) {
@@ -805,7 +805,7 @@
         updateParticipantCountBadge();
         clearSignaturePad();
 
-        const modal = new bootstrap.Modal(document.getElementById('attendanceSheetModal'));
+        const modal = bootstrap.Modal.getOrCreateInstance(document.getElementById('attendanceSheetModal'));
         modal.show();
         setTimeout(() => {
             if (canvas) {

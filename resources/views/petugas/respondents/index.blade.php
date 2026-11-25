@@ -209,7 +209,7 @@
         </div>
         <div class="col-lg-4 col-md-4">
             <select name="assignment_id" class="form-select form-select-sm">
-                <option value="">-- Semua Kegiatan Lapangan --</option>
+                <option value="">-- Pilih Kegiatan Lapangan --</option>
                 @foreach($myAssignments as $asgn)
                     <option value="{{ $asgn->id }}" {{ request('assignment_id') == $asgn->id ? 'selected' : '' }}>
                         {{ $asgn->title }}

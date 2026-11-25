@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Models\ActivityLog;
 use App\Models\Assignment;
 use App\Models\Respondent;
+use App\Models\Schedule;
 use App\Models\User;
 use App\Services\GoogleSheetService;
 use Illuminate\Http\Request;
@@ -22,7 +23,7 @@ class RespondentController extends Controller
 
     public function index(Request $request)
     {
-        $query = Respondent::with(['assignment', 'officer', 'basts']);
+        $query = Respondent::with(['assignment.assignmentOfficers.user', 'officer', 'basts']);
 
         // 1. Search
         if ($search = $request->input('search')) {
@@ -34,7 +35,8 @@ class RespondentController extends Controller
                   ->orWhere('agency', 'like', "%{$search}%")
                   ->orWhere('phone', 'like', "%{$search}%")
                   ->orWhere('address', 'like', "%{$search}%")
-                  ->orWhere('purpose', 'like', "%{$search}%");
+                  ->orWhere('purpose', 'like', "%{$search}%")
+                  ->orWhereHas('officer', fn($sq) => $sq->where('name', 'like', "%{$search}%"));
             });
         }
 
@@ -86,17 +88,20 @@ class RespondentController extends Controller
         $respondents = $query->latest('input_date')->paginate(10)->withQueryString();
 
         $assignments = Assignment::orderBy('title')->get();
+        $agendas = Schedule::orderBy('start_time', 'desc')->get();
         $officers = User::fieldStaff()->where('status', 'active')->orderBy('name')->get();
         $districts = Respondent::DISTRICTS;
         $assignmentOfficersMap = Assignment::getInvolvedOfficersMap();
 
         return view('admin.respondents.index', compact(
             'respondents',
+            'search',
             'totalRespondents',
             'thisMonthCount',
             'uniqueAgencies',
             'withBastCount',
             'assignments',
+            'agendas',
             'officers',
             'districts',
             'assignmentOfficersMap'

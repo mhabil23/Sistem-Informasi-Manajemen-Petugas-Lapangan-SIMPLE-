@@ -8,6 +8,7 @@ use App\Models\Assignment;
 use App\Models\AssignmentOfficer;
 use App\Models\OfficerReport;
 use App\Models\Respondent;
+use App\Models\Schedule;
 use App\Models\User;
 use App\Services\GoogleSheetService;
 use App\Services\SimpleExcelParser;
@@ -945,6 +946,8 @@ class AssignmentController extends Controller
     {
         $request->validate([
             'excel_file' => ['required', 'file', 'extensions:xlsx,xls,csv,txt', 'max:10240'],
+            'assignment_id' => ['required', 'exists:assignments,id'],
+            'schedule_id' => ['required', 'exists:schedules,id'],
             'start_date' => ['nullable', 'date'],
             'end_date' => ['nullable', 'date', 'after_or_equal:start_date'],
             'st_number' => ['nullable', 'string', 'max:100'],
@@ -953,6 +956,10 @@ class AssignmentController extends Controller
             'excel_file.required' => 'Pilih berkas Excel (.xlsx) atau CSV yang akan diunggah.',
             'excel_file.extensions' => 'Format berkas harus berupa .xlsx, .xls, atau .csv.',
             'excel_file.max' => 'Ukuran berkas maksimal adalah 10 MB.',
+            'assignment_id.required' => 'Pilih kegiatan sensus/survei terlebih dahulu.',
+            'assignment_id.exists' => 'Kegiatan yang dipilih tidak valid atau tidak ditemukan.',
+            'schedule_id.required' => 'Pilih agenda kegiatan terlebih dahulu.',
+            'schedule_id.exists' => 'Agenda yang dipilih tidak valid atau tidak ditemukan.',
             'end_date.after_or_equal' => 'Tanggal selesai harus sama atau setelah tanggal mulai.',
         ]);
 
@@ -982,47 +989,77 @@ class AssignmentController extends Controller
 
         DB::beginTransaction();
         try {
-            $groupedByActivity = [];
-            foreach ($parsedRows as $row) {
-                $actTitle = trim($row['nama_kegiatan'] ?? '') ?: 'Kegiatan Pendataan Lapangan ' . now()->year;
-                $groupedByActivity[$actTitle][] = $row;
+            $chosenAssignment = null;
+            if ($reqAssignmentId = $request->input('assignment_id')) {
+                $chosenAssignment = Assignment::find($reqAssignmentId);
             }
 
-            foreach ($groupedByActivity as $title => $rows) {
-                $firstRow = $rows[0];
-                $dipa = trim($firstRow['pembebanan_anggaran'] ?? '') ?: 'DIPA BPS Kabupaten Kolaka Utara';
-                $districts = array_unique(array_filter(array_map(fn($r) => trim($r['wilayah_tugas'] ?? ''), $rows)));
-                $location = !empty($districts)
-                    ? 'Kecamatan ' . implode(', ', array_slice($districts, 0, 4)) . (count($districts) > 4 ? ' dll' : '')
-                    : 'Kabupaten Kolaka Utara';
-
-                $assignment = Assignment::firstOrCreate(
-                    ['title' => $title],
-                    [
-                        'description' => 'Kegiatan dan alokasi sampel diimpor secara otomatis dari berkas Excel/Spreadsheet.',
-                        'start_date' => $startDate,
-                        'end_date' => $endDate,
-                        'location' => $location,
-                        'basis_dipa' => $dipa,
-                        'st_number' => $stNumber ?: null,
-                        'st_date' => $stDate ?: null,
-                        'basis_st' => $stNumber ? OfficerReport::formatBasisSt($stNumber, $stDate) : null,
-                        'target_respondents' => 0,
-                        'status' => 'ongoing',
-                        'created_by' => Auth::id(),
-                    ]
-                );
-
-                if ($assignment->wasRecentlyCreated) {
-                    $createdAssignments++;
-                }
-
-                $activityTitles[] = $assignment->title;
-
-                $counts = $this->processParsedRowsForAssignment($assignment, $rows);
+            if ($chosenAssignment) {
+                // Seluruh baris dialokasikan langsung ke kegiatan yang dipilih
+                $counts = $this->processParsedRowsForAssignment($chosenAssignment, $parsedRows);
                 $totalOfficers += $counts['officers'];
                 $totalNewOfficers += $counts['new_officers'];
                 $totalRespondents += $counts['respondents'];
+                $activityTitles[] = $chosenAssignment->title;
+
+                if ($scheduleId = $request->input('schedule_id')) {
+                    $schedule = Schedule::find($scheduleId);
+                    if ($schedule) {
+                        $schedule->assignment_id = $chosenAssignment->id;
+                        $schedule->save();
+                    }
+                }
+            } else {
+                $groupedByActivity = [];
+                foreach ($parsedRows as $row) {
+                    $actTitle = trim($row['nama_kegiatan'] ?? '') ?: 'Kegiatan Pendataan Lapangan ' . now()->year;
+                    $groupedByActivity[$actTitle][] = $row;
+                }
+
+                foreach ($groupedByActivity as $title => $rows) {
+                    $firstRow = $rows[0];
+                    $dipa = trim($firstRow['pembebanan_anggaran'] ?? '') ?: 'DIPA BPS Kabupaten Kolaka Utara';
+                    $districts = array_unique(array_filter(array_map(fn($r) => trim($r['wilayah_tugas'] ?? ''), $rows)));
+                    $location = !empty($districts)
+                        ? 'Kecamatan ' . implode(', ', array_slice($districts, 0, 4)) . (count($districts) > 4 ? ' dll' : '')
+                        : 'Kabupaten Kolaka Utara';
+
+                    $assignment = Assignment::firstOrCreate(
+                        ['title' => $title],
+                        [
+                            'description' => 'Kegiatan dan alokasi sampel diimpor secara otomatis dari berkas Excel/Spreadsheet.',
+                            'start_date' => $startDate,
+                            'end_date' => $endDate,
+                            'location' => $location,
+                            'basis_dipa' => $dipa,
+                            'st_number' => $stNumber ?: null,
+                            'st_date' => $stDate ?: null,
+                            'basis_st' => $stNumber ? OfficerReport::formatBasisSt($stNumber, $stDate) : null,
+                            'target_respondents' => 0,
+                            'status' => 'ongoing',
+                            'created_by' => Auth::id(),
+                        ]
+                    );
+
+                    if ($assignment->wasRecentlyCreated) {
+                        $createdAssignments++;
+                    }
+
+                    $activityTitles[] = $assignment->title;
+
+                    $counts = $this->processParsedRowsForAssignment($assignment, $rows);
+                    $totalOfficers += $counts['officers'];
+                    $totalNewOfficers += $counts['new_officers'];
+                    $totalRespondents += $counts['respondents'];
+
+                    if ($scheduleId = $request->input('schedule_id')) {
+                        $schedule = Schedule::find($scheduleId);
+                        if ($schedule && !$schedule->assignment_id) {
+                            $schedule->assignment_id = $assignment->id;
+                            $schedule->save();
+                        }
+                    }
+                }
             }
 
             DB::commit();

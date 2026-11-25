@@ -175,7 +175,7 @@
 
         <div class="col-md-3 col-lg-3">
             <select name="status" class="form-select">
-                <option value="all">-- Semua Status --</option>
+                <option value="all">-- Pilih Status --</option>
                 <option value="draft" {{ request('status') == 'draft' ? 'selected' : '' }}>Draft</option>
                 <option value="submitted" {{ request('status') == 'submitted' ? 'selected' : '' }}>Diajukan</option>
                 <option value="reviewing" {{ request('status') == 'reviewing' ? 'selected' : '' }}>Dalam Pemeriksaan</option>

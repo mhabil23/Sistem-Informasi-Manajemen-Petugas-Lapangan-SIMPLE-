@@ -137,7 +137,7 @@
             <div class="col-md-2">
                 <label class="form-label small text-muted mb-1 fw-semibold">KEGIATAN:</label>
                 <select name="assignment_id" class="form-select">
-                    <option value="">-- Semua --</option>
+                    <option value="">-- Pilih Kegiatan --</option>
                     @foreach($assignments as $asgn)
                         <option value="{{ $asgn->id }}" {{ request('assignment_id') == $asgn->id ? 'selected' : '' }}>{{ $asgn->title }}</option>
                     @endforeach
@@ -146,7 +146,7 @@
             <div class="col-md-2">
                 <label class="form-label small text-muted mb-1 fw-semibold">PETUGAS:</label>
                 <select name="officer_id" class="form-select">
-                    <option value="">-- Semua --</option>
+                    <option value="">-- Pilih Petugas --</option>
                     @foreach($officers as $off)
                         <option value="{{ $off->id }}" {{ request('officer_id') == $off->id ? 'selected' : '' }}>{{ $off->name }}</option>
                     @endforeach

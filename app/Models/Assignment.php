@@ -113,7 +113,7 @@ class Assignment extends Model
 
         foreach ($pivotOfficers->concat($respOfficers)->unique(fn($item) => $item->assignment_id . '_' . $item->id)->sortBy('name') as $row) {
             if (isset($map[$row->assignment_id])) {
-                $roleLabel = !empty($row->activity_role) ? ' [' . $row->activity_role . ']' : '';
+                $roleLabel = !empty($row->activity_role) ? ' (' . $row->activity_role . ')' : ' (PCL)';
                 $map[$row->assignment_id][] = [
                     'id' => (int) $row->id,
                     'name' => $row->name . $roleLabel,

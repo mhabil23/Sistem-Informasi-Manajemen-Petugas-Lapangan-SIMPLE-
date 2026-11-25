@@ -129,6 +129,28 @@ class User extends Authenticatable
         return $query->whereIn('role', ['petugas', 'pegawai']);
     }
 
+    public function getFieldRoleAttribute(): string
+    {
+        if ($this->role === 'pegawai') {
+            return 'PML';
+        }
+
+        if (!empty($this->position) && (stripos($this->position, 'pemetaan') !== false || stripos($this->position, 'ppl') !== false)) {
+            return 'PPL';
+        }
+
+        return 'PCL';
+    }
+
+    public function getFieldRoleLabelAttribute(): string
+    {
+        return match ($this->field_role) {
+            'PML' => 'PML (Pengawas / Pemeriksa Lapangan)',
+            'PPL' => 'PPL (Petugas Pendata Lapangan)',
+            default => 'PCL (Petugas Pencacah Lapangan)',
+        };
+    }
+
     /**
      * Dapatkan daftar seluruh pegawai BPS / penandatangan berkas lengkap dengan nama, NIP, jabatan, dan pangkat.
      *
@@ -203,6 +225,11 @@ class User extends Authenticatable
         return $this->belongsToMany(Assignment::class, 'assignment_officers', 'user_id', 'assignment_id')
                     ->withPivot(['id', 'specific_task', 'status', 'progress_notes'])
                     ->withTimestamps();
+    }
+
+    public function assignments(): BelongsToMany
+    {
+        return $this->assignedTasks();
     }
 
     public function assignmentOfficers(): HasMany

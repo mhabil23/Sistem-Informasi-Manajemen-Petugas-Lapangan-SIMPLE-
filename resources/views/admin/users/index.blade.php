@@ -382,7 +382,7 @@
 
             <div class="col-6 col-md-3">
                 <select name="role" class="form-select">
-                    <option value="">-- Semua Role --</option>
+                    <option value="">-- Pilih Role --</option>
                     <option value="admin" {{ request('role') === 'admin' ? 'selected' : '' }}>Administrator</option>
                     <option value="pegawai" {{ request('role') === 'pegawai' ? 'selected' : '' }}>Pegawai / PML</option>
                     <option value="petugas" {{ request('role') === 'petugas' ? 'selected' : '' }}>Petugas Lapangan</option>
@@ -392,7 +392,7 @@
 
             <div class="col-6 col-md-2">
                 <select name="status" class="form-select">
-                    <option value="">-- Semua Status --</option>
+                    <option value="">-- Pilih Status --</option>
                     <option value="active" {{ request('status') === 'active' ? 'selected' : '' }}>Aktif</option>
                     <option value="inactive" {{ request('status') === 'inactive' ? 'selected' : '' }}>Nonaktif</option>
                 </select>

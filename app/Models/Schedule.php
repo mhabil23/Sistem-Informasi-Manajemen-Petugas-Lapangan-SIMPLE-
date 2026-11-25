@@ -20,6 +20,7 @@ class Schedule extends Model
         'location',
         'notes',
         'status',
+        'officer_status',
     ];
 
     protected function casts(): array
@@ -28,6 +29,16 @@ class Schedule extends Model
             'start_time' => 'datetime',
             'end_time' => 'datetime',
         ];
+    }
+
+    public function isOfficerActive(): bool
+    {
+        return ($this->officer_status ?? 'active') === 'active';
+    }
+
+    public function getOfficerStatusLabelAttribute(): string
+    {
+        return ($this->officer_status ?? 'active') === 'active' ? 'Aktif' : 'Tidak Aktif';
     }
 
     public function assignment(): BelongsTo

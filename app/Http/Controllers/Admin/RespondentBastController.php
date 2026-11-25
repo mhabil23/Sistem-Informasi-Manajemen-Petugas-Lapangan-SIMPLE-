@@ -39,6 +39,38 @@ class RespondentBastController extends Controller
             $query->where('assignment_id', $assignmentId);
         }
 
+        // Filter Tim Responden / Pengawas PML
+        if ($teamFilter = $request->input('team_id')) {
+            if ($teamFilter === 'role_pcl') {
+                $query->whereHas('officer', fn($q) => $q->where('role', 'petugas'));
+            } elseif ($teamFilter === 'role_pml') {
+                $query->whereHas('officer', fn($q) => $q->where('role', 'pegawai'));
+            } elseif (is_numeric($teamFilter)) {
+                $pmlUser = User::find($teamFilter);
+                if ($pmlUser) {
+                    $supervisedAssignmentIds = \App\Models\AssignmentOfficer::where('user_id', $teamFilter)
+                        ->when($request->input('assignment_id'), fn($q, $asgnId) => $q->where('assignment_id', $asgnId))
+                        ->pluck('assignment_id')
+                        ->toArray();
+
+                    $teamOfficerIds = User::where('id', $teamFilter)
+                        ->orWhere(function ($q) use ($supervisedAssignmentIds, $pmlUser) {
+                            $q->whereIn('role', ['petugas', 'pegawai']);
+                            if (!empty($supervisedAssignmentIds)) {
+                                $q->whereHas('assignmentOfficers', fn($ao) => $ao->whereIn('assignment_id', $supervisedAssignmentIds));
+                            }
+                            if (!empty($pmlUser->district) && $pmlUser->district !== 'match') {
+                                $q->where('district', $pmlUser->district);
+                            }
+                        })
+                        ->pluck('id')
+                        ->toArray();
+
+                    $query->whereIn('officer_id', $teamOfficerIds);
+                }
+            }
+        }
+
         if ($officerId = $request->input('officer_id')) {
             $query->where('officer_id', $officerId);
         }
@@ -62,6 +94,13 @@ class RespondentBastController extends Controller
         $officers = User::fieldStaff()->where('status', 'active')->orderBy('name')->get();
         $assignmentOfficersMap = Assignment::getInvolvedOfficersMap();
 
+        // Daftar Tim Pengawas PML / Regu Kerja Lapangan
+        $teams = User::where('role', 'pegawai')
+            ->orWhereHas('assignmentOfficers', fn($q) => $q->where('activity_role', 'PML'))
+            ->where('status', 'active')
+            ->orderBy('name')
+            ->get(['id', 'name', 'district', 'role']);
+
         return view('admin.basts.respondents.index', compact(
             'basts',
             'totalBasts',
@@ -69,6 +108,7 @@ class RespondentBastController extends Controller
             'respondents',
             'assignments',
             'officers',
+            'teams',
             'assignmentOfficersMap'
         ));
     }

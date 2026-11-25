@@ -376,7 +376,7 @@
         <div class="d-flex align-items-center gap-2 flex-wrap ms-auto">
             <!-- Filter Status Tugas -->
             <select id="filterOfficerStatus" class="form-select form-select-sm rounded-pill" style="width: 130px; font-size: 0.78rem;" onchange="filterOfficerTable()">
-                <option value="">Semua Status</option>
+                <option value="">-- Pilih Status --</option>
                 <option value="pending">Menunggu</option>
                 <option value="in_progress">Berjalan</option>
                 <option value="completed">Selesai</option>

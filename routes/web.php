@@ -155,6 +155,16 @@ Route::middleware(['auth', 'role:admin,pegawai'])->prefix('admin')->as('admin.')
     Route::get('/respondents', [\App\Http\Controllers\Admin\RespondentController::class, 'index'])->name('respondents.index');
     Route::get('/respondents/{respondent}', [\App\Http\Controllers\Admin\RespondentController::class, 'show'])->name('respondents.show');
 
+    // Progres Pendataan Lapangan (Monitoring Khusus Capaian Lapangan & Kinerja Petugas)
+    Route::get('/field-progress', [\App\Http\Controllers\Admin\FieldProgressController::class, 'index'])->name('progress.field');
+    Route::get('/field-progress/export', [\App\Http\Controllers\Admin\FieldProgressController::class, 'exportExcel'])->name('progress.field.export');
+
+    // Progres Pengolahan Dokumen (Monitoring, Update Tahapan & Export BPS)
+    Route::get('/document-progress', [\App\Http\Controllers\Admin\DocumentProgressController::class, 'index'])->name('progress.documents');
+    Route::put('/document-progress/{respondent}/status', [\App\Http\Controllers\Admin\DocumentProgressController::class, 'updateStatus'])->name('progress.documents.update-status');
+    Route::post('/document-progress/bulk-update', [\App\Http\Controllers\Admin\DocumentProgressController::class, 'bulkUpdateStatus'])->name('progress.documents.bulk-update');
+    Route::get('/document-progress/export', [\App\Http\Controllers\Admin\DocumentProgressController::class, 'exportExcel'])->name('progress.documents.export');
+
     // BAST Responden (Read/Preview/Download)
     Route::get('/basts/respondents/get-by-officer', [\App\Http\Controllers\Admin\RespondentBastController::class, 'getRespondentsByOfficer'])->name('basts.respondents.by-officer');
     Route::get('/basts/respondents', [\App\Http\Controllers\Admin\RespondentBastController::class, 'index'])->name('basts.respondents.index');

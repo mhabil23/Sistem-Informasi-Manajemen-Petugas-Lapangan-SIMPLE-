@@ -264,7 +264,7 @@
 
         <div class="col-lg-2 col-md-2">
             <select name="status" class="form-select">
-                <option value="all">-- Semua Status --</option>
+                <option value="all">-- Pilih Status --</option>
                 <option value="submitted" {{ request('status') == 'submitted' ? 'selected' : '' }}>Diajukan (Menunggu)</option>
                 <option value="reviewing" {{ request('status') == 'reviewing' ? 'selected' : '' }}>Dalam Pemeriksaan</option>
                 <option value="revision_needed" {{ request('status') == 'revision_needed' ? 'selected' : '' }}>Perlu Revisi</option>
@@ -275,7 +275,7 @@
 
         <div class="col-lg-3 col-md-3">
             <select name="officer_id" class="form-select">
-                <option value="">-- Semua Petugas --</option>
+                <option value="">-- Pilih Petugas --</option>
                 @foreach($officers as $officer)
                     <option value="{{ $officer->id }}" {{ request('officer_id') == $officer->id ? 'selected' : '' }}>{{ $officer->name }}</option>
                 @endforeach
@@ -284,7 +284,7 @@
 
         <div class="col-lg-2 col-md-2">
             <select name="assignment_id" class="form-select">
-                <option value="">-- Semua Kegiatan --</option>
+                <option value="">-- Pilih Kegiatan --</option>
                 @foreach($assignments as $assignment)
                     <option value="{{ $assignment->id }}" {{ request('assignment_id') == $assignment->id ? 'selected' : '' }}>{{ $assignment->title }}</option>
                 @endforeach

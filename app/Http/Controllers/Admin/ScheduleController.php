@@ -42,12 +42,59 @@ class ScheduleController extends Controller
             $query->where('status', $status);
         }
 
+        if ($officerStatus = $request->input('officer_status')) {
+            $query->where('officer_status', $officerStatus);
+        }
+
         if ($assignmentId = $request->input('assignment_id')) {
             $query->where('assignment_id', $assignmentId);
         }
 
-        if ($officerId = $request->input('officer_id')) {
-            $query->where('officer_id', $officerId);
+        if ($roleInput = $request->input('officer_role') ?: $request->input('officer_id')) {
+            $targetRole = strtoupper(trim(str_replace('role:', '', $roleInput)));
+            if ($targetRole === 'PML') {
+                // Hanya PML (Pegawai / Pengawas)
+                $pmlIds = User::where('role', 'pegawai')->pluck('id');
+                $query->whereIn('officer_id', $pmlIds);
+            } elseif ($targetRole === 'PPL') {
+                // Hanya PPL (Petugas Pendata / Pemetaan Lapangan)
+                $pplIds = User::where('role', 'petugas')->where(function ($q) {
+                    $q->where('position', 'like', '%pemetaan%')
+                      ->orWhere('position', 'like', '%ppl%');
+                })->pluck('id');
+                $query->whereIn('officer_id', $pplIds);
+            } elseif ($targetRole === 'PCL') {
+                // Hanya PCL (Pencacah Lapangan)
+                $pclIds = User::where('role', 'petugas')->where(function ($q) {
+                    $q->whereNull('position')
+                      ->orWhere(function ($sq) {
+                          $sq->where('position', 'not like', '%pemetaan%')
+                             ->where('position', 'not like', '%ppl%');
+                      });
+                })->pluck('id');
+                $query->whereIn('officer_id', $pclIds);
+            } elseif ($targetRole === 'PETUGAS_LAPANGAN' || $targetRole === 'HANYA_PETUGAS_LAPANGAN') {
+                // Hanya Petugas Lapangan (PCL & PPL / role: petugas)
+                $fieldOfficerIds = User::where('role', 'petugas')->pluck('id');
+                $query->whereIn('officer_id', $fieldOfficerIds);
+            } elseif ($targetRole === 'PPL_PML' || $targetRole === 'PPL_DAN_PML') {
+                // PPL & PML
+                $pplPmlIds = User::where(function ($q) {
+                    $q->where('role', 'pegawai')
+                      ->orWhere(function ($sq) {
+                          $sq->where('role', 'petugas')
+                             ->where(function ($ssq) {
+                                 $ssq->where('position', 'like', '%pemetaan%')
+                                     ->orWhere('position', 'like', '%ppl%');
+                             });
+                      });
+                })->pluck('id');
+                $query->whereIn('officer_id', $pplPmlIds);
+            } elseif ($targetRole === 'SELURUH' || $targetRole === 'SELURUH_PETUGAS' || $targetRole === 'ALL') {
+                // Seluruh Petugas (tidak membatasi role tertentu / tampilkan semua)
+            } elseif (is_numeric($roleInput)) {
+                $query->where('officer_id', $roleInput);
+            }
         }
 
         $totalSchedules = Schedule::count();
@@ -84,6 +131,7 @@ class ScheduleController extends Controller
             'location' => ['required', 'string', 'max:255'],
             'notes' => ['nullable', 'string', 'max:1000'],
             'status' => ['required', Rule::in(['scheduled', 'in_progress', 'completed', 'cancelled'])],
+            'officer_status' => ['nullable', Rule::in(['active', 'inactive'])],
         ], [
             'title.required' => 'Judul jadwal kegiatan wajib diisi.',
             'start_time.required' => 'Waktu mulai kegiatan wajib diisi.',
@@ -91,6 +139,8 @@ class ScheduleController extends Controller
             'end_time.after' => 'Waktu selesai harus setelah waktu mulai.',
             'location.required' => 'Lokasi kegiatan wajib diisi.',
         ]);
+
+        $validated['officer_status'] = $validated['officer_status'] ?? 'active';
 
         $schedule = Schedule::create($validated);
 
@@ -105,6 +155,7 @@ class ScheduleController extends Controller
                 'location' => $schedule->location,
                 'notes' => $schedule->notes ?? '',
                 'status' => $schedule->status,
+                'officer_status' => $schedule->officer_status ?? 'active',
                 'created_at' => now()->toISOString(),
                 'updated_at' => now()->toISOString(),
             ]);
@@ -130,7 +181,10 @@ class ScheduleController extends Controller
             'location' => ['required', 'string', 'max:255'],
             'notes' => ['nullable', 'string', 'max:1000'],
             'status' => ['required', Rule::in(['scheduled', 'in_progress', 'completed', 'cancelled'])],
+            'officer_status' => ['nullable', Rule::in(['active', 'inactive'])],
         ]);
+
+        $validated['officer_status'] = $validated['officer_status'] ?? 'active';
 
         $schedule->update($validated);
 
@@ -144,6 +198,7 @@ class ScheduleController extends Controller
                 'location' => $schedule->location,
                 'notes' => $schedule->notes ?? '',
                 'status' => $schedule->status,
+                'officer_status' => $schedule->officer_status ?? 'active',
                 'updated_at' => now()->toISOString(),
             ]);
         }
@@ -186,6 +241,7 @@ class ScheduleController extends Controller
             'Nama Agenda',
             'Kegiatan Terkait',
             'Petugas Terkait',
+            'Status Petugas',
             'Waktu Mulai',
             'Waktu Selesai',
             'Lokasi / Tempat',
@@ -199,6 +255,7 @@ class ScheduleController extends Controller
                 'Briefing Tim & Pembagian Peta Kerja Lapangan',
                 'Survey Pola Konsumsi Rumah Tangga (SPKI)',
                 'Dini Amirul, S.ST, MIDS, M.Ec.Dev.',
+                'Aktif',
                 '2026-11-21 08:30',
                 '2026-11-21 11:30',
                 'Ruang Rapat Kantor BPS Kolaka Utara',
@@ -210,6 +267,7 @@ class ScheduleController extends Controller
                 'Pencacahan Lapangan Responden Blok Sensus 001B',
                 'Survey Pola Konsumsi Rumah Tangga (SPKI)',
                 'Evayana',
+                'Aktif',
                 '2026-11-22 09:00',
                 '2026-11-22 15:00',
                 'Kecamatan Lasusua',
@@ -221,6 +279,7 @@ class ScheduleController extends Controller
                 'Evaluasi Progres Mingguan & Validasi BAST',
                 'Survey Pola Konsumsi Rumah Tangga (SPKI)',
                 '-- Seluruh Petugas (Umum) --',
+                'Aktif',
                 '2026-11-25 14:00',
                 '2026-11-25 16:30',
                 'Aula Lantai 2 BPS Kolaka Utara',
@@ -360,6 +419,7 @@ class ScheduleController extends Controller
                     'location' => $item['location'],
                     'notes' => $item['notes'],
                     'status' => $item['status'],
+                    'officer_status' => $item['officer_status'] ?? 'active',
                 ]);
 
                 if ($this->sheetService->isConfigured()) {
@@ -373,6 +433,7 @@ class ScheduleController extends Controller
                         'location' => $schedule->location,
                         'notes' => $schedule->notes ?? '',
                         'status' => $schedule->status,
+                        'officer_status' => $schedule->officer_status ?? 'active',
                         'created_at' => now()->toISOString(),
                         'updated_at' => now()->toISOString(),
                     ]);
@@ -491,6 +552,11 @@ class ScheduleController extends Controller
                 default => 'Terjadwal',
             };
 
+            // Status Petugas (Aktif / Tidak Aktif)
+            $officerStatusVal = strtolower(trim((string) $this->findColValue($row, ['statuspetugas', 'keaktifanpetugas', 'keaktifan', 'officerstatus', 'status_petugas'], 'active')));
+            $officerStatus = (str_contains($officerStatusVal, 'tidak') || str_contains($officerStatusVal, 'non') || str_contains($officerStatusVal, 'inact')) ? 'inactive' : 'active';
+            $officerStatusLabel = $officerStatus === 'active' ? 'Aktif' : 'Tidak Aktif';
+
             // Catatan
             $notes = $this->findColValue($row, ['catatan', 'perlengkapan', 'instruksi', 'keterangan', 'notes']);
 
@@ -509,6 +575,8 @@ class ScheduleController extends Controller
                 'location' => $location,
                 'status' => $status,
                 'status_label' => $statusLabel,
+                'officer_status' => $officerStatus,
+                'officer_status_label' => $officerStatusLabel,
                 'notes' => $notes ?: '',
             ];
         }

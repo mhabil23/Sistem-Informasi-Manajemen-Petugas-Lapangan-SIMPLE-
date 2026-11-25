@@ -188,7 +188,7 @@
 
             <div class="col-md-3">
                 <select name="category" class="form-select">
-                    <option value="all">-- Semua Kategori Peserta --</option>
+                    <option value="all">-- Pilih Kategori Peserta --</option>
                     @foreach($availableCategories as $cat)
                         <option value="{{ $cat }}" {{ request('category') == $cat ? 'selected' : '' }}>{{ $cat }}</option>
                     @endforeach
@@ -197,7 +197,7 @@
 
             <div class="col-md-2">
                 <select name="attendance" class="form-select">
-                    <option value="all">-- Semua Status Hadir --</option>
+                    <option value="all">-- Pilih Status Hadir --</option>
                     <option value="present" {{ request('attendance') == 'present' ? 'selected' : '' }}>Hadir</option>
                     <option value="excused" {{ request('attendance') == 'excused' ? 'selected' : '' }}>Izin</option>
                     <option value="absent" {{ request('attendance') == 'absent' ? 'selected' : '' }}>Tidak Hadir</option>
