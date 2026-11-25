@@ -564,56 +564,88 @@
                         <i class="bi bi-qr-code text-white"></i>
                     </div>
                     <div>
-                        <h6 class="modal-title fw-bold mb-0" id="shareLinkModalLabel">QR Code & Link Presensi</h6>
+                        <h6 class="modal-title fw-bold mb-0" id="shareLinkModalLabel">QR Code &amp; Link Presensi</h6>
                         <small class="text-white-50">Tanda tangan digital langsung dari HP peserta</small>
                     </div>
                 </div>
                 <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
             <div class="modal-body p-4 text-center">
-                <div class="mb-3">
+                <div class="mb-2">
                     <span class="badge bg-primary-subtle text-primary border border-primary-subtle px-3 py-1 rounded-pill small fw-bold">
                         {{ Str::limit($training->title, 40) }}
                     </span>
                 </div>
 
+                <!-- Mode Selector: Akses HP (Wi-Fi) vs Laptop -->
+                <div class="d-inline-flex p-1 bg-light rounded-pill border mb-3">
+                    <button type="button" class="btn btn-sm rounded-pill px-3 py-1 fw-bold btn-primary" id="modeHpBtn" onclick="switchShareMode('hp')">
+                        <i class="bi bi-phone me-1"></i> Akses HP (Wi-Fi)
+                    </button>
+                    <button type="button" class="btn btn-sm rounded-pill px-3 py-1 fw-bold btn-outline-secondary" id="modeLocalBtn" onclick="switchShareMode('local')">
+                        <i class="bi bi-laptop me-1"></i> Laptop Sendiri
+                    </button>
+                </div>
+
+                <!-- Pengaturan IP Wi-Fi Laptop -->
+                <div id="lanIpSettingsBox" class="p-2.5 rounded-3 bg-light border text-start mb-3">
+                    <div class="d-flex align-items-center justify-content-between mb-1">
+                        <label class="form-label small fw-bold text-dark mb-0" style="font-size: 0.74rem;">
+                            <i class="bi bi-wifi me-1 text-primary"></i> IP Wi-Fi Laptop untuk HP Peserta:
+                        </label>
+                        <span class="badge bg-success-subtle text-success border border-success-subtle rounded-pill" style="font-size: 0.65rem;">Wi-Fi Aktif</span>
+                    </div>
+                    <div class="input-group input-group-sm">
+                        <span class="input-group-text bg-white text-muted" style="font-size: 0.75rem;">http://</span>
+                        <input type="text" id="customLanIpInput" class="form-control font-monospace" value="192.168.1.81" placeholder="192.168.1.81" oninput="updateShareUrl()">
+                        <span class="input-group-text bg-white text-muted" style="font-size: 0.75rem;">:</span>
+                        <input type="text" id="customLanPortInput" class="form-control font-monospace" style="max-width: 70px;" value="8000" placeholder="8000" oninput="updateShareUrl()">
+                    </div>
+                    <div class="text-muted mt-1" style="font-size: 0.68rem;">
+                        HP peserta tidak bisa mengakses alamat <code class="text-dark">127.0.0.1</code>, sehingga alamat otomatis diganti menggunakan IP Wi-Fi laptop.
+                    </div>
+                </div>
+
                 <!-- QR Code Box -->
                 <div class="p-3 bg-light rounded-4 d-inline-block border shadow-sm mb-3">
-                    <img src="https://api.qrserver.com/v1/create-qr-code/?size=220x220&margin=10&data={{ urlencode($training->public_attendance_url) }}" 
+                    <img id="shareModalQrImage" src="https://api.qrserver.com/v1/create-qr-code/?size=210x210&margin=10&data={{ urlencode(str_replace(['127.0.0.1', 'localhost'], '192.168.1.81', $training->public_attendance_url)) }}" 
                          alt="QR Code Presensi {{ $training->title }}" 
                          class="img-fluid rounded-3" 
-                         style="width: 220px; height: 220px;"
+                         style="width: 210px; height: 210px;"
                          loading="lazy">
-                    <div class="small text-muted mt-2">
-                        <i class="bi bi-camera me-1"></i> Pindai kamera HP untuk mengisi
+                    <div class="small text-muted mt-2 fw-semibold">
+                        <i class="bi bi-camera me-1"></i> Pindai dengan kamera HP peserta
                     </div>
                 </div>
 
                 <!-- Link Input Copy -->
                 <div class="text-start mb-3">
                     <label class="form-label small fw-bold text-secondary text-uppercase mb-1">
-                        <i class="bi bi-link-45deg me-1"></i> Tautan / Link Presensi Langsung
+                        <i class="bi bi-link-45deg me-1"></i> Tautan / Link Presensi
                     </label>
                     <div class="input-group">
                         <input type="text" id="publicAttendanceUrlInput" class="form-control form-control-sm font-monospace bg-light border-end-0" 
-                               value="{{ $training->public_attendance_url }}" readonly>
-                        <button class="btn btn-primary btn-sm px-3 fw-bold" type="button" onclick="copyAttendanceLink('{{ $training->public_attendance_url }}')">
+                               value="{{ str_replace(['127.0.0.1', 'localhost'], '192.168.1.81', $training->public_attendance_url) }}" readonly>
+                        <button class="btn btn-primary btn-sm px-3 fw-bold" type="button" onclick="copyAttendanceLink()">
                             <i class="bi bi-clipboard me-1"></i> Salin
                         </button>
                     </div>
-                    <div class="form-text small text-muted">
-                        Bisa dibagikan ke WhatsApp grup peserta atau ditampilkan di proyektor ruangan.
-                    </div>
                 </div>
 
-                <div class="alert alert-info py-2 px-3 text-start small mb-0 rounded-3 border-0 bg-info-subtle text-info-emphasis">
-                    <i class="bi bi-info-circle-fill me-1 text-info"></i>
-                    <strong>Cara Kerja:</strong> Peserta membuka tautan, memilih nama mereka, menandatangani langsung di layar HP (touchscreen), lalu tanda tangan otomatis tercetak di format PDF BPS.
+                <!-- Panduan Koneksi HP -->
+                <div class="alert alert-warning py-2.5 px-3 text-start small mb-0 rounded-3 border-0 bg-warning-subtle text-warning-emphasis">
+                    <div class="fw-bold mb-1" style="font-size: 0.76rem;"><i class="bi bi-info-circle-fill me-1 text-warning"></i> Syarat Agar HP Peserta Bisa Membuka:</div>
+                    <ol class="mb-0 ps-3" style="font-size: 0.72rem; line-height: 1.5;">
+                        <li>HP peserta dan Laptop harus terhubung ke <strong>Wi-Fi / Hotspot yang sama</strong>.</li>
+                        <li>Pastikan perintah di terminal laptop dijalankan dengan opsi:<br>
+                            <code class="bg-white px-1.5 py-0.5 rounded text-dark fw-bold border d-inline-block mt-0.5">php artisan serve --host=0.0.0.0 --port=8000</code>
+                        </li>
+                    </ol>
                 </div>
             </div>
             <div class="modal-footer bg-light border-top px-4 py-2.5 d-flex justify-content-between">
-                <a href="{{ $training->public_attendance_url }}" target="_blank" class="btn btn-sm btn-outline-secondary rounded-pill px-3">
-                    <i class="bi bi-box-arrow-up-right me-1"></i> Tes Buka Form
+                <a id="shareModalDirectLink" href="{{ str_replace(['127.0.0.1', 'localhost'], '192.168.1.81', $training->public_attendance_url) }}" target="_blank" class="btn btn-sm btn-outline-secondary rounded-pill px-3">
+                    <i class="bi bi-box-arrow-up-right me-1"></i> Buka di Tab Baru
                 </a>
                 <button type="button" class="btn btn-sm btn-secondary rounded-pill px-4" data-bs-dismiss="modal">Tutup</button>
             </div>
@@ -624,10 +656,54 @@
 
 @push('scripts')
 <script>
-    function copyAttendanceLink(url) {
+    const originalLocalUrl = @json($training->public_attendance_url);
+    const attendanceToken = @json($training->public_token);
+    let currentShareMode = 'hp';
+
+    function switchShareMode(mode) {
+        currentShareMode = mode;
+        const hpBtn = document.getElementById('modeHpBtn');
+        const localBtn = document.getElementById('modeLocalBtn');
+        const ipBox = document.getElementById('lanIpSettingsBox');
+
+        if (mode === 'hp') {
+            hpBtn.className = 'btn btn-sm rounded-pill px-3 py-1 fw-bold btn-primary';
+            localBtn.className = 'btn btn-sm rounded-pill px-3 py-1 fw-bold btn-outline-secondary';
+            if (ipBox) ipBox.style.display = 'block';
+        } else {
+            localBtn.className = 'btn btn-sm rounded-pill px-3 py-1 fw-bold btn-secondary';
+            hpBtn.className = 'btn btn-sm rounded-pill px-3 py-1 fw-bold btn-outline-primary';
+            if (ipBox) ipBox.style.display = 'none';
+        }
+
+        updateShareUrl();
+    }
+
+    function updateShareUrl() {
+        let finalUrl = '';
+        if (currentShareMode === 'hp') {
+            const ipInput = document.getElementById('customLanIpInput');
+            const portInput = document.getElementById('customLanPortInput');
+            const ip = (ipInput ? ipInput.value.trim() : '') || '192.168.1.81';
+            const port = (portInput ? portInput.value.trim() : '') || '8000';
+            const portStr = (port && port !== '80' && port !== '443') ? (':' + port) : '';
+            finalUrl = 'http://' + ip + portStr + '/presensi/' + attendanceToken;
+        } else {
+            finalUrl = originalLocalUrl;
+        }
+
+        document.getElementById('publicAttendanceUrlInput').value = finalUrl;
+        document.getElementById('shareModalDirectLink').href = finalUrl;
+        document.getElementById('shareModalQrImage').src = 'https://api.qrserver.com/v1/create-qr-code/?size=210x210&margin=10&data=' + encodeURIComponent(finalUrl);
+    }
+
+    function copyAttendanceLink() {
+        const url = document.getElementById('publicAttendanceUrlInput').value;
+        if (!url) return;
+
         if (navigator.clipboard && navigator.clipboard.writeText) {
             navigator.clipboard.writeText(url).then(() => {
-                alert('Tautan presensi berhasil disalin ke clipboard!\n\nAnda dapat membagikannya ke WhatsApp grup peserta atau membukanya di browser.');
+                alert('Tautan presensi berhasil disalin ke clipboard!\n\nLink: ' + url);
             }).catch(() => {
                 fallbackCopy(url);
             });
@@ -637,7 +713,7 @@
     }
 
     function fallbackCopy(text) {
-        const input = document.getElementById('publicAttendanceUrlInput') || document.getElementById('publicLinkInput');
+        const input = document.getElementById('publicAttendanceUrlInput');
         if (input) {
             input.select();
             document.execCommand('copy');
