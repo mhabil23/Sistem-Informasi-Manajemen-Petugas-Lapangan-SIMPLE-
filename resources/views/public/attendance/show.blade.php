@@ -4,6 +4,16 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Presensi Online - {{ $training->title }}</title>
+    <script>
+        (function() {
+            try {
+                var signedId = localStorage.getItem('signed_dh_{{ $training->public_token }}');
+                if (signedId) {
+                    window.location.replace("{{ route('attendance.public.success', [$training->public_token]) }}?p=" + encodeURIComponent(signedId) + "&already=1");
+                }
+            } catch(e) {}
+        })();
+    </script>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
     <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -123,6 +133,17 @@
                 </span>
             </div>
 
+            @if($errors->any())
+                <div class="alert alert-danger rounded-4 p-3 m-4 mb-0 small">
+                    <div class="fw-bold mb-1"><i class="bi bi-exclamation-triangle-fill me-1"></i> Perhatian:</div>
+                    <ul class="mb-0 ps-3">
+                        @foreach($errors->all() as $err)
+                            <li>{{ $err }}</li>
+                        @endforeach
+                    </ul>
+                </div>
+            @endif
+
             <form method="POST" action="{{ route('attendance.public.submit', $training->public_token) }}" id="attendanceForm" class="p-4">
                 @csrf
                 <input type="hidden" name="signature_data" id="signatureDataInput" required>
@@ -142,13 +163,14 @@
                                     data-category="{{ $p->category ?: 'Peserta' }}"
                                     data-agency="{{ $p->agency ?: '-' }}"
                                     data-nip="{{ $p->nip_or_id ?: '-' }}"
-                                    data-signed="{{ $hasSig ? '1' : '0' }}">
-                                {{ $p->name }} {{ $hasSig ? '✓ [Sudah TTD]' : '' }}
+                                    data-signed="{{ $hasSig ? '1' : '0' }}"
+                                    {{ $hasSig ? 'disabled class=text-muted' : '' }}>
+                                {{ $p->name }} {{ $hasSig ? '— ✓ [Sudah Hadir]' : '' }}
                             </option>
                         @endforeach
                     </select>
                     <div class="form-text text-muted" style="font-size: 0.74rem;">
-                        Pilih nama Anda yang telah didaftarkan oleh panitia kegiatan.
+                        Pilih nama Anda yang telah didaftarkan. Nama yang sudah hadir tidak dapat dipilih kembali.
                     </div>
                 </div>
 

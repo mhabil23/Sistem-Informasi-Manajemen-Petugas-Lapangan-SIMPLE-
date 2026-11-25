@@ -79,11 +79,29 @@
             </div>
         @endif
 
+        <div class="alert alert-secondary py-3 px-3 text-start small mb-4 rounded-4 border-0 bg-light text-secondary">
+            <div class="d-flex align-items-center gap-2 mb-1.5 fw-bold text-dark" style="font-size: 0.82rem;">
+                <i class="bi bi-shield-lock-fill text-success fs-6"></i>
+                <span>Formulir Terkunci (Hanya 1x Pengisian)</span>
+            </div>
+            <div style="font-size: 0.76rem; line-height: 1.45;">
+                Perangkat ini telah menyelesaikan presensi resmi. Demi menjaga integritas data kehadiran, setiap peserta/perangkat hanya dapat melakukan presensi <strong>satu kali</strong> dan formulir telah ditutup agar tidak dapat digunakan untuk mengabsenkan orang lain.
+            </div>
+        </div>
+
         <div class="d-flex flex-column gap-2">
-            <a href="{{ route('attendance.public.show', $training->public_token) }}" class="btn btn-outline-secondary rounded-pill py-2 small" style="font-size: 0.8rem;">
-                <i class="bi bi-arrow-left me-1"></i> Kembali ke Halaman Presensi
-            </a>
+            <button type="button" class="btn btn-secondary rounded-pill py-2.5 small fw-bold" onclick="alert('Presensi Anda telah tersimpan secara resmi. Anda dapat menutup tab / browser ini.');">
+                <i class="bi bi-check2-circle me-1"></i> Presensi Selesai (Tutup Halaman)
+            </button>
         </div>
     </div>
+
+    <script>
+        @if($participant)
+            try {
+                localStorage.setItem('signed_dh_{{ $training->public_token }}', '{{ $participant->id }}');
+            } catch(e) {}
+        @endif
+    </script>
 </body>
 </html>

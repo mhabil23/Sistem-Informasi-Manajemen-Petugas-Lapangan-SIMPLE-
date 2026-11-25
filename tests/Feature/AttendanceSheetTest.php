@@ -249,4 +249,68 @@ class AttendanceSheetTest extends TestCase
         $response = $this->get('/presensi/token-palsu-ngawur-123');
         $response->assertStatus(404);
     }
+
+    public function test_cannot_sign_again_if_participant_already_has_signature(): void
+    {
+        $training = TrainingEvent::create([
+            'title' => 'Pelatihan Petugas SPKRT 2026',
+            'start_date' => now()->toDateString(),
+            'end_date' => now()->addDays(2)->toDateString(),
+            'location' => 'Aula BPS Kab. Kolaka',
+            'created_by' => $this->admin->id,
+        ]);
+
+        $participant = TrainingParticipant::create([
+            'training_event_id' => $training->id,
+            'name' => 'Peserta Sudah Hadir',
+            'category' => 'PCL',
+            'signature_path' => 'signatures/dummy.png',
+            'attendance_status' => 'present',
+        ]);
+
+        $dummySignature = 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mNkYAAAAAYAAjCB0C8AAAAASUVORK5CYII=';
+
+        $response = $this->post(route('attendance.public.submit', $training->public_token), [
+            'participant_id' => $participant->id,
+            'signature_data' => $dummySignature,
+        ]);
+
+        $response->assertSessionHasErrors(['participant_id']);
+    }
+
+    public function test_device_with_cookie_cannot_submit_again_for_other_participant(): void
+    {
+        $training = TrainingEvent::create([
+            'title' => 'Pelatihan Petugas SPKRT 2026',
+            'start_date' => now()->toDateString(),
+            'end_date' => now()->addDays(2)->toDateString(),
+            'location' => 'Aula BPS Kab. Kolaka',
+            'created_by' => $this->admin->id,
+        ]);
+
+        $p1 = TrainingParticipant::create([
+            'training_event_id' => $training->id,
+            'name' => 'Peserta Pertama',
+            'category' => 'PCL',
+            'signature_path' => 'signatures/dummy1.png',
+            'attendance_status' => 'present',
+        ]);
+
+        $p2 = TrainingParticipant::create([
+            'training_event_id' => $training->id,
+            'name' => 'Peserta Kedua',
+            'category' => 'PCL',
+            'attendance_status' => 'absent',
+        ]);
+
+        $dummySignature = 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mNkYAAAAAYAAjCB0C8AAAAASUVORK5CYII=';
+
+        $response = $this->withCookie('signed_dh_' . $training->public_token, (string) $p1->id)
+            ->post(route('attendance.public.submit', $training->public_token), [
+                'participant_id' => $p2->id,
+                'signature_data' => $dummySignature,
+            ]);
+
+        $response->assertSessionHasErrors(['error']);
+    }
 }
