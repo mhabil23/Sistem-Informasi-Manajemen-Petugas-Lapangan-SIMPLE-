@@ -2,6 +2,7 @@
 
 namespace Tests\Feature;
 
+use App\Models\OfficerNotice;
 use App\Models\User;
 use App\Services\BerandaMenuVisibilityService;
 use Carbon\Carbon;
@@ -193,5 +194,28 @@ class BerandaMenuVisibilityTest extends TestCase
             ->assertRedirect(route('petugas.dashboard'));
 
         $this->assertFalse(app(BerandaMenuVisibilityService::class)->shouldShowMenus());
+    }
+
+    public function test_officer_notice_renders_with_5_second_temporary_auto_hide_on_beranda(): void
+    {
+        $resEmpty = $this->actingAs($this->petugas)->get(route('petugas.dashboard'));
+        $resEmpty->assertStatus(200);
+        $this->assertStringNotContainsString('id="officerNoticesBanner"', $resEmpty->getContent());
+
+        OfficerNotice::create([
+            'user_id' => $this->petugas->id,
+            'sender_id' => $this->admin->id,
+            'type' => 'general',
+            'title' => 'Pengingat Penting Lapangan',
+            'message' => 'Mohon segera melengkapi berkas BAST hari ini.',
+            'is_read' => false,
+        ]);
+
+        $resWithNotice = $this->actingAs($this->petugas)->get(route('petugas.dashboard'));
+        $resWithNotice->assertStatus(200);
+        $resWithNotice->assertSee('id="officerNoticesBanner"', false);
+        $resWithNotice->assertSee('data-auto-hide-ms="5000"', false);
+        $resWithNotice->assertSee('Pengingat Penting Lapangan');
+        $resWithNotice->assertSee('dismissOfficerNoticesBanner', false);
     }
 }

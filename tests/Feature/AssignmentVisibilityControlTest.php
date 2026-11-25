@@ -165,11 +165,16 @@ class AssignmentVisibilityControlTest extends TestCase
         $toggleRes->assertSessionHas('success');
         $this->assertFalse(Assignment::isGlobalPortalEnabled());
 
-        // Petugas dashboard hides assignment & shows expected message
+        // Petugas dashboard hides "Penugasan Lapangan Anda" section when no active tasks are open
         $dashRes = $this->actingAs($this->petugas)->get(route('petugas.dashboard'));
         $dashRes->assertStatus(200);
         $dashRes->assertDontSee('Tugas Sedang Berjalan');
-        $dashRes->assertSee('Penugasan lapangan belum dibuka oleh Admin.');
+        $dashRes->assertDontSee('Penugasan Lapangan Anda');
+
+        // Dedicated Tugas menu still displays the admin-closed message
+        $tugasRes = $this->actingAs($this->petugas)->get(route('petugas.assignments.index'));
+        $tugasRes->assertStatus(200);
+        $tugasRes->assertSee('Penugasan lapangan belum dibuka oleh Admin.');
 
         // Data still exists in DB and Admin can still see it
         $this->assertDatabaseHas('assignments', ['id' => $assignment->id, 'title' => 'Tugas Sedang Berjalan']);
@@ -177,13 +182,14 @@ class AssignmentVisibilityControlTest extends TestCase
         $adminRes->assertStatus(200);
         $adminRes->assertSee('Tugas Sedang Berjalan');
 
-        // Admin re-enables globally -> assignment reappears
+        // Admin re-enables globally -> "Penugasan Lapangan Anda" and assignment reappear on dashboard
         $this->actingAs($this->admin)->patch(route('admin.assignments.global-toggle'), [
             'enabled' => '1',
         ]);
         $this->assertTrue(Assignment::isGlobalPortalEnabled());
 
         $dashRes2 = $this->actingAs($this->petugas)->get(route('petugas.dashboard'));
+        $dashRes2->assertSee('Penugasan Lapangan Anda');
         $dashRes2->assertSee('Tugas Sedang Berjalan');
     }
 
@@ -205,10 +211,16 @@ class AssignmentVisibilityControlTest extends TestCase
             'status' => 'in_progress',
         ]);
 
+        // Dashboard omits "Penugasan Lapangan Anda" when no active assignment exists
         $dashRes = $this->actingAs($this->petugas)->get(route('petugas.dashboard'));
         $dashRes->assertStatus(200);
         $dashRes->assertDontSee('Tugas Lama Selesai Periode');
-        $dashRes->assertSee('Belum ada penugasan lapangan yang tersedia saat ini.');
+        $dashRes->assertDontSee('Penugasan Lapangan Anda');
+
+        // Dedicated Tugas menu still shows the empty-state message
+        $tugasRes = $this->actingAs($this->petugas)->get(route('petugas.assignments.index'));
+        $tugasRes->assertStatus(200);
+        $tugasRes->assertSee('Belum ada penugasan lapangan yang tersedia saat ini.');
     }
 
     public function test_admin_can_toggle_individual_assignment_update_period_and_view_history(): void

@@ -310,6 +310,35 @@
     font-style: italic;
     margin-top: 1rem;
 }
+
+/* Temporary Administrator Notice Banner (Auto-hide ~5s) */
+.officer-notices-container {
+    transition: opacity 0.4s ease, transform 0.4s ease, max-height 0.45s ease, margin 0.45s ease;
+    overflow: hidden;
+}
+.officer-notices-container.is-hiding {
+    opacity: 0;
+    transform: translateY(-6px);
+    pointer-events: none;
+}
+.officer-notice-progress {
+    height: 3px;
+    background: rgba(243, 112, 33, 0.16);
+    border-radius: 999px;
+    overflow: hidden;
+    margin-top: 0.65rem;
+}
+.officer-notice-progress-bar {
+    height: 100%;
+    width: 100%;
+    background: linear-gradient(90deg, #F37021 0%, #FB923C 100%);
+    transform-origin: left center;
+    animation: officerNoticeCountdown 5s linear forwards;
+}
+@keyframes officerNoticeCountdown {
+    from { transform: scaleX(1); }
+    to { transform: scaleX(0); }
+}
 </style>
 @endpush
 
@@ -317,13 +346,13 @@
 <div class="bento-dashboard-wrapper">
 
     <!-- ==============================================================
-         1. NOTIFIKASI / PESAN KHUSUS DARI ADMINISTRATOR (JIKA ADA)
+         1. NOTIFIKASI / PESAN KHUSUS DARI ADMINISTRATOR (TAMPIL SEMENTARA ~5 DETIK)
          ============================================================== -->
     @if(isset($officerNotices) && $officerNotices->isNotEmpty())
-        <div class="mb-3">
+        <div id="officerNoticesBanner" class="mb-3 officer-notices-container" data-auto-hide-ms="5000">
             @foreach($officerNotices as $notice)
-                <div class="p-3 mb-3 shadow-sm" style="background: #FFFDF9; border: 1px solid rgba(243, 112, 33, 0.25); border-radius: 16px; box-shadow: 0 4px 16px rgba(243, 112, 33, 0.04);">
-                    <div class="d-flex justify-content-between align-items-start mb-1.5">
+                <div class="p-3 mb-3 shadow-sm officer-notice-card" style="background: #FFFDF9; border: 1px solid rgba(243, 112, 33, 0.25); border-radius: 16px; box-shadow: 0 4px 16px rgba(243, 112, 33, 0.04);">
+                    <div class="d-flex justify-content-between align-items-start gap-2 mb-1.5">
                         <div class="d-flex align-items-center gap-2 flex-wrap">
                             <span class="badge text-white px-2.5 py-1" style="font-size: 0.72rem; background: #F37021; border-radius: 999px;">
                                 <i class="bi bi-megaphone-fill me-1"></i> Pesan Administrator
@@ -333,9 +362,15 @@
                             @endif
                             <span class="fw-bold text-dark small">{{ $notice->title }}</span>
                         </div>
-                        <span class="text-muted" style="font-size: 0.72rem;">
-                            <i class="bi bi-clock me-1"></i> {{ $notice->created_at->diffForHumans() }}
-                        </span>
+                        <div class="d-flex align-items-center gap-2 flex-shrink-0">
+                            <span class="badge bg-light text-secondary border rounded-pill px-2 py-0.5 officer-notice-timer" style="font-size: 0.65rem;" title="Pesan tampil sementara 5 detik">
+                                5 dtk
+                            </span>
+                            <span class="text-muted" style="font-size: 0.72rem;">
+                                <i class="bi bi-clock me-1"></i> {{ $notice->created_at->diffForHumans() }}
+                            </span>
+                            <button type="button" class="btn-close" style="font-size: 0.65rem;" aria-label="Tutup pesan sementara" title="Tutup" onclick="dismissOfficerNoticesBanner()"></button>
+                        </div>
                     </div>
                     <div class="text-dark small my-2" style="line-height: 1.5; white-space: pre-line;">
                         {{ $notice->message }}
@@ -372,6 +407,9 @@
                                 </button>
                             </form>
                         </div>
+                    </div>
+                    <div class="officer-notice-progress" aria-hidden="true">
+                        <div class="officer-notice-progress-bar"></div>
                     </div>
                 </div>
             @endforeach
@@ -611,13 +649,15 @@
     @endif
 
     <!-- ==============================================================
-         5. BOTTOM ROW: KEGIATAN AKTIF & AGENDA LAPANGAN BPS (SELALU TAMPIL)
+         5. BOTTOM ROW: KEGIATAN AKTIF (MUNCUL SAAT ADA TUGAS DARI ADMIN) & AGENDA BPS
          ============================================================== -->
     @php
+        $showPenugasanLapangan = isset($activeTasks) && $activeTasks->isNotEmpty();
         $showJadwalAgenda = true;
     @endphp
     <div class="row g-4">
-        <!-- Penugasan Lapangan Aktif -->
+        @if($showPenugasanLapangan)
+        {{-- Penugasan Lapangan Aktif --}}
         <div class="{{ $showJadwalAgenda ? 'col-lg-7' : 'col-12' }}">
             <div class="bento-card h-100">
                 <div class="bento-card-header-sm">
@@ -682,10 +722,11 @@
                 @endif
             </div>
         </div>
+        @endif
 
-        <!-- Kanan: Timeline Jadwal & Agenda Lapangan BPS (col-lg-5) -->
+        <!-- Kanan: Timeline Jadwal & Agenda Lapangan BPS -->
         @if($showJadwalAgenda)
-        <div class="col-lg-5">
+        <div class="{{ $showPenugasanLapangan ? 'col-lg-5' : 'col-12' }}">
             <div class="bento-card h-100 d-flex flex-column justify-content-between">
                 <div>
                     <div class="bento-card-header-sm">
@@ -740,3 +781,43 @@
 
 </div>
 @endsection
+
+@push('scripts')
+<script>
+(function () {
+    const banner = document.getElementById('officerNoticesBanner');
+    if (!banner) return;
+
+    const durationMs = parseInt(banner.dataset.autoHideMs || '5000', 10) || 5000;
+    let remainingSec = Math.max(1, Math.ceil(durationMs / 1000));
+    const timerBadges = banner.querySelectorAll('.officer-notice-timer');
+    let dismissed = false;
+
+    window.dismissOfficerNoticesBanner = function () {
+        if (dismissed) return;
+        dismissed = true;
+        clearInterval(countdownInterval);
+        clearTimeout(hideTimeout);
+
+        banner.style.maxHeight = banner.scrollHeight + 'px';
+        void banner.offsetHeight;
+        banner.classList.add('is-hiding');
+        banner.style.maxHeight = '0px';
+        banner.style.marginBottom = '0px';
+
+        setTimeout(function () {
+            banner.classList.add('d-none');
+        }, 450);
+    };
+
+    const countdownInterval = setInterval(function () {
+        remainingSec = Math.max(0, remainingSec - 1);
+        timerBadges.forEach(function (el) {
+            el.textContent = remainingSec > 0 ? remainingSec + ' dtk' : 'Menutup...';
+        });
+    }, 1000);
+
+    const hideTimeout = setTimeout(window.dismissOfficerNoticesBanner, durationMs);
+})();
+</script>
+@endpush
