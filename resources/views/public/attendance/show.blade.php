@@ -111,12 +111,15 @@
             </div>
 
             <!-- Live Progress Bar -->
+            @php
+                $hasSignatureCount = $participants->whereNotNull('signature_path')->count();
+            @endphp
             <div class="px-4 py-2.5 bg-light border-bottom d-flex align-items-center justify-content-between small">
                 <span class="text-secondary fw-medium" style="font-size: 0.76rem;">
                     <i class="bi bi-people-fill me-1 text-primary"></i> Presensi Peserta:
                 </span>
                 <span class="fw-bold text-success" style="font-size: 0.78rem;">
-                    {{ $signedCount }} dari {{ $totalCount }} peserta telah hadir ({{ $totalCount > 0 ? round(($signedCount / $totalCount) * 100) : 0 }}%)
+                    {{ $hasSignatureCount }} dari {{ $totalCount }} peserta telah bertanda tangan ({{ $totalCount > 0 ? round(($hasSignatureCount / $totalCount) * 100) : 0 }}%)
                 </span>
             </div>
 
@@ -133,15 +136,14 @@
                         <option value="">-- Ketuk untuk memilih nama Anda --</option>
                         @foreach($participants as $p)
                             @php
-                                $isSigned = !empty($p->signature_path) || $p->attendance_status === 'present';
+                                $hasSig = !empty($p->signature_path);
                             @endphp
                             <option value="{{ $p->id }}" 
                                     data-category="{{ $p->category ?: 'Peserta' }}"
                                     data-agency="{{ $p->agency ?: '-' }}"
                                     data-nip="{{ $p->nip_or_id ?: '-' }}"
-                                    data-signed="{{ $isSigned ? '1' : '0' }}"
-                                    {{ $isSigned ? 'disabled' : '' }}>
-                                {{ $p->name }} {{ $isSigned ? '✓ [Sudah Hadir]' : '' }}
+                                    data-signed="{{ $hasSig ? '1' : '0' }}">
+                                {{ $p->name }} {{ $hasSig ? '✓ [Sudah TTD]' : '' }}
                             </option>
                         @endforeach
                     </select>
@@ -170,6 +172,10 @@
                             <span class="text-muted">Instansi/Asal:</span>
                             <div class="fw-semibold text-dark text-truncate" id="partAgencyDisplay">-</div>
                         </div>
+                    </div>
+                    <div id="partSignedAlert" class="alert alert-info py-2 px-3 mb-0 mt-2.5 small rounded-3 border-0 bg-info-subtle text-info-emphasis" style="display: none;">
+                        <i class="bi bi-info-circle-fill me-1 text-info"></i>
+                        <span>Peserta ini sudah pernah bertanda tangan. Mengisi tanda tangan di bawah akan memperbarui tanda tangan sebelumnya.</span>
                     </div>
                 </div>
 
@@ -291,17 +297,24 @@
 
         function onParticipantChanged(select) {
             const card = document.getElementById('participantDetailCard');
+            const alertBox = document.getElementById('partSignedAlert');
             const opt = select.options[select.selectedIndex];
             if (!select.value) {
                 card.style.display = 'none';
                 return;
             }
             card.style.display = 'block';
-            document.getElementById('partNameDisplay').textContent = opt.textContent.trim();
+            document.getElementById('partNameDisplay').textContent = opt.textContent.replace('✓ [Sudah TTD]', '').trim();
             document.getElementById('partInitial').textContent = opt.textContent.trim().substring(0, 1).toUpperCase();
             document.getElementById('partNipDisplay').textContent = 'NIP / ID: ' + (opt.dataset.nip || '-');
             document.getElementById('partCategoryDisplay').textContent = opt.dataset.category || 'Peserta';
             document.getElementById('partAgencyDisplay').textContent = opt.dataset.agency || '-';
+
+            if (opt.dataset.signed === '1') {
+                alertBox.style.display = 'block';
+            } else {
+                alertBox.style.display = 'none';
+            }
         }
 
         document.getElementById('attendanceForm').addEventListener('submit', function(e) {

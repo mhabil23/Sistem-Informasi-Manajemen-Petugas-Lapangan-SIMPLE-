@@ -52,12 +52,7 @@ class PublicAttendanceController extends Controller
             ->where('id', $validated['participant_id'])
             ->firstOrFail();
 
-        if (!empty($participant->signature_path) && $participant->attendance_status === 'present') {
-            return redirect()->route('attendance.public.success', [$token, 'p' => $participant->id])
-                ->with('info', "Peserta {$participant->name} sudah tercatat presensi sebelumnya.");
-        }
-
-        // Simpan tanda tangan digital
+        // Simpan tanda tangan digital (bisa update tanda tangan jika tanda tangan ulang)
         $sigPath = $this->saveSignatureData($validated['signature_data'], $participant->id);
 
         $participant->update([
