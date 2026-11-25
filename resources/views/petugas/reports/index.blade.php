@@ -20,7 +20,9 @@
     }
     .bento-table-container-fixed {
         width: 100%;
-        overflow: hidden;
+        overflow-x: auto;
+        overflow-y: hidden;
+        -webkit-overflow-scrolling: touch;
     }
     .bento-table {
         table-layout: fixed;
@@ -29,6 +31,11 @@
         border-collapse: separate;
         border-spacing: 0;
         font-size: 0.8rem;
+    }
+    @media (min-width: 768px) and (max-width: 1279.98px) {
+        .bento-table {
+            min-width: 820px;
+        }
     }
     .bento-table thead th {
         background: #f8fafc;
@@ -206,7 +213,7 @@
             </h6>
             <span class="text-muted" style="font-size: 0.72rem;">Total {{ $reports->total() }} laporan kegiatan tersimpan</span>
         </div>
-        <div class="d-flex align-items-center gap-2">
+        <div class="d-flex flex-wrap align-items-center gap-2">
             <span class="badge bg-light text-secondary border rounded-pill px-3 py-1.5 font-monospace" style="font-size: 0.75rem;">
                 Halaman {{ $reports->currentPage() }} dari {{ $reports->lastPage() ?: 1 }}
             </span>
@@ -911,7 +918,7 @@
     <div class="modal-dialog modal-dialog-centered modal-xl">
         <div class="modal-content border-0 shadow">
             <div class="modal-header bg-light border-bottom">
-                <div class="d-flex align-items-center gap-2">
+                <div class="d-flex flex-wrap align-items-center gap-2">
                     <h5 class="modal-title fw-bold text-dark mb-0" id="detailReportModalLabel">
                         <i class="bi bi-file-text text-info me-2"></i> Pratinjau Dokumen Laporan Perjalanan Dinas
                     </h5>

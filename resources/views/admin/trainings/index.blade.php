@@ -113,6 +113,78 @@
         border-radius: 10px;
         cursor: crosshair;
     }
+
+    @media (max-width: 767.98px) {
+        .bento-table-fixed {
+            table-layout: auto !important;
+            min-width: 0 !important;
+        }
+        .bento-table-fixed thead {
+            display: none;
+        }
+        .bento-table-fixed,
+        .bento-table-fixed tbody,
+        .bento-table-fixed tr,
+        .bento-table-fixed td {
+            display: block;
+            width: 100% !important;
+        }
+        .bento-table-fixed tbody tr {
+            margin: 0.65rem auto;
+            width: calc(100% - 1.25rem) !important;
+            border: 1px solid #e2e8f0;
+            border-radius: 16px;
+            background: #ffffff;
+            box-shadow: 0 2px 8px rgba(15, 23, 42, 0.04);
+            overflow: hidden;
+            box-sizing: border-box;
+        }
+        .bento-table-fixed tbody td {
+            display: flex;
+            align-items: flex-start;
+            justify-content: space-between;
+            gap: 0.75rem;
+            text-align: right !important;
+            padding: 0.65rem 0.9rem !important;
+            border-bottom: 1px solid #f1f5f9;
+            white-space: normal !important;
+        }
+        .bento-table-fixed tbody td::before {
+            content: attr(data-label);
+            font-size: 0.68rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            color: #64748b;
+            letter-spacing: 0.03em;
+            text-align: left;
+            flex-shrink: 0;
+            padding-top: 0.1rem;
+        }
+        .bento-table-fixed tbody td > div {
+            max-width: 66%;
+            min-width: 0;
+        }
+        .bento-table-fixed tbody td > div .d-flex {
+            justify-content: flex-end;
+        }
+        .bento-table-fixed tbody td:last-child {
+            border-bottom: none;
+            background: #f8fafc;
+            align-items: center;
+            justify-content: flex-end;
+        }
+        .bento-table-fixed tbody td[colspan] {
+            display: block;
+            text-align: center !important;
+            background: transparent !important;
+        }
+        .bento-table-fixed tbody td[colspan]::before {
+            display: none;
+        }
+        .bento-table-fixed tbody td[colspan] > div {
+            max-width: 100%;
+        }
+    }
 </style>
 @endpush
 
@@ -194,21 +266,21 @@
             <tbody>
                 @forelse($trainings as $tr)
                     @php
-                        $docNum = $tr->document_number ?: ('DH/' . $tr->start_date->format('Y') . '/' . str_pad($tr->id, 4, '0', STR_PAD_LEFT));
+                        $docNum = $tr->document_number ?: ('DH/' . ($tr->start_date ? $tr->start_date->format('Y') : now()->format('Y')) . '/' . str_pad($tr->id, 4, '0', STR_PAD_LEFT));
                         $participantsCount = $tr->participants->count();
                         $firstParticipant = $tr->participants->first();
                     @endphp
                     <tr>
-                        <td>
+                        <td data-label="Dokumen">
                             <div class="fw-bold text-dark font-monospace text-truncate" style="font-size: 0.8rem;" title="{{ $docNum }}">
                                 {{ $docNum }}
                             </div>
-                            <div class="text-muted text-truncate d-flex align-items-center gap-1 mt-0.5" style="font-size: 0.72rem;">
+                            <div class="text-muted text-truncate d-flex align-items-center justify-content-end justify-content-md-start gap-1 mt-0.5" style="font-size: 0.72rem;">
                                 <i class="bi bi-calendar-event text-secondary flex-shrink-0"></i>
-                                <span>{{ $tr->start_date->translatedFormat('d F Y') }}</span>
+                                <span>{{ $tr->start_date ? $tr->start_date->translatedFormat('d F Y') : '-' }}</span>
                             </div>
                         </td>
-                        <td>
+                        <td data-label="Kegiatan">
                             <div class="fw-bold text-dark text-truncate mb-0.5" style="font-size: 0.82rem;" title="{{ $tr->activity_subtitle ?: $tr->title }}">
                                 {{ $tr->activity_subtitle ?: $tr->title }}
                             </div>
@@ -235,7 +307,7 @@
                                 </a>
                             </div>
                         </td>
-                        <td>
+                        <td data-label="Tempat">
                             <div class="small fw-semibold text-dark text-truncate" style="font-size: 0.78rem;" title="{{ $tr->document_place ?: $tr->location }}">
                                 <i class="bi bi-geo-alt text-danger me-1"></i> {{ $tr->document_place ?: $tr->location }}
                             </div>
@@ -245,7 +317,7 @@
                                 </div>
                             @endif
                         </td>
-                        <td>
+                        <td data-label="Peserta Hadir">
                             @if($participantsCount > 1)
                                 <div class="fw-bold text-dark text-truncate mb-0.5" style="font-size: 0.8rem;" title="{{ $firstParticipant->name }}">
                                     {{ $firstParticipant->name }}
@@ -265,7 +337,7 @@
                                 <div class="small text-muted fst-italic">Belum ada peserta</div>
                             @endif
                         </td>
-                        <td>
+                        <td data-label="Penanggung Jawab">
                             <div class="small fw-semibold text-dark text-truncate" title="{{ $tr->maker_name ?: ($tr->creator ? $tr->creator->name : '-') }}">
                                 {{ $tr->maker_name ?: ($tr->creator ? $tr->creator->name : '-') }}
                             </div>
@@ -275,7 +347,7 @@
                                 </div>
                             @endif
                         </td>
-                        <td class="text-end pe-3">
+                        <td class="text-end pe-3" data-label="Aksi">
                             <div class="d-flex align-items-center justify-content-end gap-1 flex-nowrap">
                                 <!-- Unduh PDF -->
                                 <a href="{{ route('admin.trainings.attendance.pdf', $tr) }}" 

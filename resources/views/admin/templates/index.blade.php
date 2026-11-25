@@ -20,7 +20,9 @@
     }
     .bento-table-container-fixed {
         width: 100%;
-        overflow: hidden;
+        overflow-x: auto;
+        overflow-y: hidden;
+        -webkit-overflow-scrolling: touch;
     }
     .bento-table {
         table-layout: fixed;
@@ -96,7 +98,15 @@
     .bento-action-btn.btn-word:hover { background: #2563EB; color: #FFFFFF; }
     .bento-action-btn.btn-pdf { color: #DC2626; border-color: #FECACA; background: #FEF2F2; }
     .bento-action-btn.btn-pdf:hover { background: #DC2626; color: #FFFFFF; }
+    @media (min-width: 768px) and (max-width: 1279.98px) {
+        .bento-table {
+            min-width: 820px;
+        }
+    }
     @media (max-width: 767.98px) {
+        .bento-table {
+            table-layout: auto !important;
+        }
         .bento-table thead {
             display: none;
         }
@@ -104,27 +114,54 @@
             display: block;
             width: 100% !important;
         }
-        .bento-table tr {
-            margin-bottom: 1rem;
+        .bento-table tbody tr {
+            margin: 0.65rem auto;
+            width: calc(100% - 1.25rem) !important;
             border: 1px solid #e2e8f0;
-            border-radius: 12px;
-            padding: 0.5rem;
+            border-radius: 14px;
+            padding: 0;
             background: #fff;
+            box-shadow: 0 2px 8px rgba(15, 23, 42, 0.04);
+            overflow: hidden;
+            box-sizing: border-box;
         }
-        .bento-table td {
-            text-align: right;
-            padding: 0.5rem 0.75rem;
+        .bento-table tbody td {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 0.75rem;
+            text-align: right !important;
+            padding: 0.6rem 0.85rem !important;
             border-bottom: 1px solid #f1f5f9;
+            white-space: normal !important;
         }
-        .bento-table td:last-child {
+        .bento-table tbody td > div,
+        .bento-table tbody td > small {
+            max-width: 66%;
+            min-width: 0;
+        }
+        .bento-table tbody td:last-child {
             border-bottom: none;
+            background: #f8fafc;
+            justify-content: flex-end;
         }
-        .bento-table td::before {
+        .bento-table tbody td::before {
             content: attr(data-label);
-            float: left;
-            font-weight: 600;
+            font-weight: 700;
+            text-transform: uppercase;
             color: #64748b;
-            font-size: 0.75rem;
+            font-size: 0.68rem;
+            letter-spacing: 0.03em;
+            text-align: left;
+            flex-shrink: 0;
+        }
+        .bento-table tbody td[colspan] {
+            display: block;
+            text-align: center !important;
+            background: transparent !important;
+        }
+        .bento-table tbody td[colspan]::before {
+            display: none;
         }
     }
 </style>
@@ -229,10 +266,12 @@
                             @endif
                         </td>
                         <td data-label="Nama Template">
-                            <div class="fw-bold text-dark text-truncate">{{ $tpl->name }}</div>
-                            <small class="text-muted text-truncate d-block" style="max-width: 260px;">
-                                {{ \Illuminate\Support\Str::limit(strip_tags($tpl->content), 50) }}
-                            </small>
+                            <div style="max-width: min(260px, 100%);">
+                                <div class="fw-bold text-dark text-truncate">{{ $tpl->name }}</div>
+                                <small class="text-muted text-truncate d-block">
+                                    {{ \Illuminate\Support\Str::limit(strip_tags($tpl->content), 50) }}
+                                </small>
+                            </div>
                         </td>
                         <td data-label="Tipe Dokumen">
                             <span class="badge bg-secondary-subtle text-dark border">
@@ -339,7 +378,7 @@
     </div>
 
     @if($templates->hasPages())
-        <div class="p-3 border-top d-flex justify-content-between align-items-center">
+        <div class="p-3 border-top d-flex flex-wrap justify-content-between align-items-center gap-2">
             <div class="small text-muted">
                 Menampilkan {{ $templates->firstItem() }} sampai {{ $templates->lastItem() }} dari {{ $templates->total() }} template
             </div>

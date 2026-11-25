@@ -20,7 +20,9 @@
     }
     .bento-table-container-fixed {
         width: 100%;
-        overflow: hidden;
+        overflow-x: auto;
+        overflow-y: hidden;
+        -webkit-overflow-scrolling: touch;
     }
     .bento-table {
         table-layout: fixed;
@@ -176,6 +178,12 @@
     }
     .user-stats-scroll::-webkit-scrollbar {
         display: none;
+    }
+
+    @media (min-width: 768px) and (max-width: 1279.98px) {
+        .bento-table {
+            min-width: 860px;
+        }
     }
 
     @media (max-width: 767.98px) {
@@ -415,7 +423,7 @@
 <!-- Table Bento Card -->
 <div class="bento-card mb-4">
     <div class="d-flex flex-wrap justify-content-between align-items-center p-3 border-bottom gap-2">
-        <div>
+        <div style="min-width: 0; max-width: 100%; flex: 1 1 260px;">
             <h5 class="fw-bold text-dark mb-0" style="font-size: 1.05rem;">Daftar Pengguna Sistem</h5>
             <div class="user-stats-scroll gap-1 mt-1">
                 <span class="badge bg-light text-secondary border">Total Pengguna: {{ $totalUsers }}</span>
@@ -733,7 +741,7 @@
     </div>
 
     @if($users->hasPages())
-        <div class="p-3 border-top d-flex justify-content-between align-items-center">
+        <div class="p-3 border-top d-flex flex-wrap justify-content-between align-items-center gap-2">
             <div class="small text-muted">
                 Menampilkan {{ $users->firstItem() }} sampai {{ $users->lastItem() }} dari {{ $users->total() }} data
             </div>

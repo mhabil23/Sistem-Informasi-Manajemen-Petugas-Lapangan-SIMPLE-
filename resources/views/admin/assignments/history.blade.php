@@ -30,7 +30,7 @@
             Arsip penugasan yang telah berakhir / selesai beserta catatan aktivitas pengaturan status &amp; periode oleh Administrator.
         </p>
     </div>
-    <div class="d-flex align-items-center gap-2">
+    <div class="d-flex flex-wrap align-items-center gap-2">
         <span class="badge {{ $globalAssignmentEnabled ? 'bg-success-subtle text-success border border-success-subtle' : 'bg-danger-subtle text-danger border border-danger-subtle' }} rounded-pill px-3 py-1.5 small">
             Status Global: {{ $globalAssignmentEnabled ? 'AKTIF' : 'NONAKTIF' }}
         </span>
@@ -60,7 +60,7 @@
 
 <!-- Daftar Penugasan Berakhir / Selesai / Diarsipkan -->
 <div class="bento-card-clean overflow-hidden mb-4">
-    <div class="px-4 py-3 border-bottom bg-light d-flex justify-content-between align-items-center">
+    <div class="px-3 px-md-4 py-3 border-bottom bg-light d-flex flex-wrap justify-content-between align-items-center gap-2">
         <h6 class="fw-bold text-dark mb-0"><i class="bi bi-archive me-1.5 text-secondary"></i> Daftar Penugasan Berakhir / Selesai / Diarsipkan</h6>
         <span class="badge bg-secondary-subtle text-secondary border rounded-pill px-2.5 py-1 small">{{ $historicalAssignments->total() }} Kegiatan</span>
     </div>

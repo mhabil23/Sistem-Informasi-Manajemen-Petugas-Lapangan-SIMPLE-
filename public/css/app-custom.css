@@ -18,13 +18,17 @@
     --sp-shadow-lg: 0 10px 25px rgba(15, 33, 66, 0.1);
 }
 
+html, body {
+    overflow-x: hidden;
+    max-width: 100%;
+}
+
 body {
     font-family: 'Plus Jakarta Sans', system-ui, -apple-system, sans-serif;
     background-color: var(--sp-bg);
     color: #1e293b;
     margin: 0;
     padding: 0;
-    overflow-x: hidden;
 }
 
 /* ===================================================
@@ -798,6 +802,66 @@ body {
     .modal-footer > * {
         width: 100% !important;
         margin: 0 !important;
+    }
+
+    /* Global Bento Cards, Headers, Tables & Filter Anti-Overflow (HP) */
+    .bento-table-card,
+    .bento-card-clean,
+    .bento-card {
+        max-width: 100%;
+    }
+    .bento-table-header {
+        padding: 0.85rem 1rem !important;
+        flex-direction: column;
+        align-items: stretch !important;
+        gap: 0.65rem !important;
+    }
+    .bento-table-header > * {
+        max-width: 100%;
+    }
+    .bento-table-container-fixed {
+        overflow-x: hidden !important;
+        max-width: 100%;
+    }
+    .bento-table-card .bento-table-fixed tr {
+        width: calc(100% - 1.2rem) !important;
+        margin: 0.6rem auto !important;
+        box-sizing: border-box;
+    }
+    .bento-table-card .bento-table-fixed td {
+        white-space: normal !important;
+        word-break: break-word;
+    }
+    .bento-tabs-container {
+        width: 100% !important;
+        border-radius: 16px !important;
+        flex-wrap: wrap !important;
+        gap: 0.25rem;
+    }
+    .bento-tabs-container .nav-item {
+        flex: 1 1 100%;
+    }
+    .bento-tabs-container .nav-link {
+        width: 100%;
+        justify-content: space-between;
+        padding: 0.55rem 0.9rem !important;
+        font-size: 0.8rem !important;
+    }
+    .sp-page-title {
+        max-width: clamp(140px, 52vw, 260px);
+    }
+    .sp-footer {
+        padding: 0.75rem 1rem !important;
+        text-align: center;
+        justify-content: center !important;
+    }
+}
+
+/* Laptop & Tablet Intermediate Screens: Smooth Table Horizontal Scroll When Narrow */
+@media (min-width: 768px) and (max-width: 1279.98px) {
+    .bento-table-container-fixed {
+        overflow-x: auto !important;
+        -webkit-overflow-scrolling: touch;
     }
 }
 

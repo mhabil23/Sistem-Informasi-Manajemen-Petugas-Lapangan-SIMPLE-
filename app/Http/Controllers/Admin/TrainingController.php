@@ -289,7 +289,7 @@ class TrainingController extends Controller
             'activity_subtitle.required' => 'Subjudul Kegiatan / Pelatihan wajib diisi.',
         ]);
 
-        $date = !empty($validated['attendance_date']) ? $validated['attendance_date'] : $training->start_date->toDateString();
+        $date = !empty($validated['attendance_date']) ? $validated['attendance_date'] : ($training->start_date ? $training->start_date->toDateString() : now()->toDateString());
         $place = !empty($validated['document_place']) ? trim($validated['document_place']) : ($training->location ?: 'Kantor BPS Kabupaten Kolaka Utara');
         $title = !empty($validated['activity_subtitle']) ? trim($validated['activity_subtitle']) : $training->title;
 
@@ -573,7 +573,10 @@ class TrainingController extends Controller
             'nip_or_id' => ['nullable', 'string', 'max:50'],
             'category' => ['required', 'string', 'max:100'],
             'agency' => ['nullable', 'string', 'max:255'],
+            'phone' => ['nullable', 'string', 'max:25'],
+            'email' => ['nullable', 'email', 'max:255'],
             'attendance_status' => ['required', Rule::in(['present', 'absent', 'excused'])],
+            'certificate_number' => ['nullable', 'string', 'max:100'],
         ]);
 
         $participant->update($validated);

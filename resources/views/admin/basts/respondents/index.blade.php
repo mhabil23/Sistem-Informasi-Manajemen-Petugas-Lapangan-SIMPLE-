@@ -92,13 +92,20 @@
 }
 .bento-table-container-fixed {
     width: 100%;
-    overflow: hidden;
+    overflow-x: auto;
+    overflow-y: hidden;
+    -webkit-overflow-scrolling: touch;
 }
 .bento-table-fixed {
     table-layout: fixed;
     width: 100%;
     margin-bottom: 0;
     font-size: 0.8rem;
+}
+@media (min-width: 768px) and (max-width: 1279.98px) {
+    .bento-table-card .bento-table-fixed {
+        min-width: 820px;
+    }
 }
 .bento-table-fixed th {
     background: #F8FAFC;
@@ -205,9 +212,11 @@
         background: #FFFFFF;
         border: 1px solid #E2E8F0;
         border-radius: 14px;
-        margin: 0.75rem;
+        margin: 0.6rem auto;
+        width: calc(100% - 1.2rem) !important;
         padding: 0.85rem;
         box-shadow: 0 2px 8px rgba(15, 23, 42, 0.02);
+        box-sizing: border-box;
     }
     .bento-table-card .bento-table-fixed td {
         border: none;
@@ -219,6 +228,12 @@
         padding-top: 0.5rem;
         display: flex;
         justify-content: flex-end;
+    }
+    .bento-table-card .bento-table-fixed td[colspan] {
+        border-top: none;
+        margin-top: 0;
+        justify-content: center;
+        text-align: center !important;
     }
 }
 </style>
@@ -582,13 +597,13 @@
                     <div class="col-md-8">
                         <label class="form-label small fw-semibold text-secondary">KATEGORI TANDA TERIMA <span class="text-danger">*</span></label>
                         <div class="row g-2">
-                            <div class="col-6">
+                            <div class="col-12 col-sm-6">
                                 <label class="border rounded-3 p-2 d-flex align-items-center gap-2 cursor-pointer bg-light h-100">
                                     <input type="radio" name="handover_category" value="ATK" class="form-check-input mt-0">
                                     <span class="small fw-semibold">ATK <small class="text-muted fw-normal">(Perlengkapan)</small></span>
                                 </label>
                             </div>
-                            <div class="col-6">
+                            <div class="col-12 col-sm-6">
                                 <label class="border rounded-3 p-2 d-flex align-items-center gap-2 cursor-pointer bg-light h-100">
                                     <input type="radio" name="handover_category" value="KUES" class="form-check-input mt-0" checked>
                                     <span class="small fw-semibold">KUES <small class="text-muted fw-normal">(Kuesioner)</small></span>

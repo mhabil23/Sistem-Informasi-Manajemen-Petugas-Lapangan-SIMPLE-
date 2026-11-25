@@ -48,10 +48,25 @@ class TrainingEvent extends Model
         return $this->belongsTo(User::class, 'created_by');
     }
 
+    private static ?bool $hasPublicTokenColumn = null;
+
+    public static function hasPublicTokenColumn(): bool
+    {
+        if (self::$hasPublicTokenColumn !== null) {
+            return self::$hasPublicTokenColumn;
+        }
+
+        try {
+            return self::$hasPublicTokenColumn = \Illuminate\Support\Facades\Schema::hasColumn('training_events', 'public_token');
+        } catch (\Throwable $e) {
+            return self::$hasPublicTokenColumn = false;
+        }
+    }
+
     protected static function booted(): void
     {
         static::creating(function ($event) {
-            if (empty($event->public_token)) {
+            if (self::hasPublicTokenColumn() && empty($event->public_token)) {
                 $event->public_token = \Illuminate\Support\Str::random(24);
             }
         });
@@ -59,9 +74,19 @@ class TrainingEvent extends Model
 
     public function ensurePublicToken(): string
     {
-        if (empty($this->public_token)) {
-            $this->public_token = \Illuminate\Support\Str::random(24);
+        if (!empty($this->public_token)) {
+            return $this->public_token;
+        }
+
+        if (!self::hasPublicTokenColumn()) {
+            return 'unmigrated-' . ($this->id ?? '0');
+        }
+
+        $this->public_token = \Illuminate\Support\Str::random(24);
+        try {
             $this->save();
+        } catch (\Throwable $e) {
+            // Hindari HTTP 500 saat getter diakses dalam kondisi database belum tersinkronisasi
         }
 
         return $this->public_token;

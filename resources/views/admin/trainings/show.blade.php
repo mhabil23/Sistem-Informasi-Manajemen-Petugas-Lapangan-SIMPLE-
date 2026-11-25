@@ -21,7 +21,8 @@
     }
     .bento-table-container-fixed {
         width: 100%;
-        overflow: hidden;
+        overflow-x: auto;
+        -webkit-overflow-scrolling: touch;
     }
     .bento-table {
         table-layout: fixed;
@@ -89,7 +90,15 @@
     .bento-action-btn.btn-edit:hover { background: #D97706; color: #FFFFFF; }
     .bento-action-btn.btn-delete { color: #DC2626; border-color: #FECACA; background: #FEF2F2; }
     .bento-action-btn.btn-delete:hover { background: #DC2626; color: #FFFFFF; }
+    @media (min-width: 768px) and (max-width: 1279.98px) {
+        .bento-table {
+            min-width: 820px;
+        }
+    }
     @media (max-width: 767.98px) {
+        .bento-table {
+            table-layout: auto !important;
+        }
         .bento-table thead {
             display: none;
         }
@@ -97,27 +106,54 @@
             display: block;
             width: 100% !important;
         }
-        .bento-table tr {
-            margin-bottom: 1rem;
+        .bento-table tbody tr {
+            margin: 0.65rem auto;
+            width: calc(100% - 1.3rem) !important;
             border: 1px solid #e2e8f0;
-            border-radius: 12px;
-            padding: 0.5rem;
+            border-radius: 14px;
+            padding: 0;
             background: #fff;
+            box-shadow: 0 2px 8px rgba(15, 23, 42, 0.04);
+            overflow: hidden;
+            box-sizing: border-box;
         }
-        .bento-table td {
-            text-align: right;
-            padding: 0.5rem 0.75rem;
+        .bento-table tbody td {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 0.75rem;
+            text-align: right !important;
+            padding: 0.6rem 0.85rem !important;
             border-bottom: 1px solid #f1f5f9;
+            white-space: normal !important;
         }
-        .bento-table td:last-child {
-            border-bottom: none;
+        .bento-table tbody td > div,
+        .bento-table tbody td > span {
+            max-width: 66%;
+            min-width: 0;
         }
-        .bento-table td::before {
+        .bento-table tbody td::before {
             content: attr(data-label);
-            float: left;
-            font-weight: 600;
+            font-weight: 700;
+            text-transform: uppercase;
             color: #64748b;
-            font-size: 0.75rem;
+            font-size: 0.68rem;
+            letter-spacing: 0.03em;
+            text-align: left;
+            flex-shrink: 0;
+        }
+        .bento-table tbody td:last-child {
+            border-bottom: none;
+            background: #f8fafc;
+            justify-content: flex-end;
+        }
+        .bento-table tbody td[colspan] {
+            display: block;
+            text-align: center !important;
+            background: transparent !important;
+        }
+        .bento-table tbody td[colspan]::before {
+            display: none;
         }
     }
 </style>
@@ -128,13 +164,13 @@
 <div class="bento-card mb-4">
     <div class="p-4">
         <div class="row align-items-center">
-            <div class="col-lg-8">
+            <div class="col-lg-7">
                 <a href="{{ route('admin.trainings.index') }}" class="btn btn-sm btn-outline-secondary mb-2 rounded-pill px-3 py-1" style="font-size: 0.8rem;">
                     <i class="bi bi-arrow-left me-1"></i> Kembali ke Daftar Agenda
                 </a>
                 <h4 class="fw-bold text-dark mb-1">{{ $training->title }}</h4>
                 <div class="d-flex flex-wrap gap-3 text-secondary small mt-2">
-                    <div><i class="bi bi-calendar-check text-primary me-1"></i> <strong>{{ $training->start_date->format('d M Y') }} - {{ $training->end_date->format('d M Y') }}</strong></div>
+                    <div><i class="bi bi-calendar-check text-primary me-1"></i> <strong>{{ $training->start_date?->format('d M Y') ?? '-' }} - {{ $training->end_date?->format('d M Y') ?? '-' }}</strong></div>
                     <div><i class="bi bi-geo-alt text-danger me-1"></i> {{ $training->location }}</div>
                     <div><i class="bi bi-people text-info me-1"></i> Kuota: <strong>{{ $training->quota ?: 'Tak Terbatas' }}</strong></div>
                     <div>
@@ -175,16 +211,16 @@
 <!-- Banner Link Presensi Online Peserta (WhatsApp & Proyektor) -->
 <div class="bento-card mb-4 border shadow-sm p-3.5" style="border-radius: 20px; background: linear-gradient(135deg, #FFFFFF 0%, #F0FDF4 100%); border-color: #BBF7D0 !important;">
     <div class="d-flex flex-wrap align-items-center justify-content-between gap-3">
-        <div class="d-flex align-items-center gap-3">
+        <div class="d-flex align-items-center gap-3" style="min-width: 0; flex: 1 1 260px;">
             <div class="rounded-4 d-flex align-items-center justify-content-center text-white flex-shrink-0 shadow-sm" style="width: 46px; height: 46px; background: #16A34A;">
                 <i class="bi bi-link-45deg fs-4"></i>
             </div>
-            <div>
-                <div class="d-flex align-items-center gap-2 mb-0.5">
+            <div style="min-width: 0; flex: 1 1 auto;">
+                <div class="d-flex flex-wrap align-items-center gap-2 mb-0.5">
                     <span class="fw-bold text-dark" style="font-size: 0.94rem;">Link Presensi &amp; Tanda Tangan Digital Peserta</span>
                     <span class="badge bg-success text-white rounded-pill px-2.5 py-0.5" style="font-size: 0.68rem;">Siap Dibagikan</span>
                 </div>
-                <div class="text-secondary small font-monospace text-truncate" style="font-size: 0.78rem; max-width: 480px;">
+                <div class="text-secondary small font-monospace text-truncate" style="font-size: 0.78rem; max-width: min(480px, 100%);">
                     {{ $training->public_attendance_url }}
                 </div>
             </div>
@@ -384,7 +420,7 @@
     </div>
 
     @if($participants->hasPages())
-        <div class="p-3 border-top d-flex justify-content-between align-items-center">
+        <div class="p-3 border-top d-flex flex-wrap justify-content-between align-items-center gap-2">
             <div class="small text-muted">
                 Menampilkan {{ $participants->firstItem() }} sampai {{ $participants->lastItem() }} dari {{ $participants->total() }} peserta
             </div>
@@ -697,8 +733,9 @@
         document.getElementById('shareModalQrImage').src = 'https://api.qrserver.com/v1/create-qr-code/?size=210x210&margin=10&data=' + encodeURIComponent(finalUrl);
     }
 
-    function copyAttendanceLink() {
-        const url = document.getElementById('publicAttendanceUrlInput').value;
+    function copyAttendanceLink(customUrl = null) {
+        const inputEl = document.getElementById('publicAttendanceUrlInput');
+        const url = customUrl || (inputEl ? inputEl.value : '');
         if (!url) return;
 
         if (navigator.clipboard && navigator.clipboard.writeText) {

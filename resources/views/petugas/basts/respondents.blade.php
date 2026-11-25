@@ -41,6 +41,11 @@
         margin-bottom: 0;
         font-size: 0.82rem;
     }
+    @media (min-width: 768px) and (max-width: 1279.98px) {
+        .bento-table {
+            min-width: 800px;
+        }
+    }
     .bento-table thead th {
         background-color: #F8FAFC;
         color: #475569;
@@ -117,7 +122,7 @@
                     <i class="bi bi-hourglass-split fs-5 text-warning-emphasis"></i>
                 </div>
                 <div>
-                    <div class="d-flex align-items-center gap-2 mb-0.5">
+                    <div class="d-flex flex-wrap align-items-center gap-2 mb-0.5">
                         <span class="badge bg-warning text-dark px-2.5 py-1 rounded-pill" style="font-size: 0.72rem;">
                             <i class="bi bi-clock-history me-1"></i> {{ $periodStatusMsg }}
                         </span>
@@ -139,7 +144,7 @@
                     <i class="bi bi-lock-fill fs-5"></i>
                 </div>
                 <div>
-                    <div class="d-flex align-items-center gap-2 mb-0.5">
+                    <div class="d-flex flex-wrap align-items-center gap-2 mb-0.5">
                         <span class="badge bg-danger text-white px-2.5 py-1 rounded-pill" style="font-size: 0.72rem;">
                             <i class="bi bi-x-circle-fill me-1"></i> {{ $periodStatusMsg }}
                         </span>
@@ -186,7 +191,7 @@
 
 <!-- Table Card -->
 <div class="bento-card mb-4 overflow-hidden">
-    <div class="d-flex justify-content-between align-items-center px-4 py-3 border-bottom bg-white">
+    <div class="d-flex flex-wrap justify-content-between align-items-center gap-2 px-3 px-md-4 py-3 border-bottom bg-white">
         <div class="d-flex align-items-center gap-2">
             <div class="rounded-circle d-flex align-items-center justify-content-center" style="width: 32px; height: 32px; background: #EFF6FF; color: #005BAC;">
                 <i class="bi bi-file-earmark-check"></i>
@@ -201,7 +206,7 @@
     </div>
 
     <!-- MODE DESKTOP & TABLET: Tabel Anti-Geser -->
-    <div class="d-none d-md-block">
+    <div class="d-none d-md-block table-responsive">
         <table class="table bento-table align-middle">
             <thead>
                 <tr>
@@ -532,7 +537,7 @@
                             </span>
                         </label>
                         <div class="row g-2">
-                            <div class="col-6">
+                            <div class="col-12 col-sm-6">
                                 <label class="border rounded-3 p-2.5 d-flex align-items-start gap-2 cursor-pointer bg-light h-100" id="respCatAtkLabel" style="cursor: pointer;">
                                     <input type="radio" name="handover_category" id="respCatAtk" value="ATK" class="form-check-input mt-1" onchange="onRespCategoryChanged('ATK')">
                                     <div>
@@ -541,7 +546,7 @@
                                     </div>
                                 </label>
                             </div>
-                            <div class="col-6">
+                            <div class="col-12 col-sm-6">
                                 <label class="border rounded-3 p-2.5 d-flex align-items-start gap-2 cursor-pointer bg-white border-primary h-100" id="respCatKuesLabel" style="cursor: pointer;">
                                     <input type="radio" name="handover_category" id="respCatKues" value="KUES" class="form-check-input mt-1" checked onchange="onRespCategoryChanged('KUES')">
                                     <div>

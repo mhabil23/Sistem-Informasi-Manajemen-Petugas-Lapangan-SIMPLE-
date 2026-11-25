@@ -131,6 +131,96 @@
     font-size: 0.8rem;
     flex-shrink: 0;
 }
+.bento-table-fixed {
+    min-width: 920px;
+}
+@media (max-width: 767.98px) {
+    .bento-table-header {
+        padding: 0.85rem 1rem;
+        flex-direction: column;
+        align-items: stretch;
+    }
+    #docProgressTabs {
+        flex-wrap: wrap;
+        gap: 0.4rem !important;
+    }
+    #docProgressTabs .nav-item {
+        flex: 1 1 100%;
+    }
+    #docProgressTabs .nav-link {
+        width: 100%;
+        text-align: left;
+        font-size: 0.78rem;
+        padding: 0.5rem 0.85rem !important;
+    }
+    .bento-table-container-fixed {
+        overflow-x: hidden !important;
+    }
+    .bento-table-fixed {
+        min-width: 0 !important;
+        table-layout: auto !important;
+    }
+    .bento-table-fixed thead {
+        display: none;
+    }
+    .bento-table-fixed,
+    .bento-table-fixed tbody,
+    .bento-table-fixed tr,
+    .bento-table-fixed td {
+        display: block;
+        width: 100% !important;
+    }
+    .bento-table-fixed tbody tr {
+        background: #FFFFFF;
+        border: 1px solid #E2E8F0;
+        border-radius: 14px;
+        margin: 0.65rem auto;
+        width: calc(100% - 1.3rem) !important;
+        padding: 0.75rem 0.9rem;
+        box-shadow: 0 2px 8px rgba(15, 23, 42, 0.03);
+        box-sizing: border-box;
+    }
+    .bento-table-fixed tbody td {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 0.75rem;
+        text-align: right !important;
+        padding: 0.4rem 0;
+        border-bottom: 1px solid #F1F5F9;
+        white-space: normal !important;
+    }
+    .bento-table-fixed tbody td::before {
+        content: attr(data-label);
+        font-weight: 700;
+        font-size: 0.72rem;
+        color: #64748B;
+        text-transform: uppercase;
+        letter-spacing: 0.03em;
+        text-align: left;
+        flex-shrink: 0;
+    }
+    .bento-table-fixed tbody td[colspan]::before {
+        display: none;
+    }
+    .bento-table-fixed tbody td[colspan] {
+        display: block;
+        text-align: center !important;
+        border-bottom: none;
+    }
+    .bento-table-fixed tbody td:last-child {
+        border-bottom: none;
+        padding-bottom: 0.1rem;
+    }
+    #bulkActionForm .bg-light.border-bottom {
+        flex-direction: column;
+        align-items: stretch !important;
+    }
+    #bulkStatusSelect {
+        width: 100% !important;
+        min-width: 0 !important;
+    }
+}
 </style>
 @endpush
 
@@ -289,9 +379,9 @@
                 <form id="bulkActionForm" method="POST" action="{{ route('admin.progress.documents.bulk-update') }}">
                     @csrf
                     <div class="px-3 py-2 bg-light border-bottom d-flex align-items-center justify-content-between flex-wrap gap-2">
-                        <div class="d-flex align-items-center gap-2">
+                        <div class="d-flex flex-wrap align-items-center gap-2 w-100 w-lg-auto">
                             <span class="text-muted small"><i class="bi bi-check2-square me-1"></i> Aksi Massal Dokumen Terpilih:</span>
-                            <select name="processing_status" id="bulkStatusSelect" class="form-select form-select-sm" style="width: auto; min-width: 180px;" required>
+                            <select name="processing_status" id="bulkStatusSelect" class="form-select form-select-sm" style="width: auto; min-width: 180px; max-width: 100%;" required>
                                 <option value="">-- Ubah Status Terpilih Ke --</option>
                                 <option value="belum_diterima">Belum Diterima</option>
                                 <option value="receiving">1. Penerimaan (Receiving)</option>
@@ -329,17 +419,17 @@
                                 @forelse($documents as $index => $doc)
                                     <tr>
                                         <!-- Checkbox -->
-                                        <td class="text-center">
+                                        <td class="text-center" data-label="Pilih">
                                             <input type="checkbox" name="respondent_ids[]" value="{{ $doc->id }}" class="form-check-input doc-checkbox">
                                         </td>
 
                                         <!-- Nomor Urut -->
-                                        <td class="text-center text-muted fw-bold">
+                                        <td class="text-center text-muted fw-bold" data-label="No">
                                             {{ $documents->firstItem() + $index }}
                                         </td>
 
                                         <!-- Responden & Kontak -->
-                                        <td>
+                                        <td data-label="Responden">
                                             <div class="fw-bold text-dark text-truncate" title="{{ $doc->name }}">
                                                 {{ $doc->name }}
                                             </div>
@@ -358,7 +448,7 @@
                                         </td>
 
                                         <!-- Kegiatan Survei -->
-                                        <td>
+                                        <td data-label="Kegiatan">
                                             <div class="text-truncate fw-semibold text-primary" title="{{ $doc->assignment?->title ?? '-' }}">
                                                 {{ $doc->assignment?->title ?? '-' }}
                                             </div>
@@ -368,7 +458,7 @@
                                         </td>
 
                                         <!-- Petugas Pencacah & PML -->
-                                        <td>
+                                        <td data-label="Petugas">
                                             @if($doc->officer)
                                                 <div class="fw-semibold text-dark text-truncate" title="{{ $doc->officer->name }}">
                                                     {{ $doc->officer->name }}
@@ -382,7 +472,7 @@
                                         </td>
 
                                         <!-- Wilayah -->
-                                        <td>
+                                        <td data-label="Wilayah">
                                             <div class="fw-semibold text-dark text-truncate" title="{{ $doc->district }}">{{ $doc->district }}</div>
                                             <div class="text-muted text-truncate" style="font-size: 0.68rem;" title="{{ $doc->village ?? $doc->address }}">
                                                 {{ $doc->village ?? $doc->address }}
@@ -390,7 +480,7 @@
                                         </td>
 
                                         <!-- Status Lapangan & BAST -->
-                                        <td class="text-center">
+                                        <td class="text-center" data-label="Status Lapangan">
                                             @if($doc->progress_status === 'selesai' || $doc->basts->count() > 0)
                                                 <span class="badge bg-success-subtle text-success border border-success-subtle rounded-pill px-2 py-0.5 fw-semibold text-nowrap" style="font-size: 0.68rem;">
                                                     <i class="bi bi-check2-circle me-0.5"></i> Selesai
@@ -403,7 +493,7 @@
                                         </td>
 
                                         <!-- Tahapan Pengolahan Dokumen -->
-                                        <td class="text-center">
+                                        <td class="text-center" data-label="Pengolahan">
                                             @php
                                                 $badgeClass = match($doc->processing_status) {
                                                     'clean' => 'bg-success-subtle text-success border border-success-subtle',
@@ -433,7 +523,7 @@
                                         </td>
 
                                         <!-- Tombol Aksi Update Cepat -->
-                                        <td class="text-center">
+                                        <td class="text-center" data-label="Aksi">
                                             <button type="button" class="btn btn-sm btn-outline-primary rounded-pill px-2 py-0.5 d-inline-flex align-items-center gap-1 text-nowrap shadow-none" style="font-size: 0.72rem; font-weight: 600;" 
                                                     onclick="openStatusModal({{ $doc->id }}, '{{ addslashes($doc->name) }}', '{{ $doc->processing_status ?? 'belum_diterima' }}')"
                                                     title="Ubah Tahapan Pengolahan">
@@ -490,25 +580,25 @@
                             @php $distNo = 1; @endphp
                             @foreach($districtStats as $dStat)
                                 <tr>
-                                    <td class="text-center text-muted fw-bold">{{ $distNo++ }}</td>
-                                    <td>
+                                    <td class="text-center text-muted fw-bold" data-label="No">{{ $distNo++ }}</td>
+                                    <td data-label="Kecamatan">
                                         <div class="fw-bold text-dark text-truncate">{{ $dStat['district'] }}</div>
                                         <small class="text-muted" style="font-size: 0.68rem;">Kab. Kolaka Utara</small>
                                     </td>
-                                    <td class="text-center fw-bold">{{ number_format($dStat['total']) }}</td>
-                                    <td class="text-center">
+                                    <td class="text-center fw-bold" data-label="Target">{{ number_format($dStat['total']) }}</td>
+                                    <td class="text-center" data-label="1. Receiving">
                                         <div class="small fw-semibold text-info">{{ $dStat['received'] }} / {{ $dStat['total'] }}</div>
                                         <span class="badge bg-info-subtle text-info border border-info-subtle rounded-pill px-2 py-0.2" style="font-size: 0.65rem;">{{ $dStat['received_pct'] }}%</span>
                                     </td>
-                                    <td class="text-center">
+                                    <td class="text-center" data-label="2. Editing/Coding">
                                         <div class="small fw-semibold text-warning">{{ $dStat['edited'] }} / {{ $dStat['total'] }}</div>
                                         <span class="badge bg-warning-subtle text-warning-emphasis border border-warning-subtle rounded-pill px-2 py-0.2" style="font-size: 0.65rem;">{{ $dStat['edited_pct'] }}%</span>
                                     </td>
-                                    <td class="text-center">
+                                    <td class="text-center" data-label="3. Entri">
                                         <div class="small fw-semibold text-primary">{{ $dStat['entered'] }} / {{ $dStat['total'] }}</div>
                                         <span class="badge bg-primary-subtle text-primary border border-primary-subtle rounded-pill px-2 py-0.2" style="font-size: 0.65rem;">{{ $dStat['entered_pct'] }}%</span>
                                     </td>
-                                    <td class="text-center">
+                                    <td class="text-center" data-label="4. Clean Data">
                                         <div class="small fw-semibold text-success">{{ $dStat['clean'] }} / {{ $dStat['total'] }}</div>
                                         <span class="badge bg-success-subtle text-success border border-success-subtle rounded-pill px-2 py-0.2" style="font-size: 0.65rem;">{{ $dStat['clean_pct'] }}%</span>
                                     </td>
@@ -539,25 +629,25 @@
                         <tbody>
                             @forelse($assignmentStats as $aIndex => $aStat)
                                 <tr>
-                                    <td class="text-center text-muted fw-bold">{{ $aIndex + 1 }}</td>
-                                    <td>
+                                    <td class="text-center text-muted fw-bold" data-label="No">{{ $aIndex + 1 }}</td>
+                                    <td data-label="Kegiatan">
                                         <div class="fw-bold text-dark text-truncate" title="{{ $aStat['title'] }}">{{ $aStat['title'] }}</div>
                                         <small class="text-muted" style="font-size: 0.68rem;">ID: #{{ $aStat['id'] }}</small>
                                     </td>
-                                    <td class="text-center fw-bold">{{ number_format($aStat['total']) }}</td>
-                                    <td class="text-center">
+                                    <td class="text-center fw-bold" data-label="Target">{{ number_format($aStat['total']) }}</td>
+                                    <td class="text-center" data-label="1. Receiving">
                                         <div class="small fw-semibold text-info">{{ $aStat['received'] }} / {{ $aStat['total'] }}</div>
                                         <span class="badge bg-info-subtle text-info border border-info-subtle rounded-pill px-2 py-0.2" style="font-size: 0.65rem;">{{ $aStat['received_pct'] }}%</span>
                                     </td>
-                                    <td class="text-center">
+                                    <td class="text-center" data-label="2. Editing/Coding">
                                         <div class="small fw-semibold text-warning">{{ $aStat['edited'] }} / {{ $aStat['total'] }}</div>
                                         <span class="badge bg-warning-subtle text-warning-emphasis border border-warning-subtle rounded-pill px-2 py-0.2" style="font-size: 0.65rem;">{{ $aStat['edited_pct'] }}%</span>
                                     </td>
-                                    <td class="text-center">
+                                    <td class="text-center" data-label="3. Entri">
                                         <div class="small fw-semibold text-primary">{{ $aStat['entered'] }} / {{ $aStat['total'] }}</div>
                                         <span class="badge bg-primary-subtle text-primary border border-primary-subtle rounded-pill px-2 py-0.2" style="font-size: 0.65rem;">{{ $aStat['entered_pct'] }}%</span>
                                     </td>
-                                    <td class="text-center">
+                                    <td class="text-center" data-label="4. Clean Data">
                                         <div class="small fw-semibold text-success">{{ $aStat['clean'] }} / {{ $aStat['total'] }}</div>
                                         <span class="badge bg-success-subtle text-success border border-success-subtle rounded-pill px-2 py-0.2" style="font-size: 0.65rem;">{{ $aStat['clean_pct'] }}%</span>
                                     </td>

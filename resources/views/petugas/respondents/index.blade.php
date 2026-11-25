@@ -61,6 +61,11 @@
         margin-bottom: 0;
         font-size: 0.82rem;
     }
+    @media (min-width: 768px) and (max-width: 1279.98px) {
+        .bento-table {
+            min-width: 800px;
+        }
+    }
     .bento-table thead th {
         background-color: #F8FAFC;
         color: #475569;
@@ -151,7 +156,7 @@
                     <i class="bi bi-hourglass-split fs-5 text-warning-emphasis"></i>
                 </div>
                 <div>
-                    <div class="d-flex align-items-center gap-2 mb-0.5">
+                    <div class="d-flex flex-wrap align-items-center gap-2 mb-0.5">
                         <span class="badge bg-warning text-dark px-2.5 py-1 rounded-pill" style="font-size: 0.72rem;">
                             <i class="bi bi-clock-history me-1"></i> {{ $periodStatusMsg }}
                         </span>
@@ -173,7 +178,7 @@
                     <i class="bi bi-lock-fill fs-5"></i>
                 </div>
                 <div>
-                    <div class="d-flex align-items-center gap-2 mb-0.5">
+                    <div class="d-flex flex-wrap align-items-center gap-2 mb-0.5">
                         <span class="badge bg-danger text-white px-2.5 py-1 rounded-pill" style="font-size: 0.72rem;">
                             <i class="bi bi-x-circle-fill me-1"></i> {{ $periodStatusMsg }}
                         </span>
@@ -329,9 +334,9 @@
 
 <!-- Table Card -->
 <div class="bento-card mb-4 overflow-hidden">
-    <div class="d-flex justify-content-between align-items-center px-4 py-3 border-bottom bg-white">
+    <div class="d-flex flex-wrap justify-content-between align-items-center gap-2 px-3 px-md-4 py-3 border-bottom bg-white">
         <div class="d-flex align-items-center gap-2">
-            <div class="rounded-circle d-flex align-items-center justify-content-center" style="width: 32px; height: 32px; background: #FFF4ED; color: #F37021;">
+            <div class="rounded-circle d-flex align-items-center justify-content-center flex-shrink-0" style="width: 32px; height: 32px; background: #FFF4ED; color: #F37021;">
                 <i class="bi bi-people-fill"></i>
             </div>
             <h5 class="fw-bold text-dark mb-0" style="font-size: 0.95rem;">
@@ -344,7 +349,7 @@
     </div>
 
     <!-- MODE DESKTOP & TABLET: Tabel Data Anti-Geser -->
-    <div class="d-none d-md-block">
+    <div class="d-none d-md-block table-responsive">
         <table class="table bento-table align-middle">
             <thead>
                 <tr>

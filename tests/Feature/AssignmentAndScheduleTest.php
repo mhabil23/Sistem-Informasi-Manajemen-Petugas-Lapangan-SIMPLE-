@@ -127,10 +127,25 @@ class AssignmentAndScheduleTest extends TestCase
     public function test_petugas_can_view_own_schedules(): void
     {
         $officer = User::where('role', 'petugas')->first();
+        $assignment = Assignment::first();
+
+        Schedule::create([
+            'title' => 'Identifikasi Sampel SPKRT Triwulan 1 2027',
+            'assignment_id' => $assignment?->id,
+            'officer_id' => $officer->id,
+            'start_time' => now()->addDays(1)->setTime(8, 30),
+            'end_time' => now()->addDays(1)->setTime(11, 30),
+            'location' => 'Wilayah Tugas Masing-Masing',
+            'status' => 'scheduled',
+            'officer_status' => 'active',
+        ]);
 
         $response = $this->actingAs($officer)->get(route('petugas.schedules.index'));
         $response->assertStatus(200);
         $response->assertSee('Agenda Lapangan Saya');
+        $response->assertSee('Identifikasi Sampel SPKRT Triwulan 1 2027');
+        $response->assertSee('schedule-card-header', false);
+        $response->assertSee('schedule-badges', false);
     }
 
     public function test_show_assignment_renders_cleanly_even_if_assigned_officer_user_is_soft_deleted(): void

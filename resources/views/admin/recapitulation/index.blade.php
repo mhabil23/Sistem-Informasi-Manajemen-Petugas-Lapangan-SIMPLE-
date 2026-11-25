@@ -20,7 +20,9 @@
     }
     .bento-table-container-fixed {
         width: 100%;
-        overflow: hidden;
+        overflow-x: auto;
+        overflow-y: hidden;
+        -webkit-overflow-scrolling: touch;
     }
     .bento-table {
         table-layout: fixed;
@@ -72,6 +74,15 @@
         border-bottom: 1px solid #e2e8f0;
         background: #f8fafc;
         padding: 8px 16px 0 16px;
+        flex-wrap: nowrap;
+        overflow-x: auto;
+        overflow-y: hidden;
+        -webkit-overflow-scrolling: touch;
+        scrollbar-width: none;
+        white-space: nowrap;
+    }
+    .nav-tabs-bento::-webkit-scrollbar {
+        display: none;
     }
     .nav-tabs-bento .nav-link {
         border: none;
@@ -81,13 +92,22 @@
         padding: 10px 16px;
         border-radius: 8px 8px 0 0;
         transition: all 0.2s ease;
+        white-space: nowrap;
     }
     .nav-tabs-bento .nav-link.active {
         color: #F37021;
         background: #ffffff;
         border-bottom: 2px solid #F37021;
     }
+    @media (min-width: 768px) and (max-width: 1279.98px) {
+        .bento-table {
+            min-width: 780px;
+        }
+    }
     @media (max-width: 767.98px) {
+        .bento-table {
+            table-layout: auto !important;
+        }
         .bento-table thead {
             display: none;
         }
@@ -95,27 +115,52 @@
             display: block;
             width: 100% !important;
         }
-        .bento-table tr {
-            margin-bottom: 1rem;
+        .bento-table tbody tr {
+            margin: 0.65rem auto;
+            width: calc(100% - 1.25rem) !important;
             border: 1px solid #e2e8f0;
-            border-radius: 12px;
-            padding: 0.5rem;
+            border-radius: 14px;
+            padding: 0;
             background: #fff;
+            box-shadow: 0 2px 8px rgba(15, 23, 42, 0.04);
+            overflow: hidden;
+            box-sizing: border-box;
         }
-        .bento-table td {
-            text-align: right;
-            padding: 0.5rem 0.75rem;
+        .bento-table tbody td {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 0.75rem;
+            text-align: right !important;
+            padding: 0.6rem 0.85rem !important;
             border-bottom: 1px solid #f1f5f9;
+            white-space: normal !important;
         }
-        .bento-table td:last-child {
+        .bento-table tbody td > div,
+        .bento-table tbody td > span {
+            max-width: 66%;
+            min-width: 0;
+        }
+        .bento-table tbody td:last-child {
             border-bottom: none;
         }
-        .bento-table td::before {
+        .bento-table tbody td::before {
             content: attr(data-label);
-            float: left;
-            font-weight: 600;
+            font-weight: 700;
+            text-transform: uppercase;
             color: #64748b;
-            font-size: 0.75rem;
+            font-size: 0.68rem;
+            letter-spacing: 0.03em;
+            text-align: left;
+            flex-shrink: 0;
+        }
+        .bento-table tbody td[colspan] {
+            display: block;
+            text-align: center !important;
+            background: transparent !important;
+        }
+        .bento-table tbody td[colspan]::before {
+            display: none;
         }
     }
 </style>

@@ -33,16 +33,46 @@
     max-width: 1320px;
     margin: 0 auto;
     padding-bottom: 2rem;
+    --period-card-bg: linear-gradient(135deg, #FFFFFF 0%, #FEF2F2 100%);
+    --period-card-bg-hover: linear-gradient(135deg, #FFF8F8 0%, #FEE2E2 100%);
+    --period-card-border: #FECACA;
+    --period-card-border-hover: #FCA5A5;
+    --period-accent: #DC2626;
+    --period-dot-ring: rgba(220, 38, 38, 0.25);
+}
+.bento-dashboard-wrapper.period-theme-active {
+    --period-card-bg: linear-gradient(135deg, #FFFFFF 0%, #F0FDF4 100%);
+    --period-card-bg-hover: linear-gradient(135deg, #F8FFFA 0%, #DCFCE7 100%);
+    --period-card-border: #86EFAC;
+    --period-card-border-hover: #4ADE80;
+    --period-accent: #16A34A;
+    --period-dot-ring: rgba(22, 163, 74, 0.25);
+    --bps-card-hover-shadow: 0 16px 36px rgba(22, 163, 74, 0.14), 0 2px 6px rgba(15, 23, 42, 0.04);
+}
+.bento-dashboard-wrapper.period-theme-not-started {
+    --period-card-bg: linear-gradient(135deg, #FFFFFF 0%, #FFFBEB 100%);
+    --period-card-bg-hover: linear-gradient(135deg, #FFFDF5 0%, #FEF3C7 100%);
+    --period-card-border: #FDE68A;
+    --period-card-border-hover: #FBBF24;
+    --period-accent: #D97706;
+    --period-dot-ring: rgba(217, 119, 6, 0.25);
+    --bps-card-hover-shadow: 0 16px 36px rgba(217, 119, 6, 0.14), 0 2px 6px rgba(15, 23, 42, 0.04);
+}
+.bento-dashboard-wrapper.period-theme-closed {
+    --period-card-bg: linear-gradient(135deg, #FFFFFF 0%, #FEF2F2 100%);
+    --period-card-bg-hover: linear-gradient(135deg, #FFF8F8 0%, #FEE2E2 100%);
+    --period-card-border: #FECACA;
+    --period-card-border-hover: #FCA5A5;
+    --period-accent: #DC2626;
+    --period-dot-ring: rgba(220, 38, 38, 0.25);
+    --bps-card-hover-shadow: 0 16px 36px rgba(220, 38, 38, 0.14), 0 2px 6px rgba(15, 23, 42, 0.04);
 }
 
-
-
-
-/* Base Card Style */
+/* Base Card Style (mengikuti warna & gradasi status Periode SPKRT) */
 .bento-card {
-    background: #FFFFFF;
+    background: var(--period-card-bg);
     border-radius: var(--bps-radius-card);
-    border: 1px solid rgba(226, 232, 240, 0.85);
+    border: 1px solid var(--period-card-border);
     box-shadow: var(--bps-card-shadow);
     padding: 1.5rem;
     transition: all 0.28s cubic-bezier(0.4, 0, 0.2, 1);
@@ -98,8 +128,8 @@
     padding: 0.85rem 1.1rem;
     border-radius: 16px;
     text-decoration: none;
-    border: 1px solid #E2E8F0;
-    background: #FFFFFF;
+    border: 1px solid var(--period-card-border);
+    background: var(--period-card-bg);
     transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
     box-shadow: 0 3px 12px rgba(15, 23, 42, 0.04), 0 1px 3px rgba(15, 23, 42, 0.02);
     min-height: 72px;
@@ -109,7 +139,7 @@
 }
 .bento-action-pill:hover {
     transform: translateY(-2px);
-    box-shadow: 0 10px 24px rgba(15, 23, 42, 0.08);
+    box-shadow: var(--bps-card-hover-shadow);
 }
 .bento-action-pill:active {
     transform: scale(0.985);
@@ -179,14 +209,14 @@
 
 /* Specific Action Color Tints & Borders */
 .bento-pill-green {
-    background: #FFFFFF;
-    border: 1.5px solid #DCFCE7;
+    background: var(--period-card-bg);
+    border: 1.5px solid var(--period-card-border);
     border-left: 5px solid #16A34A;
 }
 .bento-pill-green:hover {
-    border-color: #86EFAC;
+    border-color: var(--period-card-border-hover);
     border-left-color: #16A34A;
-    background: #F0FDF4;
+    background: var(--period-card-bg-hover);
 }
 .bento-pill-green .bento-action-icon {
     background: #DCFCE7;
@@ -201,14 +231,14 @@
 }
 
 .bento-pill-blue {
-    background: #FFFFFF;
-    border: 1.5px solid #E0F2FE;
+    background: var(--period-card-bg);
+    border: 1.5px solid var(--period-card-border);
     border-left: 5px solid #0284C7;
 }
 .bento-pill-blue:hover {
-    border-color: #7DD3FC;
+    border-color: var(--period-card-border-hover);
     border-left-color: #0284C7;
-    background: #F0F9FF;
+    background: var(--period-card-bg-hover);
 }
 .bento-pill-blue .bento-action-icon {
     background: #E0F2FE;
@@ -223,14 +253,14 @@
 }
 
 .bento-pill-purple {
-    background: #FFFFFF;
-    border: 1.5px solid #F3E8FF;
+    background: var(--period-card-bg);
+    border: 1.5px solid var(--period-card-border);
     border-left: 5px solid #7C3AED;
 }
 .bento-pill-purple:hover {
-    border-color: #D8B4FE;
+    border-color: var(--period-card-border-hover);
     border-left-color: #7C3AED;
-    background: #FAF5FF;
+    background: var(--period-card-bg-hover);
 }
 .bento-pill-purple .bento-action-icon {
     background: #F3E8FF;
@@ -245,14 +275,14 @@
 }
 
 .bento-pill-amber {
-    background: #FFFFFF;
-    border: 1.5px solid #FEF3C7;
+    background: var(--period-card-bg);
+    border: 1.5px solid var(--period-card-border);
     border-left: 5px solid #D97706;
 }
 .bento-pill-amber:hover {
-    border-color: #FCD34D;
+    border-color: var(--period-card-border-hover);
     border-left-color: #D97706;
-    background: #FFFBEB;
+    background: var(--period-card-bg-hover);
 }
 .bento-pill-amber .bento-action-icon {
     background: #FEF3C7;
@@ -282,7 +312,7 @@
     top: 10px;
     bottom: -6px;
     width: 2px;
-    background: #E2E8F0;
+    background: var(--period-card-border);
 }
 .bento-timeline-item:last-child::before {
     display: none;
@@ -294,15 +324,16 @@
     width: 10px;
     height: 10px;
     border-radius: 50%;
-    background: var(--bps-orange);
+    background: var(--period-accent);
     border: 2px solid #FFFFFF;
-    box-shadow: 0 0 0 2px rgba(243, 112, 33, 0.25);
+    box-shadow: 0 0 0 2px var(--period-dot-ring);
 }
 
 /* Quote Box (Bottom Right) */
 .bento-quote-box {
-    background: #F8FAFC;
-    border-left: 3px solid var(--bps-orange);
+    background: rgba(255, 255, 255, 0.72);
+    border: 1px solid var(--period-card-border);
+    border-left: 3px solid var(--period-accent);
     border-radius: 12px;
     padding: 0.85rem 1rem;
     font-size: 0.78rem;
@@ -335,6 +366,17 @@
     transform-origin: left center;
     animation: officerNoticeCountdown 5s linear forwards;
 }
+.officer-notice-card.officer-notice-approved {
+    background: linear-gradient(135deg, #FFFFFF 0%, #F0FDF4 100%) !important;
+    border-color: #86EFAC !important;
+    box-shadow: 0 6px 20px rgba(22, 163, 74, 0.12) !important;
+}
+.officer-notice-card.officer-notice-approved .officer-notice-progress {
+    background: rgba(22, 163, 74, 0.16);
+}
+.officer-notice-card.officer-notice-approved .officer-notice-progress-bar {
+    background: linear-gradient(90deg, #16A34A 0%, #22C55E 100%);
+}
 @keyframes officerNoticeCountdown {
     from { transform: scaleX(1); }
     to { transform: scaleX(0); }
@@ -343,7 +385,18 @@
 @endpush
 
 @section('content')
-<div class="bento-dashboard-wrapper">
+@php
+    $periodStatus = isset($currentPeriod) && $currentPeriod ? $currentPeriod->currentStatus() : 'closed';
+    $periodMessage = isset($currentPeriod) && $currentPeriod ? $currentPeriod->status_message : 'Periode pengisian telah ditutup';
+    $isPeriodOpen = isset($currentPeriod) && $currentPeriod && $currentPeriod->isOpen();
+    $today = \Carbon\Carbon::today();
+    $periodThemeClass = match ($periodStatus) {
+        'active' => 'period-theme-active',
+        'not_started' => 'period-theme-not-started',
+        default => 'period-theme-closed',
+    };
+@endphp
+<div class="bento-dashboard-wrapper {{ $periodThemeClass }}">
 
     <!-- ==============================================================
          1. NOTIFIKASI / PESAN KHUSUS DARI ADMINISTRATOR (TAMPIL SEMENTARA ~5 DETIK)
@@ -351,19 +404,27 @@
     @if(isset($officerNotices) && $officerNotices->isNotEmpty())
         <div id="officerNoticesBanner" class="mb-3 officer-notices-container" data-auto-hide-ms="5000">
             @foreach($officerNotices as $notice)
-                <div class="p-3 mb-3 shadow-sm officer-notice-card" style="background: #FFFDF9; border: 1px solid rgba(243, 112, 33, 0.25); border-radius: 16px; box-shadow: 0 4px 16px rgba(243, 112, 33, 0.04);">
+                @php
+                    $isApprovedNotice = ($notice->type === 'report_approved')
+                        || str_contains(strtolower((string) $notice->title), 'disetujui')
+                        || str_contains(strtolower((string) $notice->title), '(acc)');
+                    $noticeAccent = $isApprovedNotice ? '#16A34A' : '#F37021';
+                    $noticeShadow = $isApprovedNotice ? 'rgba(22, 163, 74, 0.25)' : 'rgba(243, 112, 33, 0.25)';
+                    $noticeDivider = $isApprovedNotice ? 'rgba(22, 163, 74, 0.18)' : 'rgba(243, 112, 33, 0.12)';
+                @endphp
+                <div class="p-3 mb-3 shadow-sm officer-notice-card {{ $isApprovedNotice ? 'officer-notice-approved' : '' }}" style="background: var(--period-card-bg); border: 1px solid var(--period-card-border); border-radius: 16px; box-shadow: var(--bps-card-shadow);">
                     <div class="d-flex justify-content-between align-items-start gap-2 mb-1.5">
                         <div class="d-flex align-items-center gap-2 flex-wrap">
-                            <span class="badge text-white px-2.5 py-1" style="font-size: 0.72rem; background: #F37021; border-radius: 999px;">
-                                <i class="bi bi-megaphone-fill me-1"></i> Pesan Administrator
+                            <span class="badge text-white px-2.5 py-1" style="font-size: 0.72rem; background: {{ $noticeAccent }}; border-radius: 999px;">
+                                <i class="bi {{ $isApprovedNotice ? 'bi-check-circle-fill' : 'bi-megaphone-fill' }} me-1"></i> Pesan Administrator
                             </span>
                             @if(!$notice->is_read)
-                                <span class="badge bg-warning text-dark px-2 py-0.5 rounded-pill" style="font-size: 0.65rem; font-weight: 700;">Baru</span>
+                                <span class="badge {{ $isApprovedNotice ? 'bg-success text-white' : 'bg-warning text-dark' }} px-2 py-0.5 rounded-pill" style="font-size: 0.65rem; font-weight: 700;">Baru</span>
                             @endif
                             <span class="fw-bold text-dark small">{{ $notice->title }}</span>
                         </div>
                         <div class="d-flex align-items-center gap-2 flex-shrink-0">
-                            <span class="badge bg-light text-secondary border rounded-pill px-2 py-0.5 officer-notice-timer" style="font-size: 0.65rem;" title="Pesan tampil sementara 5 detik">
+                            <span class="badge {{ $isApprovedNotice ? 'bg-success-subtle text-success border-success-subtle' : 'bg-light text-secondary' }} border rounded-pill px-2 py-0.5 officer-notice-timer" style="font-size: 0.65rem;" title="Pesan tampil sementara 5 detik">
                                 5 dtk
                             </span>
                             <span class="text-muted" style="font-size: 0.72rem;">
@@ -375,15 +436,15 @@
                     <div class="text-dark small my-2" style="line-height: 1.5; white-space: pre-line;">
                         {{ $notice->message }}
                     </div>
-                    <div class="d-flex justify-content-between align-items-center pt-2 mt-2 border-top" style="border-color: rgba(243, 112, 33, 0.12) !important;">
+                    <div class="d-flex justify-content-between align-items-center pt-2 mt-2 border-top" style="border-color: {{ $noticeDivider }} !important;">
                         <div class="d-flex align-items-center gap-2">
                             @if(str_contains($notice->type, 'report'))
-                                <a href="{{ route('petugas.reports.index') }}" class="btn btn-sm py-1.5 px-3 rounded-pill text-white fw-bold d-inline-flex align-items-center gap-1.5 shadow-sm" style="font-size: 0.76rem; background: #F37021; border: none; box-shadow: 0 4px 12px rgba(243, 112, 33, 0.25);">
+                                <a href="{{ route('petugas.reports.index') }}" class="btn btn-sm py-1.5 px-3 rounded-pill text-white fw-bold d-inline-flex align-items-center gap-1.5 shadow-sm" style="font-size: 0.76rem; background: {{ $noticeAccent }}; border: none; box-shadow: 0 4px 12px {{ $noticeShadow }};">
                                     <i class="bi bi-clipboard2-check-fill"></i>
                                     <span>Buka Menu Laporan</span>
                                 </a>
                             @elseif(str_contains($notice->type, 'bast'))
-                                <a href="{{ route('petugas.basts.respondents.index') }}" class="btn btn-sm py-1.5 px-3 rounded-pill text-white fw-bold d-inline-flex align-items-center gap-1.5 shadow-sm" style="font-size: 0.76rem; background: #F37021; border: none; box-shadow: 0 4px 12px rgba(243, 112, 33, 0.25);">
+                                <a href="{{ route('petugas.basts.respondents.index') }}" class="btn btn-sm py-1.5 px-3 rounded-pill text-white fw-bold d-inline-flex align-items-center gap-1.5 shadow-sm" style="font-size: 0.76rem; background: {{ $noticeAccent }}; border: none; box-shadow: 0 4px 12px {{ $noticeShadow }};">
                                     <i class="bi bi-file-earmark-check-fill"></i>
                                     <span>Buka Tanda Terima Responden</span>
                                 </a>
@@ -421,13 +482,6 @@
     <!-- ==============================================================
          2. STATUS PERIODE PENGISIAN SPKRT (Req 4, 5, 6, 8, 10)
          ============================================================== -->
-    @php
-        $periodStatus = isset($currentPeriod) && $currentPeriod ? $currentPeriod->currentStatus() : 'closed';
-        $periodMessage = isset($currentPeriod) && $currentPeriod ? $currentPeriod->status_message : 'Periode pengisian telah ditutup';
-        $isPeriodOpen = isset($currentPeriod) && $currentPeriod && $currentPeriod->isOpen();
-        $today = \Carbon\Carbon::today();
-    @endphp
-
     <div class="mb-4">
         <div class="bento-card p-3.5 border" style="border-radius: 20px; {{ $periodStatus === 'active' ? 'border-color: #86EFAC !important; background: linear-gradient(135deg, #FFFFFF 0%, #F0FDF4 100%);' : ($periodStatus === 'not_started' ? 'border-color: #FDE68A !important; background: linear-gradient(135deg, #FFFFFF 0%, #FFFBEB 100%);' : 'border-color: #FECACA !important; background: linear-gradient(135deg, #FFFFFF 0%, #FEF2F2 100%);') }}">
             <div class="d-flex flex-wrap align-items-center justify-content-between gap-3">
@@ -674,7 +728,7 @@
                 @if(isset($activeTasks) && $activeTasks->isNotEmpty())
                     <div class="d-flex flex-column gap-2.5">
                         @foreach($activeTasks as $task)
-                            <div class="p-3 rounded-4 border bg-light bg-opacity-50 d-flex flex-wrap justify-content-between align-items-center gap-2 transition" style="border-color: #E2E8F0 !important;">
+                            <div class="p-3 rounded-4 border d-flex flex-wrap justify-content-between align-items-center gap-2 transition" style="background: rgba(255, 255, 255, 0.72); border-color: var(--period-card-border) !important;">
                                 <div class="d-flex align-items-center gap-3">
                                     <div class="rounded-3 p-2 text-white text-center" style="background: var(--bps-orange); width: 42px; height: 42px; display: flex; align-items: center; justify-content: center;">
                                         <i class="bi bi-briefcase-fill"></i>

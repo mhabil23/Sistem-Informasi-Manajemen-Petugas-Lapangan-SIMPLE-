@@ -80,6 +80,11 @@
         margin-bottom: 0;
         font-size: 0.82rem;
     }
+    @media (min-width: 768px) and (max-width: 1279.98px) {
+        .bento-table {
+            min-width: 800px;
+        }
+    }
     .bento-table thead th {
         background-color: #F8FAFC;
         color: #475569;
@@ -168,7 +173,7 @@
             </h6>
             <span class="text-muted" style="font-size: 0.72rem;">Total {{ $basts->total() }} berkas dokumen terdaftar</span>
         </div>
-        <div class="d-flex align-items-center gap-2">
+        <div class="d-flex flex-wrap align-items-center gap-2">
             <span class="badge bg-light text-secondary border rounded-pill px-3 py-1.5 font-monospace" style="font-size: 0.75rem;">
                 Halaman {{ $basts->currentPage() }} dari {{ $basts->lastPage() ?: 1 }}
             </span>
@@ -181,7 +186,7 @@
     </div>
 
     <!-- MODE DESKTOP & TABLET: Tabel Anti-Geser -->
-    <div class="d-none d-md-block">
+    <div class="d-none d-md-block table-responsive">
         <table class="table bento-table align-middle">
             <thead>
                 <tr>

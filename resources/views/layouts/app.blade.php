@@ -271,20 +271,20 @@
         <!-- Main Wrapper -->
         <div class="sp-main {{ auth()->user()->isPetugas() ? 'sp-main-petugas' : '' }}">
             <!-- Top Navbar -->
-            <header class="sp-navbar">
+            <header class="sp-navbar gap-2">
                 @if(auth()->user()->canAccessMonitoring())
-                    <div class="d-flex align-items-center gap-3">
-                        <button class="sp-nav-toggle" id="sidebarToggle" type="button" aria-label="Toggle navigation">
+                    <div class="d-flex align-items-center gap-2 gap-md-3 flex-grow-1" style="min-width: 0;">
+                        <button class="sp-nav-toggle flex-shrink-0" id="sidebarToggle" type="button" aria-label="Toggle navigation">
                             <i class="bi bi-list fs-5"></i>
                         </button>
-                        <div class="sp-breadcrumb-container overflow-hidden">
+                        <div class="sp-breadcrumb-container overflow-hidden" style="min-width: 0;">
                             <h1 class="sp-page-title text-truncate">@yield('page_title', 'Halaman')</h1>
                         </div>
                     </div>
                 @else
                     <!-- Petugas Navbar: Full-Width Clean Header (Zero Sidebar) -->
-                    <div class="d-flex align-items-center gap-2">
-                        <a href="{{ route('petugas.dashboard') }}" class="d-flex align-items-center gap-2 text-decoration-none me-2" title="Beranda Petugas">
+                    <div class="d-flex align-items-center gap-2 flex-grow-1" style="min-width: 0;">
+                        <a href="{{ route('petugas.dashboard') }}" class="d-flex align-items-center gap-2 text-decoration-none me-1 flex-shrink-0" title="Beranda Petugas">
                             <div class="sp-brand-logo" style="width: 38px; height: 38px;">
                                 <img src="{{ asset('images/logo.png') }}?v={{ file_exists(public_path('images/logo.png')) ? filemtime(public_path('images/logo.png')) : time() }}" alt="Logo BPS SIMPEL">
                             </div>
@@ -294,13 +294,13 @@
                             </div>
                         </a>
                         @if(!request()->routeIs('petugas.dashboard'))
-                            <div class="vr text-muted opacity-25 d-none d-sm-block" style="height: 20px;"></div>
-                            <span class="fw-bold text-dark d-none d-sm-inline" style="font-size: 0.95rem;">@yield('page_title', 'Halaman')</span>
+                            <div class="vr text-muted opacity-25 d-none d-sm-block flex-shrink-0" style="height: 20px;"></div>
+                            <span class="fw-bold text-dark d-none d-sm-inline text-truncate" style="font-size: 0.95rem;">@yield('page_title', 'Halaman')</span>
                         @endif
                     </div>
                 @endif
 
-                <div class="d-flex align-items-center gap-3">
+                <div class="d-flex align-items-center gap-2 gap-md-3 flex-shrink-0">
                     @if(auth()->user()->isAdmin())
                         <!-- Notifikasi Laporan Perjadin Masuk (Admin) -->
                         <div class="dropdown">
@@ -319,7 +319,7 @@
                                     {{ $unreadBadge }}
                                 </span>
                             </button>
-                            <div class="dropdown-menu dropdown-menu-end shadow border-0 mt-2 p-0" style="width: 350px; max-width: 92vw;">
+                            <div class="dropdown-menu dropdown-menu-end shadow border-0 mt-2 p-0" style="width: 350px; max-width: calc(100vw - 1.5rem);">
                                 <div class="px-3 py-2.5 bg-light border-bottom d-flex justify-content-between align-items-center">
                                     <div>
                                         <div class="fw-bold small text-dark">Notifikasi Laporan Perjadin</div>
@@ -411,7 +411,7 @@
                             </div>
                             <i class="bi bi-chevron-down text-muted small ms-1"></i>
                         </div>
-                        <ul class="dropdown-menu dropdown-menu-end shadow border-0 mt-2 p-0" style="min-width: 270px; border-radius: 14px; overflow: hidden;">
+                        <ul class="dropdown-menu dropdown-menu-end shadow border-0 mt-2 p-0" style="min-width: 270px; max-width: calc(100vw - 1.5rem); border-radius: 14px; overflow: hidden;">
                             <!-- Header Profil Info (Seperti pada SSO BPS) -->
                             <li class="px-3 py-2.5 text-white" style="background: linear-gradient(135deg, #1e3a8a 0%, #0284c7 100%);">
                                 <div class="fw-bold small text-white lh-sm">{{ auth()->user()->name }}</div>

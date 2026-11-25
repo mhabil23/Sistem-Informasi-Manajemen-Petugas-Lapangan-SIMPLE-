@@ -313,4 +313,61 @@ class AttendanceSheetTest extends TestCase
 
         $response->assertSessionHasErrors(['error']);
     }
+
+    public function test_admin_can_update_participant_contact_and_certificate_details(): void
+    {
+        $training = TrainingEvent::create([
+            'title' => 'Pelatihan Detail Peserta 2026',
+            'start_date' => now()->toDateString(),
+            'end_date' => now()->toDateString(),
+            'location' => 'Aula BPS Kolaka Utara',
+            'created_by' => $this->admin->id,
+        ]);
+
+        $participant = TrainingParticipant::create([
+            'training_event_id' => $training->id,
+            'name' => 'Peserta Awal',
+            'category' => 'PCL',
+            'attendance_status' => 'present',
+        ]);
+
+        $showResponse = $this->actingAs($this->admin)->get(route('admin.trainings.show', $training));
+        $showResponse->assertStatus(200);
+        $showResponse->assertSee('Peserta Awal');
+
+        $updateResponse = $this->actingAs($this->admin)->put(
+            route('admin.trainings.participants.update', [$training, $participant]),
+            [
+                'name' => 'Peserta Terbarui',
+                'nip_or_id' => '740801001',
+                'category' => 'PML',
+                'agency' => 'BPS Kolaka Utara',
+                'phone' => '081234567890',
+                'email' => 'peserta@bps.go.id',
+                'attendance_status' => 'present',
+                'certificate_number' => 'SERT/2026/001',
+            ]
+        );
+
+        $updateResponse->assertRedirect();
+        $this->assertDatabaseHas('training_participants', [
+            'id' => $participant->id,
+            'name' => 'Peserta Terbarui',
+            'phone' => '081234567890',
+            'email' => 'peserta@bps.go.id',
+            'certificate_number' => 'SERT/2026/001',
+        ]);
+    }
+
+    public function test_admin_can_search_field_progress_without_column_error(): void
+    {
+        $this->officer->update(['nik' => '74080199990001']);
+
+        $response = $this->actingAs($this->admin)->get(route('admin.progress.field', [
+            'search' => '7408019999',
+        ]));
+
+        $response->assertStatus(200);
+        $response->assertSee('Budi Santoso');
+    }
 }

@@ -165,6 +165,102 @@
     border-color: #CBD5E1;
     box-shadow: 0 4px 12px rgba(15, 23, 42, 0.03);
 }
+.spkrt-desc-truncate {
+    max-width: 320px;
+}
+
+@media (min-width: 768px) and (max-width: 1279.98px) {
+    .spkrt-table-fixed {
+        min-width: 820px;
+    }
+}
+
+@media (max-width: 767.98px) {
+    .bento-tabs-container {
+        display: flex !important;
+        flex-wrap: wrap;
+        width: 100%;
+        border-radius: 18px !important;
+        gap: 0.25rem;
+    }
+    .bento-tabs-container .nav-item {
+        flex: 1 1 auto;
+    }
+    .bento-tabs-container .nav-link {
+        width: 100%;
+        justify-content: center;
+        padding: 0.5rem 0.85rem;
+        font-size: 0.78rem;
+    }
+    .bento-stat-item {
+        padding: 0.9rem 1rem;
+        gap: 0.75rem;
+    }
+    .spkrt-table-fixed {
+        table-layout: auto !important;
+        min-width: 0 !important;
+    }
+    .spkrt-table-fixed thead {
+        display: none;
+    }
+    .spkrt-table-fixed,
+    .spkrt-table-fixed tbody,
+    .spkrt-table-fixed tr,
+    .spkrt-table-fixed td {
+        display: block;
+        width: 100% !important;
+    }
+    .spkrt-table-fixed tbody tr {
+        margin: 0.65rem auto;
+        width: calc(100% - 1.25rem) !important;
+        border: 1px solid #E2E8F0;
+        border-radius: 16px;
+        background: #FFFFFF;
+        box-shadow: 0 2px 8px rgba(15, 23, 42, 0.04);
+        overflow: hidden;
+        box-sizing: border-box;
+    }
+    .spkrt-table-fixed tbody td {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 0.75rem;
+        text-align: right !important;
+        padding: 0.65rem 0.9rem !important;
+        border-bottom: 1px solid #F1F5F9;
+        white-space: normal !important;
+    }
+    .spkrt-table-fixed tbody td::before {
+        content: attr(data-label);
+        font-size: 0.68rem;
+        font-weight: 700;
+        text-transform: uppercase;
+        color: #64748B;
+        letter-spacing: 0.03em;
+        text-align: left;
+        flex-shrink: 0;
+    }
+    .spkrt-table-fixed tbody td > div {
+        max-width: 68%;
+        min-width: 0;
+    }
+    .spkrt-desc-truncate {
+        max-width: 100%;
+    }
+    .spkrt-table-fixed tbody td:last-child {
+        border-bottom: none;
+        background: #F8FAFC;
+        justify-content: flex-end;
+    }
+    .spkrt-table-fixed tbody td[colspan] {
+        display: block;
+        text-align: center !important;
+        background: transparent !important;
+    }
+    .spkrt-table-fixed tbody td[colspan]::before {
+        display: none;
+    }
+}
 </style>
 @endpush
 
@@ -423,7 +519,7 @@
                 </div>
 
                 <div class="table-responsive">
-                    <table class="table bento-table-fixed align-middle">
+                    <table class="table bento-table-fixed spkrt-table-fixed align-middle">
                         <thead>
                             <tr>
                                 <th style="width: 5%;" class="text-center">NO</th>
@@ -442,17 +538,17 @@
                                     $today = \Carbon\Carbon::today();
                                 @endphp
                                 <tr>
-                                    <td class="text-center text-muted fw-semibold">{{ $periods->firstItem() + $index }}</td>
-                                    <td>
+                                    <td class="text-center text-muted fw-semibold" data-label="No">{{ $periods->firstItem() + $index }}</td>
+                                    <td data-label="Nama Kegiatan">
                                         <div class="fw-bold text-dark" style="font-size: 0.88rem;">{{ $period->activity_name }}</div>
                                         @if($period->description)
-                                            <div class="text-muted small text-truncate mt-0.5" style="max-width: 320px;" title="{{ $period->description }}">
+                                            <div class="text-muted small text-truncate mt-0.5 spkrt-desc-truncate" title="{{ $period->description }}">
                                                 {{ $period->description }}
                                             </div>
                                         @endif
                                     </td>
-                                    <td>
-                                        <div class="d-flex align-items-center gap-1.5 small mb-1">
+                                    <td data-label="Jadwal Waktu">
+                                        <div class="d-flex align-items-center justify-content-end justify-content-md-start gap-1.5 small mb-1 flex-wrap">
                                             <span class="badge bg-light text-dark border px-2 py-0.5 rounded-pill" style="font-size: 0.72rem;">
                                                 <i class="bi bi-calendar-event me-1 text-primary"></i>
                                                 {{ $period->start_date ? $period->start_date->format('d/m/Y') : '-' }}
@@ -474,7 +570,7 @@
                                             </div>
                                         @endif
                                     </td>
-                                    <td>
+                                    <td data-label="Status Sistem">
                                         @if($computedStatus === 'active')
                                             <span class="badge bg-success-subtle text-success border border-success-subtle px-3 py-1 rounded-pill d-inline-flex align-items-center gap-1.5" style="font-size: 0.74rem;">
                                                 <span class="pulse-dot bg-success"></span>
@@ -492,7 +588,7 @@
                                             </span>
                                         @endif
                                     </td>
-                                    <td class="text-center">
+                                    <td class="text-center" data-label="Kontrol Admin">
                                         <form action="{{ route('admin.spkrt-periods.toggle-status', $period) }}" method="POST" class="d-inline">
                                             @csrf
                                             @method('PATCH')
@@ -507,7 +603,7 @@
                                             @endif
                                         </form>
                                     </td>
-                                    <td class="text-end pe-3">
+                                    <td class="text-end pe-3" data-label="Aksi">
                                         <div class="d-inline-flex align-items-center gap-1.5">
                                             <button type="button" class="btn btn-sm btn-outline-primary rounded-pill px-2.5 py-1" 
                                                     title="Edit Periode" 
@@ -589,11 +685,11 @@
                 </div>
 
                 <div class="row g-2 mb-3">
-                    <div class="col-6">
+                    <div class="col-12 col-sm-6">
                         <label class="form-label small fw-bold text-dark">TANGGAL MULAI <span class="text-danger">*</span></label>
                         <input type="date" name="start_date" class="form-control rounded-3" required value="{{ date('Y-m-d') }}" style="font-size: 0.85rem;">
                     </div>
-                    <div class="col-6">
+                    <div class="col-12 col-sm-6">
                         <label class="form-label small fw-bold text-dark">TANGGAL SELESAI <span class="text-danger">*</span></label>
                         <input type="date" name="end_date" class="form-control rounded-3" required value="{{ date('Y-m-d', strtotime('+14 days')) }}" style="font-size: 0.85rem;">
                     </div>
@@ -650,11 +746,11 @@
                 </div>
 
                 <div class="row g-2 mb-3">
-                    <div class="col-6">
+                    <div class="col-12 col-sm-6">
                         <label class="form-label small fw-bold text-dark">TANGGAL MULAI <span class="text-danger">*</span></label>
                         <input type="date" name="start_date" id="editStartDate" class="form-control rounded-3" required style="font-size: 0.85rem;">
                     </div>
-                    <div class="col-6">
+                    <div class="col-12 col-sm-6">
                         <label class="form-label small fw-bold text-dark">TANGGAL SELESAI <span class="text-danger">*</span></label>
                         <input type="date" name="end_date" id="editEndDate" class="form-control rounded-3" required style="font-size: 0.85rem;">
                     </div>

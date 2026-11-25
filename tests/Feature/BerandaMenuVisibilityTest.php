@@ -3,6 +3,7 @@
 namespace Tests\Feature;
 
 use App\Models\OfficerNotice;
+use App\Models\SpkrtPeriod;
 use App\Models\User;
 use App\Services\BerandaMenuVisibilityService;
 use Carbon\Carbon;
@@ -217,5 +218,54 @@ class BerandaMenuVisibilityTest extends TestCase
         $resWithNotice->assertSee('data-auto-hide-ms="5000"', false);
         $resWithNotice->assertSee('Pengingat Penting Lapangan');
         $resWithNotice->assertSee('dismissOfficerNoticesBanner', false);
+    }
+
+    public function test_beranda_cards_follow_spkrt_period_color_theme(): void
+    {
+        // 1. Default without period -> closed (merah gradasi)
+        $resClosed = $this->actingAs($this->petugas)->get(route('petugas.dashboard'));
+        $resClosed->assertStatus(200);
+        $resClosed->assertSee('period-theme-closed', false);
+        $resClosed->assertSee('--period-card-bg', false);
+
+        // 2. Period not started -> not_started (kuning gradasi)
+        $period = SpkrtPeriod::create([
+            'activity_name' => 'SPKRT Uji Tema Belum Mulai',
+            'start_date' => Carbon::today()->addDays(2),
+            'end_date' => Carbon::today()->addDays(10),
+            'is_active' => true,
+        ]);
+
+        $resUpcoming = $this->actingAs($this->petugas)->get(route('petugas.dashboard'));
+        $resUpcoming->assertStatus(200);
+        $resUpcoming->assertSee('period-theme-not-started', false);
+
+        // 3. Period active -> active (hijau gradasi)
+        $period->update([
+            'start_date' => Carbon::today()->subDay(),
+            'end_date' => Carbon::today()->addDays(5),
+        ]);
+
+        $resActive = $this->actingAs($this->petugas)->get(route('petugas.dashboard'));
+        $resActive->assertStatus(200);
+        $resActive->assertSee('period-theme-active', false);
+    }
+
+    public function test_approved_admin_notice_card_uses_green_acc_theme(): void
+    {
+        OfficerNotice::create([
+            'user_id' => $this->petugas->id,
+            'sender_id' => $this->admin->id,
+            'type' => 'report_approved',
+            'title' => 'Laporan Perjadin Disetujui (ACC): Survei Ubinan',
+            'message' => 'Laporan telah di-ACC oleh Administrator.',
+            'is_read' => false,
+        ]);
+
+        $response = $this->actingAs($this->petugas)->get(route('petugas.dashboard'));
+        $response->assertStatus(200);
+        $response->assertSee('officer-notice-approved', false);
+        $response->assertSee('background: #16A34A;', false);
+        $response->assertSee('bi-check-circle-fill', false);
     }
 }

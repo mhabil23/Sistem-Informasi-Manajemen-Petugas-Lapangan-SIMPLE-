@@ -106,6 +106,92 @@
     background-color: #E2E8F0;
     overflow: hidden;
 }
+.bento-table-fixed {
+    min-width: 820px;
+}
+@media (max-width: 767.98px) {
+    .bento-stat-card {
+        padding: 0.9rem;
+        gap: 0.75rem;
+    }
+    .bento-table-header {
+        padding: 0.85rem 1rem;
+        flex-direction: column;
+        align-items: stretch;
+    }
+    #progressTabs {
+        flex-wrap: wrap;
+        gap: 0.4rem !important;
+    }
+    #progressTabs .nav-item {
+        flex: 1 1 100%;
+    }
+    #progressTabs .nav-link {
+        width: 100%;
+        text-align: left;
+        font-size: 0.78rem;
+        padding: 0.5rem 0.85rem !important;
+    }
+    .bento-table-fixed {
+        min-width: 0 !important;
+        table-layout: auto !important;
+    }
+    .bento-table-fixed thead {
+        display: none;
+    }
+    .bento-table-fixed,
+    .bento-table-fixed tbody,
+    .bento-table-fixed tr,
+    .bento-table-fixed td {
+        display: block;
+        width: 100% !important;
+    }
+    .bento-table-fixed tbody tr {
+        background: #FFFFFF;
+        border: 1px solid #E2E8F0;
+        border-radius: 14px;
+        margin: 0.65rem auto;
+        width: calc(100% - 1.3rem) !important;
+        padding: 0.75rem 0.9rem;
+        box-shadow: 0 2px 8px rgba(15, 23, 42, 0.03);
+        box-sizing: border-box;
+    }
+    .bento-table-fixed tbody td {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 0.75rem;
+        text-align: right !important;
+        padding: 0.4rem 0;
+        border-bottom: 1px solid #F1F5F9;
+        white-space: normal !important;
+    }
+    .bento-table-fixed tbody td::before {
+        content: attr(data-label);
+        font-weight: 700;
+        font-size: 0.72rem;
+        color: #64748B;
+        text-transform: uppercase;
+        letter-spacing: 0.03em;
+        text-align: left;
+        flex-shrink: 0;
+    }
+    .bento-table-fixed tbody td[colspan]::before {
+        display: none;
+    }
+    .bento-table-fixed tbody td[colspan] {
+        display: block;
+        text-align: center !important;
+        border-bottom: none;
+    }
+    .bento-table-fixed tbody td:last-child {
+        border-bottom: none;
+        padding-bottom: 0.1rem;
+    }
+    .bento-table-fixed tbody td > div {
+        max-width: 100%;
+    }
+}
 </style>
 @endpush
 
@@ -239,7 +325,7 @@
                                 @endphp
                                 <tr>
                                     <!-- Nama Petugas -->
-                                    <td>
+                                    <td data-label="Petugas">
                                         <div class="d-flex align-items-center gap-2">
                                             <div class="rounded-circle bg-light text-dark fw-bold border d-flex align-items-center justify-content-center flex-shrink-0" style="width: 32px; height: 32px; font-size: 0.78rem;">
                                                 {{ strtoupper(substr($off->name, 0, 1)) }}
@@ -263,7 +349,7 @@
                                     </td>
 
                                     <!-- Wilayah Tugas -->
-                                    <td>
+                                    <td data-label="Wilayah">
                                         @if(!empty($item['districts']))
                                             <div class="d-flex flex-wrap gap-1">
                                                 @foreach($item['districts'] as $dist)
@@ -278,19 +364,19 @@
                                     </td>
 
                                     <!-- Target -->
-                                    <td class="text-center">
+                                    <td class="text-center" data-label="Target">
                                         <span class="fw-bold font-monospace text-dark" style="font-size: 0.88rem;">{{ $item['target'] }}</span>
                                         <span class="text-muted d-block" style="font-size: 0.65rem;">Sampel</span>
                                     </td>
 
                                     <!-- Realisasi -->
-                                    <td class="text-center">
+                                    <td class="text-center" data-label="Realisasi">
                                         <span class="fw-bold font-monospace text-success" style="font-size: 0.88rem;">{{ $item['completed'] }}</span>
                                         <span class="text-muted d-block" style="font-size: 0.65rem;">BAST</span>
                                     </td>
 
                                     <!-- Persentase & Bar -->
-                                    <td>
+                                    <td data-label="Capaian">
                                         <div class="d-flex justify-content-between align-items-center mb-1">
                                             <span class="fw-bold" style="font-size: 0.78rem;">{{ $pct }}%</span>
                                             <span class="text-muted" style="font-size: 0.68rem;">Sisa: {{ $item['pending'] }}</span>
@@ -301,7 +387,7 @@
                                     </td>
 
                                     <!-- Status Badge -->
-                                    <td class="text-center">
+                                    <td class="text-center" data-label="Status">
                                         @if($pct >= 100)
                                             <span class="badge bg-success-subtle text-success border border-success-subtle rounded-pill px-2.5 py-1" style="font-size: 0.68rem;">
                                                 <i class="bi bi-check-circle-fill me-1"></i> Tuntas
@@ -318,7 +404,7 @@
                                     </td>
 
                                     <!-- Aksi -->
-                                    <td class="text-end pe-3">
+                                    <td class="text-end pe-3" data-label="Aksi">
                                         <div class="d-flex align-items-center justify-content-end gap-1">
                                             @if($item['wa_url'])
                                                 <a href="{{ $item['wa_url'] }}" target="_blank" class="btn btn-sm btn-outline-success rounded-circle p-1 d-inline-flex align-items-center justify-content-center" style="width: 28px; height: 28px;" title="Follow-up WhatsApp">
@@ -368,8 +454,8 @@
                                     $tBar = $tPct >= 100 ? 'bg-success' : ($tPct >= 50 ? 'bg-primary' : ($tPct > 0 ? 'bg-warning' : 'bg-secondary'));
                                 @endphp
                                 <tr>
-                                    <td class="text-center text-muted fw-bold" style="font-size: 0.78rem;">{{ $index + 1 }}</td>
-                                    <td>
+                                    <td class="text-center text-muted fw-bold" style="font-size: 0.78rem;" data-label="No">{{ $index + 1 }}</td>
+                                    <td data-label="Ketua Tim (PML)">
                                         <div class="d-flex align-items-center gap-2">
                                             <div class="rounded-circle p-2 bg-primary bg-opacity-10 text-primary fw-bold d-flex align-items-center justify-content-center" style="width: 32px; height: 32px; font-size: 0.8rem;">
                                                 {{ substr($t['pml']->name, 0, 1) }}
@@ -382,25 +468,25 @@
                                             </div>
                                         </div>
                                     </td>
-                                    <td>
+                                    <td data-label="Anggota PCL">
                                         <div class="d-flex align-items-center gap-1.5 flex-wrap">
                                             <span class="badge bg-light text-dark border rounded-pill px-2 py-0.5" style="font-size: 0.72rem;">
                                                 <i class="bi bi-person-fill text-muted me-1"></i>{{ count($t['members']) }} Anggota PCL
                                             </span>
                                         </div>
                                     </td>
-                                    <td>
+                                    <td data-label="Wilayah">
                                         <span class="text-muted" style="font-size: 0.78rem;">
                                             <i class="bi bi-geo-alt me-0.5 text-danger"></i>{{ $t['district'] }}
                                         </span>
                                     </td>
-                                    <td class="text-center">
+                                    <td class="text-center" data-label="Target">
                                         <span class="fw-bold font-monospace text-dark" style="font-size: 0.88rem;">{{ number_format($t['target']) }}</span>
                                     </td>
-                                    <td class="text-center">
+                                    <td class="text-center" data-label="Realisasi">
                                         <span class="fw-bold font-monospace text-success" style="font-size: 0.88rem;">{{ number_format($t['completed']) }}</span>
                                     </td>
-                                    <td>
+                                    <td data-label="Capaian Tim">
                                         <div class="d-flex justify-content-between align-items-center mb-1">
                                             <span class="fw-bold text-dark" style="font-size: 0.78rem;">{{ $tPct }}%</span>
                                             <a href="{{ route('admin.basts.respondents.index', ['team_id' => $t['pml']->id, 'assignment_id' => $selectedAssignmentId]) }}" class="text-decoration-none text-primary fw-semibold" style="font-size: 0.7rem;">
@@ -449,8 +535,8 @@
                                     $dBar = $dPct >= 100 ? 'bg-success' : ($dPct >= 50 ? 'bg-primary' : ($dPct > 0 ? 'bg-warning' : 'bg-secondary'));
                                 @endphp
                                 <tr>
-                                    <td class="text-center text-muted fw-bold" style="font-size: 0.78rem;">{{ $index + 1 }}</td>
-                                    <td>
+                                    <td class="text-center text-muted fw-bold" style="font-size: 0.78rem;" data-label="No">{{ $index + 1 }}</td>
+                                    <td data-label="Kecamatan">
                                         <div class="d-flex align-items-center gap-2">
                                             <div class="rounded-2 p-1 bg-light border text-danger d-flex align-items-center justify-content-center" style="width: 28px; height: 28px;">
                                                 <i class="bi bi-geo-alt-fill"></i>
@@ -458,18 +544,18 @@
                                             <strong class="text-dark" style="font-size: 0.85rem;">Kecamatan {{ $dist['name'] }}</strong>
                                         </div>
                                     </td>
-                                    <td class="text-center">
+                                    <td class="text-center" data-label="Petugas">
                                         <span class="badge bg-light text-dark border rounded-pill px-2.5 py-1 font-monospace" style="font-size: 0.72rem;">
                                             {{ $dist['officers_count'] }} Petugas
                                         </span>
                                     </td>
-                                    <td class="text-center">
+                                    <td class="text-center" data-label="Target">
                                         <span class="fw-bold font-monospace text-dark" style="font-size: 0.88rem;">{{ number_format($dist['total']) }}</span>
                                     </td>
-                                    <td class="text-center">
+                                    <td class="text-center" data-label="Realisasi BAST">
                                         <span class="fw-bold font-monospace text-success" style="font-size: 0.88rem;">{{ number_format($dist['completed']) }}</span>
                                     </td>
-                                    <td>
+                                    <td data-label="Capaian">
                                         <div class="d-flex justify-content-between align-items-center mb-1">
                                             <span class="fw-bold text-dark" style="font-size: 0.78rem;">{{ $dPct }}%</span>
                                             <span class="text-muted" style="font-size: 0.68rem;">Sisa: {{ $dist['pending'] }}</span>
@@ -478,7 +564,7 @@
                                             <div class="progress-bar {{ $dBar }}" role="progressbar" style="width: {{ $dPct }}%;" aria-valuenow="{{ $dPct }}" aria-valuemin="0" aria-valuemax="100"></div>
                                         </div>
                                     </td>
-                                    <td class="text-center">
+                                    <td class="text-center" data-label="Aksi">
                                         <a href="{{ route('admin.respondents.index', ['assignment_id' => $selectedAssignmentId, 'district' => $dist['name']]) }}" class="btn btn-sm btn-outline-primary rounded-pill px-2.5 py-1" style="font-size: 0.72rem;" title="Lihat Data Responden di Kecamatan Ini">
                                             Detail <i class="bi bi-arrow-right ms-0.5"></i>
                                         </a>

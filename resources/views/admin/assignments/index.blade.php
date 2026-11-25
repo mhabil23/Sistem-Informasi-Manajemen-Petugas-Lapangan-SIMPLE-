@@ -62,13 +62,20 @@
 }
 .bento-table-container-fixed {
     width: 100%;
-    overflow: hidden;
+    overflow-x: auto;
+    overflow-y: hidden;
+    -webkit-overflow-scrolling: touch;
 }
 .bento-table-fixed {
     table-layout: fixed;
     width: 100%;
     margin-bottom: 0;
     font-size: 0.8rem;
+}
+@media (min-width: 768px) and (max-width: 1279.98px) {
+    .bento-table-card .bento-table-fixed {
+        min-width: 820px;
+    }
 }
 .bento-table-fixed th {
     background: #F8FAFC;
@@ -152,9 +159,11 @@
         background: #FFFFFF;
         border: 1px solid #E2E8F0;
         border-radius: 14px;
-        margin: 0.75rem;
+        margin: 0.6rem auto;
+        width: calc(100% - 1.2rem) !important;
         padding: 0.85rem;
         box-shadow: 0 2px 8px rgba(15, 23, 42, 0.02);
+        box-sizing: border-box;
     }
     .bento-table-card .bento-table-fixed td {
         border: none;
@@ -166,6 +175,12 @@
         padding-top: 0.5rem;
         display: flex;
         justify-content: flex-end;
+    }
+    .bento-table-card .bento-table-fixed td[colspan] {
+        border-top: none;
+        margin-top: 0;
+        justify-content: center;
+        text-align: center !important;
     }
 }
 
@@ -1105,11 +1120,11 @@
                         <input type="text" id="period_title" class="form-control bg-light" readonly disabled>
                     </div>
                     <div class="row g-3 mb-3">
-                        <div class="col-6">
+                        <div class="col-12 col-sm-6">
                             <label class="form-label small fw-bold text-dark mb-1">TANGGAL MULAI <span class="text-danger">*</span></label>
                             <input type="date" id="period_start_date" name="start_date" class="form-control" required>
                         </div>
-                        <div class="col-6">
+                        <div class="col-12 col-sm-6">
                             <label class="form-label small fw-bold text-dark mb-1">TANGGAL SELESAI <span class="text-danger">*</span></label>
                             <input type="date" id="period_end_date" name="end_date" class="form-control" required>
                         </div>

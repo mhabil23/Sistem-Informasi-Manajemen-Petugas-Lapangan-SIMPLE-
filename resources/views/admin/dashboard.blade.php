@@ -252,6 +252,48 @@
     box-shadow: 0 4px 16px rgba(15, 23, 42, 0.02);
     margin-bottom: 1.25rem;
 }
+
+@media (max-width: 767.98px) {
+    .bento-greeting-title {
+        font-size: 1.32rem;
+    }
+    .bento-greeting-sub {
+        font-size: 0.84rem;
+    }
+    .bento-card {
+        padding: 1.1rem;
+        border-radius: 18px;
+    }
+    .bento-hero-card {
+        min-height: auto;
+    }
+    .bento-hero-title {
+        font-size: 1.15rem;
+    }
+    .bento-hero-desc {
+        max-width: 100%;
+        font-size: 0.83rem;
+    }
+    .bento-card-header-sm {
+        flex-wrap: wrap;
+        gap: 0.5rem;
+    }
+    .bento-progress-body {
+        flex-wrap: wrap;
+        gap: 0.9rem;
+    }
+    .bento-ring-wrap {
+        width: 92px;
+        height: 92px;
+    }
+}
+
+@media (max-width: 575.98px) {
+    .bento-progress-body {
+        flex-direction: column;
+        text-align: center;
+    }
+}
 </style>
 @endpush
 
@@ -458,8 +500,8 @@
     <div class="bento-card bento-hero-card mb-4">
         <div class="bento-hero-bg-art"></div>
         <div class="d-flex flex-wrap justify-content-between align-items-center gap-3">
-            <div>
-                <div class="d-flex align-items-center gap-2 mb-2">
+            <div style="min-width: 0; flex: 1 1 260px;">
+                <div class="d-flex flex-wrap align-items-center gap-2 mb-2">
                     <span class="bento-hero-badge">
                         <i class="bi bi-graph-up-arrow"></i> Ringkasan Monitoring Wilayah
                     </span>
@@ -483,10 +525,10 @@
             </div>
 
             <div class="mt-2 d-flex flex-wrap gap-2 align-items-center">
-                <button type="button" class="btn btn-outline-success rounded-pill px-3 py-2 fw-bold" style="font-size: 0.88rem; background: #FFFFFF;" data-bs-toggle="modal" data-bs-target="#importExcelModal">
+                <button type="button" class="btn btn-outline-success rounded-pill px-3 py-2 fw-bold" style="font-size: 0.85rem; background: #FFFFFF;" data-bs-toggle="modal" data-bs-target="#importExcelModal">
                     <i class="bi bi-file-earmark-excel-fill text-success me-1"></i> Upload Excel Kegiatan
                 </button>
-                <a href="{{ route('admin.recapitulation.excel') }}" class="btn btn-outline-secondary rounded-pill px-3 py-2 font-weight-bold" style="font-size: 0.88rem; background: #FFFFFF;">
+                <a href="{{ route('admin.recapitulation.excel') }}" class="btn btn-outline-secondary rounded-pill px-3 py-2 fw-bold" style="font-size: 0.85rem; background: #FFFFFF;">
                     <i class="bi bi-file-earmark-spreadsheet-fill text-success me-1"></i> Unduh Rekap Excel
                 </a>
             </div>
@@ -527,21 +569,21 @@
         <div class="col-lg-6 d-flex flex-column gap-4" id="colFieldMonitoring">
 
             <!-- Header Pilar Lapangan -->
-            <div class="p-3 rounded-4 text-white d-flex justify-content-between align-items-center shadow-sm" style="background: linear-gradient(135deg, #005BAC 0%, #0284C7 100%);">
-                <div class="d-flex align-items-center gap-2.5">
-                    <div class="rounded-circle bg-white text-primary d-flex align-items-center justify-content-center shadow-sm" style="width: 40px; height: 40px; font-size: 1.25rem;">
+            <div class="p-3 rounded-4 text-white d-flex flex-wrap justify-content-between align-items-center gap-2 shadow-sm" style="background: linear-gradient(135deg, #005BAC 0%, #0284C7 100%);">
+                <div class="d-flex align-items-center gap-2.5" style="min-width: 0; flex: 1 1 220px;">
+                    <div class="rounded-circle bg-white text-primary d-flex align-items-center justify-content-center shadow-sm flex-shrink-0" style="width: 40px; height: 40px; font-size: 1.25rem;">
                         <i class="bi bi-geo-alt-fill"></i>
                     </div>
-                    <div>
-                        <h5 class="fw-bold mb-0 text-white" style="font-size: 1.05rem;">
+                    <div style="min-width: 0;">
+                        <h5 class="fw-bold mb-0 text-white" style="font-size: 1.02rem;">
                             PILAR 1: MONITORING PROGRES LAPANGAN
                         </h5>
-                        <small class="text-white-50" style="font-size: 0.74rem;">
+                        <small class="text-white-50 d-block" style="font-size: 0.74rem;">
                             Operasional Responden, Capaian Sensus, &amp; Kinerja PCL
                         </small>
                     </div>
                 </div>
-                <span class="badge bg-white text-primary rounded-pill px-3 py-1.5 fw-bold font-monospace shadow-sm" style="font-size: 0.78rem;">
+                <span class="badge bg-white text-primary rounded-pill px-3 py-1.5 fw-bold font-monospace shadow-sm flex-shrink-0" style="font-size: 0.78rem;">
                     {{ $fieldPercentage }}% Realisasi
                 </span>
             </div>
@@ -598,26 +640,26 @@
 
                 <!-- 4 Kotak Indikator Sampel -->
                 <div class="row g-2 mb-3">
-                    <div class="col-3">
-                        <div class="p-2 rounded-3 bg-white border text-center shadow-xs">
+                    <div class="col-6 col-sm-3">
+                        <div class="p-2 rounded-3 bg-white border text-center shadow-xs h-100">
                             <span class="d-block text-muted" style="font-size: 0.68rem; text-transform: uppercase;">Target Beban</span>
                             <span class="fs-6 fw-bold text-dark">{{ number_format($fieldTotalSamples) }}</span>
                         </div>
                     </div>
-                    <div class="col-3">
-                        <div class="p-2 rounded-3 bg-white border text-center shadow-xs">
+                    <div class="col-6 col-sm-3">
+                        <div class="p-2 rounded-3 bg-white border text-center shadow-xs h-100">
                             <span class="d-block text-muted" style="font-size: 0.68rem; text-transform: uppercase;">Selesai (BAST)</span>
                             <span class="fs-6 fw-bold text-success">{{ number_format($fieldCompletedSamples) }}</span>
                         </div>
                     </div>
-                    <div class="col-3">
-                        <div class="p-2 rounded-3 bg-white border text-center shadow-xs">
+                    <div class="col-6 col-sm-3">
+                        <div class="p-2 rounded-3 bg-white border text-center shadow-xs h-100">
                             <span class="d-block text-muted" style="font-size: 0.68rem; text-transform: uppercase;">Sedang Didata</span>
                             <span class="fs-6 fw-bold text-warning">{{ number_format($fieldInProgressSamples) }}</span>
                         </div>
                     </div>
-                    <div class="col-3">
-                        <div class="p-2 rounded-3 bg-white border text-center shadow-xs">
+                    <div class="col-6 col-sm-3">
+                        <div class="p-2 rounded-3 bg-white border text-center shadow-xs h-100">
                             <span class="d-block text-muted" style="font-size: 0.68rem; text-transform: uppercase;">Belum Didata</span>
                             <span class="fs-6 fw-bold text-secondary">{{ number_format($fieldPendingSamples) }}</span>
                         </div>
@@ -631,7 +673,7 @@
                     $pctPending = $fieldTotalSamples > 0 ? ($fieldPendingSamples / $fieldTotalSamples) * 100 : 0;
                 @endphp
                 <div>
-                    <div class="d-flex justify-content-between small text-muted mb-1" style="font-size: 0.72rem;">
+                    <div class="d-flex flex-wrap justify-content-between gap-2 small text-muted mb-1" style="font-size: 0.72rem;">
                         <span><i class="bi bi-circle-fill text-success me-1" style="font-size: 0.5rem;"></i> Selesai ({{ round($pctCompleted, 1) }}%)</span>
                         <span><i class="bi bi-circle-fill text-warning me-1" style="font-size: 0.5rem;"></i> Sedang Didata ({{ round($pctInProgress, 1) }}%)</span>
                         <span><i class="bi bi-circle-fill text-secondary me-1" style="font-size: 0.5rem;"></i> Belum ({{ round($pctPending, 1) }}%)</span>
@@ -692,7 +734,7 @@
 
             <!-- Card 1.3: Tabel Ringkas Kinerja Petugas Pencacah (PCL) -->
             <div class="bento-card">
-                <div class="d-flex justify-content-between align-items-center mb-2">
+                <div class="d-flex flex-wrap justify-content-between align-items-center gap-2 mb-2">
                     <h5 class="bento-card-title-sm mb-0">
                         <i class="bi bi-people-fill me-1 text-primary"></i> Kinerja Petugas Lapangan (PCL)
                     </h5>
@@ -769,21 +811,21 @@
         <div class="col-lg-6 d-flex flex-column gap-4" id="colAdminMonitoring">
 
             <!-- Header Pilar Administrasi -->
-            <div class="p-3 rounded-4 text-white d-flex justify-content-between align-items-center shadow-sm" style="background: linear-gradient(135deg, #16A34A 0%, #10B981 100%);">
-                <div class="d-flex align-items-center gap-2.5">
-                    <div class="rounded-circle bg-white text-success d-flex align-items-center justify-content-center shadow-sm" style="width: 40px; height: 40px; font-size: 1.25rem;">
+            <div class="p-3 rounded-4 text-white d-flex flex-wrap justify-content-between align-items-center gap-2 shadow-sm" style="background: linear-gradient(135deg, #16A34A 0%, #10B981 100%);">
+                <div class="d-flex align-items-center gap-2.5" style="min-width: 0; flex: 1 1 220px;">
+                    <div class="rounded-circle bg-white text-success d-flex align-items-center justify-content-center shadow-sm flex-shrink-0" style="width: 40px; height: 40px; font-size: 1.25rem;">
                         <i class="bi bi-folder-check"></i>
                     </div>
-                    <div>
-                        <h5 class="fw-bold mb-0 text-white" style="font-size: 1.05rem;">
+                    <div style="min-width: 0;">
+                        <h5 class="fw-bold mb-0 text-white" style="font-size: 1.02rem;">
                             PILAR 2: MONITORING ADMINISTRASI &amp; SPJ
                         </h5>
-                        <small class="text-white-50" style="font-size: 0.74rem;">
+                        <small class="text-white-50 d-block" style="font-size: 0.74rem;">
                             Kelengkapan Dokumen Fisik, SPJ, Laporan Perjadin &amp; Presensi
                         </small>
                     </div>
                 </div>
-                <span class="badge bg-white text-success rounded-pill px-3 py-1.5 fw-bold font-monospace shadow-sm" style="font-size: 0.78rem;">
+                <span class="badge bg-white text-success rounded-pill px-3 py-1.5 fw-bold font-monospace shadow-sm flex-shrink-0" style="font-size: 0.78rem;">
                     {{ $reportSubmissionRate }}% Laporan
                 </span>
             </div>
@@ -816,11 +858,11 @@
                     </div>
                 </div>
 
-                <div class="d-flex justify-content-between align-items-center mb-2">
+                <div class="d-flex flex-wrap justify-content-between align-items-center gap-2 mb-2">
                     <span class="fw-bold text-dark small" style="font-size: 0.78rem;">
                         Daftar Petugas Belum Menyerahkan Laporan:
                     </span>
-                    <div class="d-flex gap-2">
+                    <div class="d-flex flex-wrap gap-2">
                         @if(auth()->user()->isAdmin() && $officersWithoutReports->count() > 0)
                             <button type="button" 
                                     class="btn btn-xs rounded-pill text-white py-0.5 px-2.5" 
@@ -883,19 +925,19 @@
 
                 <div class="d-flex flex-column gap-2 mb-3">
                     <!-- 1. Tanda Terima Blanko & Petugas -->
-                    <div class="p-2.5 border rounded-3 bg-white d-flex justify-content-between align-items-center">
-                        <div class="d-flex align-items-center gap-2.5">
-                            <div class="rounded-2 p-1.5 bg-primary-subtle text-primary d-flex align-items-center justify-content-center" style="width: 32px; height: 32px;">
+                    <div class="p-2.5 border rounded-3 bg-white d-flex flex-wrap justify-content-between align-items-center gap-2">
+                        <div class="d-flex align-items-center gap-2.5" style="min-width: 0; flex: 1 1 200px;">
+                            <div class="rounded-2 p-1.5 bg-primary-subtle text-primary d-flex align-items-center justify-content-center flex-shrink-0" style="width: 32px; height: 32px;">
                                 <i class="bi bi-card-checklist"></i>
                             </div>
-                            <div>
+                            <div style="min-width: 0;">
                                 <a href="{{ route('admin.basts.officers.index', ['bast_type' => 'kantor_ke_petugas']) }}" class="fw-bold text-dark text-decoration-none small d-block">
                                     Tanda Terima Petugas (Blanko &amp; ATK)
                                 </a>
-                                <span class="text-muted" style="font-size: 0.7rem;">Penyerahan berkas fisik kantor &rarr; petugas</span>
+                                <span class="text-muted d-block" style="font-size: 0.7rem;">Penyerahan berkas fisik kantor &rarr; petugas</span>
                             </div>
                         </div>
-                        <div class="text-end">
+                        <div class="text-end flex-shrink-0">
                             <span class="badge bg-primary-subtle text-primary border rounded-pill px-2.5 py-1 fw-bold" style="font-size: 0.75rem;">
                                 {{ $adminBastBlankoCount }} Berkas
                             </span>
@@ -903,19 +945,19 @@
                     </div>
 
                     <!-- 2. Tanda Terima Responden -->
-                    <div class="p-2.5 border rounded-3 bg-white d-flex justify-content-between align-items-center">
-                        <div class="d-flex align-items-center gap-2.5">
-                            <div class="rounded-2 p-1.5 bg-info-subtle text-info-emphasis d-flex align-items-center justify-content-center" style="width: 32px; height: 32px;">
+                    <div class="p-2.5 border rounded-3 bg-white d-flex flex-wrap justify-content-between align-items-center gap-2">
+                        <div class="d-flex align-items-center gap-2.5" style="min-width: 0; flex: 1 1 200px;">
+                            <div class="rounded-2 p-1.5 bg-info-subtle text-info-emphasis d-flex align-items-center justify-content-center flex-shrink-0" style="width: 32px; height: 32px;">
                                 <i class="bi bi-file-earmark-check"></i>
                             </div>
-                            <div>
+                            <div style="min-width: 0;">
                                 <a href="{{ route('admin.basts.respondents.index') }}" class="fw-bold text-dark text-decoration-none small d-block">
                                     Tanda Terima Responden (BAST Ruta)
                                 </a>
-                                <span class="text-muted" style="font-size: 0.7rem;">Bukti serah terima kuesioner ke responden</span>
+                                <span class="text-muted d-block" style="font-size: 0.7rem;">Bukti serah terima kuesioner ke responden</span>
                             </div>
                         </div>
-                        <div class="text-end">
+                        <div class="text-end flex-shrink-0">
                             <span class="badge bg-info-subtle text-info-emphasis border rounded-pill px-2.5 py-1 fw-bold" style="font-size: 0.75rem;">
                                 {{ $adminBastRespondentCount }} Dokumen Sah
                             </span>
@@ -923,19 +965,19 @@
                     </div>
 
                     <!-- 3. Laporan Perjadin Petugas -->
-                    <div class="p-2.5 border rounded-3 bg-white d-flex justify-content-between align-items-center">
-                        <div class="d-flex align-items-center gap-2.5">
-                            <div class="rounded-2 p-1.5 bg-warning-subtle text-warning-emphasis d-flex align-items-center justify-content-center" style="width: 32px; height: 32px;">
+                    <div class="p-2.5 border rounded-3 bg-white d-flex flex-wrap justify-content-between align-items-center gap-2">
+                        <div class="d-flex align-items-center gap-2.5" style="min-width: 0; flex: 1 1 200px;">
+                            <div class="rounded-2 p-1.5 bg-warning-subtle text-warning-emphasis d-flex align-items-center justify-content-center flex-shrink-0" style="width: 32px; height: 32px;">
                                 <i class="bi bi-journal-text"></i>
                             </div>
-                            <div>
+                            <div style="min-width: 0;">
                                 <a href="{{ route('admin.reports.index') }}" class="fw-bold text-dark text-decoration-none small d-block">
                                     Laporan Perjalanan Dinas Petugas
                                 </a>
-                                <span class="text-muted" style="font-size: 0.7rem;">{{ $officersWithReportCount }} dari {{ $totalOfficersCount }} petugas sudah lapor</span>
+                                <span class="text-muted d-block" style="font-size: 0.7rem;">{{ $officersWithReportCount }} dari {{ $totalOfficersCount }} petugas sudah lapor</span>
                             </div>
                         </div>
-                        <div class="text-end">
+                        <div class="text-end flex-shrink-0">
                             <span class="badge {{ $officersWithoutReportCount === 0 ? 'bg-success' : 'bg-warning text-dark' }} rounded-pill px-2.5 py-1 fw-bold" style="font-size: 0.75rem;">
                                 {{ $reportSubmissionRate }}% Terkumpul
                             </span>
@@ -943,19 +985,19 @@
                     </div>
 
                     <!-- 4. BAST Petugas (Penyerahan Dokumen Terisi) -->
-                    <div class="p-2.5 border rounded-3 bg-white d-flex justify-content-between align-items-center">
-                        <div class="d-flex align-items-center gap-2.5">
-                            <div class="rounded-2 p-1.5 bg-success-subtle text-success d-flex align-items-center justify-content-center" style="width: 32px; height: 32px;">
+                    <div class="p-2.5 border rounded-3 bg-white d-flex flex-wrap justify-content-between align-items-center gap-2">
+                        <div class="d-flex align-items-center gap-2.5" style="min-width: 0; flex: 1 1 200px;">
+                            <div class="rounded-2 p-1.5 bg-success-subtle text-success d-flex align-items-center justify-content-center flex-shrink-0" style="width: 32px; height: 32px;">
                                 <i class="bi bi-box-seam"></i>
                             </div>
-                            <div>
+                            <div style="min-width: 0;">
                                 <a href="{{ route('admin.basts.officers.index', ['bast_type' => 'petugas_ke_kantor']) }}" class="fw-bold text-dark text-decoration-none small d-block">
                                     BAST Petugas (Hasil Sensus &rarr; Kantor)
                                 </a>
-                                <span class="text-muted" style="font-size: 0.7rem;">Penyerahan berkas fisik tuntas ke BPS</span>
+                                <span class="text-muted d-block" style="font-size: 0.7rem;">Penyerahan berkas fisik tuntas ke BPS</span>
                             </div>
                         </div>
-                        <div class="text-end">
+                        <div class="text-end flex-shrink-0">
                             <span class="badge bg-success-subtle text-success border rounded-pill px-2.5 py-1 fw-bold" style="font-size: 0.75rem;">
                                 {{ $adminBastHasilCount }} Dokumen Tuntas
                             </span>
@@ -963,19 +1005,19 @@
                     </div>
 
                     <!-- 5. Daftar Hadir Pelatihan / Briefing -->
-                    <div class="p-2.5 border rounded-3 bg-white d-flex justify-content-between align-items-center">
-                        <div class="d-flex align-items-center gap-2.5">
-                            <div class="rounded-2 p-1.5 d-flex align-items-center justify-content-center" style="width: 32px; height: 32px; background: #FAF5FF; color: #7C3AED;">
+                    <div class="p-2.5 border rounded-3 bg-white d-flex flex-wrap justify-content-between align-items-center gap-2">
+                        <div class="d-flex align-items-center gap-2.5" style="min-width: 0; flex: 1 1 200px;">
+                            <div class="rounded-2 p-1.5 d-flex align-items-center justify-content-center flex-shrink-0" style="width: 32px; height: 32px; background: #FAF5FF; color: #7C3AED;">
                                 <i class="bi bi-person-check-fill"></i>
                             </div>
-                            <div>
+                            <div style="min-width: 0;">
                                 <a href="{{ route('admin.trainings.index') }}" class="fw-bold text-dark text-decoration-none small d-block">
                                     Daftar Hadir Pelatihan / Briefing
                                 </a>
-                                <span class="text-muted" style="font-size: 0.7rem;">Presensi pelatihan &amp; briefing petugas</span>
+                                <span class="text-muted d-block" style="font-size: 0.7rem;">Presensi pelatihan &amp; briefing petugas</span>
                             </div>
                         </div>
-                        <div class="text-end">
+                        <div class="text-end flex-shrink-0">
                             <span class="badge rounded-pill px-2.5 py-1 fw-bold" style="font-size: 0.75rem; background: #FAF5FF; color: #7C3AED; border: 1px solid #E9D5FF;">
                                 {{ $adminTrainingsCount }} Agenda Presensi
                             </span>
@@ -984,11 +1026,11 @@
                 </div>
 
                 <!-- Aksi Cepat Administrasi -->
-                <div class="d-flex flex-wrap gap-2 pt-2 border-top">
+                <div class="d-flex flex-wrap justify-content-between align-items-center gap-2 pt-2 border-top">
                     <a href="{{ route('admin.reports.index') }}" class="btn btn-sm btn-outline-primary rounded-pill px-3 py-1.5" style="font-size: 0.76rem;">
                         <i class="bi bi-clipboard2-data me-1"></i> Kelola Laporan Perjadin
                     </a>
-                    <a href="{{ route('admin.basts.officers.index') }}" class="btn btn-sm btn-outline-success rounded-pill px-3 py-1.5 ms-auto" style="font-size: 0.76rem;">
+                    <a href="{{ route('admin.basts.officers.index') }}" class="btn btn-sm btn-outline-success rounded-pill px-3 py-1.5" style="font-size: 0.76rem;">
                         <i class="bi bi-shield-check me-1"></i> Kelola BAST Petugas
                     </a>
                 </div>
