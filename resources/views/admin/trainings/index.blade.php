@@ -183,12 +183,12 @@
         <table class="table bento-table-fixed align-middle mb-0">
             <thead>
                 <tr>
-                    <th style="width: 17%; min-width: 150px;"><i class="bi bi-file-earmark-text me-1 text-primary"></i> Nomor &amp; Tanggal Dokumen</th>
-                    <th style="width: 24%; min-width: 190px;"><i class="bi bi-briefcase me-1 text-muted"></i> Judul &amp; Kegiatan Terkait</th>
+                    <th style="width: 18%; min-width: 160px;"><i class="bi bi-file-earmark-text me-1 text-primary"></i> Nomor &amp; Tanggal Dokumen</th>
+                    <th style="width: 25%; min-width: 190px;"><i class="bi bi-briefcase me-1 text-muted"></i> Judul &amp; Kegiatan Terkait</th>
                     <th style="width: 16%; min-width: 130px;"><i class="bi bi-geo-alt-fill text-danger me-1"></i> Tempat Pelaksanaan</th>
-                    <th style="width: 14%; min-width: 120px;"><i class="bi bi-people-fill me-1 text-primary"></i> Peserta Hadir</th>
-                    <th style="width: 12%; min-width: 110px;"><i class="bi bi-person-badge me-1 text-info"></i> Penanggung Jawab</th>
-                    <th class="text-end pe-3" style="width: 17%; min-width: 175px;">Aksi</th>
+                    <th style="width: 15%; min-width: 130px;"><i class="bi bi-people-fill me-1 text-primary"></i> Peserta Hadir</th>
+                    <th style="width: 12%; min-width: 120px;"><i class="bi bi-person-badge me-1 text-info"></i> Penanggung Jawab</th>
+                    <th class="text-end pe-3" style="width: 14%; min-width: 145px;">Aksi</th>
                 </tr>
             </thead>
             <tbody>
@@ -277,23 +277,6 @@
                         </td>
                         <td class="text-end pe-3">
                             <div class="d-flex align-items-center justify-content-end gap-1 flex-nowrap">
-                                <!-- Link & QR Presensi Online -->
-                                <button type="button" 
-                                        class="bento-action-btn btn-qr" 
-                                        title="Link &amp; QR Presensi Online" 
-                                        data-bs-toggle="tooltip"
-                                        onclick="openShareLinkModal('{{ $tr->public_attendance_url }}', '{{ addslashes($tr->activity_subtitle ?: $tr->title) }}')">
-                                    <i class="bi bi-qr-code"></i>
-                                </button>
-
-                                <!-- Detail Peserta & TTD -->
-                                <a href="{{ route('admin.trainings.show', $tr) }}" 
-                                   class="bento-action-btn btn-view" 
-                                   title="Detail Peserta &amp; Tanda Tangan" 
-                                   data-bs-toggle="tooltip">
-                                    <i class="bi bi-people"></i>
-                                </a>
-
                                 <!-- Unduh PDF -->
                                 <a href="{{ route('admin.trainings.attendance.pdf', $tr) }}" 
                                    class="bento-action-btn btn-download" 
