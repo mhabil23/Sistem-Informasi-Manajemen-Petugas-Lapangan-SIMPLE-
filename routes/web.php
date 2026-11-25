@@ -88,7 +88,8 @@ Route::middleware(['auth', 'role:admin'])->prefix('admin')->as('admin.')->group(
     Route::put('/schedules/{schedule}', [\App\Http\Controllers\Admin\ScheduleController::class, 'update'])->name('schedules.update');
     Route::delete('/schedules/{schedule}', [\App\Http\Controllers\Admin\ScheduleController::class, 'destroy'])->name('schedules.destroy');
 
-    // Periode Pengisian SPKRT (Admin CUD & Toggle)
+    // Periode & Akses Menu (Terpadu: SPKRT & Kontrol Menu Beranda)
+    Route::get('/access-periods', [\App\Http\Controllers\Admin\SpkrtPeriodController::class, 'index'])->name('access-periods.index');
     Route::get('/spkrt-periods', [\App\Http\Controllers\Admin\SpkrtPeriodController::class, 'index'])->name('spkrt-periods.index');
     Route::post('/spkrt-periods', [\App\Http\Controllers\Admin\SpkrtPeriodController::class, 'store'])->name('spkrt-periods.store');
     Route::put('/spkrt-periods/{spkrtPeriod}', [\App\Http\Controllers\Admin\SpkrtPeriodController::class, 'update'])->name('spkrt-periods.update');

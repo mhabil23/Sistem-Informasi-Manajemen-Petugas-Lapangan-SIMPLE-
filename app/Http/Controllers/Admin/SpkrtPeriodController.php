@@ -52,6 +52,12 @@ class SpkrtPeriodController extends Controller
         $assignments = Assignment::orderBy('title')->get(['id', 'title']);
         $berandaState = app(BerandaMenuVisibilityService::class)->getState();
 
+        // Tentukan tab aktif ('beranda' atau 'spkrt')
+        $activeTab = $request->input('tab');
+        if (!$activeTab) {
+            $activeTab = $request->hasAny(['search', 'status', 'page']) ? 'spkrt' : 'beranda';
+        }
+
         return view('admin.spkrt_periods.index', compact(
             'periods',
             'totalPeriods',
@@ -59,7 +65,8 @@ class SpkrtPeriodController extends Controller
             'totalNotStarted',
             'totalClosed',
             'assignments',
-            'berandaState'
+            'berandaState',
+            'activeTab'
         ));
     }
 

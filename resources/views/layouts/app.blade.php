@@ -74,13 +74,9 @@
                             <i class="bi bi-calendar3 sp-nav-icon"></i>
                             <span>Jadwal Kegiatan</span>
                         </a>
-                        <a href="{{ route('admin.spkrt-periods.index') }}" class="sp-nav-link {{ request()->routeIs('admin.spkrt-periods.*') ? 'active' : '' }}">
-                            <i class="bi bi-calendar-range sp-nav-icon"></i>
-                            <span>Periode SPKRT</span>
-                        </a>
-                        <a href="{{ route('admin.beranda-menus.index') }}" class="sp-nav-link {{ request()->routeIs('admin.beranda-menus.*') ? 'active' : '' }}">
-                            <i class="bi bi-sliders sp-nav-icon"></i>
-                            <span>Kontrol Menu Beranda</span>
+                        <a href="{{ route('admin.spkrt-periods.index') }}" class="sp-nav-link {{ request()->routeIs('admin.spkrt-periods.*') || request()->routeIs('admin.beranda-menus.*') || request()->routeIs('admin.access-periods.*') ? 'active' : '' }}">
+                            <i class="bi bi-calendar-check sp-nav-icon"></i>
+                            <span>Periode &amp; Akses Menu</span>
                         </a>
 
                         <div class="sp-nav-heading">Monitoring Progres</div>
@@ -156,9 +152,9 @@
                             <i class="bi bi-calendar3 sp-nav-icon"></i>
                             <span>Jadwal Kegiatan</span>
                         </a>
-                        <a href="{{ route('admin.spkrt-periods.index') }}" class="sp-nav-link {{ request()->routeIs('admin.spkrt-periods.*') ? 'active' : '' }}">
-                            <i class="bi bi-calendar-range sp-nav-icon"></i>
-                            <span>Periode SPKRT</span>
+                        <a href="{{ route('admin.spkrt-periods.index') }}" class="sp-nav-link {{ request()->routeIs('admin.spkrt-periods.*') || request()->routeIs('admin.beranda-menus.*') || request()->routeIs('admin.access-periods.*') ? 'active' : '' }}">
+                            <i class="bi bi-calendar-check sp-nav-icon"></i>
+                            <span>Periode &amp; Akses Menu</span>
                         </a>
 
                         <div class="sp-nav-heading">Monitoring Progres</div>

@@ -7,143 +7,190 @@
     $anyManualOn = (bool) ($berandaState['is_manually_enabled'] ?? false);
 @endphp
 
-<div class="bento-card-clean p-3.5 mb-4 border" style="{{ $visibleCount > 0 ? 'border-color: #86EFAC !important; background: linear-gradient(135deg, #FFFFFF 0%, #F0FDF4 100%);' : 'border-color: #FECACA !important; background: linear-gradient(135deg, #FFFFFF 0%, #FEF2F2 100%);' }}">
-    <!-- Header & Batch Controls -->
-    <div class="d-flex flex-wrap align-items-center justify-content-between gap-3 mb-3 pb-3 border-bottom" style="border-color: rgba(15, 23, 42, 0.08) !important;">
-        <div class="d-flex align-items-center gap-3">
-            <div class="rounded-4 d-flex align-items-center justify-content-center text-white flex-shrink-0" style="width: 46px; height: 46px; background: {{ $visibleCount > 0 ? '#16A34A' : '#DC2626' }}; box-shadow: 0 4px 12px {{ $visibleCount > 0 ? 'rgba(22, 163, 74, 0.25)' : 'rgba(220, 38, 38, 0.25)' }};">
-                <i class="bi {{ $visibleCount > 0 ? 'bi-eye-fill' : 'bi-eye-slash-fill' }} fs-5"></i>
-            </div>
-            <div>
-                <div class="d-flex flex-wrap align-items-center gap-2 mb-0.5">
-                    <span class="fw-bold text-dark" style="font-size: 0.96rem;">Kontrol Tampil Menu Beranda Petugas</span>
-                    <span class="badge {{ $berandaState['status_badge_class'] }} rounded-pill px-2.5 py-1" style="font-size: 0.72rem;">
-                        {{ $berandaState['status_label'] }}
-                    </span>
+<div class="mb-4">
+    <!-- Master Summary & Global Action Bento Card -->
+    <div class="bento-card-clean p-4 mb-4 border shadow-sm" 
+         style="border-radius: 20px; {{ $visibleCount > 0 ? 'border-color: #86EFAC !important; background: linear-gradient(135deg, #FFFFFF 0%, #F0FDF4 100%);' : 'border-color: #FECACA !important; background: linear-gradient(135deg, #FFFFFF 0%, #FEF2F2 100%);' }}">
+        
+        <div class="d-flex flex-wrap align-items-center justify-content-between gap-3">
+            <div class="d-flex align-items-center gap-3">
+                <div class="rounded-4 d-flex align-items-center justify-content-center text-white flex-shrink-0 shadow-sm" 
+                     style="width: 50px; height: 50px; background: {{ $visibleCount > 0 ? '#16A34A' : '#DC2626' }};">
+                    <i class="bi {{ $visibleCount > 0 ? 'bi-eye-fill' : 'bi-eye-slash-fill' }} fs-4"></i>
                 </div>
-                <div class="text-secondary small" style="font-size: 0.78rem;">
-                    {{ $berandaState['status_description'] }}
+                <div>
+                    <div class="d-flex flex-wrap align-items-center gap-2 mb-1">
+                        <h5 class="fw-bold text-dark mb-0" style="font-size: 1.05rem;">
+                            Kontrol Tampil Menu Beranda Petugas
+                        </h5>
+                        <span class="badge {{ $berandaState['status_badge_class'] }} rounded-pill px-3 py-1 font-monospace" style="font-size: 0.75rem;">
+                            {{ $berandaState['status_label'] }}
+                        </span>
+                    </div>
+                    <div class="text-secondary small d-flex align-items-center gap-1.5" style="font-size: 0.82rem;">
+                        <span>{{ $berandaState['status_description'] }}</span>
+                        <span class="text-muted">&bull;</span>
+                        <span class="fw-semibold {{ $visibleCount > 0 ? 'text-success' : 'text-danger' }}">
+                            {{ $visibleCount }} dari {{ $totalCount }} Menu Ditampilkan di HP Petugas
+                        </span>
+                    </div>
                 </div>
             </div>
-        </div>
 
-        <div class="d-flex flex-wrap align-items-center gap-2">
-            <form method="POST" action="{{ route('admin.beranda-menus.toggle') }}" class="d-inline">
-                @csrf
-                @method('PATCH')
-                <input type="hidden" name="enabled" value="1">
-                <button type="submit" class="btn btn-sm {{ $allManualOn ? 'btn-success' : 'btn-outline-success' }} rounded-pill px-3 py-1.5 fw-semibold" {{ $allManualOn ? 'disabled' : '' }}>
-                    <i class="bi bi-power me-1"></i> Nyalakan Semua ({{ $totalCount }})
-                </button>
-            </form>
-            <form method="POST" action="{{ route('admin.beranda-menus.toggle') }}" class="d-inline">
-                @csrf
-                @method('PATCH')
-                <input type="hidden" name="enabled" value="0">
-                <button type="submit" class="btn btn-sm {{ !$anyManualOn ? 'btn-danger' : 'btn-outline-danger' }} rounded-pill px-3 py-1.5 fw-semibold" {{ !$anyManualOn ? 'disabled' : '' }}>
-                    <i class="bi bi-eye-slash me-1"></i> Matikan Semua
-                </button>
-            </form>
+            <!-- Global Action Switchers di Samping Kanan -->
+            <div class="d-flex flex-wrap align-items-center gap-2 flex-shrink-0">
+                <form method="POST" action="{{ route('admin.beranda-menus.toggle') }}" class="d-inline">
+                    @csrf
+                    @method('PATCH')
+                    <input type="hidden" name="enabled" value="1">
+                    <button type="submit" class="btn btn-sm {{ $allManualOn ? 'btn-success' : 'btn-outline-success' }} rounded-pill px-3.5 py-2 fw-semibold d-inline-flex align-items-center gap-1.5 shadow-sm" {{ $allManualOn ? 'disabled' : '' }} style="font-size: 0.8rem;">
+                        <i class="bi bi-power"></i> Nyalakan Semua ({{ $totalCount }})
+                    </button>
+                </form>
+                <form method="POST" action="{{ route('admin.beranda-menus.toggle') }}" class="d-inline">
+                    @csrf
+                    @method('PATCH')
+                    <input type="hidden" name="enabled" value="0">
+                    <button type="submit" class="btn btn-sm {{ !$anyManualOn ? 'btn-danger' : 'btn-outline-danger' }} rounded-pill px-3.5 py-2 fw-semibold d-inline-flex align-items-center gap-1.5 shadow-sm" {{ !$anyManualOn ? 'disabled' : '' }} style="font-size: 0.8rem;">
+                        <i class="bi bi-eye-slash"></i> Matikan Semua
+                    </button>
+                </form>
+            </div>
         </div>
     </div>
 
-    <!-- Individual 4-Menu Control Grid -->
-    <div class="row g-3">
-        @foreach($menus as $menuKey => $menu)
-            @php
-                $isVisible = (bool) ($menu['is_visible'] ?? false);
-                $isManualOn = (bool) ($menu['is_manually_enabled'] ?? false);
-            @endphp
-            <div class="col-12 col-lg-6">
-                <div class="p-3 rounded-4 bg-white border h-100 d-flex flex-column justify-content-between" style="border-color: {{ $isVisible ? '#BBF7D0' : '#E2E8F0' }} !important;">
-                    <div class="d-flex flex-wrap align-items-start justify-content-between gap-2 mb-2.5">
-                        <div class="d-flex align-items-start gap-2.5">
-                            <div class="rounded-3 d-flex align-items-center justify-content-center flex-shrink-0" style="width: 38px; height: 38px; background: {{ $menu['soft_bg'] }}; color: {{ $menu['color'] }};">
-                                <i class="bi {{ $menu['icon'] }} fs-6"></i>
-                            </div>
-                            <div>
-                                <div class="fw-bold text-dark" style="font-size: 0.88rem;">{{ $menu['label'] }}</div>
-                                <div class="text-muted" style="font-size: 0.72rem;">{{ $menu['subtitle'] }}</div>
-                                <div class="mt-1 d-flex flex-wrap align-items-center gap-1.5">
-                                    <span class="badge {{ $menu['status_badge_class'] }} rounded-pill px-2 py-0.5" style="font-size: 0.66rem;">
+    <!-- Systematic Table: Seluruh Tombol On/Off Terletak Pasti di Samping Kanan (Tidak Pernah Pindah ke Bawah) -->
+    <div class="bento-table-card mb-4 shadow-sm border" style="border-radius: 20px;">
+        <div class="bento-table-header px-4 py-3 bg-light border-bottom d-flex align-items-center justify-content-between">
+            <div class="d-flex align-items-center gap-2.5">
+                <div class="rounded-circle d-flex align-items-center justify-content-center" style="width: 32px; height: 32px; background: #EFF6FF; color: #1D4ED8;">
+                    <i class="bi bi-toggles fs-6"></i>
+                </div>
+                <div>
+                    <h6 class="fw-bold text-dark mb-0" style="font-size: 0.92rem;">Pengaturan Saklar &amp; Jadwal 4 Menu Beranda</h6>
+                    <span class="text-muted" style="font-size: 0.72rem;">Tombol On/Off selalu berada konsisten di sisi samping kanan.</span>
+                </div>
+            </div>
+        </div>
+
+        <div class="table-responsive">
+            <table class="table bento-table-fixed align-middle mb-0">
+                <thead>
+                    <tr>
+                        <th style="width: 32%;" class="ps-4">MENU BERANDA PETUGAS</th>
+                        <th style="width: 18%;">STATUS TAMPIL</th>
+                        <th style="width: 32%;">JADWAL BUKA OTOMATIS (OPSIONAL)</th>
+                        <th style="width: 18%;" class="text-end pe-4 text-nowrap">SAKLAR ON / OFF</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach($menus as $menuKey => $menu)
+                        @php
+                            $isVisible = (bool) ($menu['is_visible'] ?? false);
+                            $isManualOn = (bool) ($menu['is_manually_enabled'] ?? false);
+                        @endphp
+                        <tr style="background: {{ $isVisible ? '#FAFCFA' : '#FFFFFF' }};">
+                            <!-- Kolom 1: Info Menu -->
+                            <td class="ps-4 py-3">
+                                <div class="d-flex align-items-center gap-3">
+                                    <div class="rounded-4 d-flex align-items-center justify-content-center flex-shrink-0 shadow-sm" 
+                                         style="width: 42px; height: 42px; background: {{ $menu['soft_bg'] }}; color: {{ $menu['color'] }};">
+                                        <i class="bi {{ $menu['icon'] }} fs-5"></i>
+                                    </div>
+                                    <div class="overflow-hidden">
+                                        <div class="fw-bold text-dark text-truncate" style="font-size: 0.88rem;" title="{{ $menu['label'] }}">{{ $menu['label'] }}</div>
+                                        <div class="text-muted small text-truncate" style="font-size: 0.74rem;" title="{{ $menu['subtitle'] }}">{{ $menu['subtitle'] }}</div>
+                                    </div>
+                                </div>
+                            </td>
+
+                            <!-- Kolom 2: Status Tampil -->
+                            <td class="py-3">
+                                <div>
+                                    <span class="badge {{ $menu['status_badge_class'] }} rounded-pill px-2.5 py-1" style="font-size: 0.72rem;">
                                         {{ $menu['status_label'] }}
                                     </span>
-                                    @if(!empty($menu['start_date_formatted']) && !empty($menu['end_date_formatted']))
-                                        <span class="badge bg-light text-secondary border rounded-pill px-2 py-0.5" style="font-size: 0.66rem;">
-                                            <i class="bi bi-calendar-range me-1"></i>{{ $menu['start_date_formatted'] }} - {{ $menu['end_date_formatted'] }}
-                                        </span>
-                                    @endif
                                 </div>
-                            </div>
-                        </div>
+                                @if(!empty($menu['start_date_formatted']) && !empty($menu['end_date_formatted']))
+                                    <div class="mt-1">
+                                        <span class="badge bg-light text-secondary border rounded-pill px-2 py-0.5" style="font-size: 0.68rem;">
+                                            <i class="bi bi-calendar-range me-1 text-primary"></i>{{ $menu['start_date_formatted'] }} - {{ $menu['end_date_formatted'] }}
+                                        </span>
+                                    </div>
+                                @endif
+                            </td>
 
-                        <form method="POST" action="{{ route('admin.beranda-menus.toggle') }}" class="d-inline flex-shrink-0">
-                            @csrf
-                            @method('PATCH')
-                            <input type="hidden" name="menu_key" value="{{ $menuKey }}">
-                            <input type="hidden" name="enabled" value="{{ $isManualOn ? '0' : '1' }}">
-                            @if($isManualOn)
-                                <button type="submit" class="btn btn-sm btn-success rounded-pill px-3 py-1 fw-semibold" title="Klik untuk mematikan tombol menu ini" style="font-size: 0.74rem;">
-                                    <i class="bi bi-toggle-on me-1"></i> Menyala (Matikan)
-                                </button>
-                            @else
-                                <button type="submit" class="btn btn-sm btn-outline-secondary rounded-pill px-3 py-1 fw-semibold" title="Klik untuk menyalakan menu ini secara manual" style="font-size: 0.74rem;">
-                                    <i class="bi bi-toggle-off me-1"></i> Mati (Nyalakan)
-                                </button>
-                            @endif
-                        </form>
+                            <!-- Kolom 3: Jadwal Tanggal Inline -->
+                            <td class="py-3">
+                                <form method="POST" action="{{ route('admin.beranda-menus.update-period') }}" class="d-flex align-items-center gap-1.5 flex-nowrap">
+                                    @csrf
+                                    @method('PATCH')
+                                    <input type="hidden" name="menu_key" value="{{ $menuKey }}">
+                                    <div style="width: 125px;" class="flex-shrink-0">
+                                        <input type="date" name="start_date" class="form-control form-control-sm bg-white rounded-3 py-1 px-1.5" value="{{ $menu['start_date'] ?? '' }}" required style="font-size: 0.73rem;" title="Tanggal Mulai">
+                                    </div>
+                                    <span class="text-muted small flex-shrink-0">&rarr;</span>
+                                    <div style="width: 125px;" class="flex-shrink-0">
+                                        <input type="date" name="end_date" class="form-control form-control-sm bg-white rounded-3 py-1 px-1.5" value="{{ $menu['end_date'] ?? '' }}" required style="font-size: 0.73rem;" title="Tanggal Selesai">
+                                    </div>
+                                    <button type="submit" class="btn btn-sm btn-primary rounded-pill px-2.5 py-1 fw-semibold d-inline-flex align-items-center gap-1 shadow-sm flex-shrink-0" style="font-size: 0.72rem;" title="Simpan Jadwal">
+                                        <i class="bi bi-check2"></i> Simpan
+                                    </button>
+                                    @if(!empty($menu['start_date']) || !empty($menu['end_date']))
+                                        <button type="submit" name="clear_period" value="1" formnovalidate class="btn btn-sm btn-outline-danger rounded-pill px-2 py-1 flex-shrink-0" title="Hapus Jadwal" style="font-size: 0.72rem;">
+                                            <i class="bi bi-x-lg"></i>
+                                        </button>
+                                    @endif
+                                </form>
+                            </td>
+
+                            <!-- Kolom 4: SAKLAR ON / OFF SELALU TETAP DI SAMPING KANAN (TIDAK PINDAH KE BAWAH) -->
+                            <td class="text-end pe-4 py-3 text-nowrap">
+                                <form method="POST" action="{{ route('admin.beranda-menus.toggle') }}" class="d-inline">
+                                    @csrf
+                                    @method('PATCH')
+                                    <input type="hidden" name="menu_key" value="{{ $menuKey }}">
+                                    <input type="hidden" name="enabled" value="{{ $isManualOn ? '0' : '1' }}">
+                                    @if($isManualOn)
+                                        <button type="submit" class="btn btn-sm btn-success rounded-pill px-3 py-1.5 fw-bold shadow-sm d-inline-flex align-items-center justify-content-center gap-1.5 text-nowrap" title="Klik untuk mematikan menu ini" style="width: 120px; font-size: 0.76rem;">
+                                            <i class="bi bi-toggle-on fs-6"></i> Menyala
+                                        </button>
+                                    @else
+                                        <button type="submit" class="btn btn-sm btn-outline-secondary rounded-pill px-3 py-1.5 fw-semibold d-inline-flex align-items-center justify-content-center gap-1.5 text-nowrap" title="Klik untuk menyalakan menu ini secara manual" style="width: 120px; font-size: 0.76rem; background: #F8FAFC;">
+                                            <i class="bi bi-toggle-off fs-6 text-secondary"></i> Nonaktif
+                                        </button>
+                                    @endif
+                                </form>
+                            </td>
+                        </tr>
+                    @endforeach
+                </tbody>
+            </table>
+        </div>
+
+        <!-- Bar Jadwal Serentak di Bawah Tabel -->
+        <div class="p-3 bg-light border-top px-4">
+            <form method="POST" action="{{ route('admin.beranda-menus.update-period') }}" class="row g-2 align-items-center">
+                @csrf
+                @method('PATCH')
+                <div class="col-12 col-lg-5">
+                    <div class="d-flex align-items-center gap-2">
+                        <i class="bi bi-calendar2-range text-primary fs-6"></i>
+                        <span class="fw-bold text-dark" style="font-size: 0.82rem;">Atur Jadwal Sekaligus untuk Seluruh 4 Menu:</span>
                     </div>
-
-                    <form method="POST" action="{{ route('admin.beranda-menus.update-period') }}" class="row g-1.5 align-items-end pt-2 border-top">
-                        @csrf
-                        @method('PATCH')
-                        <input type="hidden" name="menu_key" value="{{ $menuKey }}">
-                        <div class="col-5 col-sm-4">
-                            <label class="form-label text-muted mb-0.5" style="font-size: 0.68rem;">Mulai Periode</label>
-                            <input type="date" name="start_date" class="form-control form-control-sm bg-light" value="{{ $menu['start_date'] ?? '' }}" required>
-                        </div>
-                        <div class="col-5 col-sm-4">
-                            <label class="form-label text-muted mb-0.5" style="font-size: 0.68rem;">Selesai Periode</label>
-                            <input type="date" name="end_date" class="form-control form-control-sm bg-light" value="{{ $menu['end_date'] ?? '' }}" required>
-                        </div>
-                        <div class="col-12 col-sm-4 d-flex gap-1">
-                            <button type="submit" class="btn btn-sm btn-primary rounded-pill px-2.5 py-1 fw-semibold flex-grow-1" style="font-size: 0.72rem;">
-                                <i class="bi bi-calendar-check me-1"></i> Simpan
-                            </button>
-                            @if(!empty($menu['start_date']) || !empty($menu['end_date']))
-                                <button type="submit" name="clear_period" value="1" formnovalidate class="btn btn-sm btn-outline-secondary rounded-pill px-2 py-1" title="Reset Periode" style="font-size: 0.72rem;">
-                                    <i class="bi bi-x-lg"></i>
-                                </button>
-                            @endif
-                        </div>
-                    </form>
                 </div>
-            </div>
-        @endforeach
-    </div>
-
-    <!-- Optional Bulk Period Bar -->
-    <div class="mt-3 pt-3 border-top" style="border-color: rgba(15, 23, 42, 0.08) !important;">
-        <form method="POST" action="{{ route('admin.beranda-menus.update-period') }}" class="row g-2 align-items-end">
-            @csrf
-            @method('PATCH')
-            <div class="col-12 col-md-4">
-                <div class="fw-semibold text-dark" style="font-size: 0.78rem;">
-                    <i class="bi bi-calendar2-week text-primary me-1"></i> Atur Periode Sekaligus (Semua 4 Menu)
+                <div class="col-5 col-lg-3">
+                    <input type="date" name="start_date" class="form-control form-control-sm bg-white rounded-3 py-1" required style="font-size: 0.74rem;" placeholder="Mulai Serentak">
                 </div>
-                <div class="text-muted" style="font-size: 0.7rem;">Opsional jika ingin menyamakan jadwal buka ke-4 menu sekaligus.</div>
-            </div>
-            <div class="col-6 col-md-3">
-                <input type="date" name="start_date" class="form-control form-control-sm bg-white" required>
-            </div>
-            <div class="col-6 col-md-3">
-                <input type="date" name="end_date" class="form-control form-control-sm bg-white" required>
-            </div>
-            <div class="col-12 col-md-2 d-flex gap-1">
-                <button type="submit" class="btn btn-sm btn-outline-primary rounded-pill px-3 py-1 fw-semibold w-100" style="font-size: 0.74rem;">
-                    Terapkan Semua
-                </button>
-            </div>
-        </form>
+                <div class="col-5 col-lg-3">
+                    <input type="date" name="end_date" class="form-control form-control-sm bg-white rounded-3 py-1" required style="font-size: 0.74rem;" placeholder="Selesai Serentak">
+                </div>
+                <div class="col-2 col-lg-1">
+                    <button type="submit" class="btn btn-sm btn-outline-primary rounded-pill px-2.5 py-1 fw-semibold w-100" style="font-size: 0.72rem;">
+                        Terapkan
+                    </button>
+                </div>
+            </form>
+        </div>
     </div>
 </div>

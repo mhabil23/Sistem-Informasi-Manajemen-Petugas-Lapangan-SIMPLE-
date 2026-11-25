@@ -15,11 +15,13 @@ class BerandaMenuController extends Controller
     ) {
     }
 
-    public function index()
+    public function index(Request $request)
     {
-        $berandaState = $this->visibilityService->getState();
+        if (!$request->has('tab')) {
+            $request->merge(['tab' => 'beranda']);
+        }
 
-        return view('admin.beranda_menus.index', compact('berandaState'));
+        return app(SpkrtPeriodController::class)->index($request);
     }
 
     public function toggle(Request $request)
