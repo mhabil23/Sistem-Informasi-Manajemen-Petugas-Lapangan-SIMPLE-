@@ -9,9 +9,10 @@ use Illuminate\Support\Facades\Schema;
 class BerandaMenuVisibilityService
 {
     public const MENU_TANDA_TERIMA_RESPONDEN = 'tanda_terima_responden';
-    public const MENU_TANDA_TERIMA_PETUGAS = 'tanda_terima_petugas';
+    public const MENU_TANDA_TERIMA_BLANKO = 'tanda_terima_blanko';
+    public const MENU_BAST_TERISI = 'bast_dokumen_terisi';
     public const MENU_LAPORAN_PERJADIN = 'laporan_perjadin';
-    public const MENU_JADWAL_AGENDA = 'jadwal_agenda';
+    public const MENU_TANDA_TERIMA_PETUGAS = 'tanda_terima_blanko';
 
     public const STATUS_MANUAL_ACTIVE = 'manual_active';
     public const STATUS_PERIOD_ACTIVE = 'period_active';
@@ -34,12 +35,19 @@ class BerandaMenuVisibilityService
                 'color' => '#16A34A',
                 'soft_bg' => '#DCFCE7',
             ],
-            self::MENU_TANDA_TERIMA_PETUGAS => [
-                'label' => 'Tanda Terima & BAST Petugas',
-                'subtitle' => 'Tanda terima blanko & BAST dokumen terisi',
-                'icon' => 'bi-shield-check',
+            self::MENU_TANDA_TERIMA_BLANKO => [
+                'label' => 'Tanda Terima Blanko Petugas',
+                'subtitle' => 'Penerimaan blanko & kuesioner dari kantor',
+                'icon' => 'bi-box-seam-fill',
                 'color' => '#0284C7',
                 'soft_bg' => '#E0F2FE',
+            ],
+            self::MENU_BAST_TERISI => [
+                'label' => 'BAST Dokumen Terisi Petugas',
+                'subtitle' => 'Penyerahan berkas & kuesioner terisi ke kantor',
+                'icon' => 'bi-file-earmark-arrow-up-fill',
+                'color' => '#D97706',
+                'soft_bg' => '#FEF3C7',
             ],
             self::MENU_LAPORAN_PERJADIN => [
                 'label' => 'Laporan Perjadin',
@@ -47,13 +55,6 @@ class BerandaMenuVisibilityService
                 'icon' => 'bi-clipboard2-check-fill',
                 'color' => '#7C3AED',
                 'soft_bg' => '#F3E8FF',
-            ],
-            self::MENU_JADWAL_AGENDA => [
-                'label' => 'Jadwal & Agenda BPS',
-                'subtitle' => 'Kalender kegiatan & jadwal lapangan',
-                'icon' => 'bi-calendar3',
-                'color' => '#D97706',
-                'soft_bg' => '#FEF3C7',
             ],
         ];
     }

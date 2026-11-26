@@ -42,9 +42,9 @@ class BerandaMenuVisibilityTest extends TestCase
 
         $html = $response->getContent();
         $this->assertStringNotContainsString('Menu Aksi Lapangan', $html);
-        $this->assertStringNotContainsString('Tanda Terima &amp; BAST Petugas', $html);
+        $this->assertStringNotContainsString('Tanda Terima Blanko', $html);
+        $this->assertStringNotContainsString('BAST Dokumen Terisi', $html);
         $this->assertStringNotContainsString('Laporan Perjadin', $html);
-        $this->assertStringNotContainsString('Jadwal &amp; Agenda BPS', $html);
         $this->assertStringNotContainsString('Tanda Terima Responden (BAST)', $html);
     }
 
@@ -66,13 +66,13 @@ class BerandaMenuVisibilityTest extends TestCase
         $this->assertStringContainsString('Laporan Perjadin', $htmlOne);
         $this->assertStringContainsString('1 dari 4 Menu Tampil', $htmlOne);
         $this->assertStringNotContainsString('Tanda Terima Responden (BAST)', $htmlOne);
-        $this->assertStringNotContainsString('Tanda Terima &amp; BAST Petugas', $htmlOne);
-        $this->assertStringNotContainsString('Jadwal &amp; Agenda BPS', $htmlOne);
+        $this->assertStringNotContainsString('Tanda Terima Blanko', $htmlOne);
+        $this->assertStringNotContainsString('BAST Dokumen Terisi', $htmlOne);
 
-        // Turn on ONLY one more menu: "tanda_terima_petugas" -> 2 of 4 visible
+        // Turn on ONLY one more menu: "tanda_terima_blanko" -> 2 of 4 visible
         $this->actingAs($this->admin)
             ->patch(route('admin.beranda-menus.toggle'), [
-                'menu_key' => BerandaMenuVisibilityService::MENU_TANDA_TERIMA_PETUGAS,
+                'menu_key' => BerandaMenuVisibilityService::MENU_TANDA_TERIMA_BLANKO,
                 'enabled' => '1',
             ])
             ->assertSessionHas('success');
@@ -83,11 +83,11 @@ class BerandaMenuVisibilityTest extends TestCase
         $htmlTwo = $resTwo->getContent();
         $this->assertStringContainsString('2 dari 4 Menu Tampil', $htmlTwo);
         $this->assertStringContainsString('Laporan Perjadin', $htmlTwo);
-        $this->assertStringContainsString('Tanda Terima &amp; BAST Petugas', $htmlTwo);
+        $this->assertStringContainsString('Tanda Terima Blanko', $htmlTwo);
         $this->assertStringNotContainsString('Tanda Terima Responden (BAST)', $htmlTwo);
-        $this->assertStringNotContainsString('Jadwal &amp; Agenda BPS', $htmlTwo);
+        $this->assertStringNotContainsString('BAST Dokumen Terisi', $htmlTwo);
 
-        // Turn off "laporan_perjadin" while keeping "tanda_terima_petugas" ON
+        // Turn off "laporan_perjadin" while keeping "tanda_terima_blanko" ON
         $this->actingAs($this->admin)
             ->patch(route('admin.beranda-menus.toggle'), [
                 'menu_key' => BerandaMenuVisibilityService::MENU_LAPORAN_PERJADIN,
@@ -98,7 +98,7 @@ class BerandaMenuVisibilityTest extends TestCase
         $this->flushSession();
         $resAfterOff = $this->actingAs($this->petugas)->get(route('petugas.dashboard'));
         $htmlAfterOff = $resAfterOff->getContent();
-        $this->assertStringContainsString('Tanda Terima &amp; BAST Petugas', $htmlAfterOff);
+        $this->assertStringContainsString('Tanda Terima Blanko', $htmlAfterOff);
         $this->assertStringNotContainsString('Laporan Perjadin', $htmlAfterOff);
     }
 
@@ -113,9 +113,9 @@ class BerandaMenuVisibilityTest extends TestCase
         $resAllOn->assertStatus(200);
         $resAllOn->assertSee('Semua Menu Tampil (4/4)');
         $resAllOn->assertSee('Tanda Terima Responden (BAST)');
-        $resAllOn->assertSee('Tanda Terima & BAST Petugas');
+        $resAllOn->assertSee('Tanda Terima Blanko');
+        $resAllOn->assertSee('BAST Dokumen Terisi');
         $resAllOn->assertSee('Laporan Perjadin');
-        $resAllOn->assertSee('Jadwal & Agenda BPS');
 
         $this->actingAs($this->admin)
             ->patch(route('admin.beranda-menus.toggle'), ['enabled' => '0'])
@@ -130,7 +130,7 @@ class BerandaMenuVisibilityTest extends TestCase
 
     public function test_individual_menu_period_controls_only_that_menu(): void
     {
-        // Active period ONLY for tanda_terima_responden; future period ONLY for jadwal_agenda
+        // Active period ONLY for tanda_terima_responden; future period ONLY for bast_dokumen_terisi
         $this->actingAs($this->admin)
             ->patch(route('admin.beranda-menus.update-period'), [
                 'menu_key' => BerandaMenuVisibilityService::MENU_TANDA_TERIMA_RESPONDEN,
@@ -141,7 +141,7 @@ class BerandaMenuVisibilityTest extends TestCase
 
         $this->actingAs($this->admin)
             ->patch(route('admin.beranda-menus.update-period'), [
-                'menu_key' => BerandaMenuVisibilityService::MENU_JADWAL_AGENDA,
+                'menu_key' => BerandaMenuVisibilityService::MENU_BAST_TERISI,
                 'start_date' => Carbon::today()->addDays(5)->toDateString(),
                 'end_date' => Carbon::today()->addDays(10)->toDateString(),
             ])
@@ -153,9 +153,9 @@ class BerandaMenuVisibilityTest extends TestCase
         $html = $res->getContent();
         $this->assertStringContainsString('Tanda Terima Responden (BAST)', $html);
         $this->assertStringContainsString('1 dari 4 Menu Tampil', $html);
-        $this->assertStringNotContainsString('Tanda Terima &amp; BAST Petugas', $html);
+        $this->assertStringNotContainsString('Tanda Terima Blanko', $html);
         $this->assertStringNotContainsString('Laporan Perjadin', $html);
-        $this->assertStringNotContainsString('Jadwal &amp; Agenda BPS', $html);
+        $this->assertStringNotContainsString('BAST Dokumen Terisi', $html);
     }
 
     public function test_admin_pages_render_and_petugas_cannot_modify_controls(): void
@@ -165,7 +165,8 @@ class BerandaMenuVisibilityTest extends TestCase
             ->assertStatus(200)
             ->assertSee('Nyalakan Semua (4)')
             ->assertSee('Tanda Terima Responden (BAST)')
-            ->assertSee('Jadwal & Agenda BPS');
+            ->assertSee('Tanda Terima Blanko Petugas')
+            ->assertSee('BAST Dokumen Terisi Petugas');
 
         $this->actingAs($this->admin)
             ->get(route('admin.spkrt-periods.index'))

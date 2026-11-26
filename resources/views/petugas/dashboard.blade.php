@@ -473,13 +473,12 @@
     @php
         $berandaMenusMap = $berandaMenuState['menus'] ?? [];
         $showRespondenMenu = (bool) ($berandaMenusMap['tanda_terima_responden']['is_visible'] ?? false);
-        $showPetugasBastMenu = (bool) ($berandaMenusMap['tanda_terima_petugas']['is_visible'] ?? false);
+        $showBlankoMenu = (bool) ($berandaMenusMap['tanda_terima_blanko']['is_visible'] ?? false);
+        $showTerisiMenu = (bool) ($berandaMenusMap['bast_dokumen_terisi']['is_visible'] ?? false);
         $showLaporanPerjadinMenu = (bool) ($berandaMenusMap['laporan_perjadin']['is_visible'] ?? false);
-        $showJadwalMenu = (bool) ($berandaMenusMap['jadwal_agenda']['is_visible'] ?? false);
 
-        $visibleMenuCount = (int) $showRespondenMenu + (int) $showPetugasBastMenu + (int) $showLaporanPerjadinMenu + (int) $showJadwalMenu;
+        $visibleMenuCount = (int) $showRespondenMenu + (int) $showBlankoMenu + (int) $showTerisiMenu + (int) $showLaporanPerjadinMenu;
         $showMenuAksiLapangan = $visibleMenuCount > 0;
-        $hiddenDashboardMenus = ['BAST Dokumen Terisi'];
         $actionCardColClass = match ($visibleMenuCount) {
             1 => 'col-12',
             2 => 'col-12 col-md-6',
@@ -502,8 +501,7 @@
 
         <div class="row g-2 g-lg-3">
             {{-- 1. Tanda Terima Responden (BAST) --}}
-            @php $cardTitle = 'Tanda Terima Responden'; @endphp
-            @if($showRespondenMenu && !in_array($cardTitle, $hiddenDashboardMenus))
+            @if($showRespondenMenu)
             <div class="{{ $actionCardColClass }}">
                 <a href="{{ route('petugas.basts.respondents.index') }}" class="bento-action-pill bento-pill-green">
                     <div class="bento-action-icon">
@@ -521,7 +519,7 @@
                                 </span>
                             @endif
                         </div>
-                        <span class="bento-action-sub">Input tanda tangan & serah terima responden</span>
+                        <span class="bento-action-sub">Input tanda tangan &amp; serah terima responden</span>
                     </div>
                     <span class="bento-action-cta cta-green">
                         <span>Buka</span>
@@ -531,28 +529,27 @@
             </div>
             @endif
 
-            {{-- 2. Tanda Terima & BAST Petugas (Mencakup Blanko & Dokumen Terisi) --}}
-            @php $cardTitle = 'Tanda Terima Petugas'; @endphp
-            @if($showPetugasBastMenu && !in_array($cardTitle, $hiddenDashboardMenus))
+            {{-- 2. Tanda Terima Blanko Petugas --}}
+            @if($showBlankoMenu)
             <div class="{{ $actionCardColClass }}">
-                <a href="{{ route('petugas.basts.officers.index') }}" class="bento-action-pill bento-pill-blue">
+                <a href="{{ route('petugas.basts.officers.index', ['type' => 'kantor_ke_petugas']) }}" class="bento-action-pill bento-pill-blue">
                     <div class="bento-action-icon">
                         <i class="bi bi-box-seam-fill"></i>
                     </div>
                     <div class="bento-action-text">
                         <div class="d-flex align-items-center gap-1.5 flex-wrap">
-                            <span class="bento-action-title">Tanda Terima &amp; BAST Petugas</span>
+                            <span class="bento-action-title">Tanda Terima Blanko</span>
                             @if(($pendingSignBlankoBastsCount ?? 0) > 0)
                                 <span class="badge bg-danger text-white border bento-action-badge">
                                     <i class="bi bi-pen me-1"></i> {{ $pendingSignBlankoBastsCount }} TTD
                                 </span>
                             @else
                                 <span class="badge bg-primary-subtle text-primary border border-primary-subtle bento-action-badge">
-                                    {{ $totalOfficerBasts }} Sah
+                                    {{ $totalBlankoBasts ?? 0 }} Sah
                                 </span>
                             @endif
                         </div>
-                        <span class="bento-action-sub">Tanda terima blanko &amp; BAST dokumen terisi</span>
+                        <span class="bento-action-sub">Penerimaan blanko kuesioner dari kantor</span>
                     </div>
                     <span class="bento-action-cta cta-blue">
                         <span>Buka</span>
@@ -562,61 +559,8 @@
             </div>
             @endif
 
-            {{-- 3. Laporan Perjadin --}}
-            @php $cardTitle = 'Laporan Perjadin'; @endphp
-            @if($showLaporanPerjadinMenu && !in_array($cardTitle, $hiddenDashboardMenus))
-            <div class="{{ $actionCardColClass }}">
-                <a href="{{ route('petugas.reports.index') }}" class="bento-action-pill bento-pill-purple">
-                    <div class="bento-action-icon">
-                        <i class="bi bi-clipboard2-check-fill"></i>
-                    </div>
-                    <div class="bento-action-text">
-                        <div class="d-flex align-items-center gap-1.5 flex-wrap">
-                            <span class="bento-action-title">Laporan Perjadin</span>
-                            <span class="badge {{ $reportsRevision > 0 ? 'bg-danger text-white' : ($reportsApproved > 0 ? 'bg-success-subtle text-success border' : 'bg-secondary-subtle text-secondary border') }} bento-action-badge">
-                                {{ $reportsRevision > 0 ? $reportsRevision . ' Revisi' : ($reportsApproved > 0 ? $reportsApproved . ' ACC' : ($reportsSubmitted > 0 ? $reportsSubmitted . ' Menunggu' : 'Draft')) }}
-                            </span>
-                        </div>
-                        <span class="bento-action-sub">Ajukan & pantau persetujuan laporan perjadin</span>
-                    </div>
-                    <span class="bento-action-cta cta-purple">
-                        <span>Buka</span>
-                        <i class="bi bi-arrow-right-short" style="font-size: 1.15rem; line-height: 1;"></i>
-                    </span>
-                </a>
-            </div>
-            @endif
-
-            {{-- 4. Jadwal & Agenda BPS --}}
-            @php $cardTitle = 'Jadwal & Agenda BPS'; @endphp
-            @if($showJadwalMenu && !in_array($cardTitle, $hiddenDashboardMenus))
-            <div class="{{ $actionCardColClass }}">
-                <a href="{{ route('petugas.schedules.index') }}" class="bento-action-pill bento-pill-amber">
-                    <div class="bento-action-icon">
-                        <i class="bi bi-calendar3"></i>
-                    </div>
-                    <div class="bento-action-text">
-                        <div class="d-flex align-items-center gap-1.5 flex-wrap">
-                            <span class="bento-action-title">Jadwal &amp; Agenda BPS</span>
-                            @if(isset($upcomingSchedules) && $upcomingSchedules->count() > 0)
-                                <span class="badge bg-warning-subtle text-warning-emphasis border border-warning-subtle bento-action-badge">
-                                    {{ $upcomingSchedules->count() }} Agenda
-                                </span>
-                            @endif
-                        </div>
-                        <span class="bento-action-sub">Kalender kegiatan &amp; jadwal lapangan</span>
-                    </div>
-                    <span class="bento-action-cta cta-amber">
-                        <span>Buka</span>
-                        <i class="bi bi-arrow-right-short" style="font-size: 1.15rem; line-height: 1;"></i>
-                    </span>
-                </a>
-            </div>
-            @endif
-
-            {{-- 5. BAST Dokumen Terisi (Digabungkan ke Tanda Terima & BAST Petugas) --}}
-            @php $cardTitle = 'BAST Dokumen Terisi'; @endphp
-            @if(!in_array($cardTitle, $hiddenDashboardMenus))
+            {{-- 3. BAST Dokumen Terisi Petugas --}}
+            @if($showTerisiMenu)
             <div class="{{ $actionCardColClass }}">
                 <a href="{{ route('petugas.basts.officers.index', ['type' => 'petugas_ke_kantor']) }}" class="bento-action-pill bento-pill-amber">
                     <div class="bento-action-icon">
@@ -629,9 +573,33 @@
                                 {{ $totalTerisiBasts ?? 0 }} Sah
                             </span>
                         </div>
-                        <span class="bento-action-sub">Serah terima kuesioner & berkas ke kantor</span>
+                        <span class="bento-action-sub">Serah terima kuesioner &amp; berkas ke kantor</span>
                     </div>
                     <span class="bento-action-cta cta-amber">
+                        <span>Buka</span>
+                        <i class="bi bi-arrow-right-short" style="font-size: 1.15rem; line-height: 1;"></i>
+                    </span>
+                </a>
+            </div>
+            @endif
+
+            {{-- 4. Laporan Perjadin --}}
+            @if($showLaporanPerjadinMenu)
+            <div class="{{ $actionCardColClass }}">
+                <a href="{{ route('petugas.reports.index') }}" class="bento-action-pill bento-pill-purple">
+                    <div class="bento-action-icon">
+                        <i class="bi bi-clipboard2-check-fill"></i>
+                    </div>
+                    <div class="bento-action-text">
+                        <div class="d-flex align-items-center gap-1.5 flex-wrap">
+                            <span class="bento-action-title">Laporan Perjadin</span>
+                            <span class="badge {{ $reportsRevision > 0 ? 'bg-danger text-white' : ($reportsApproved > 0 ? 'bg-success-subtle text-success border' : 'bg-secondary-subtle text-secondary border') }} bento-action-badge">
+                                {{ $reportsRevision > 0 ? $reportsRevision . ' Revisi' : ($reportsApproved > 0 ? $reportsApproved . ' ACC' : ($reportsSubmitted > 0 ? $reportsSubmitted . ' Menunggu' : 'Draft')) }}
+                            </span>
+                        </div>
+                        <span class="bento-action-sub">Ajukan &amp; pantau persetujuan laporan perjadin</span>
+                    </div>
+                    <span class="bento-action-cta cta-purple">
                         <span>Buka</span>
                         <i class="bi bi-arrow-right-short" style="font-size: 1.15rem; line-height: 1;"></i>
                     </span>
@@ -643,10 +611,10 @@
     @endif
 
     <!-- ==============================================================
-         5. BOTTOM ROW: KEGIATAN AKTIF & AGENDA (AGENDA TAMPIL SAAT MENU JADWAL AKTIF)
+         5. BOTTOM ROW: KEGIATAN AKTIF & AGENDA LAPANGAN BPS (SELALU TAMPIL)
          ============================================================== -->
     @php
-        $showJadwalAgenda = $showJadwalMenu;
+        $showJadwalAgenda = true;
     @endphp
     <div class="row g-4">
         <!-- Penugasan Lapangan Aktif -->
